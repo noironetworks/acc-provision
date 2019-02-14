@@ -1,14 +1,20 @@
-.. image:: https://travis-ci.org/noironetworks/aci-containers.svg?branch=master
+.. image:: https://travis-ci.org/noironetworks/acc-provision.svg?branch=master
    :alt: Build Status
-   :target: https://travis-ci.org/noironetworks/aci-containers
+   :target: https://travis-ci.org/noironetworks/acc-provision
 
-ACI Container Integration Plugins
-=================================
+acc-provision
+=============
 
-This repository contains plugins for interfacing ACI with container
-orchestration systems, such as docker and kubernetes.
+Tool for provisioning Cisco ACI APIC to integrate with Container Orchestration
+systems like Docker and Kubernetes, and generating the CNI Plugin Containers'
+deployment configuration.
 
-It contains:
+To install:
+-----------
 
-* Kubernetes policy controller for ACI
-* OpFlex OVS Agent CNI Plugin
+pip install acc-provision
+
+To use:
+-------
+
+acc-provision --help
