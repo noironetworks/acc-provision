@@ -3224,6 +3224,56 @@ class ApicKubeConfig(object):
                         "children": kube_default_children
                     }
                 })
+
+        if vmm_type == "OpenShift":
+            os_extra_port = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                "openshift-svc-catalog",
+                                            ),
+                                            (
+                                                "etherT",
+                                                "ip",
+                                            ),
+                                            (
+                                                "prot",
+                                                "tcp",
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                "2379",
+                                            ),
+                                            (
+                                                "dToPort",
+                                                "2379",
+                                            ),
+                                            (
+                                                "stateful",
+                                                "no",
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'][7]['vzFilter']['children'].append(os_extra_port)
+
         return path, data
 
     def epg(
