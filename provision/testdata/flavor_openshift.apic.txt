@@ -736,6 +736,19 @@ None
                                     "tcpRules": ""
                                 }
                             }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-svc-catalog",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "2379",
+                                    "dToPort": "2379",
+                                    "stateful": "no",
+                                    "tcpRules": ""
+                                }
+                            }
                         }
                     ]
                 }
