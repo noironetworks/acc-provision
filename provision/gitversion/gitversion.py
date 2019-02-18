@@ -1,18 +1,15 @@
-__all__ = ("get_git_version")
-
 from subprocess import Popen, PIPE
 import os
-
+import os.path as path
 
 def call_git_rev_parse():
-
 	try:
 		p = Popen(['git', 'rev-parse', 'HEAD'], stdout=PIPE, stderr=PIPE)
 		p.stderr.close()
-		line = "Git commit ID: " + p.stdout.readlines()[0]
+		line = "Git commit ID: " + p.stdout.readlines()[0].decode()
 		p = Popen(['date', '-u', '+%m-%d-%Y.%H:%M:%S.UTC'], stdout=PIPE, stderr=PIPE)
 		p.stderr.close()
-		line = line + "Build time: " + p.stdout.readlines()[0]
+		line = line + "Build time: " + p.stdout.readlines()[0].decode()
 		return line.strip()
 
 	except:
@@ -21,7 +18,7 @@ def call_git_rev_parse():
 
 def read_release_version():
 	try:
-		script_dir = os.path.dirname(__file__)
+		script_dir = path.abspath(path.join(__file__ ,"../.."))
 		with open(script_dir + "/acc_provision/RELEASE-VERSION", "r") as f:
 			version = f.readlines()[0]
 			f.close()
@@ -32,7 +29,7 @@ def read_release_version():
 
 
 def write_release_version(version):
-	script_dir = os.path.dirname(__file__)
+	script_dir = path.abspath(path.join(__file__ ,"../.."))
 	with open(script_dir + "/acc_provision/RELEASE-VERSION", "w") as f:
 		f.write("%s\n" % version)
 		f.close()
@@ -66,7 +63,3 @@ def get_git_version():
 	# Finally, return the current version.
 
 	return version
-
-
-if __name__ == "__main__":
-	print(get_git_version())
