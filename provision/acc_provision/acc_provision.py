@@ -202,19 +202,19 @@ def config_discover(config, prov_apic):
     if prov_apic is not None:
         apic = get_apic(config)
 
+    orig_infra_vlan = config["net_config"].get("infra_vlan")
     ret = {
         "net_config": {
-            "infra_vlan": None,
+            "infra_vlan": orig_infra_vlan,
         }
     }
     if apic is not None:
         infra_vlan = apic.get_infravlan()
         ret["net_config"]["infra_vlan"] = infra_vlan
-        orig_infra_vlan = config["net_config"].get("infra_vlan")
         if orig_infra_vlan is not None and orig_infra_vlan != infra_vlan:
             warn("ACI infra_vlan (%s) is different from input file (%s)" %
                  (infra_vlan, orig_infra_vlan))
-        if orig_infra_vlan is None:
+        if orig_infra_vlan is None or orig_infra_vlan != infra_vlan:
             info("Using infra_vlan from ACI: %s" %
                  (infra_vlan,))
     return ret
@@ -958,7 +958,8 @@ def provision(args, apic_file, no_random):
         deep_merge(config,
                    {"registry": VERSIONS[config["registry"]["version"]]})
 
-    deep_merge(config, config_discover(config, prov_apic))
+    # Discoverd state (e.g. infra-vlan) overrides the config file data
+    deep_merge(config_discover(config, prov_apic), config)
 
     # Validate APIC access
     if prov_apic is not None:
