@@ -155,6 +155,16 @@ def test_flavor_cloudfoundry_10():
 
 
 @in_testdir
+def test_conflicting_infravlan():
+    run_provision(
+        "conflicting_infravlan.inp.yaml",
+        "base_case.kube.yaml",
+        "base_case.apic.txt",
+        overrides={"infra_vlan": 4093}
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
@@ -235,6 +245,7 @@ def get_args(**overrides):
         "flavor": None,
         "version_token": "dummy",
         "release": False,
+        "infra_vlan": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
