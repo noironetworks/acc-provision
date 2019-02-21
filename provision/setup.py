@@ -1,9 +1,16 @@
+import sys
+sys.dont_write_bytecode = True
+
 from setuptools import setup, find_packages
+import os 
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+from gitversion.gitversion import get_git_version
 
 setup(
     name='acc_provision',
     version='4.1.0',
-    description='Tool to provision ACI for ACI Containers Controller',
+    description='Tool to provision ACI for ACI Containers Controller\n\nBuild info: \n' + get_git_version(),
     author="Cisco Systems, Inc.",
     author_email="apicapi@noironetworks.com",
     url='http://github.com/noironetworks/aci-containers/',
