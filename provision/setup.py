@@ -1,8 +1,5 @@
-import sys
-sys.dont_write_bytecode = True
-
 from setuptools import setup, find_packages
-import os 
+import os, sys 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 from gitversion.gitversion import get_git_version
