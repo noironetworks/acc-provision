@@ -34,6 +34,7 @@ install -p -D -m 755 bin/acikubectl %{buildroot}/%{_bindir}/acikubectl
 %doc README.md
 %{python2_sitelib}/acc_provision
 %{python2_sitelib}/acc_provision-%%{version}*.egg-info
+%{python2_sitelib}/gitversion
 %{_bindir}/acc-provision
 %{_bindir}/acikubectl
 
