@@ -845,6 +845,9 @@ def parse_args(show_help):
         '-w', '--timeout', default=None, metavar='timeout',
         help='wait/timeout to use for APIC API access')
     parser.add_argument(
+        '--infra-vlan', default=None, metavar='vlan', type=int,
+        help='infra VLAN configured in APIC')
+    parser.add_argument(
         '--list-flavors', action='store_true', default=False,
         help='list available configuration flavors')
     parser.add_argument(
@@ -921,12 +924,12 @@ def provision(args, apic_file, no_random):
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
         },
-        "discovered": {
-            "infra_vlan": args.infra_vlan,
-        },
     }
-    if args.username:
-        config["aci_config"]["apic_login"]["username"] = args.username
+
+    if args.infra_vlan and (args.infra_vlan < 1 or args.infra_vlan > 4095):
+        err("Invalid infra vlan %s" % args.infra_vlan)
+        sys.exit(1)
+    config["discovered"] = {"infra_vlan": args.infra_vlan}
 
     config["aci_config"]["apic_login"]["password"] = \
         args.password if args.password else os.environ.get('ACC_PROVISION_PASS')
