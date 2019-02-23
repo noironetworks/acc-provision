@@ -1,6 +1,7 @@
 usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-o file] [-a] [-d] [-u name] [-p pass] [-w timeout]
-                        [--list-flavors] [-f flavor] [-t token]
+                        [--infra-vlan vlan] [--list-flavors] [-f flavor]
+                        [-t token]
 
 Provision an ACI/Kubernetes installation
 
@@ -18,6 +19,7 @@ optional arguments:
   -p, --password pass   apic-admin password to use for APIC API access
   -w timeout, --timeout timeout
                         wait/timeout to use for APIC API access
+  --infra-vlan vlan     infra VLAN configured in APIC
   --list-flavors        list available configuration flavors
   -f flavor, --flavor flavor
                         set configuration flavor. Example: openshift-3.6
