@@ -921,10 +921,14 @@ def provision(args, apic_file, no_random):
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
         },
-        "discovered": {
-            "infra_vlan": args.infra_vlan,
-        },
     }
+
+    # infra_vlan is not part of command line input, but we do
+    # pass it as a command line arg in unit tests to pass in
+    # configuration which would otherwise be discovered from
+    # the APIC
+    config["discovered"] = {"infra_vlan": getattr(args, "infra_vlan", None)}
+
     if args.username:
         config["aci_config"]["apic_login"]["username"] = args.username
 
