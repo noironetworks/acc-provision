@@ -245,6 +245,10 @@ def get_args(**overrides):
         "flavor": None,
         "version_token": "dummy",
         "release": False,
+        # infra_vlan is not part of command line input, but we do
+        # pass it as a command line arg in unit tests to pass in
+        # configuration which would otherwise be discovered from
+        # the APIC
         "infra_vlan": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
