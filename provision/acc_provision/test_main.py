@@ -155,6 +155,16 @@ def test_flavor_cloudfoundry_10():
 
 
 @in_testdir
+def test_flavor_localhost():
+    run_provision(
+        "flavor_localhost.inp.yaml",
+        "flavor_localhost.kube.yaml",
+        None,
+        overrides={"flavor": "k8s-localhost"}
+    )
+
+
+@in_testdir
 def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
@@ -245,6 +255,10 @@ def get_args(**overrides):
         "flavor": None,
         "version_token": "dummy",
         "release": False,
+        # infra_vlan is not part of command line input, but we do
+        # pass it as a command line arg in unit tests to pass in
+        # configuration which would otherwise be discovered from
+        # the APIC
         "infra_vlan": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))

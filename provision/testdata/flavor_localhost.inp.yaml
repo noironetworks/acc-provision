@@ -10,7 +10,7 @@ aci_config:
     controller: kube
   # The following resources must already exist on the APIC,
   # this is a reference to use them
-  aep: fab12-vmware                        # The attachment profile for ports/VPCs connected to this cluster
+  aep: dummy-value                        # The attachment profile for ports/VPCs connected to this cluster
   vrf:                                  # VRF used to create all subnets used by this Kubernetes cluster
     name: defaultVrf          # This should exist, the provisioning tool does not create it
     tenant: kube        # This can be tenant for this cluster (system-id) or common
@@ -20,6 +20,8 @@ aci_config:
         - l3out_v1_net        # This should also exist, the provisioning tool does not create iti
   sync_login:
     username: kube
+    certfile: user.crt
+    keyfile: user.key
 #
 # Networks used by Kubernetes
 #
