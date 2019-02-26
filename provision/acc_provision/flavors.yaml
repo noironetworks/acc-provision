@@ -31,31 +31,31 @@ flavors:
     default_version: 1.9
     status: null
     hidden: false
-    order: 4
+    order: 5
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 1.9
     status: null
     hidden: false
-    order: 5
+    order: 6
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 6
+    order: 7
   kubernetes-1.10:
     desc: Kubernetes 1.10
     default_version: 1.9
     status: null
     hidden: true
-    order: 7
+    order: 8
   kubernetes-1.9:
     desc: Kubernetes 1.9
     default_version: 1.9
     status: null
     hidden: true
-    order: 8
+    order: 9
   kubernetes-1.8:
     desc: Kubernetes 1.8
     default_version: 1.7
@@ -65,7 +65,7 @@ flavors:
         use_apps_apigroup: apps
     status: null
     hidden: true
-    order: 9
+    order: 10
   kubernetes-1.7:
     desc: Kubernetes 1.7
     default_version: 1.7
@@ -76,7 +76,7 @@ flavors:
         use_apps_apigroup: extensions
     status: null
     hidden: true
-    order: 10  
+    order: 11  
   kubernetes-1.6:
     desc: Kubernetes 1.6
     default_version: 1.6
@@ -89,7 +89,7 @@ flavors:
         use_netpol_apigroup: extensions
     status: null
     hidden: true
-    order: 11
+    order: 12
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 1.9
@@ -108,6 +108,24 @@ flavors:
     status: null
     hidden: false
     order: 1
+  openshift-3.10:
+    desc: Red Hat OpenShift Container Platform 3.10
+    default_version: 1.9
+    config:
+      kube_config:
+        use_external_service_ip_allocator: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+      aci_config:
+        vmm_domain:
+          type: OpenShift
+    status: null
+    hidden: false
+    order: 2
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
     default_version: 1.9
@@ -125,7 +143,7 @@ flavors:
           type: OpenShift
     status: null
     hidden: false
-    order: 2
+    order: 3
   openshift-3.6:
     desc: Red Hat OpenShift Container Platform 3.6
     default_version: 1.6
@@ -148,7 +166,7 @@ flavors:
           type: OpenShift
     status: null
     hidden: true
-    order: 3
+    order: 4
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
@@ -167,4 +185,4 @@ flavors:
     options: *anchor
     status: null
     hidden: false
-    order: 12
+    order: 13
