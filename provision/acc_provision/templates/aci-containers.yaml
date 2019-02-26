@@ -67,7 +67,9 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% if not config.kube_config.skip_aci_prefix_hostagent %}
         "aci-prefix": {{config.aci_config.system_id|json}},
+        {% endif %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
         "service-vlan": {{ config.net_config.service_vlan|json }},
@@ -76,6 +78,10 @@ data:
         {% if config.net_config.interface_mtu %}
         "interface-mtu": {{ config.net_config.interface_mtu|json }},
         {% endif %}
+        {% if config.net_config.gbp_server_registry %}
+        "registry-url": {{ config.net_config.gbp_server_registry|json }},
+        {% endif %}
+        {% if not config.kube_config.skip_default_endpoint_group_hostagent %}
         "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }},
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
@@ -89,6 +95,9 @@ data:
             }
             {% endfor %}
         }
+        {% else %}
+        "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }}
+        {% endif %}
     }
   opflex-agent-config: |-
     {
@@ -143,13 +152,23 @@ rules:
   resources:
   - nodes
   - namespaces
+  {% if not config.kube_config.pod_exec_resources_controller %}
   - pods
+  {% else %}
+  - pods
+  - pods/exec
+  {% endif %}
   - endpoints
   - services
+  {% if not config.kube_config.all_access_controller_clusterrole %}
   verbs:
   - list
   - watch
   - get
+  {% else %}
+  verbs:
+  - '*'
+  {% endif %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:
@@ -163,17 +182,31 @@ rules:
   resources:
   - deployments
   - replicasets
+  {% if not config.kube_config.all_access_controller_clusterrole %}
   verbs:
   - list
   - watch
   - get
+  {% else %}
+  verbs:
+  - '*'
+  {% endif %}
 - apiGroups:
   - ""
   resources:
+  {% if config.kube_config.pod_exec_resources_controller %}
+  - pods
+  - pods/exec
+  {% endif %}
   - nodes
   - services/status
+  {% if not config.kube_config.all_access_controller_clusterrole %}
   verbs:
   - update
+  {% else %}
+  verbs:
+  - '*'
+  {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -187,7 +220,9 @@ rules:
   - ""
   resources:
   - nodes
+  {% if not config.kube_config.skip_namespace_resource_hostagent %}
   - namespaces
+  {% endif %}
   - pods
   - endpoints
   - services
@@ -195,6 +230,7 @@ rules:
   - list
   - watch
   - get
+{% if not config.kube_config.no_hostagent_networking_clusterrole %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:
@@ -203,6 +239,8 @@ rules:
   - list
   - watch
   - get
+{% endif %}
+{% if not config.kube_config.no_hostagent_deployment_clusterrole %}
 - apiGroups:
   - "{{ config.kube_config.use_apps_apigroup }}"
   resources:
@@ -212,6 +250,7 @@ rules:
   - list
   - watch
   - get
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
@@ -387,6 +426,23 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+        {% if config.kube_config.run_opflex_server_container %}
+        - name: opflex-server
+          image: noirolabs/opflex-server:{{ config.registry.opflex_server_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          ports:
+            - containerPort: {{
+              config.net_config.opflex_server_port|json }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - name: opflex-server-config-volume
+              mountPath: /usr/local/etc/opflex-server
+        {% endif %}
         - name: mcast-daemon
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           command: ["/bin/sh"]
@@ -432,6 +488,9 @@ spec:
             items:
               - key: opflex-agent-config
                 path: local.conf
+        {% if config.kube_config.use_opflex_server_volume %}
+        - name: opflex-server-config-volume
+        {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
@@ -551,6 +610,14 @@ spec:
         - operator: Exists
           effect: NoSchedule
       containers:
+        {% if config.kube_config.run_gbp_container %}
+        - name: aci-gbpserver
+          image: noirolabs/gbp-server:{{ config.registry.gbp_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /kube
+        {% endif %}
         - name: aci-containers-controller
           image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
@@ -564,6 +631,11 @@ spec:
               path: /status
               port: 8091
       volumes:
+        {% if config.kube_config.use_kubeconfig_volume %}
+        - name: kubeconfig
+          hostPath:
+            path: /kubeconfig
+        {% endif %}
         - name: aci-user-cert-volume
           secret:
             secretName: aci-user-cert
@@ -573,3 +645,20 @@ spec:
             items:
               - key: controller-config
                 path: controller.conf
+{% if config.kube_config.ep_registry_service %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ep-registry
+  namespace: kube-system
+  labels:
+    app: gbpserver
+spec:
+  clusterIP: {{ config.net_config.ep_registry_service_IP|json }}
+  ports:
+  - port: {{ config.net_config.ep_registry_service_port|json }}
+    targetPort: {{ config.net_config.ep_registry_service_port|json }}
+  selector:
+    name: aci-containers-controller
+{% endif %}
