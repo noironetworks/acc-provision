@@ -29,6 +29,13 @@ rm -f requirements.txt
 %install
 %{__python2} setup.py install -O1 --install-data / --skip-build --root %{buildroot}
 install -p -D -m 755 bin/acikubectl %{buildroot}/%{_bindir}/acikubectl
+mkdir -p %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci
+cat > %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml <<-EOF
+name: "aci"
+shortDesc: "CLI plugin for acikubectl commands"
+command: "acikubectl" 
+EOF
+chmod 0755 %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 
 %files
 %doc README.md
@@ -37,6 +44,7 @@ install -p -D -m 755 bin/acikubectl %{buildroot}/%{_bindir}/acikubectl
 %{python2_sitelib}/gitversion
 %{_bindir}/acc-provision
 %{_bindir}/acikubectl
+/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 
 %changelog
 * Tue Aug 01 2017 Mandeep Dhami <dhami@noironetworks.com> - 1.0.0
