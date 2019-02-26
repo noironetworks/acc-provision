@@ -155,6 +155,16 @@ def test_flavor_cloudfoundry_10():
 
 
 @in_testdir
+def test_flavor_localhost():
+    run_provision(
+        "flavor_localhost.inp.yaml",
+        "flavor_localhost.kube.yaml",
+        None,
+        overrides={"flavor": "k8s-localhost"}
+    )
+
+
+@in_testdir
 def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
