@@ -145,6 +145,16 @@ def test_flavor_openshift_39():
 
 
 @in_testdir
+def test_flavor_dockerucp_30():
+    run_provision(
+        "base_case.inp.yaml",
+        "base_case.kube.yaml",
+        "flavor_dockerucp.apic.txt",
+        overrides={"flavor": "docker-ucp-3.0"}
+    )
+
+
+@in_testdir
 def test_flavor_cloudfoundry_10():
     run_provision(
         "flavor_cf_10.inp.yaml",
