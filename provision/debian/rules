@@ -21,3 +21,5 @@ override_dh_auto_test:
 	#testr init && ./run_tests.sh -N -P
 	true
 endif
+
+override_dh_usrlocal:
