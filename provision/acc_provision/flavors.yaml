@@ -103,6 +103,12 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
+        ports:
+          - name: openshift-svc-catalog
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
         vmm_domain:
           type: OpenShift
     status: null
@@ -121,6 +127,12 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
+        ports:
+          - name: openshift-svc-catalog
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
         vmm_domain:
           type: OpenShift
     status: null
@@ -139,6 +151,12 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
+        ports:
+          - name: openshift-svc-catalog
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
         vmm_domain:
           type: OpenShift
     status: null
@@ -162,6 +180,26 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
+      # this will generate apic config like this:
+      # {
+      #                         "vzEntry": {
+      #                             "attributes": {
+      #                                 "name": "openshift-svc-catalog",
+      #                                 "etherT": "ip",
+      #                                 "prot": "tcp",
+      #                                 "dFromPort": "2379",
+      #                                 "dToPort": "2379",
+      #                                 "stateful": "no",
+      #                                 "tcpRules": ""
+      #                             }
+      #                         }
+      #                     }
+        ports:
+          - name: openshift-svc-catalog
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
         vmm_domain:
           type: OpenShift
     status: null
@@ -173,6 +211,30 @@ flavors:
     default_version: 1.9
     status: Experimental
     hidden: false
+    config:
+      aci_config:
+  #https://docs.docker.com/ee/ucp/admin/install/system-requirements/
+        ports:
+          - name: ucp-ui-port
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: ucp-tls-port
+            range: [12376, 12376]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: ucp-kubelet-port
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: ucp-misc-ports
+            range: [12378, 12388]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
     order: 14
   # CloudFoundry
   cloudfoundry-1.0:

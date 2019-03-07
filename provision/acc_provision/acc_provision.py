@@ -951,6 +951,7 @@ def provision(args, apic_file, no_random):
         flavor = args.flavor
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
+        deep_merge(config, {"flavor": flavor})
         if "config" in FLAVORS[flavor]:
             deep_merge(config, FLAVORS[flavor]["config"])
         if "default_version" in FLAVORS[flavor]:
