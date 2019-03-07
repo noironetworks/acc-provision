@@ -304,7 +304,7 @@ class ApicKubeConfig(object):
         update(data, self.opflex_cert())
 
         update(data, self.l3out_tn())
-        update(data, getattr(self, self.tenant_generator)())
+        update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
         for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
             update(data, self.l3out_contract(l3out_instp))
 
@@ -1494,7 +1494,7 @@ class ApicKubeConfig(object):
         else:
             return True
 
-    def kube_tn(self):
+    def kube_tn(self, flavor):
         system_id = self.config["aci_config"]["system_id"]
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
@@ -3225,54 +3225,13 @@ class ApicKubeConfig(object):
                     }
                 })
 
-        if vmm_type == "OpenShift":
-            os_extra_port = collections.OrderedDict(
-                [
-                    (
-                        "vzEntry",
-                        collections.OrderedDict(
-                            [
-                                (
-                                    "attributes",
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "name",
-                                                "openshift-svc-catalog",
-                                            ),
-                                            (
-                                                "etherT",
-                                                "ip",
-                                            ),
-                                            (
-                                                "prot",
-                                                "tcp",
-                                            ),
-                                            (
-                                                "dFromPort",
-                                                "2379",
-                                            ),
-                                            (
-                                                "dToPort",
-                                                "2379",
-                                            ),
-                                            (
-                                                "stateful",
-                                                "no",
-                                            ),
-                                            (
-                                                "tcpRules",
-                                                "",
-                                            ),
-                                        ]
-                                    ),
-                                )
-                            ]
-                        ),
-                    )
-                ]
-            )
-            data['fvTenant']['children'][7]['vzFilter']['children'].append(os_extra_port)
+        print(self.config["aci_config"])
+        if "ports" in self.config["aci_config"].keys():
+            ports = self.config["aci_config"]["ports"]
+            if vmm_type == "OpenShift":
+                open_port_for_flavor(data, ports)
+            elif flavor == "docker-ucp-3.0":
+                open_port_for_flavor(data, ports)
 
         return path, data
 
@@ -3325,7 +3284,7 @@ class ApicKubeConfig(object):
             children.append(subj)
         return aci_obj("vzBrCP", [('name', name), ('_children', children)])
 
-    def cloudfoundry_tn(self):
+    def cloudfoundry_tn(self, flavor):
         system_id = self.config["aci_config"]["system_id"]
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
@@ -3454,6 +3413,61 @@ class ApicKubeConfig(object):
                                        is_all_filter, is_node_contract,
                                        dns_contract] + gorouter_contracts)])
         return path, data
+
+
+def open_port_for_flavor(data, ports):
+
+    if ports is None or len(ports) == 0:
+        err("Error in getting ports for flavor")
+    else:
+        for port in ports:
+            extra_port = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                port["name"],
+                                            ),
+                                            (
+                                                "etherT",
+                                                port["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                port["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port["range"][0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port["range"][1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(port["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
 
 
 if __name__ == "__main__":
