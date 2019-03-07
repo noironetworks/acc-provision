@@ -190,6 +190,7 @@ rules:
   - pods
   - endpoints
   - services
+  - replicationcontrollers
   verbs:
   - list
   - watch
