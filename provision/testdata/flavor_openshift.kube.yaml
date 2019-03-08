@@ -23,16 +23,16 @@ data:
         "apic-hosts": [
             "10.30.120.100"
         ],
-        "apic-username": "kube",
+        "apic-username": "os",
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
         "apic-use-inst-tag": true,
-        "aci-prefix": "kube",
+        "aci-prefix": "os",
         "aci-vmm-type": "OpenShift",
-        "aci-vmm-domain": "kube",
-        "aci-vmm-controller": "kube",
-        "aci-policy-tenant": "kube",
+        "aci-vmm-domain": "os",
+        "aci-vmm-controller": "os",
+        "aci-policy-tenant": "os",
         "require-netpol-annot": false,
-        "aci-service-phys-dom": "kube-pdom",
+        "aci-service-phys-dom": "os-pdom",
         "aci-service-encap": "vlan-4003",
         "aci-service-monitor-interval": 0,
         "aci-vrf-tenant": "common",
@@ -40,15 +40,15 @@ data:
         "aci-ext-networks": [
             "default"
         ],
-        "aci-vrf": "kube",
+        "aci-vrf": "os",
         "default-endpoint-group": {
-            "policy-space": "kube",
-            "name": "kubernetes|kube-default"
+            "policy-space": "os",
+            "name": "openshift|os-default"
         },
         "namespace-default-endpoint-group": {
             "aci-containers-system": {
-                "policy-space": "kube",
-                "name": "kubernetes|kube-system"
+                "policy-space": "os",
+                "name": "openshift|os-system"
             }
         },
         "service-ip-pool": [
@@ -85,10 +85,10 @@ data:
     {
         "log-level": "info",
         "aci-vmm-type": "OpenShift",
-        "aci-vmm-domain": "kube",
-        "aci-vmm-controller": "kube",
-        "aci-prefix": "kube",
-        "aci-vrf": "kube",
+        "aci-vmm-domain": "os",
+        "aci-vmm-controller": "os",
+        "aci-prefix": "os",
+        "aci-vrf": "os",
         "aci-vrf-tenant": "common",
         "service-vlan": 4003,
         "encap-type": "vxlan",
@@ -106,13 +106,13 @@ data:
             }
         ],
         "default-endpoint-group": {
-            "policy-space": "kube",
-            "name": "kubernetes|kube-default"
+            "policy-space": "os",
+            "name": "openshift|os-default"
         },
         "namespace-default-endpoint-group": {
             "aci-containers-system": {
-                "policy-space": "kube",
-                "name": "kubernetes|kube-system"
+                "policy-space": "os",
+                "name": "openshift|os-system"
             }
         }
     }

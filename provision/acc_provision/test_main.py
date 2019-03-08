@@ -137,7 +137,7 @@ def test_pod_external_access():
 @in_testdir
 def test_flavor_openshift_39():
     run_provision(
-        "base_case.inp.yaml",
+        "flavor_openshift.inp.yaml",
         "flavor_openshift.kube.yaml",
         "flavor_openshift.apic.txt",
         overrides={"flavor": "openshift-3.9"}
@@ -147,8 +147,8 @@ def test_flavor_openshift_39():
 @in_testdir
 def test_flavor_dockerucp_30():
     run_provision(
-        "base_case.inp.yaml",
-        "base_case.kube.yaml",
+        "flavor_dockerucp.inp.yaml",
+        "flavor_dockerucp.kube.yaml",
         "flavor_dockerucp.apic.txt",
         overrides={"flavor": "docker-ucp-3.0"}
     )

@@ -1,8 +1,8 @@
-/api/mo/uni/infra/vlanns-[kube-pool]-static.json
+/api/mo/uni/infra/vlanns-[os-pool]-static.json
 {
     "fvnsVlanInstP": {
         "attributes": {
-            "name": "kube-pool",
+            "name": "os-pool",
             "allocMode": "static"
         },
         "children": [
@@ -27,12 +27,12 @@
         ]
     }
 }
-/api/mo/uni/infra/maddrns-kube-mpool.json
+/api/mo/uni/infra/maddrns-os-mpool.json
 {
     "fvnsMcastAddrInstP": {
         "attributes": {
-            "name": "kube-mpool",
-            "dn": "uni/infra/maddrns-kube-mpool"
+            "name": "os-mpool",
+            "dn": "uni/infra/maddrns-os-mpool"
         },
         "children": [
             {
@@ -46,29 +46,29 @@
         ]
     }
 }
-/api/mo/uni/phys-kube-pdom.json
+/api/mo/uni/phys-os-pdom.json
 {
     "physDomP": {
         "attributes": {
-            "dn": "uni/phys-kube-pdom",
-            "name": "kube-pdom"
+            "dn": "uni/phys-os-pdom",
+            "name": "os-pdom"
         },
         "children": [
             {
                 "infraRsVlanNs": {
                     "attributes": {
-                        "tDn": "uni/infra/vlanns-[kube-pool]-static"
+                        "tDn": "uni/infra/vlanns-[os-pool]-static"
                     }
                 }
             }
         ]
     }
 }
-/api/mo/uni/vmmp-OpenShift/dom-kube.json
+/api/mo/uni/vmmp-OpenShift/dom-os.json
 {
     "vmmDomP": {
         "attributes": {
-            "name": "kube",
+            "name": "os",
             "mode": "openshift",
             "enfPref": "sw",
             "encapMode": "vxlan",
@@ -79,7 +79,7 @@
             {
                 "vmmCtrlrP": {
                     "attributes": {
-                        "name": "kube",
+                        "name": "os",
                         "mode": "openshift",
                         "scope": "openshift",
                         "hostOrIp": "1.1.1.1"
@@ -89,7 +89,7 @@
             {
                 "vmmRsDomMcastAddrNs": {
                     "attributes": {
-                        "tDn": "uni/infra/maddrns-kube-mpool"
+                        "tDn": "uni/infra/maddrns-os-mpool"
                     }
                 }
             }
@@ -100,20 +100,20 @@
 {
     "infraAttEntityP": {
         "attributes": {
-            "name": "kube-aep"
+            "name": "os-aep"
         },
         "children": [
             {
                 "infraRsDomP": {
                     "attributes": {
-                        "tDn": "uni/vmmp-OpenShift/dom-kube"
+                        "tDn": "uni/vmmp-OpenShift/dom-os"
                     }
                 }
             },
             {
                 "infraRsDomP": {
                     "attributes": {
-                        "tDn": "uni/phys-kube-pdom"
+                        "tDn": "uni/phys-os-pdom"
                     }
                 }
             },
@@ -151,7 +151,7 @@
                         {
                             "infraRsFuncToEpg": {
                                 "attributes": {
-                                    "tDn": "uni/tn-kube/ap-kubernetes/epg-kube-nodes",
+                                    "tDn": "uni/tn-os/ap-openshift/epg-os-nodes",
                                     "encap": "vlan-4001"
                                 }
                             }
@@ -162,11 +162,11 @@
         ]
     }
 }
-/api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/vmmp-OpenShift/dom-kube].json
+/api/mo/uni/infra/attentp-os-aep/rsdomP-[uni/vmmp-OpenShift/dom-os].json
 None
-/api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/phys-kube-pdom].json
+/api/mo/uni/infra/attentp-os-aep/rsdomP-[uni/phys-os-pdom].json
 None
-/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-kube/ap-kubernetes/epg-kube-nodes].json
+/api/mo/uni/infra/attentp-os-aep/gen-default/rsfuncToEpg-[uni/tn-os/ap-openshift/epg-os-nodes].json
 None
 /api/mo/uni/infra.json
 {
@@ -188,7 +188,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "kube-allow-all-filter"
+                        "name": "os-allow-all-filter"
                     },
                     "children": [
                         {
@@ -204,7 +204,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "kube-l3out-allow-all"
+                        "name": "os-l3out-allow-all"
                     },
                     "children": [
                         {
@@ -218,7 +218,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "kube-allow-all-filter"
+                                                "tnVzFilterName": "os-allow-all-filter"
                                             }
                                         }
                                     }
@@ -231,34 +231,34 @@ None
         ]
     }
 }
-/api/mo/uni/tn-common/flt-kube-allow-all-filter.json
+/api/mo/uni/tn-common/flt-os-allow-all-filter.json
 None
-/api/mo/uni/tn-common/brc-kube-l3out-allow-all.json
+/api/mo/uni/tn-common/brc-os-l3out-allow-all.json
 None
-/api/mo/uni/tn-kube.json
+/api/mo/uni/tn-os.json
 {
     "fvTenant": {
         "attributes": {
-            "name": "kube",
-            "dn": "uni/tn-kube"
+            "name": "os",
+            "dn": "uni/tn-os"
         },
         "children": [
             {
                 "fvAp": {
                     "attributes": {
-                        "name": "kubernetes"
+                        "name": "openshift"
                     },
                     "children": [
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "kube-default"
+                                    "name": "os-default"
                                 },
                                 "children": [
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-OpenShift/dom-kube"
+                                                "tDn": "uni/vmmp-OpenShift/dom-os"
                                             }
                                         }
                                     },
@@ -272,7 +272,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
+                                                "tnVzBrCPName": "os-l3out-allow-all"
                                             }
                                         }
                                     },
@@ -293,14 +293,14 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "kube-pod-bd"
+                                                "tnFvBDName": "os-pod-bd"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-api"
+                                                "tnVzBrCPName": "os-api"
                                             }
                                         }
                                     },
@@ -324,7 +324,7 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "kube-system"
+                                    "name": "os-system"
                                 },
                                 "children": [
                                     {
@@ -358,28 +358,28 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-api"
+                                                "tnVzBrCPName": "os-api"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
+                                                "tnVzBrCPName": "os-l3out-allow-all"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-OpenShift/dom-kube"
+                                                "tDn": "uni/vmmp-OpenShift/dom-os"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "kube-pod-bd"
+                                                "tnFvBDName": "os-pod-bd"
                                             }
                                         }
                                     },
@@ -424,7 +424,7 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "kube-nodes"
+                                    "name": "os-nodes"
                                 },
                                 "children": [
                                     {
@@ -437,7 +437,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-api"
+                                                "tnVzBrCPName": "os-api"
                                             }
                                         }
                                     },
@@ -458,7 +458,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
+                                                "tnVzBrCPName": "os-l3out-allow-all"
                                             }
                                         }
                                     },
@@ -466,14 +466,14 @@ None
                                         "fvRsDomAtt": {
                                             "attributes": {
                                                 "encap": "vlan-4001",
-                                                "tDn": "uni/phys-kube-pdom"
+                                                "tDn": "uni/phys-os-pdom"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "kube-node-bd"
+                                                "tnFvBDName": "os-node-bd"
                                             }
                                         }
                                     },
@@ -503,7 +503,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-OpenShift/dom-kube"
+                                                "tDn": "uni/vmmp-OpenShift/dom-os"
                                             }
                                         }
                                     },
@@ -517,7 +517,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
+                                                "tnVzBrCPName": "os-l3out-allow-all"
                                             }
                                         }
                                     },
@@ -538,14 +538,14 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "kube-pod-bd"
+                                                "tnFvBDName": "os-pod-bd"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-api"
+                                                "tnVzBrCPName": "os-api"
                                             }
                                         }
                                     },
@@ -575,7 +575,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-OpenShift/dom-kube"
+                                                "tDn": "uni/vmmp-OpenShift/dom-os"
                                             }
                                         }
                                     },
@@ -589,7 +589,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
+                                                "tnVzBrCPName": "os-l3out-allow-all"
                                             }
                                         }
                                     },
@@ -610,14 +610,14 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "kube-pod-bd"
+                                                "tnFvBDName": "os-pod-bd"
                                             }
                                         }
                                     },
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "kube-api"
+                                                "tnVzBrCPName": "os-api"
                                             }
                                         }
                                     },
@@ -644,7 +644,7 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "kube-node-bd",
+                        "name": "os-node-bd",
                         "arpFlood": "yes"
                     },
                     "children": [
@@ -659,7 +659,7 @@ None
                         {
                             "fvRsCtx": {
                                 "attributes": {
-                                    "tnFvCtxName": "kube"
+                                    "tnFvCtxName": "os"
                                 }
                             }
                         },
@@ -676,7 +676,7 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "kube-pod-bd"
+                        "name": "os-pod-bd"
                     },
                     "children": [
                         {
@@ -689,7 +689,7 @@ None
                         {
                             "fvRsCtx": {
                                 "attributes": {
-                                    "tnFvCtxName": "kube"
+                                    "tnFvCtxName": "os"
                                 }
                             }
                         }
@@ -799,13 +799,13 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "kube-api-filter"
+                        "name": "os-api-filter"
                     },
                     "children": [
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "kube-api",
+                                    "name": "os-api",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "6443",
@@ -818,7 +818,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "kube-api2",
+                                    "name": "os-api2",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "8443",
@@ -834,13 +834,13 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "kube-api"
+                        "name": "os-api"
                     },
                     "children": [
                         {
                             "vzSubj": {
                                 "attributes": {
-                                    "name": "kube-api-subj",
+                                    "name": "os-api-subj",
                                     "consMatchT": "AtleastOne",
                                     "provMatchT": "AtleastOne"
                                 },
@@ -848,7 +848,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "kube-api-filter"
+                                                "tnVzFilterName": "os-api-filter"
                                             }
                                         }
                                     }
@@ -1084,17 +1084,17 @@ None
     "fvRsProv": {
         "attributes": {
             "matchT": "AtleastOne",
-            "tnVzBrCPName": "kube-l3out-allow-all"
+            "tnVzBrCPName": "os-l3out-allow-all"
         }
     }
 }
-/api/mo/uni/tn-common/out-l3out/instP-default/rsprov-kube-l3out-allow-all.json
+/api/mo/uni/tn-common/out-l3out/instP-default/rsprov-os-l3out-allow-all.json
 None
-/api/node/mo/uni/userext/user-kube.json
+/api/node/mo/uni/userext/user-os.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "kube",
+            "name": "os",
             "accountStatus": "active",
             "pwd": "NotRandom!"
         },
@@ -1119,17 +1119,17 @@ None
         ]
     }
 }
-/api/node/mo/uni/userext/user-kube.json
+/api/node/mo/uni/userext/user-os.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "kube"
+            "name": "os"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "kube.crt",
+                        "name": "os.crt",
                         "data": "-----BEGIN CERTIFICATE-----\nMIIB6DCCAVECAgPoMA0GCSqGSIb3DQEBBQUAMDwxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRUwEwYDVQQDDAxVc2VyIG1hbmRlZXAwHhcNMTcw\nNTE2MjEyOTMwWhcNMjcwNTE0MjEyOTMwWjA8MQswCQYDVQQGEwJVUzEWMBQGA1UE\nCgwNQ2lzY28gU3lzdGVtczEVMBMGA1UEAwwMVXNlciBtYW5kZWVwMIGfMA0GCSqG\nSIb3DQEBAQUAA4GNADCBiQKBgQDa/gPoDimwFVaybG9/mVm3J1V6P4HbsSE5L5tP\nZHohQp/lKf0hnar+gIfo5SXxe7r/hYAibQsQ/O6mMNKuQ3BlSyHHxeGVG/QfKyVi\ngSOsCX8bTHxblDWNuHIMEKSaqzFKgA8/zFvsK2XobEpxbMnsF0d/PHkexCow1noH\nScj3FwIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAHX+kLTe6LCABewmCTvMsjusHdpZ\nki01+nQ7KhnERbBm/tZ5scZE4ctIqch3ny1EITHNtYWKBN4CdUKcjvDW2h2vkHeg\nrtYbV+AaEsq0m4vGF9Emvt1cp9Y41IyMBZYqw8c/V1AtmRQcRTYQA8H3OFDchyB2\n0JHSDnBoS7ffSbBx\n-----END CERTIFICATE-----\n"
                     }
                 }

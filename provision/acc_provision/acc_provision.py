@@ -247,6 +247,7 @@ def cidr_split(cidr):
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
+    app_profile = config["aci_config"]["app_profile"]
     infra_vlan = config["net_config"]["infra_vlan"]
     node_subnet = config["net_config"]["node_subnet"]
     pod_subnet = config["net_config"]["pod_subnet"]
@@ -263,6 +264,7 @@ def config_adjust(args, config, prov_apic, no_random):
     adj_config = {
         "aci_config": {
             "cluster_tenant": tenant,
+            "app_profile": app_profile,
             "physical_domain": {
                 "domain": system_id + "-pdom",
                 "vlan_pool": system_id + "-pool",
@@ -293,14 +295,14 @@ def config_adjust(args, config, prov_apic, no_random):
         "kube_config": {
             "default_endpoint_group": {
                 "tenant": tenant,
-                "app_profile": "kubernetes",
-                "group": "kube-default",
+                "app_profile": app_profile,
+                "group": "%s-default" % system_id,
             },
             "namespace_default_endpoint_group": {
                 system_namespace: {
                     "tenant": tenant,
-                    "app_profile": "kubernetes",
-                    "group": "kube-system",
+                    "app_profile": app_profile,
+                    "group": "%s-system" % system_id,
                 },
             },
             "pod_ip_pool": [
@@ -955,6 +957,13 @@ def provision(args, apic_file, no_random):
         flavor = args.flavor
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
+        if "app_profile" not in config["aci_config"]:
+            if "openshift" in flavor:
+                config["aci_config"]["app_profile"] = "openshift"
+            elif "docker-ucp" in flavor:
+                config["aci_config"]["app_profile"] = "dockerucp"
+            else:
+                config["aci_config"]["app_profile"] = "kubernetes"
         deep_merge(config, {"flavor": flavor})
         if "config" in FLAVORS[flavor]:
             deep_merge(config, FLAVORS[flavor]["config"])
