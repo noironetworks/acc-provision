@@ -368,6 +368,13 @@ None
                                                 "tnFvBDName": "kube-pod-bd"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-svc-catalog"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -425,6 +432,13 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-node-bd"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-svc-catalog"
                                             }
                                         }
                                     }
@@ -736,19 +750,6 @@ None
                                     "tcpRules": ""
                                 }
                             }
-                        },
-                        {
-                            "vzEntry": {
-                                "attributes": {
-                                    "name": "openshift-svc-catalog",
-                                    "etherT": "ip",
-                                    "prot": "tcp",
-                                    "dFromPort": "2379",
-                                    "dToPort": "2379",
-                                    "stateful": "no",
-                                    "tcpRules": ""
-                                }
-                            }
                         }
                     ]
                 }
@@ -882,6 +883,55 @@ None
                                         }
                                     }
                                 ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "openshift-svc-catalog"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "openshift-svc-catalog-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "openshift-svc-catalog-filter"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "openshift-svc-catalog-filter"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-svc-catalog",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "2379",
+                                    "dToPort": "2379",
+                                    "stateful": "no",
+                                    "tcpRules": ""
+                                }
                             }
                         }
                     ]
