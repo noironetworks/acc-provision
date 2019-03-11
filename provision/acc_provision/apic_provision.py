@@ -3225,13 +3225,12 @@ class ApicKubeConfig(object):
                     }
                 })
 
-        print(self.config["aci_config"])
         if "ports" in self.config["aci_config"].keys():
             ports = self.config["aci_config"]["ports"]
             if vmm_type == "OpenShift":
-                open_port_for_flavor(data, ports)
+                openshift_flavor_specific_handling(data, ports)
             elif flavor == "docker-ucp-3.0":
-                open_port_for_flavor(data, ports)
+                dockerucp_flavor_specific_handling(data, ports)
 
         return path, data
 
@@ -3415,7 +3414,223 @@ class ApicKubeConfig(object):
         return path, data
 
 
-def open_port_for_flavor(data, ports):
+def openshift_flavor_specific_handling(data, ports):
+    if ports is None or len(ports) == 0:
+        err("Error in getting ports for flavor")
+
+    # add new contract
+    provide_os_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsProv",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "openshift-svc-catalog",
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+
+    consume_os_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsCons",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "openshift-svc-catalog",
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+
+    # for kube-nodes and kube-systems
+    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+    data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+
+    # add new contract and subject
+    openshift_svc_catalog_contract = collections.OrderedDict(
+        [
+            (
+                "vzBrCP",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [("name", "openshift-svc-catalog")]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "vzSubj",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "attributes",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "name",
+                                                                    "openshift-svc-catalog-subj",
+                                                                ),
+                                                                (
+                                                                    "consMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                                (
+                                                                    "provMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ),
+                                                    (
+                                                        "children",
+                                                        [
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "vzRsSubjFiltAtt",
+                                                                        collections.OrderedDict(
+                                                                            [
+                                                                                (
+                                                                                    "attributes",
+                                                                                    collections.OrderedDict(
+                                                                                        [
+                                                                                            (
+                                                                                                "tnVzFilterName",
+                                                                                                "openshift-svc-catalog-filter",
+                                                                                            )
+                                                                                        ]
+                                                                                    ),
+                                                                                )
+                                                                            ]
+                                                                        ),
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ],
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                )
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    data['fvTenant']['children'].append(openshift_svc_catalog_contract)
+
+    # add filter and entires to that subject
+    openshift_svc_catalog_filter = collections.OrderedDict(
+        [
+            (
+                "vzFilter",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "name",
+                                        "openshift-svc-catalog-filter",
+                                    )
+                                ]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    for port in ports:
+        child = collections.OrderedDict(
+            [
+                (
+                    "vzEntry",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "name",
+                                            port["name"],
+                                        ),
+                                        (
+                                            "etherT",
+                                            port["etherT"],
+                                        ),
+                                        (
+                                            "prot",
+                                            port["prot"],
+                                        ),
+                                        (
+                                            "dFromPort",
+                                            str(port["range"][0]),
+                                        ),
+                                        (
+                                            "dToPort",
+                                            str(port["range"][1]),
+                                        ),
+                                        (
+                                            "stateful",
+                                            str(port["stateful"]),
+                                        ),
+                                        (
+                                            "tcpRules",
+                                            "",
+                                        ),
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        )
+        openshift_svc_catalog_filter['vzFilter']['children'].append(child)
+
+    data['fvTenant']['children'].append(openshift_svc_catalog_filter)
+
+
+def dockerucp_flavor_specific_handling(data, ports):
 
     if ports is None or len(ports) == 0:
         err("Error in getting ports for flavor")
