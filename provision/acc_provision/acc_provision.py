@@ -572,8 +572,12 @@ def config_validate_preexisting(config, prov_apic):
 
 def generate_sample(filep):
     data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
-    filep.write(data)
-    filep.flush()
+    try:
+        filep.write(data)
+    except TypeError:
+        filep.write(data.decode(filep.encoding))
+    finally:
+        filep.flush()
     return filep
 
 
