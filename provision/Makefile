@@ -13,4 +13,10 @@ clean:
 	rm -rf dist acc_provision.egg-info acc_provision/__pycache__ testdata/tmp-*
 
 upload: clean
+	python setup.py --description
 	python setup.py sdist upload
+
+upload-twine: clean
+	python setup.py --description
+	python setup.py sdist bdist_wheel 
+	twine upload --repository pypi dist/*	
