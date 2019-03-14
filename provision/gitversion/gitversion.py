@@ -10,7 +10,7 @@ def call_git_rev_parse():
 		p = Popen(['date', '-u', '+%m-%d-%Y.%H:%M:%S.UTC'], stdout=PIPE, stderr=PIPE)
 		p.stderr.close()
 		line = line + "Build time: " + p.stdout.readlines()[0].decode()
-		return line.strip()
+		return line.strip('\n', '')
 
 	except:
 		return None
