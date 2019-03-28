@@ -26,6 +26,12 @@ cfFlavorOptions: &anchor
 
 flavors: 
   # Upstream Kubernetes
+  kubernetes-1.14:
+    desc: Kubernetes 1.14
+    default_version: 4.1
+    status: Experimental
+    hidden: false
+    order: 16
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 4.1
