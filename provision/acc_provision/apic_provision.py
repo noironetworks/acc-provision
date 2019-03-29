@@ -3465,8 +3465,32 @@ def openshift_flavor_specific_handling(data, ports):
         ]
     )
 
+    consume_dns_contract_os = collections.OrderedDict(
+        [
+            (
+                "fvRsCons",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "dns",
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+
     # for kube-nodes and kube-systems
     data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_dns_contract_os)
     data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
 
     # add new contract and subject

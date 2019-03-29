@@ -375,6 +375,13 @@ None
                                                 "tnVzBrCPName": "openshift-svc-catalog"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "dns"
+                                            }
+                                        }
                                     }
                                 ]
                             }
