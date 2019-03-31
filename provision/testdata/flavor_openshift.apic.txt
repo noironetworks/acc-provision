@@ -303,6 +303,20 @@ None
                                                 "tnVzBrCPName": "kube-api"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -370,6 +384,20 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "dns"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "openshift-svc-catalog"
@@ -379,7 +407,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "dns"
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
                                             }
                                         }
                                     }
@@ -448,6 +483,13 @@ None
                                                 "tnVzBrCPName": "openshift-svc-catalog"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -506,6 +548,20 @@ None
                                                 "tnVzBrCPName": "kube-api"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -562,6 +618,20 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "kube-api"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring"
                                             }
                                         }
                                     }
@@ -923,6 +993,33 @@ None
                 }
             },
             {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "openshift-monitoring"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "openshift-monitoring-filter"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
                 "vzFilter": {
                     "attributes": {
                         "name": "openshift-svc-catalog-filter"
@@ -931,11 +1028,46 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "openshift-svc-catalog",
+                                    "name": "openshift-svc-catalog-2379",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "2379",
                                     "dToPort": "2379",
+                                    "stateful": "no",
+                                    "tcpRules": ""
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "openshift-monitoring-filter"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9091",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9091",
+                                    "dToPort": "9091",
+                                    "stateful": "no",
+                                    "tcpRules": ""
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9094",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9094",
+                                    "dToPort": "9094",
                                     "stateful": "no",
                                     "tcpRules": ""
                                 }
