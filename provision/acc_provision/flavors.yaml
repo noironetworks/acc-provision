@@ -109,12 +109,27 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
-        ports:
+        items:
           - name: openshift-svc-catalog
-            range: [2379, 2379]
+            range:
+              -
+                [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
+            consumed: ["kube-system"]
+            provided: ["kube-nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["kube-system","kube-default","kube-nodes"]
+            consumed: ["kube-system","kube-default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -133,12 +148,27 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
-        ports:
+        items:
           - name: openshift-svc-catalog
-            range: [2379, 2379]
+            range:
+              -
+                [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
+            consumed: ["kube-system"]
+            provided: ["kube-nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["kube-system","kube-default","kube-nodes"]
+            consumed: ["kube-system","kube-default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -157,12 +187,27 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
       aci_config:
-        ports:
+        items:
           - name: openshift-svc-catalog
-            range: [2379, 2379]
+            range:
+              -
+                [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
+            consumed: ["kube-system"]
+            provided: ["kube-nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["kube-system","kube-default","kube-nodes"]
+            consumed: ["kube-system","kube-default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -200,12 +245,27 @@ flavors:
       #                             }
       #                         }
       #                     }
-        ports:
+        items:
           - name: openshift-svc-catalog
-            range: [2379, 2379]
+            range:
+              -
+                [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
+            consumed: ["kube-system"]
+            provided: ["kube-nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["kube-system","kube-default","kube-nodes"]
+            consumed: ["kube-system","kube-default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -220,7 +280,7 @@ flavors:
     config:
       aci_config:
   #https://docs.docker.com/ee/ucp/admin/install/system-requirements/
-        ports:
+        items:
           - name: ucp-ui-port
             range: [443, 443]
             etherT: ip
