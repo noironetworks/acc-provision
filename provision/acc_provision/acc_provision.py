@@ -900,7 +900,7 @@ def provision(args, apic_file, no_random):
     if args.timeout:
         try:
             if int(args.timeout) >= 0:
-                timeout = args.timeout
+                timeout = int(args.timeout)
         except ValueError:
             # ignore that timeout value
             warn("Invalid timeout value ignored: '%s'" % timeout)
