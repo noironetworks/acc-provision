@@ -10,7 +10,7 @@ setup(
     description='Tool to provision ACI for ACI Containers Controller  Build info: ' + get_git_version(),
     author="Cisco Systems, Inc.",
     author_email="apicapi@noironetworks.com",
-    url='http://github.com/noironetworks/aci-containers/',
+    url='http://github.com/noironetworks/acc-provision/',
     license="http://www.apache.org/licenses/LICENSE-2.0",
     packages=find_packages(),
     include_package_data=True,
