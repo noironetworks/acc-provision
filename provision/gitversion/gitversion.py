@@ -10,10 +10,10 @@ def call_git_rev_parse():
 		p = Popen(['date', '-u', '+%m-%d-%Y.%H:%M:%S.UTC'], stdout=PIPE, stderr=PIPE)
 		p.stderr.close()
 		line = line + "Build time: " + p.stdout.readlines()[0].decode()
-		return line.strip('\n', '')
+		return (line.strip(), line.replace('\n', ' '))
 
 	except:
-		return None
+		return (None, None)
 
 
 def read_release_version():
@@ -39,7 +39,7 @@ def get_git_version():
 	# Read in the version that's currently in RELEASE-VERSION.
 	release_version = read_release_version()
 
-	version = call_git_rev_parse()
+	version, version_formatted = call_git_rev_parse()
 
 	# If that doesn't work, fall back on the value that's in
 	# RELEASE-VERSION.
@@ -47,19 +47,14 @@ def get_git_version():
 	if version is None:
 		version = release_version
 
-	# If we still don't have anything:
-
 	if version is None:
-		version = "Release info not in the current build."
-		return version
-
-
+		write_release_version("Release info not in the current build.")
 	# If the current version is different from what's in the
 	# RELEASE-VERSION file, update the file to be current.
-
-	if version != release_version:
+	elif version != release_version:
 		write_release_version(version)
 
-	# Finally, return the current version.
-
-	return version
+	if version_formatted is None:
+        	version_formatted = "Release info not in the current build."
+	
+	return version_formatted
