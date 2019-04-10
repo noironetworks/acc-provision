@@ -1,3 +1,42 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: epgs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Epg
+    listKind: EpgList
+    plural: epgs
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: contracts.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Contract
+    listKind: ContractList
+    plural: contracts
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: podifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: PodIF
+    listKind: PodIFList
+    plural: podifs
+  scope: Namespaced
+  version: v1
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -76,12 +115,12 @@ data:
         "aci-vmm-type": "Kubernetes",
         "aci-vmm-domain": "kube",
         "aci-vmm-controller": "kube",
+        "aci-prefix": "kube",
         "aci-vrf": "defaultVrf",
         "aci-vrf-tenant": "kube",
         "service-vlan": 1022,
         "encap-type": "vxlan",
         "aci-infra-vlan": 4093,
-        "registry-url": "http://10.96.0.2:14443",
         "cni-netconfig": [
             {
                 "gateway": "10.2.56.1",
@@ -93,7 +132,17 @@ data:
                 ],
                 "subnet": "10.2.56.0/21"
             }
-        ]
+        ],
+        "default-endpoint-group": {
+            "policy-space": "kube",
+            "name": "kubernetes|kube-default"
+        },
+        "namespace-default-endpoint-group": {
+            "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            }
+        }
     }
   opflex-agent-config: |-
     {
@@ -150,10 +199,23 @@ rules:
   - services
   verbs:
   - '*'
+# - list
+# - watch
+# - get
 - apiGroups:
   - "networking.k8s.io"
   resources:
   - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - epgs
+  - contracts
+  - podifs
   verbs:
   - list
   - watch
@@ -165,6 +227,9 @@ rules:
   - replicasets
   verbs:
   - '*'
+# - list
+# - watch
+# - get
 - apiGroups:
   - ""
   resources:
@@ -173,6 +238,7 @@ rules:
   - nodes
   - services/status
   verbs:
+# - update
   - '*'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -190,11 +256,17 @@ rules:
   - pods
   - endpoints
   - services
-  - replicationcontrollers
   verbs:
   - list
   - watch
   - get
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  verbs:
+  - "*"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -502,18 +574,3 @@ spec:
             items:
               - key: controller-config
                 path: controller.conf
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ep-registry
-  namespace: kube-system
-  labels:
-    app: gbpserver
-spec:
-  clusterIP: "10.96.0.2"
-  ports:
-  - port: 14443
-    targetPort: 14443
-  selector:
-    name: aci-containers-controller

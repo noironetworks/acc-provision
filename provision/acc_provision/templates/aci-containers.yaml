@@ -10,6 +10,47 @@ metadata:
     openshift.io/node-selector: ''
 ---
 {% endif %}
+{% if config.kube_config.use_aci_anywhere_crd %}
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: epgs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Epg
+    listKind: EpgList
+    plural: epgs
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: contracts.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Contract
+    listKind: ContractList
+    plural: contracts
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: podifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: PodIF
+    listKind: PodIFList
+    plural: podifs
+  scope: Namespaced
+  version: v1
+---
+{% endif %}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -67,9 +108,7 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
-        {% if not config.kube_config.skip_aci_prefix_hostagent %}
         "aci-prefix": {{config.aci_config.system_id|json}},
-        {% endif %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
         "service-vlan": {{ config.net_config.service_vlan|json }},
@@ -78,10 +117,6 @@ data:
         {% if config.net_config.interface_mtu %}
         "interface-mtu": {{ config.net_config.interface_mtu|json }},
         {% endif %}
-        {% if config.net_config.gbp_server_registry %}
-        "registry-url": {{ config.net_config.gbp_server_registry|json }},
-        {% endif %}
-        {% if not config.kube_config.skip_default_endpoint_group_hostagent %}
         "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }},
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
@@ -95,9 +130,6 @@ data:
             }
             {% endfor %}
         }
-        {% else %}
-        "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }}
-        {% endif %}
     }
   opflex-agent-config: |-
     {
@@ -168,6 +200,9 @@ rules:
   {% else %}
   verbs:
   - '*'
+# - list
+# - watch
+# - get
   {% endif %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
@@ -177,6 +212,18 @@ rules:
   - list
   - watch
   - get
+{% if config.kube_config.use_aci_anywhere_crd %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - epgs
+  - contracts
+  - podifs
+  verbs:
+  - list
+  - watch
+  - get
+{% endif %}
 - apiGroups:
   - "{{ config.kube_config.use_apps_apigroup }}"
   resources:
@@ -190,6 +237,9 @@ rules:
   {% else %}
   verbs:
   - '*'
+# - list
+# - watch
+# - get
   {% endif %}
 - apiGroups:
   - ""
@@ -205,6 +255,7 @@ rules:
   - update
   {% else %}
   verbs:
+# - update
   - '*'
   {% endif %}
 ---
@@ -226,11 +277,22 @@ rules:
   - pods
   - endpoints
   - services
+  {% if not config.kube_config.skip_replicationcontroller_resource_hostagent %}
   - replicationcontrollers
+  {% endif %}
   verbs:
   - list
   - watch
   - get
+{% if config.kube_config.use_aci_anywhere_crd %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  verbs:
+  - "*"
+{% endif %}
 {% if not config.kube_config.no_hostagent_networking_clusterrole %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
@@ -646,20 +708,3 @@ spec:
             items:
               - key: controller-config
                 path: controller.conf
-{% if config.kube_config.ep_registry_service %}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ep-registry
-  namespace: kube-system
-  labels:
-    app: gbpserver
-spec:
-  clusterIP: {{ config.net_config.ep_registry_service_IP|json }}
-  ports:
-  - port: {{ config.net_config.ep_registry_service_port|json }}
-    targetPort: {{ config.net_config.ep_registry_service_port|json }}
-  selector:
-    name: aci-containers-controller
-{% endif %}
