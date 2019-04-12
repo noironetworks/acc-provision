@@ -319,17 +319,16 @@ flavors:
     default_version: 4.1
     config:
       kube_config:
-        skip_aci_prefix_hostagent: True
-        skip_default_endpoint_group_hostagent: True
+        use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: True
+        skip_replicationcontroller_resource_hostagent: True
         skip_default_endpoint_group: True
         all_access_controller_clusterrole: True
         no_hostagent_networking_clusterrole: True
         no_hostagent_deployment_clusterrole: True
         run_opflex_server_container: True
         run_gbp_container: True
-        ep_registry_service: True
         use_opflex_server_volume: True
         use_kubeconfig_volume: True
     status: Experimental
