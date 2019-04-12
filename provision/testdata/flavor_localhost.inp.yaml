@@ -34,10 +34,7 @@ net_config:
   kubeapi_vlan: 202                    # The VLAN used by the internal physdom for nodes
   service_vlan: 1022                    # The VLAN used for external LoadBalancer services
   infra_vlan: 4093
-  gbp_server_registry: http://10.96.0.2:14443
   opflex_server_port: 8009
-  ep_registry_service_IP: 10.96.0.2
-  ep_registry_service_port: 14443
 #
 #
 # Configuration for container registry
