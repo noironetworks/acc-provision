@@ -386,6 +386,10 @@ def config_adjust(args, config, prov_apic, no_random):
             "configuration_version": token,
         }
     }
+    if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
+        apic_refreshtime = config["aci_config"]["apic_refreshtime"]
+        adj_config["aci_config"]["apic_refreshtime"] = apic_refreshtime
+
     if config["net_config"].get("vip_subnet"):
         vip_subnet = cidr_split(config["net_config"]["vip_subnet"])
         adj_config["cf_config"]["app_vip_pool"] = [
@@ -422,6 +426,21 @@ def is_valid_mtu(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_refreshtime(xval):
+    if xval is None:
+        # Not a required field.
+        return True
+    xmin = 0
+    xmax = (12 * 60 * 60)  # 12Hrs is the max suggested subscription refresh time for APIC
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -442,6 +461,8 @@ def config_validate(flavor_opts, config):
         # ACI config
         "aci_config/system_id": (get(("aci_config", "system_id")),
                                  lambda x: required(x) and isname(x, 32)),
+        "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
+                                        is_valid_refreshtime),
         "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
         "aci_config/aep": (get(("aci_config", "aep")), required),
         "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),

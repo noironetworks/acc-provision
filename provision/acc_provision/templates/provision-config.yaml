@@ -2,7 +2,8 @@
 # Configuration for ACI Fabric
 #
 aci_config:
-  system_id: mykube             # Every opflex cluster must have a distict ID
+  system_id: mykube             # Every opflex cluster must have a distinct ID
+  #apic_refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
   apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101
   vmm_domain:                   # Kubernetes container domain configuration
