@@ -126,6 +126,15 @@ def test_with_interface_mtu():
 
 
 @in_testdir
+def test_with_apic_refreshtime():
+    run_provision(
+        "with_refreshtime.inp.yaml",
+        "with_refreshtime.kube.yaml",
+        "base_case.apic.txt",
+    )
+
+
+@in_testdir
 def test_pod_external_access():
     run_provision(
         "pod_ext_access.inp.yaml",
