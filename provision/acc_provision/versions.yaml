@@ -6,8 +6,8 @@ versions:
     opflex_agent_version: 1.9r80
     openvswitch_version: 1.7r24
   4.1:
-    aci_containers_controller_version: 4.1.1.2.r13
-    aci_containers_host_version: 4.1.1.2.r13
-    cnideploy_version: 4.1.1.2.r13
-    openvswitch_version: 4.1.1.2.r11
-    opflex_agent_version: 4.1.1.2.r12
+    aci_containers_controller_version: 4.1.1.5.r19
+    aci_containers_host_version: 4.1.1.5.r19
+    cnideploy_version: 4.1.1.5.r19
+    openvswitch_version: 4.1.1.5.r16
+    opflex_agent_version: 4.1.1.5.r21
