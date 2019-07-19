@@ -29,9 +29,9 @@ flavors:
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 4.1
-    status: Experimental
+    status: null
     hidden: false
-    order: 16
+    order: 4 
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 4.1
@@ -42,7 +42,7 @@ flavors:
     desc: Kubernetes 1.12
     default_version: 4.1
     status: null
-    hidden: false
+    hidden: true
     order: 6
   kubernetes-1.11:
     desc: Kubernetes 1.11
@@ -56,46 +56,6 @@ flavors:
     status: null
     hidden: true
     order: 8
-  kubernetes-1.9:
-    desc: Kubernetes 1.9
-    default_version: 1.9
-    status: null
-    hidden: true
-    order: 9
-  kubernetes-1.8:
-    desc: Kubernetes 1.8
-    default_version: 1.7
-    config:
-      kube_config:
-        use_apps_api: apps/v1beta2
-        use_apps_apigroup: apps
-    status: null
-    hidden: true
-    order: 10
-  kubernetes-1.7:
-    desc: Kubernetes 1.7
-    default_version: 1.7
-    config:
-      kube_config:
-        use_rbac_api: rbac.authorization.k8s.io/v1beta1
-        use_apps_api: extensions/v1beta1
-        use_apps_apigroup: extensions
-    status: null
-    hidden: true
-    order: 11
-  kubernetes-1.6:
-    desc: Kubernetes 1.6
-    default_version: 1.6
-    config:
-      kube_config:
-        use_rbac_api: rbac.authorization.k8s.io/v1beta1
-        use_apps_api: extensions/v1beta1
-        use_apps_apigroup: extensions
-        use_netpol_annotation: True
-        use_netpol_apigroup: extensions
-    status: null
-    hidden: true
-    order: 12
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 4.1
@@ -213,64 +173,6 @@ flavors:
     status: null
     hidden: false
     order: 3
-  openshift-3.6:
-    desc: Red Hat OpenShift Container Platform 3.6
-    default_version: 1.6
-    config:
-      kube_config:
-        use_external_service_ip_allocator: True
-        use_privileged_containers: True
-        use_openshift_security_context_constraints: True
-        use_cnideploy_initcontainer: True
-        allow_kube_api_default_epg: True
-        use_rbac_api: v1
-        use_apps_api: extensions/v1beta1
-        use_apps_apigroup: extensions
-        use_netpol_annotation: True
-        use_netpol_apigroup: extensions
-        kubectl: oc
-        system_namespace: aci-containers-system
-      aci_config:
-      # this will generate apic config like this:
-      # {
-      #                         "vzEntry": {
-      #                             "attributes": {
-      #                                 "name": "openshift-svc-catalog",
-      #                                 "etherT": "ip",
-      #                                 "prot": "tcp",
-      #                                 "dFromPort": "2379",
-      #                                 "dToPort": "2379",
-      #                                 "stateful": "no",
-      #                                 "tcpRules": ""
-      #                             }
-      #                         }
-      #                     }
-        items:
-          - name: openshift-svc-catalog
-            range:
-              -
-                [2379, 2379]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-            consumed: ["kube-system"]
-            provided: ["kube-nodes"]
-          - name: openshift-monitoring
-            range:
-              -
-                [9091, 9091]
-              -
-                [9094, 9094]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-            provided: ["kube-system","kube-default","kube-nodes"]
-            consumed: ["kube-system","kube-default"]
-        vmm_domain:
-          type: OpenShift
-    status: null
-    hidden: true
-    order: 4
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
@@ -301,7 +203,7 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-    order: 14
+    order: 10
   # CloudFoundry
   cloudfoundry-1.0:
     desc: CloudFoundry cf-deployment 1.x
@@ -313,7 +215,7 @@ flavors:
     options: *anchor
     status: null
     hidden: false
-    order: 13
+    order: 9
   k8s-localhost:
     desc: Kubernetes localhost 
     default_version: 4.1
@@ -333,4 +235,4 @@ flavors:
         use_kubeconfig_volume: True
     status: Experimental
     hidden: False
-    order: 15
+    order: 11

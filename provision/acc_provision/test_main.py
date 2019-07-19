@@ -270,6 +270,24 @@ def test_helpmsg():
         assert filecmp.cmp(tmpout.name, "help.stdout.txt", shallow=False)
 
 
+@in_testdir
+def test_list_flavors_msg():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            sys.argv = ["acc_provision.py", "--list-flavors"]
+            print(acc_provision.main(no_random=True))
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("list_flavors.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
