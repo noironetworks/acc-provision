@@ -12,6 +12,9 @@ import tempfile
 from . import acc_provision
 
 
+debug = False
+
+
 def in_testdir(f):
     @functools.wraps(f)
     def wrapper(*args, **kwds):
@@ -86,6 +89,15 @@ def test_nested_portgroup():
         "nested-portgroup.inp.yaml",
         "nested-portgroup.kube.yaml",
         "nested-portgroup.apic.txt"
+    )
+
+
+@in_testdir
+def test_nested_elag():
+    run_provision(
+        "nested-elag.inp.yaml",
+        "nested-elag.kube.yaml",
+        "nested-elag.apic.txt"
     )
 
 
@@ -293,9 +305,13 @@ def run_provision(inpfile, expectedkube=None, expectedapic=None,
         args = get_args(config=inpfile, output=output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
         if expectedkube is not None:
+            if debug:
+                shutil.copyfile(output.name, '/tmp/generated_kube.yaml')
             with open(expectedkube, "r") as expected:
                 assert output.read() == expected.read()
         if expectedapic is not None:
+            if debug:
+                shutil.copyfile(apicfile.name, '/tmp/generated_apic.txt')
             with open(expectedapic, "r") as expected:
                 assert apicfile.read() == expected.read()
 

@@ -18,5 +18,5 @@ upload: clean
 
 upload-twine: clean
 	python setup.py --description
-	python setup.py sdist bdist_wheel 
-	twine upload --repository pypi dist/*	
+	python setup.py sdist bdist_wheel
+	twine upload --repository pypi dist/*
