@@ -709,6 +709,7 @@ class ApicKubeConfig(object):
 
         system_id = self.config["aci_config"]["system_id"]
         nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
+        nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
         encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
         infra_vlan = self.config["net_config"]["infra_vlan"]
         service_vlan = self.config["net_config"]["service_vlan"]
@@ -847,6 +848,33 @@ class ApicKubeConfig(object):
                                                     "vlan-%d" % vlan_range["start"],
                                                 ),
                                                 ("to", "vlan-%d" % vlan_range["end"]),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            )
+        if nvmm_elag_name:
+            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (
+                nvmm_name,
+                nvmm_elag_name,
+            )
+            data["vmmUsrCustomAggr"]["children"].append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "vmmRsUsrAggrLagPolAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("status", ""),
+                                                ("tDn", nvmm_elag_dn),
                                             ]
                                         ),
                                     )

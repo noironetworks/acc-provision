@@ -140,6 +140,7 @@ def config_default():
                 },
                 "nested_inside": {
                     "portgroup": None,
+                    "elag_name": None,
                 },
             },
             "client_cert": False,
