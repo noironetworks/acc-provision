@@ -31,31 +31,31 @@ flavors:
     default_version: 4.1
     status: null
     hidden: false
-    order: 4 
+    order: 5
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 4.1
     status: null
     hidden: false
-    order: 5
+    order: 6
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 4.1
     status: null
     hidden: true
-    order: 6
+    order: 7
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 7
+    order: 8
   kubernetes-1.10:
     desc: Kubernetes 1.10
     default_version: 1.9
     status: null
     hidden: true
-    order: 8
+    order: 9
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 4.1
@@ -177,7 +177,7 @@ flavors:
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
     default_version: 4.1
-    status: Experimental
+    status: null
     hidden: false
     config:
       aci_config:
@@ -203,7 +203,7 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-    order: 10
+    order: 4
   # CloudFoundry
   cloudfoundry-1.0:
     desc: CloudFoundry cf-deployment 1.x
@@ -215,7 +215,7 @@ flavors:
     options: *anchor
     status: null
     hidden: false
-    order: 9
+    order: 10
   k8s-localhost:
     desc: Kubernetes localhost 
     default_version: 4.1
