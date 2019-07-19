@@ -1,0 +1,9 @@
+INFO: Available configuration flavors:
+INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
+INFO: openshift-3.10:	Red Hat OpenShift Container Platform 3.10
+INFO: openshift-3.9:	Red Hat OpenShift Container Platform 3.9
+INFO: kubernetes-1.14:	Kubernetes 1.14
+INFO: kubernetes-1.13:	Kubernetes 1.13
+INFO: cloudfoundry-1.0:	CloudFoundry cf-deployment 1.x
+INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0 [Experimental]
+INFO: k8s-localhost:	Kubernetes localhost [Experimental]
