@@ -250,10 +250,10 @@ rules:
   - pods
   - endpoints
   - services
+  - events
+  - configmaps
   verbs:
-  - list
-  - watch
-  - get
+  - '*'
 - apiGroups:
   - "networking.k8s.io"
   resources:
@@ -267,10 +267,15 @@ rules:
   resources:
   - deployments
   - replicasets
+  - daemonsets
+  - statefulsets
   verbs:
   - list
   - watch
   - get
+  - update
+  - create
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -279,15 +284,42 @@ rules:
   verbs:
   - update
 - apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - "aci.snat"
+  resourceNames:
+  - snat-operator
+  resources:
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  verbs:
+  - update
+  - create
+  - list
+  - watch
+  - get
+  - delete
+- apiGroups:
   - "aci.snat"
   resources:
   - snatlocalinfos
   - snatglobalinfos
   - snatpolicies
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  - nodeinfos
   verbs:
   - list
   - watch
   - get
+  - create
+  - update
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -610,6 +642,24 @@ spec:
         - operator: Exists
           effect: NoSchedule
       containers:
+        - name: snat-operator
+          image: noiro/snat-operator:snat
+          imagePullPolicy: Always
+          command:
+          - snat-operator
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: ACI_SNAT_NAMESPACE
+              value: "kube-system"
+            - name: ACI_SNAGLOBALINFO_NAME
+              value: "snatglobalinfo"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "snat-operator"
         - name: aci-containers-controller
           image: noiro/aci-containers-controller:4.1.1.5.r19
           imagePullPolicy: Always
