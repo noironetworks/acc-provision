@@ -1,3 +1,94 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatglobalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatGlobalInfo
+    listKind: SnatGlobalInfoList
+    plural: snatglobalinfos
+    singular: snatglobalinfo
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatlocalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatLocalInfo
+    listKind: SnatLocalInfoList
+    plural: snatlocalinfos
+    singular: snatlocalinfo
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatpolicies.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatPolicy
+    listKind: SnatPolicyList
+    plural: snatpolicies
+    singular: snatpolicy
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: nodeinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: NodeInfo
+    listKind: NodeInfoList
+    plural: nodeinfos
+    singular: nodeinfo
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            macaddress:
+              type: string
+            nodename:
+              type: string
+          required:
+          - nodename
+          - macaddress
+          type: object
+        status:
+          type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -187,6 +278,16 @@ rules:
   - services/status
   verbs:
   - update
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatlocalinfos
+  - snatglobalinfos
+  - snatpolicies
+  verbs:
+  - list
+  - watch
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -223,6 +324,25 @@ rules:
   - deployments
   - replicasets
   verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatallocations
+  - snatlocalinfos
+  - snatglobalinfos
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - nodeinfos
+  verbs:
+  - create
   - list
   - watch
   - get
