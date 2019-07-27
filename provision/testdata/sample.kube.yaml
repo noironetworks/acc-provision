@@ -532,6 +532,9 @@ spec:
         - name: aci-containers-openvswitch
           image: noiro/openvswitch:4.1.1.5.r16
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "20Gi"
           securityContext:
             capabilities:
               add:
