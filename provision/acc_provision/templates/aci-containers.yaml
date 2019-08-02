@@ -286,18 +286,10 @@ rules:
   {% endif %}
   - endpoints
   - services
-  {% if not config.kube_config.all_access_controller_clusterrole %}
-  verbs:
-  - list
-  - watch
-  - get
-  {% else %}
+  - events
+  - configmaps
   verbs:
   - '*'
-# - list
-# - watch
-# - get
-  {% endif %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:
@@ -323,17 +315,19 @@ rules:
   resources:
   - deployments
   - replicasets
+  - daemonsets
+  - statefulsets
   {% if not config.kube_config.all_access_controller_clusterrole %}
   verbs:
   - list
   - watch
   - get
+  - update
+  - create
+  - delete
   {% else %}
   verbs:
   - '*'
-# - list
-# - watch
-# - get
   {% endif %}
 - apiGroups:
   - ""
@@ -349,19 +343,45 @@ rules:
   - update
   {% else %}
   verbs:
-# - update
   - '*'
   {% endif %}
+- apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - "aci.snat"
+  resourceNames:
+  - {{ config.kube_config.snat_operator.name }}
+  resources:
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  verbs:
+  - update
+  - create
+  - list
+  - watch
+  - get
+  - delete
 - apiGroups:
   - "aci.snat"
   resources:
   - snatlocalinfos
   - snatglobalinfos
   - snatpolicies
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  - nodeinfos
   verbs:
   - list
   - watch
   - get
+  - create
+  - update
+  - delete
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -807,6 +827,24 @@ spec:
             - name: kubeconfig
               mountPath: /kube
         {% endif %}
+        - name: {{ config.kube_config.snat_operator.name }}
+          image: {{ config.registry.image_prefix }}/snat-operator:{{ config.registry.snat_operator_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          command:
+          - snat-operator
+          env:
+            - name: WATCH_NAMESPACE
+              value: "{{ config.kube_config.snat_operator.watch_namespace }}"
+            - name: ACI_SNAT_NAMESPACE
+              value: "{{ config.kube_config.system_namespace }}"
+            - name: ACI_SNAGLOBALINFO_NAME
+              value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "{{ config.kube_config.snat_operator.name }}"
         - name: aci-containers-controller
           image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}

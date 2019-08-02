@@ -3,11 +3,13 @@ versions:
     cnideploy_version: 1.9r43
     aci_containers_host_version: 1.9r43
     aci_containers_controller_version: 1.9r43
+    snat_operator_version: snat
     opflex_agent_version: 1.9r80
     openvswitch_version: 1.7r24
   4.1:
     aci_containers_controller_version: 4.1.1.5.r19
     aci_containers_host_version: 4.1.1.5.r19
+    snat_operator_version: snat
     cnideploy_version: 4.1.1.5.r19
     openvswitch_version: 4.1.1.5.r16
     opflex_agent_version: 4.1.1.5.r21

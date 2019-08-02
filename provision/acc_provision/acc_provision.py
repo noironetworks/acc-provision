@@ -42,6 +42,7 @@ VERSION_FIELDS = [
     "aci_containers_host_version",
     "opflex_agent_version",
     "aci_containers_controller_version",
+    "snat_operator_version",
     "openvswitch_version",
 ]
 
@@ -170,6 +171,11 @@ def config_default():
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "kube-system",
+            "snat_operator": {
+                "name": "snat-operator",
+                "watch_namespace": "",
+                "globalinfo_name": "snatglobalinfo",
+            },
         },
         "registry": {
             "image_prefix": "noiro",
