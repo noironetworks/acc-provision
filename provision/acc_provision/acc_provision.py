@@ -173,7 +173,8 @@ def config_default():
             "system_namespace": "kube-system",
             "snat_operator": {
                 "name": "snat-operator",
-                "watch_namespace": "",
+                "watch_namespace": "default",
+                "snat_namespace": "default",
                 "globalinfo_name": "snatglobalinfo",
             },
         },
