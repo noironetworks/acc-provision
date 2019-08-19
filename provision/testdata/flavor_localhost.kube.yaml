@@ -703,9 +703,9 @@ spec:
           - snat-operator
           env:
             - name: WATCH_NAMESPACE
-              value: ""
+              value: "default"
             - name: ACI_SNAT_NAMESPACE
-              value: "kube-system"
+              value: "default"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "snatglobalinfo"
             - name: POD_NAME
