@@ -171,6 +171,7 @@ def config_default():
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "kube-system",
+            "ovs_memory_limit": "10Gi",
             "snat_operator": {
                 "name": "snat-operator",
                 "watch_namespace": "default",
@@ -397,6 +398,9 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
         adj_config["aci_config"]["apic_refreshtime"] = apic_refreshtime
+
+    if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
+        adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
     if config["net_config"].get("vip_subnet"):
         vip_subnet = cidr_split(config["net_config"]["vip_subnet"])
