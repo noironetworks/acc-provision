@@ -738,7 +738,7 @@ spec:
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           resources:
             limits:
-              memory: "20Gi"
+              memory: "{{ config.kube_config.ovs_memory_limit }}"
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
             privileged: true
