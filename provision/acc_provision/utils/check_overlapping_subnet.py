@@ -1,3 +1,4 @@
+"""check if overlapping subnets are present in acc provision config file."""
 import ipaddr
 import os
 import yaml
@@ -6,7 +7,7 @@ from itertools import combinations
 
 
 def load_provision_config(config_file):
-    """load acc provision config file. """
+    """load acc provision config file."""
     if os.path.isfile(config_file):
         with open(config_file, 'r') as stream:
             try:
@@ -17,9 +18,10 @@ def load_provision_config(config_file):
     else:
         raise(Exception("%s file not found" % config_file))
 
+
 def get_subnets(acc_provison_config_info):
-    """get subnets info from acc provison config file"""
-    ndict = {} # dictionary to store subnets
+    """get subnets info from acc provison config file."""
+    ndict = {}  # dictionary to store subnets
     try:
         netc = acc_provison_config_info['net_config']
         ndict['pod_subnet'] = netc['pod_subnet']
@@ -32,8 +34,9 @@ def get_subnets(acc_provison_config_info):
         raise(Exception(msg))
     return ndict
 
+
 def check_overlaping_subnets(provision_config_file_path):
-    """check if subnets are overlapping. """
+    """check if subnets are overlapping."""
     acc_provison_config_info = load_provision_config(
         provision_config_file_path)
     subnet_info = get_subnets(acc_provison_config_info)
