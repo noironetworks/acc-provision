@@ -1,4 +1,3 @@
-import exception as excp
 import ipaddr
 import os
 import yaml
@@ -14,9 +13,9 @@ def load_provision_config(config_file):
                 return yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 msg = "Unable to load acc provision yaml. Reason: %s" % exc
-                raise excp.InvalidAccProvisionConfigFile(msg)
+                raise(Exception(msg))
     else:
-        raise excp.AccProvisionConfigFileNotFound("file not found")
+        raise(Exception("%s file not found" % config_file))
 
 def get_subnets(acc_provison_config_info):
     """get subnets info from acc provison config file"""
@@ -30,7 +29,7 @@ def get_subnets(acc_provison_config_info):
         ndict['node_svc_subnet'] = netc['node_svc_subnet']
     except KeyError:
         msg = ("Invalid acc provision config file provided")
-        raise excp.InvalidAccProvisionConfigFile(msg)
+        raise(Exception(msg))
     return ndict
 
 def check_overlaping_subnets(provision_config_file_path):
@@ -42,5 +41,4 @@ def check_overlaping_subnets(provision_config_file_path):
         net1, net2 = ipaddr.IPNetwork(sub1), ipaddr.IPNetwork(sub2)
         out = net1.overlaps(net2)
         if out:
-            msg = ("Overlapping subnet found")
-            raise excp.OverlappingSubnet(msg)
+            raise(Exception("Overlapping subnet found"))
