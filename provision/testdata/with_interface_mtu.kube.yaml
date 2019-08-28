@@ -251,6 +251,7 @@ rules:
   - services
   - events
   - configmaps
+  - replicationcontrollers
   verbs:
   - '*'
 - apiGroups:
@@ -319,6 +320,14 @@ rules:
   - create
   - update
   - delete
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs:
+  - list
+  - watch
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
