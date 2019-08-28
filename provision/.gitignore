@@ -3,4 +3,5 @@
 /*.egg
 /*.egg-info
 /dist/
+/.pytest_cache/
 RELEASE-VERSION
