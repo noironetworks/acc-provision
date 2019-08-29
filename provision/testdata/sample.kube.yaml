@@ -252,7 +252,9 @@ rules:
   - configmaps
   - replicationcontrollers
   verbs:
-  - '*'
+  - list
+  - watch
+  - get
 - apiGroups:
   - "networking.k8s.io"
   resources:
@@ -272,9 +274,6 @@ rules:
   - list
   - watch
   - get
-  - update
-  - create
-  - delete
 - apiGroups:
   - ""
   resources:
