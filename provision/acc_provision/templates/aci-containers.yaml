@@ -290,7 +290,9 @@ rules:
   - configmaps
   - replicationcontrollers
   verbs:
-  - '*'
+  - list
+  - watch
+  - get
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:
@@ -323,9 +325,6 @@ rules:
   - list
   - watch
   - get
-  - update
-  - create
-  - delete
   {% else %}
   verbs:
   - '*'
