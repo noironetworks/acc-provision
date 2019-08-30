@@ -174,7 +174,6 @@ def config_default():
             "ovs_memory_limit": "10Gi",
             "snat_operator": {
                 "name": "snat-operator",
-                "watch_namespace": "default",
                 "snat_namespace": "default",
                 "globalinfo_name": "snatglobalinfo",
             },
