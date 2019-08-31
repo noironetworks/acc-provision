@@ -90,7 +90,7 @@ spec:
     listKind: SnatPolicyList
     plural: snatpolicies
     singular: snatpolicy
-  scope: Namespaced
+  scope: Cluster
   subresources:
     status: {}
   validation:
@@ -319,12 +319,22 @@ rules:
   - endpoints
   - services
   - events
-  - configmaps
   - replicationcontrollers
   verbs:
   - list
   - watch
   - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:
@@ -873,6 +883,8 @@ spec:
           command:
           - snat-operator
           env:
+            - name: WATCH_NAMESPACE
+              value: "{{ config.kube_config.snat_operator.watch_namespace }}"
             - name: ACI_SNAT_NAMESPACE
               value: "{{ config.kube_config.snat_operator.snat_namespace }}"
             - name: ACI_SNAGLOBALINFO_NAME
