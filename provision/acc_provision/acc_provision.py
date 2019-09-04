@@ -175,7 +175,6 @@ def config_default():
             "snat_operator": {
                 "name": "snat-operator",
                 "watch_namespace": "",
-                "snat_namespace": "default",
                 "globalinfo_name": "snatglobalinfo",
             },
         },
