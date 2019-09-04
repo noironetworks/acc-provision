@@ -179,8 +179,8 @@ data:
         "allocate-service-ips": false,
         "pod-ip-pool": [
             {
-                "end": "10.1.255.254",
-                "start": "10.1.0.2"
+                "end": "10.2.255.254",
+                "start": "10.2.0.2"
             }
         ],
         "pod-subnet-chunk-size": 24,
@@ -208,14 +208,14 @@ data:
         "aci-infra-vlan": 4093,
         "cni-netconfig": [
             {
-                "gateway": "10.1.0.1",
+                "gateway": "10.2.0.1",
                 "routes": [
                     {
                         "dst": "0.0.0.0/0",
-                        "gw": "10.1.0.1"
+                        "gw": "10.2.0.1"
                     }
                 ],
-                "subnet": "10.1.0.0/16"
+                "subnet": "10.2.0.0/16"
             }
         ],
         "default-endpoint-group": {
