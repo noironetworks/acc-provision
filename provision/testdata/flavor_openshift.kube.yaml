@@ -761,7 +761,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: ""
             - name: ACI_SNAT_NAMESPACE
-              value: "default"
+              value: "aci-containers-system"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "snatglobalinfo"
             - name: POD_NAME

@@ -41,7 +41,6 @@ kube_config:
   use_ds_rolling_update: true
   snat_operator: 
     name: test_snat-operator
-    snat_namespace: snat_namespace 
     globalinfo_name: test_snatglobalinfo
 
 registry:
