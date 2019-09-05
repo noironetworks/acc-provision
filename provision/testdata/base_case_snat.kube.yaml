@@ -698,7 +698,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: ""
             - name: ACI_SNAT_NAMESPACE
-              value: "snat_namespace"
+              value: "kube-system"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "test_snatglobalinfo"
             - name: POD_NAME
