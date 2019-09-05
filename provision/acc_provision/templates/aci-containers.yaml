@@ -885,7 +885,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
             - name: ACI_SNAT_NAMESPACE
-              value: "{{ config.kube_config.snat_operator.snat_namespace }}"
+              value: "{{ config.kube_config.system_namespace }}"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
             - name: POD_NAME
