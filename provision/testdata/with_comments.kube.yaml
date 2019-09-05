@@ -410,7 +410,6 @@ rules:
 - apiGroups:
   - "aci.snat"
   resources:
-  - snatallocations
   - snatlocalinfos
   - snatglobalinfos
   verbs:
