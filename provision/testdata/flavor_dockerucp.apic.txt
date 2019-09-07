@@ -270,13 +270,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
@@ -445,13 +438,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
@@ -492,13 +478,6 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "dns"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
                                             }
                                         }
                                     },
