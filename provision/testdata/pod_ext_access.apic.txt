@@ -270,13 +270,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
@@ -301,6 +294,13 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "kube-api"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all"
                                             }
                                         }
                                     }
@@ -452,13 +452,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
@@ -483,6 +476,13 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "kube-api"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all"
                                             }
                                         }
                                     }
@@ -510,13 +510,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
@@ -541,6 +534,13 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "kube-api"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all"
                                             }
                                         }
                                     }
