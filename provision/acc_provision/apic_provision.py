@@ -1580,28 +1580,6 @@ class ApicKubeConfig(object):
             collections.OrderedDict(
                 [
                     (
-                        "fvRsCons",
-                        collections.OrderedDict(
-                            [
-                                (
-                                    "attributes",
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "tnVzBrCPName",
-                                                "%s-l3out-allow-all" % system_id,
-                                            )
-                                        ]
-                                    ),
-                                )
-                            ]
-                        ),
-                    )
-                ]
-            ),
-            collections.OrderedDict(
-                [
-                    (
                         "fvRsProv",
                         collections.OrderedDict(
                             [
@@ -1662,6 +1640,28 @@ class ApicKubeConfig(object):
                                         "attributes",
                                         collections.OrderedDict(
                                             [("tnVzBrCPName", "kube-api")]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            )
+
+        if eade is True:
+            kube_default_children.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvRsCons",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [("tnVzBrCPName",
+                                              "%s-l3out-allow-all" % system_id)]
                                         ),
                                     )
                                 ]

@@ -340,13 +340,6 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
-                                            "attributes": {
-                                                "tnVzBrCPName": "kube-l3out-allow-all"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check"
