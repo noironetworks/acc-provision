@@ -1,3 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+  annotations:
+    openshift.io/node-selector: ''
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -739,7 +749,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: ""
             - name: ACI_SNAT_NAMESPACE
-              value: "kube-system"
+              value: "aci-containers-system"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "snatglobalinfo"
             - name: POD_NAME
