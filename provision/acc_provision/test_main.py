@@ -297,6 +297,27 @@ def test_list_flavors_msg():
             assert tmperr.read() == stderr.read()
 
 
+@in_testdir
+def test_overlapping_subnets():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "with_overlapping_subnets.inp.yaml",
+                None,
+                None
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("overlapping_subnets.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
