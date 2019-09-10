@@ -25,5 +25,6 @@ setup(
           'pyyaml',
           'jinja2',
           'pyopenssl',
+          'ipaddr',
     ],
 )

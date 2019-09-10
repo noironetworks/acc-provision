@@ -6,6 +6,7 @@ import argparse
 import base64
 import copy
 import functools
+import ipaddr
 import ipaddress
 import requests
 import json
@@ -21,6 +22,7 @@ import pkgutil
 import yaml
 from yaml import SafeLoader
 
+from itertools import combinations
 from OpenSSL import crypto
 from .apic_provision import Apic, ApicKubeConfig
 from jinja2 import Environment, PackageLoader
@@ -918,6 +920,24 @@ def get_versions(versions_url):
             info("Unable to load versions from path: " + versions_url)
 
 
+def check_overlapping_subnets(config):
+    """check if subnets are overlapping."""
+    subnet_info = {
+        "node_subnet": config["net_config"]["node_subnet"],
+        "pod_subnet": config["net_config"]["pod_subnet"],
+        "extern_dynamic": config["net_config"]["extern_dynamic"],
+        "extern_static": config["net_config"]["extern_static"],
+        "node_svc_subnet": config["net_config"]["node_svc_subnet"]
+    }
+
+    for sub1, sub2 in combinations(subnet_info.values(), r=2):
+        net1, net2 = ipaddr.IPNetwork(sub1), ipaddr.IPNetwork(sub2)
+        out = net1.overlaps(net2)
+        if out:
+            return False
+    return True
+
+
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
@@ -1020,6 +1040,11 @@ def provision(args, apic_file, no_random):
     # Validate config
     if not config_validate(flavor_opts, config):
         err("Please fix configuration and retry.")
+        return False
+
+    # Verify if overlapping subnet present in config input file
+    if not check_overlapping_subnets(config):
+        err("overlapping subnets found in configuration input file")
         return False
 
     # Adjust config based on convention/apic data
