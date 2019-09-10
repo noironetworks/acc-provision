@@ -178,6 +178,11 @@ def config_default():
                 "name": "snat-operator",
                 "watch_namespace": "",
                 "globalinfo_name": "snatglobalinfo",
+                "port_range": {
+                    "start": 5000,
+                    "end": 65000,
+                    "ports_per_node": 3000,
+                },
             },
         },
         "registry": {

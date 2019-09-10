@@ -287,6 +287,19 @@ data:
     }
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snat-operator-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+    "start": "5000"
+    "end": "65000"
+    "ports-per-node": "3000"
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: aci-user-cert
