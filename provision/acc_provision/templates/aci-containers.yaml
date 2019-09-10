@@ -282,6 +282,19 @@ data:
     }
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snat-operator-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+    "start": "{{config.kube_config.snat_operator.port_range.start}}"
+    "end": "{{config.kube_config.snat_operator.port_range.end}}"
+    "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: aci-user-cert
