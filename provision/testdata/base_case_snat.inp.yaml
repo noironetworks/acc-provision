@@ -42,6 +42,10 @@ kube_config:
   snat_operator: 
     name: test_snat-operator
     globalinfo_name: test_snatglobalinfo
+    port_range:
+      start: 6000
+      end: 62000
+      ports_per_node: 500
 
 registry:
   image_prefix: noiro
