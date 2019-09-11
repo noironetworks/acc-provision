@@ -13,6 +13,7 @@ Requires:	pyOpenSSL >= 0.13
 Requires:	PyYAML >= 3.10
 Requires:	python-requests >= 2.2
 Requires:	python-jinja2 >= 2.7
+Requires:       python-ipaddr
 
 %description
 Tools to provision and support ACI fabric DC workloads
