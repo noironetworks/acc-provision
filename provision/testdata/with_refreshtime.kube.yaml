@@ -169,6 +169,7 @@ data:
             "policy-space": "kube",
             "name": "kubernetes|kube-default"
         },
+        "max-nodes-svc-graph": 32,
         "namespace-default-endpoint-group": {
             "kube-system": {
                 "policy-space": "kube",
