@@ -184,6 +184,7 @@ def config_default():
                     "ports_per_node": 3000,
                 },
             },
+            "max_nodes_svc_graph": 32
         },
         "registry": {
             "image_prefix": "noiro",
@@ -459,6 +460,20 @@ def is_valid_refreshtime(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_max_nodes_svc_graph(xval):
+    if xval is None:
+        return True
+    xmin = 1
+    xmax = 64
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -490,6 +505,10 @@ def config_validate(flavor_opts, config):
                                   required),
         "aci_config/l3out/external-networks":
         (get(("aci_config", "l3out", "external_networks")), required),
+
+        # Kubernetes config
+        "kube_config/max_nodes_svc_graph": (get(("kube_config", "max_nodes_svc_graph")),
+                                            is_valid_max_nodes_svc_graph),
 
         # Network Config
         "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
