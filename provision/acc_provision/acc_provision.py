@@ -159,7 +159,7 @@ def config_default():
             "node_svc_subnet": None,
             "kubeapi_vlan": None,
             "service_vlan": None,
-            "service_monitor_interval": 0,
+            "service_monitor_interval": 5,
             "interface_mtu": None,
         },
         "kube_config": {

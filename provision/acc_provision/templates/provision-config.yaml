@@ -53,8 +53,9 @@ net_config:
   service_vlan: 4003            # The VLAN used by LoadBalancer services
   infra_vlan: 4093              # The VLAN used by ACI infra
   #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
+                                # default is 5, set to 0 to disable, max: 65535
 
-#
 # Configuration for container registry
 # Update if a custom container registry has been setup
 #
