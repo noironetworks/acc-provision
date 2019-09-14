@@ -687,6 +687,9 @@ spec:
               path: /status
               port: 8090
         - name: opflex-agent
+          env:
+            - name: REBOOT_WITH_OVS
+              value: "{{ config.kube_config.reboot_opflex_with_ovs }}"
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           securityContext:

@@ -174,6 +174,7 @@ def config_default():
             "kubectl": "kubectl",
             "system_namespace": "kube-system",
             "ovs_memory_limit": "10Gi",
+            "reboot_opflex_with_ovs": "true",
             "snat_operator": {
                 "name": "snat-operator",
                 "watch_namespace": "",
