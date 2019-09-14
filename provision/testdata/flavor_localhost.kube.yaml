@@ -582,6 +582,9 @@ spec:
               path: /status
               port: 8090
         - name: opflex-agent
+          env:
+            - name: REBOOT_WITH_OVS
+              value: "true"
           image: noirolabs/opflex:latest
           imagePullPolicy: Always
           securityContext:
