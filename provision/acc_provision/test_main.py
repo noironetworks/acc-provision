@@ -156,6 +156,15 @@ def test_with_apic_refreshtime():
 
 
 @in_testdir
+def test_with_pbr_tracking_non_snat():
+    run_provision(
+        "with_pbr_non_snat.inp.yaml",
+        "with_pbr_non_snat.kube.yaml",
+        "base_case.apic.txt",
+    )
+
+
+@in_testdir
 def test_pod_external_access():
     run_provision(
         "pod_ext_access.inp.yaml",
