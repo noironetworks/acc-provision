@@ -245,6 +245,7 @@ data:
   host-agent-config: |-
     {
         "log-level": {{config.logging.hostagent_log_level|json}},
+        "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
@@ -915,7 +916,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
             - name: ACI_SNAT_NAMESPACE
-              value: "aci-containers-system"
+              value: "{{ config.kube_config.snat_operator.snat_namespace }}"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
             - name: POD_NAME
