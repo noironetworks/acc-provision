@@ -66,5 +66,5 @@ registry:
   # image_pull_secret: secret_name      # (if needed)
 
 #kube_config:
-  # ovs_memory_limit: "20Gi"            # override if needed, default is "10Gi"
+  # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
