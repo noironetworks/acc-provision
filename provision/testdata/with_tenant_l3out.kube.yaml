@@ -158,6 +158,7 @@ data:
         "aci-service-phys-dom": "kube-pdom",
         "aci-service-encap": "vlan-4003",
         "aci-service-monitor-interval": 5,
+        "aci-pbr-tracking-non-snat": false,
         "aci-vrf-tenant": "kube",
         "aci-l3out": "l3out",
         "aci-ext-networks": [
