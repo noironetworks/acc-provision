@@ -55,6 +55,8 @@ net_config:
   #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
   #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
                                 # default is 5, set to 0 to disable, max: 65535
+  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
+                                # be effective with non-snat services
 
 # Configuration for container registry
 # Update if a custom container registry has been setup
