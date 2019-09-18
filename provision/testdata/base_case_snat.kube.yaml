@@ -208,6 +208,7 @@ data:
   host-agent-config: |-
     {
         "log-level": "info",
+        "aci-snat-namespace": "test_namespace",
         "aci-vmm-type": "Kubernetes",
         "aci-vmm-domain": "kube",
         "aci-vmm-controller": "kube",
@@ -726,7 +727,7 @@ spec:
             - name: WATCH_NAMESPACE
               value: ""
             - name: ACI_SNAT_NAMESPACE
-              value: "aci-containers-system"
+              value: "test_namespace"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "test_snatglobalinfo"
             - name: POD_NAME

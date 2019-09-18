@@ -185,6 +185,7 @@ def config_default():
                     "end": 65000,
                     "ports_per_node": 3000,
                 },
+                "snat_namespace": "aci-containers-system",
             },
             "max_nodes_svc_graph": 32
         },

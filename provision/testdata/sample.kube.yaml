@@ -208,6 +208,7 @@ data:
   host-agent-config: |-
     {
         "log-level": "info",
+        "aci-snat-namespace": "aci-containers-system",
         "aci-vmm-type": "Kubernetes",
         "aci-vmm-domain": "mykube",
         "aci-vmm-controller": "mykube",
