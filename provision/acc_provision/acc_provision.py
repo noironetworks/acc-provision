@@ -174,7 +174,7 @@ def config_default():
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "kube-system",
-            "ovs_memory_limit": "10Gi",
+            "ovs_memory_limit": "1Gi",
             "reboot_opflex_with_ovs": "true",
             "snat_operator": {
                 "name": "snat-operator",
