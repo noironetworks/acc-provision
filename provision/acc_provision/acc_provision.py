@@ -160,6 +160,7 @@ def config_default():
             "kubeapi_vlan": None,
             "service_vlan": None,
             "service_monitor_interval": 5,
+            "pbr_tracking_non_snat": False,
             "interface_mtu": None,
         },
         "kube_config": {
@@ -410,6 +411,12 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
+    if config["net_config"].get("pbr_tracking_non_snat"):
+        adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snant"]
+
+    if config["net_config"].get("service_monitor_interval"):
+        adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
+
     if config["net_config"].get("vip_subnet"):
         vip_subnet = cidr_split(config["net_config"]["vip_subnet"])
         adj_config["cf_config"]["app_vip_pool"] = [
@@ -437,6 +444,22 @@ def is_valid_mtu(xval):
 
     xmin = 1280   # for IPv6
     xmax = 8900   # leave 100 byte header for VxLAN
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
+def is_valid_ipsla_interval(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 1
+    xmax = 65535
     try:
         x = int(xval)
         if xmin <= x <= xmax:
@@ -528,6 +551,8 @@ def config_validate(flavor_opts, config):
                                        required),
         "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
                                      is_valid_mtu),
+        "net_config/service_monitor_interval": (get(("net_config", "service_monitor_interval")),
+                                                is_valid_ipsla_interval)
     }
 
     # Allow deletion of resources without isname check
