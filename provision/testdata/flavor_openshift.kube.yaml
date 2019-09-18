@@ -694,7 +694,7 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
-              memory: "10Gi"
+              memory: "1Gi"
           securityContext:
             privileged: true
             capabilities:
