@@ -201,7 +201,7 @@ data:
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         "apic-username": {{config.aci_config.sync_login.username|json}},
         {% if config.aci_config.apic_refreshtime %}
-        "apic-refreshtime": {{config.aci_config.apic_refreshtime|json}},
+        "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
         "apic-use-inst-tag": {{config.aci_config.use_inst_tag|json}},
