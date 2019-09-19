@@ -11,7 +11,7 @@ def kubectl(kind, name, namespace=None):
     cmd.extend([kind, name])
     if namespace:
         cmd.extend(['-n', namespace])
-    retstr = subprocess.check_output(cmd)
+    retstr = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     if retstr:
         ret = json.loads(retstr).get('data')
     return ret
@@ -46,16 +46,23 @@ def retrieve_certs(sysid, name, namespace=None):
 
 
 def main():
-    namespace = 'aci-containers-system'
+    namespace_os = 'aci-containers-system'
+    namespace_kube = 'kube-system'
     config_name = 'aci-containers-config'
     secret_name = 'aci-user-cert'
 
     try:
-        sysid = get_sysid(config_name, namespace)
+        sysid = get_sysid(config_name, namespace_os)
         if sysid:
-            retrieve_certs(sysid, secret_name, namespace)
-    except Exception as e:
-        print(e)
+            retrieve_certs(sysid, secret_name, namespace_os)
+    except Exception:
+        try:
+            sysid = get_sysid(config_name, namespace_kube)
+            if sysid:
+                retrieve_certs(sysid, secret_name, namespace_kube)
+        except Exception as e:
+            print(e)
+            print("Couldn't find the required secret files in either aci-containers-system or kube-system.")
 
 
 if __name__ == '__main__':
