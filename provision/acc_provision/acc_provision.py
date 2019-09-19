@@ -413,7 +413,7 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
     if config["net_config"].get("pbr_tracking_non_snat"):
-        adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snant"]
+        adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
 
     if config["net_config"].get("service_monitor_interval"):
         adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
