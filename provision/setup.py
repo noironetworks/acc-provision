@@ -18,6 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'acc-provision=acc_provision.acc_provision:main',
+            'acc-retrieve-cert=acc_provision.acc_retrieve_cert:main',
         ]
     },
     install_requires=[
