@@ -34,7 +34,7 @@ mkdir -p %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci
 cat > %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml <<-EOF
 name: "aci"
 shortDesc: "CLI plugin for acikubectl commands"
-command: "acikubectl" 
+command: "acikubectl"
 EOF
 chmod 0755 %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 
@@ -44,6 +44,7 @@ chmod 0755 %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 %{python2_sitelib}/acc_provision-%%{version}*.egg-info
 %{python2_sitelib}/gitversion
 %{_bindir}/acc-provision
+%{_bindir}/acc-retrieve-cert
 %{_bindir}/acikubectl
 /var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 
