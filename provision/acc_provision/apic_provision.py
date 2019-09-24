@@ -3,7 +3,7 @@ from __future__ import print_function, unicode_literals
 import collections
 import json
 import sys
-
+import re
 import requests
 import urllib3
 import ipaddress
@@ -219,35 +219,65 @@ class Apic(object):
         return ret
 
     def clean_tagged_resources(self, system_id, tenant):
-        tags = collections.OrderedDict([])
-        tags_path = "/api/node/mo/uni/tn-%s.json" % (tenant,)
-        tags_path += "?query-target=subtree&target-subtree-class=tagInst"
-        tags_list = self.get_path(tags_path, multi=True)
-        if tags_list is not None:
-            for tag_mo in tags_list:
-                tag_name = tag_mo["tagInst"]["attributes"]["name"]
-                if self.valid_tagged_resource(tag_name, system_id, tenant):
-                    tags[tag_name] = True
-                    dbg("Deleting tag: %s" % tag_name)
-                else:
-                    dbg("Ignoring tag: %s" % tag_name)
 
-        mos = collections.OrderedDict([])
-        for tag in tags.keys():
-            dbg("Objcts selected for tag: %s" % tag)
-            mo_path = "/api/tag/%s.json" % tag
-            mo_list = self.get_path(mo_path, multi=True)
-            for mo_dict in mo_list:
-                for mo_key in mo_dict.keys():
-                    mo = mo_dict[mo_key]
-                    mo_dn = mo["attributes"]["dn"]
-                    mos[mo_dn] = True
-                    dbg("    - %s" % mo_dn)
+        try:
+            mos = collections.OrderedDict([])
+            # collect tagged resources
+            tags = collections.OrderedDict([])
+            tags_path = "/api/node/mo/uni/tn-%s.json" % (tenant,)
+            tags_path += "?query-target=subtree&target-subtree-class=tagInst"
+            tags_list = self.get_path(tags_path, multi=True)
+            if tags_list is not None:
+                for tag_mo in tags_list:
+                    tag_name = tag_mo["tagInst"]["attributes"]["name"]
+                    if self.valid_tagged_resource(tag_name, system_id, tenant):
+                        tags[tag_name] = True
+                        dbg("Deleting tag: %s" % tag_name)
+                    else:
+                        dbg("Ignoring tag: %s" % tag_name)
 
-        for mo_dn in sorted(mos.keys(), reverse=True):
-            mo_path = "/api/node/mo/%s.json" % mo_dn
-            dbg("Deleting object: %s" % mo_dn)
-            self.delete(mo_path)
+            for tag in tags.keys():
+                dbg("Objcts selected for tag: %s" % tag)
+                mo_path = "/api/tag/%s.json" % tag
+                mo_list = self.get_path(mo_path, multi=True)
+                for mo_dict in mo_list:
+                    for mo_key in mo_dict.keys():
+                        mo = mo_dict[mo_key]
+                        mo_dn = mo["attributes"]["dn"]
+                        mos[mo_dn] = True
+                        dbg("    - %s" % mo_dn)
+
+            # collect resources with annotation
+            annot_path = "/api/node/mo/uni/tn-%s.json" % (tenant,)
+            annot_path += "?query-target=subtree&target-subtree-class=tagAnnotation"
+            annot_list = self.get_path(annot_path, multi=True)
+            if annot_list is not None:
+                for tag_mo in annot_list:
+                    tag_name = tag_mo["tagAnnotation"]["attributes"]["value"]
+                    if self.valid_tagged_resource(tag_name, system_id, tenant):
+                        dbg("Deleting tag: %s" % tag_name)
+                        parent_dn = tag_mo["tagAnnotation"]["attributes"]["dn"]
+                        reg = re.search('(.*)(/annotationKey.*)', parent_dn)
+                        dn_name = reg.group(1)
+                        dn_path = "/api/node/mo/" + dn_name + ".json"
+                        resp = self.get(dn_path)
+                        self.check_resp(resp)
+                        respj = json.loads(resp.text)
+                        ret = respj["imdata"][0]
+                        for obj, att in ret.items():
+                            if att["attributes"]["annotation"] == "orchestrator:aci-containers-controller":
+                                mos[dn_name] = True
+                            else:
+                                dbg("Ignoring tag: %s" % tag_name)
+
+            for mo_dn in sorted(mos.keys(), reverse=True):
+                mo_path = "/api/node/mo/%s.json" % mo_dn
+                dbg("Deleting object: %s" % mo_dn)
+                self.delete(mo_path)
+
+        except Exception as e:
+            self.errors += 1
+            err("Error in deleting tags: %s" % str(e))
 
 
 class ApicKubeConfig(object):
