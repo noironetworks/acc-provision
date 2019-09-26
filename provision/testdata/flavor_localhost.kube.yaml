@@ -778,7 +778,7 @@ spec:
             - name: kubeconfig
               mountPath: /kube
         - name: snat-operator
-          image: noirolabs/snat-operator:latest-test
+          image: noirolabs/snat-operator:4.2.1.1.r1
           imagePullPolicy: Always
           command:
           - snat-operator

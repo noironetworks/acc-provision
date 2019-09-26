@@ -550,7 +550,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: aci-containers-host
-          image: noiro/aci-containers-host:4.1.1.5.r19
+          image: noiro/aci-containers-host:4.2.1.1.r22
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -586,7 +586,7 @@ spec:
           env:
             - name: REBOOT_WITH_OVS
               value: "true"
-          image: noiro/opflex:4.1.1.5.r21
+          image: noiro/opflex:4.2.1.1.r23
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -605,7 +605,7 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: mcast-daemon
-          image: noiro/opflex:4.1.1.5.r21
+          image: noiro/opflex:4.2.1.1.r23
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: Always
@@ -680,7 +680,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: aci-containers-openvswitch
-          image: noiro/openvswitch:4.1.1.5.r16
+          image: noiro/openvswitch:4.2.1.1.r18
           imagePullPolicy: Always
           resources:
             limits:
@@ -760,7 +760,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: snat-operator
-          image: noiro/snat-operator:latest-test
+          image: noiro/snat-operator:4.2.1.1.r1
           imagePullPolicy: Always
           command:
           - snat-operator
@@ -778,7 +778,7 @@ spec:
             - name: OPERATOR_NAME
               value: "snat-operator"
         - name: aci-containers-controller
-          image: noiro/aci-containers-controller:4.1.1.5.r19
+          image: noiro/aci-containers-controller:4.2.1.1.r22
           imagePullPolicy: Always
           volumeMounts:
             - name: controller-config-volume

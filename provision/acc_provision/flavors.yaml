@@ -28,25 +28,25 @@ flavors:
   # Upstream Kubernetes
   kubernetes-1.15:
     desc: Kubernetes 1.15
-    default_version: 4.1
+    default_version: 4.2
     status: null
     hidden: false
     order: 5
   kubernetes-1.14:
     desc: Kubernetes 1.14
-    default_version: 4.1
+    default_version: 4.2
     status: null
     hidden: false
     order: 6
   kubernetes-1.13:
     desc: Kubernetes 1.13
-    default_version: 4.1
+    default_version: 4.2
     status: null
     hidden: true
     order: 7
   kubernetes-1.12:
     desc: Kubernetes 1.12
-    default_version: 4.1
+    default_version: 4.2
     status: null
     hidden: true
     order: 8
@@ -64,7 +64,7 @@ flavors:
     order: 10
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
-    default_version: 4.1
+    default_version: 4.2
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -103,7 +103,7 @@ flavors:
     order: 1
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
-    default_version: 4.1
+    default_version: 4.2
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -142,7 +142,7 @@ flavors:
     order: 2
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
-    default_version: 4.1
+    default_version: 4.2
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -182,7 +182,7 @@ flavors:
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
-    default_version: 4.1
+    default_version: 4.2
     status: null
     hidden: false
     config:
@@ -224,7 +224,7 @@ flavors:
     order: 11
   k8s-localhost:
     desc: Kubernetes localhost 
-    default_version: 4.1
+    default_version: 4.2
     config:
       kube_config:
         use_aci_anywhere_crd: True
