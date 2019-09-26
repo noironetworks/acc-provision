@@ -459,7 +459,7 @@ def is_valid_ipsla_interval(xval):
         # use default configured on this host
         return True
 
-    xmin = 1
+    xmin = 0
     xmax = 65535
     try:
         x = int(xval)
