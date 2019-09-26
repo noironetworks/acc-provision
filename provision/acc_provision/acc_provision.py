@@ -159,7 +159,7 @@ def config_default():
             "node_svc_subnet": None,
             "kubeapi_vlan": None,
             "service_vlan": None,
-            "service_monitor_interval": 5,
+            "service_monitor_interval": 0,
             "pbr_tracking_non_snat": False,
             "interface_mtu": None,
         },
@@ -459,7 +459,7 @@ def is_valid_ipsla_interval(xval):
         # use default configured on this host
         return True
 
-    xmin = 1
+    xmin = 0
     xmax = 65535
     try:
         x = int(xval)
