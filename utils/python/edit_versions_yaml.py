@@ -34,7 +34,7 @@ def main():
     parser = optparse.OptionParser()
     parser.add_option("--branch-id",
                       dest="release_branch",
-                      help="one of them : 1.9, 4.1")
+                      help="one of them : 1.9, 4.1, 4.2")
     parser.add_option("--acicontainers-tools",
                       dest="acicontainers_tools",
                       help="last successful build for AciContainers-tools job")
