@@ -17,6 +17,7 @@ except Exception:
 apic_debug = False
 apic_cookies = {}
 apic_default_timeout = (15, 90)
+aciContainersOwnerAnnotation = "orchestrator:aci-containers-controller"
 
 
 def err(msg):
@@ -342,6 +343,16 @@ class ApicKubeConfig(object):
         update(data, self.kube_cert())
         return data
 
+    def annotateApicObjects(self, data):
+        for key, value in data.items():
+            if "children" in value.keys():
+                children = value["children"]
+                for i in range(len(children)):
+                    self.annotateApicObjects(children[i])
+            break
+        if not (key == "fvTenant" and data[key]["attributes"]["name"] == "common"):
+            data[key]["attributes"]["annotation"] = aciContainersOwnerAnnotation
+
     def pdom_pool(self):
         pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
         service_vlan = self.config["net_config"]["service_vlan"]
@@ -427,6 +438,7 @@ class ApicKubeConfig(object):
                     ]
                 ),
             )
+        self.annotateApicObjects(data)
         return path, data
 
     def vdom_pool(self):
@@ -496,6 +508,7 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        self.annotateApicObjects(data)
         return path, data
 
     def mcast_pool(self):
@@ -552,6 +565,7 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        self.annotateApicObjects(data)
         return path, data
 
     def phys_dom(self):
@@ -607,6 +621,7 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        self.annotateApicObjects(data)
         return path, data
 
     def kube_dom(self):
@@ -730,6 +745,7 @@ class ApicKubeConfig(object):
                 ]
             )
             data["vmmDomP"]["children"].append(vlan_pool_data)
+        self.annotateApicObjects(data)
         return path, data
 
     def nested_dom(self):
@@ -914,6 +930,7 @@ class ApicKubeConfig(object):
                     ]
                 )
             )
+        self.annotateApicObjects(data)
         return path, data
 
     def associate_aep(self):
@@ -1161,12 +1178,14 @@ class ApicKubeConfig(object):
                 )
             )
             rsnvmm = base + "/rsdomP-[uni/vmmp-%s/dom-%s].json" % (nvmm_type, nvmm_name)
+            self.annotateApicObjects(data)
             return path, data, rsvmm, rsnvmm, rsphy
         else:
             rsfun = (
                 base + "/gen-default/rsfuncToEpg-"
                 "[uni/tn-%s/ap-kubernetes/epg-kube-nodes].json" % (tn_name)
             )
+            self.annotateApicObjects(data)
             return path, data, rsvmm, rsphy, rsfun
 
     def opflex_cert(self):
@@ -1197,6 +1216,7 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        self.annotateApicObjects(data)
         return path, data
 
     def l3out_tn(self):
@@ -1368,6 +1388,7 @@ class ApicKubeConfig(object):
 
         flt = "/api/mo/uni/tn-%s/flt-%s-allow-all-filter.json" % (vrf_tenant, system_id)
         brc = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+        self.annotateApicObjects(data)
         return path, data, flt, brc
 
     def l3out_contract(self, l3out_instp):
@@ -1401,6 +1422,7 @@ class ApicKubeConfig(object):
 
         rsprovc = (vrf_tenant, l3out, l3out_instp, l3out_rsprov_name)
         rsprov = "/api/mo/uni/tn-%s/out-%s/instP-%s/rsprov-%s.json" % rsprovc
+        self.annotateApicObjects(data)
         return path, data, rsprov
 
     def kube_user(self):
@@ -1481,6 +1503,7 @@ class ApicKubeConfig(object):
 
         if password is not None:
             data["aaaUser"]["attributes"]["pwd"] = password
+        self.annotateApicObjects(data)
         return path, data
 
     def kube_cert(self):
@@ -1541,6 +1564,8 @@ class ApicKubeConfig(object):
         )
         if cert is None:
             data = None
+        if data:
+            self.annotateApicObjects(data)
         return path, data
 
     def isV6(self):
@@ -3289,7 +3314,7 @@ class ApicKubeConfig(object):
                 openshift_flavor_specific_handling(data, items)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
-
+        self.annotateApicObjects(data)
         return path, data
 
     def epg(
