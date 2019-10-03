@@ -362,12 +362,12 @@ def run_provision(inpfile, expectedkube=None, expectedapic=None,
         args = get_args(config=inpfile, output=output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
         if expectedkube is not None:
-            if debug:
+            if args.debug:
                 shutil.copyfile(output.name, '/tmp/generated_kube.yaml')
             with open(expectedkube, "r") as expected:
                 assert output.read() == expected.read()
         if expectedapic is not None:
-            if debug:
+            if args.debug:
                 shutil.copyfile(apicfile.name, '/tmp/generated_apic.txt')
             with open(expectedapic, "r") as expected:
                 assert apicfile.read() == expected.read()
