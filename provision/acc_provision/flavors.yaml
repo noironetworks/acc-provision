@@ -1,4 +1,3 @@
-default_flavor: kubernetes-1.12
 
 # Known Flavor options:
 # - template_generator: Function that generates the output config
