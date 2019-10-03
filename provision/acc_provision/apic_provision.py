@@ -17,6 +17,7 @@ except Exception:
 apic_debug = False
 apic_cookies = {}
 apic_default_timeout = (15, 90)
+aciContainersOwnerAnnotation = "orchestrator:aci-containers-controller"
 
 
 def err(msg):
@@ -356,7 +357,19 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", pool_name), ("allocMode", "static")]
+                                    [
+                                        (
+                                            "name",
+                                            pool_name
+                                        ),
+                                        (   "allocMode",
+                                            "static"
+                                        ),
+                                        (
+                                            "annotation",
+                                            aciContainersOwnerAnnotation
+                                        ),
+                                    ]
                                 ),
                             ),
                             (
@@ -447,7 +460,20 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", vpool_name), ("allocMode", "dynamic")]
+                                    [
+                                        (
+                                            "name",
+                                            vpool_name
+                                        ),
+                                        (
+                                            "allocMode",
+                                            "dynamic"
+                                        ),
+                                        (
+                                            "annotation",
+                                            aciContainersOwnerAnnotation
+                                        ),
+                                    ]
                                 ),
                             ),
                             (
@@ -516,6 +542,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("name", mpool_name),
                                         ("dn", "uni/infra/maddrns-%s" % mpool_name),
+                                        ("annotation", aciContainersOwnerAnnotation),
                                     ]
                                 ),
                             ),
@@ -571,6 +598,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("dn", "uni/phys-%s" % phys_name),
                                         ("name", phys_name),
+                                        ("annotation", aciContainersOwnerAnnotation),
                                     ]
                                 ),
                             ),
@@ -644,6 +672,7 @@ class ApicKubeConfig(object):
                                         ("encapMode", encap_type),
                                         ("prefEncapMode", encap_type),
                                         ("mcastAddr", mcast_fabric),
+                                        ("annotation", aciContainersOwnerAnnotation),
                                     ]
                                 ),
                             ),
@@ -767,7 +796,8 @@ class ApicKubeConfig(object):
                                 "attributes",
                                 collections.OrderedDict(
                                     [("name", nvmm_portgroup),
-                                     ("promMode", promMode)]
+                                     ("promMode", promMode),
+                                     ("annotation", aciContainersOwnerAnnotation)]
                                 ),
                             ),
                             (
@@ -933,7 +963,7 @@ class ApicKubeConfig(object):
                         [
                             (
                                 "attributes",
-                                collections.OrderedDict([("name", aep_name)]),
+                                collections.OrderedDict([("name", aep_name), ("annotation", aciContainersOwnerAnnotation)]),
                             ),
                             (
                                 "children",
@@ -1189,6 +1219,7 @@ class ApicKubeConfig(object):
                                             yesno(client_cert),
                                         ),
                                         ("opflexpUseSsl", yesno(client_ssl)),
+                                        ("annotation", aciContainersOwnerAnnotation),
                                     ]
                                 ),
                             )
@@ -1216,6 +1247,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("name", "%s" % vrf_tenant),
                                         ("dn", "uni/tn-%s" % vrf_tenant),
+                                        ("annotation", aciContainersOwnerAnnotation),
                                     ]
                                 ),
                             ),
@@ -1390,6 +1422,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("matchT", "AtleastOne"),
                                         ("tnVzBrCPName", l3out_rsprov_name),
+                                        ("annotation", aciContainersOwnerAnnotation), 
                                     ]
                                 ),
                             )
@@ -1417,7 +1450,7 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", name), ("accountStatus", "active")]
+                                    [("name", name), ("accountStatus", "active"), ("annotation", aciContainersOwnerAnnotation)]
                                 ),
                             ),
                             (
@@ -1505,7 +1538,7 @@ class ApicKubeConfig(object):
                     "aaaUser",
                     collections.OrderedDict(
                         [
-                            ("attributes", collections.OrderedDict([("name", name)])),
+                            ("attributes", collections.OrderedDict([("name", name), ("annotation", aciContainersOwnerAnnotation)])),
                             (
                                 "children",
                                 [
@@ -1751,7 +1784,7 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name)]
+                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name), ("annotation", aciContainersOwnerAnnotation),]
                                 ),
                             ),
                             (
