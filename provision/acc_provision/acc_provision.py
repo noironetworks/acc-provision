@@ -65,7 +65,6 @@ with open(FLAVORS_PATH, 'r') as stream:
         doc = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
         print(exc)
-    DEFAULT_FLAVOR = doc['default_flavor']
     DEFAULT_FLAVOR_OPTIONS = doc['kubeFlavorOptions']
     CfFlavorOptions = doc['cfFlavorOptions']
     FLAVORS = doc['flavors']
@@ -1054,9 +1053,7 @@ def provision(args, apic_file, no_random):
 
     deep_merge(config, user_config)
 
-    flavor = DEFAULT_FLAVOR
-    if args.flavor:
-        flavor = args.flavor
+    flavor = args.flavor
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
@@ -1149,6 +1146,11 @@ def main(args=None, apic_file=None, no_random=False):
                     desc = desc + " [" + FLAVORS[flavor]["status"] + "]"
                 info(flavor + ":\t" + desc)
         return
+
+    if args.flavor is None:
+        err("Flavor not provided. Use -f to pass a flavor name, --list-flavors to see a list of supported flavors")
+        sys.exit(1)
+
     if args.flavor is not None and args.flavor not in FLAVORS:
         err("Invalid configuration flavor: " + args.flavor)
         sys.exit(1)
