@@ -340,7 +340,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": None,
+        "flavor": "kubernetes-1.15",
         "version_token": "dummy",
         "release": False,
         # infra_vlan is not part of command line input, but we do
