@@ -14,10 +14,10 @@ versions:
     openvswitch_version: 4.1.1.5.r16
     opflex_agent_version: 4.1.1.5.r21
   4.2:
-    aci_containers_controller_version: 4.2.1.1.r22
-    aci_containers_host_version: 4.2.1.1.r22
-    snat_operator_version: 4.2.1.1.r1
-    cnideploy_version: 4.2.1.1.r22
-    openvswitch_version: 4.2.1.1.r18
-    opflex_agent_version: 4.2.1.1.r23
+    aci_containers_controller_version: 4.2.2.1.r27
+    aci_containers_host_version: 4.2.2.1.r27
+    snat_operator_version: 4.2.2.1.r3
+    cnideploy_version: 4.2.2.1.r27
+    openvswitch_version: 4.2.2.1.r23
+    opflex_agent_version: 4.2.2.1.r28
 
