@@ -4,7 +4,6 @@ metadata:
   name: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
-    network-plugin: aci-containers
   annotations:
     openshift.io/node-selector: ''
 ---
