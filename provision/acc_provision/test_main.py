@@ -214,6 +214,16 @@ def test_flavor_localhost():
 
 
 @in_testdir
+def test_flavor_eks():
+    run_provision(
+        "flavor_eks.inp.yaml",
+        "flavor_eks.kube.yaml",
+        None,
+        overrides={"flavor": "eks"}
+    )
+
+
+@in_testdir
 def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
