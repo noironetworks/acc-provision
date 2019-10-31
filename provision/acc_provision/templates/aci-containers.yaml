@@ -17,7 +17,6 @@ metadata:
   name: aci-containers-system
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
-    network-plugin: aci-containers
   annotations:
     openshift.io/node-selector: ''
 ---
