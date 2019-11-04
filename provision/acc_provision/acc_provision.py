@@ -186,7 +186,9 @@ def config_default():
                 },
                 "snat_namespace": "aci-containers-system",
             },
-            "max_nodes_svc_graph": 32
+            "max_nodes_svc_graph": 32,
+            "ep_registry": None,
+            "opflex_mode": None
         },
         "registry": {
             "image_prefix": "noiro",
@@ -273,6 +275,8 @@ def config_adjust(args, config, prov_apic, no_random):
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
     system_namespace = config["kube_config"]["system_namespace"]
+    ep_registry = config["kube_config"]["ep_registry"]
+    opflex_mode = config["kube_config"]["opflex_mode"]
     tenant = system_id
     token = str(uuid.uuid4())
     if args.version_token:
@@ -304,6 +308,7 @@ def config_adjust(args, config, prov_apic, no_random):
         },
         "net_config": {
             "infra_vlan": infra_vlan,
+            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
         },
         "node_config": {
             "encap_type": encap_type,
@@ -360,6 +365,8 @@ def config_adjust(args, config, prov_apic, no_random):
             "node_service_gw_subnets": [
                 node_svc_subnet,
             ],
+            "ep_registry": ep_registry,
+            "opflex_mode": opflex_mode,
         },
         "cf_config": {
             "default_endpoint_group": {

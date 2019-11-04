@@ -61,6 +61,21 @@ spec:
   scope: Namespaced
   version: v1
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: gbpsstates.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: GBPSState
+    listKind: GBPSStateList
+    plural: gbpsstates
+  scope: Namespaced
+  version: v1
+  subresources:
+    status: {}
+---
 {% endif %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -243,6 +258,8 @@ data:
     }
   host-agent-config: |-
     {
+        "ep-registry": {{ config.kube_config.ep_registry|json }},
+        "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         "log-level": {{config.logging.hostagent_log_level|json}},
         "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
@@ -282,6 +299,13 @@ data:
           {% endif %}
         }
     }
+  {% if config.kube_config.run_gbp_container %}
+  gbp-server-config: |-
+   {
+        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
+   }
+   {% endif %}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -381,6 +405,13 @@ rules:
   - list
   - watch
   - get
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - gbpsstates
+  - gbpsstates/status
+  verbs:
+  - '*'
 {% endif %}
 - apiGroups:
   - "{{ config.kube_config.use_apps_apigroup }}"
@@ -668,6 +699,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            {% if config.kube_config.run_gbp_container %}
+            - name: TENANT
+              value: {{config.kube_config.default_endpoint_group.tenant|json}}
+            {% endif %}
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
@@ -691,6 +726,10 @@ spec:
           env:
             - name: REBOOT_WITH_OVS
               value: "{{ config.kube_config.reboot_opflex_with_ovs }}"
+            {% if config.kube_config.run_gbp_container %}
+            - name: SSL_MODE
+              value: disabled
+            {% endif %}
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           securityContext:
@@ -905,6 +944,11 @@ spec:
           volumeMounts:
             - name: kubeconfig
               mountPath: /kube
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+          env:
+            - name: GBP_SERVER_CONF
+              value: /usr/local/etc/aci-containers/gbp-server.conf
         {% endif %}
         - name: {{ config.kube_config.snat_operator.name }}
           image: {{ config.registry.image_prefix }}/snat-operator:{{ config.registry.snat_operator_version }}
@@ -951,3 +995,7 @@ spec:
             items:
               - key: controller-config
                 path: controller.conf
+              {% if config.kube_config.run_gbp_container %}
+              - key: gbp-server-config
+                path: gbp-server.conf
+              {% endif %}
