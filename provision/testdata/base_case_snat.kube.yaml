@@ -206,6 +206,8 @@ data:
     }
   host-agent-config: |-
     {
+        "ep-registry": null,
+        "opflex-mode": null,
         "log-level": "info",
         "aci-snat-namespace": "test_namespace",
         "aci-vmm-type": "Kubernetes",
