@@ -20,10 +20,10 @@ cfFlavorOptions: &anchor
     use_kubeapi_vlan: false
     tenant_generator: cloudfoundry_tn
     associate_aep_to_nested_inside_domain: true
-  version_fields: [] 
+  version_fields: []
   vip_pool_required: true
 
-flavors: 
+flavors:
   # Upstream Kubernetes
   kubernetes-1.15:
     desc: Kubernetes 1.15
@@ -185,6 +185,8 @@ flavors:
     status: null
     hidden: false
     config:
+      kube_config:
+        use_cnideploy_initcontainer: True
       aci_config:
   #https://docs.docker.com/ee/ucp/admin/install/system-requirements/
         items:
@@ -222,7 +224,7 @@ flavors:
     hidden: false
     order: 11
   k8s-localhost:
-    desc: Kubernetes localhost 
+    desc: Kubernetes localhost
     default_version: 4.2
     config:
       kube_config:
@@ -242,8 +244,8 @@ flavors:
     hidden: False
     order: 12
   eks:
-    desc:         Kubernetes EKS 
-    default_version: 4.2 
+    desc:         Kubernetes EKS
+    default_version: 4.2
     config:
       kube_config:
         use_aci_anywhere_crd: True
