@@ -639,6 +639,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         - name: aci-containers-openvswitch
           image: noiro/openvswitch:4.2.2.1.r23
