@@ -850,6 +850,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         - name: aci-containers-openvswitch
           image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
