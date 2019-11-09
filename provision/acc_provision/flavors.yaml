@@ -25,42 +25,48 @@ cfFlavorOptions: &anchor
 
 flavors:
   # Upstream Kubernetes
+  kubernetes-1.16:
+    desc: Kubernetes 1.16
+    default_version: 4.2 
+    status: null
+    hidden: false
+    order: 5
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 4.2
     status: null
     hidden: false
-    order: 5
+    order: 6
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 4.2
     status: null
     hidden: false
-    order: 6
+    order: 7
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 4.2
     status: null
     hidden: true
-    order: 7
+    order: 8
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 4.2
     status: null
     hidden: true
-    order: 8
+    order: 9
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 9
+    order: 10
   kubernetes-1.10:
     desc: Kubernetes 1.10
     default_version: 1.9
     status: null
     hidden: true
-    order: 10
+    order: 11
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 4.2
@@ -222,7 +228,7 @@ flavors:
     options: *anchor
     status: null
     hidden: false
-    order: 11
+    order: 12
   k8s-localhost:
     desc: Kubernetes localhost
     default_version: 4.2
@@ -242,7 +248,7 @@ flavors:
         use_kubeconfig_volume: True
     status: Experimental
     hidden: False
-    order: 12
+    order: 13
   eks:
     desc:         Kubernetes EKS
     default_version: 4.2
@@ -262,4 +268,4 @@ flavors:
         use_kubeconfig_volume: True
     status: Experimental
     hidden: False
-    order: 13
+    order: 14
