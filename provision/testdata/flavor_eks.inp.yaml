@@ -3,6 +3,7 @@
 #
 aci_config:
   system_id: kube                       # Every opflex cluster on the same fabric must have a distict ID
+  use_legacy_kube_naming_convention: True
   apic_hosts:                           # List of APIC hosts to connect to for APIC API access
     - 127.0.0.1
   vmm_domain:                           # Kubernetes VMM domain configuration

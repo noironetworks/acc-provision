@@ -4,6 +4,7 @@ metadata:
   name: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
   annotations:
     openshift.io/node-selector: ''
 ---
@@ -341,7 +342,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: aci-containers-config
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
@@ -373,10 +374,14 @@ data:
         "aci-vrf": "kube",
         "default-endpoint-group": {
             "policy-space": "kube",
-            "name": "kubernetes|kube-default"
+            "name": "aci-containers-kube|aci-containers-default"
         },
         "max-nodes-svc-graph": 32,
         "namespace-default-endpoint-group": {
+            "aci-containers-system": {
+                "policy-space": "kube",
+                "name": "aci-containers-kube|aci-containers-system"
+            },
             "istio-operator": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-istio"
@@ -387,35 +392,35 @@ data:
             },
             "kube-system": {
                 "policy-space": "kube",
-                "name": "kubernetes|kube-system"
+                "name": "aci-containers-kube|aci-containers-system"
             }        },
         "service-ip-pool": [
             {
-                "end": "1:3:1:1::ffff:fffe",
-                "start": "1:3:1:1::2"
+                "end": "10.3.0.254",
+                "start": "10.3.0.2"
             }
         ],
         "static-service-ip-pool": [
             {
-                "end": "1:4:1:1::ffff:fffe",
-                "start": "1:4:1:1::2"
+                "end": "10.4.0.254",
+                "start": "10.4.0.2"
             }
         ],
         "pod-ip-pool": [
             {
-                "end": "1:2:1:1:ffff:ffff:ffff:fffe",
-                "start": "1:2:1:1::2"
+                "end": "10.2.255.254",
+                "start": "10.2.0.2"
             }
         ],
         "pod-subnet-chunk-size": 32,
         "node-service-ip-pool": [
             {
-                "end": "1:5:1:1::ffff:fffe",
-                "start": "1:5:1:1::2"
+                "end": "10.5.0.254",
+                "start": "10.5.0.2"
             }
         ],
         "node-service-subnets": [
-            "1:5:1:1::1/96"
+            "10.5.0.1/24"
         ]
     }
   host-agent-config: |-
@@ -435,21 +440,25 @@ data:
         "aci-infra-vlan": 4093,
         "cni-netconfig": [
             {
-                "gateway": "1:2:1:1::1",
+                "gateway": "10.2.0.1",
                 "routes": [
                     {
-                        "dst": "::/0",
-                        "gw": "1:2:1:1::1"
+                        "dst": "0.0.0.0/0",
+                        "gw": "10.2.0.1"
                     }
                 ],
-                "subnet": "1:2:1:1::/64"
+                "subnet": "10.2.0.0/16"
             }
         ],
         "default-endpoint-group": {
             "policy-space": "kube",
-            "name": "kubernetes|kube-default"
+            "name": "aci-containers-kube|aci-containers-default"
         },
         "namespace-default-endpoint-group": {
+            "aci-containers-system": {
+                "policy-space": "kube",
+                "name": "aci-containers-kube|aci-containers-system"
+            },
             "istio-operator": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-istio"
@@ -460,7 +469,7 @@ data:
             },
             "kube-system": {
                 "policy-space": "kube",
-                "name": "kubernetes|kube-system"
+                "name": "aci-containers-kube|aci-containers-system"
             }        }
     }
   opflex-agent-config: |-
@@ -489,7 +498,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: aci-user-cert
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
 data:
@@ -500,7 +509,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: aci-containers-controller
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
 ---
@@ -508,7 +517,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: aci-containers-host-agent
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
 ---
@@ -684,7 +693,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
-  namespace: kube-system
+  namespace: aci-containers-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -699,13 +708,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
-  namespace: kube-system
+  namespace: aci-containers-system
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: aci-containers-host
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
@@ -750,7 +759,7 @@ spec:
             - name: TENANT
               value: "kube"
             - name: NODE_EPG
-              value: "kubernetes|kube-nodes"
+              value: "aci-containers-kube|aci-containers-nodes"
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
@@ -837,7 +846,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: aci-containers-openvswitch
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
@@ -915,7 +924,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aci-containers-controller
-  namespace: kube-system
+  namespace: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
@@ -931,7 +940,7 @@ spec:
   template:
     metadata:
       name: aci-containers-controller
-      namespace: kube-system
+      namespace: aci-containers-system
       labels:
         name: aci-containers-controller
         network-plugin: aci-containers

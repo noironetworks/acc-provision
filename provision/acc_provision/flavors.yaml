@@ -95,8 +95,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            consumed: ["kube-system"]
-            provided: ["kube-nodes"]
+            consumed: ["system"]
+            provided: ["nodes"]
           - name: openshift-monitoring
             range:
               -
@@ -106,8 +106,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            provided: ["kube-system","kube-default","kube-nodes"]
-            consumed: ["kube-system","kube-default"]
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -135,8 +135,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            consumed: ["kube-system"]
-            provided: ["kube-nodes"]
+            consumed: ["system"]
+            provided: ["nodes"]
           - name: openshift-monitoring
             range:
               -
@@ -146,8 +146,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            provided: ["kube-system","kube-default","kube-nodes"]
-            consumed: ["kube-system","kube-default"]
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
         vmm_domain:
           type: OpenShift
     status: null
@@ -175,8 +175,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            consumed: ["kube-system"]
-            provided: ["kube-nodes"]
+            consumed: ["system"]
+            provided: ["nodes"]
           - name: openshift-monitoring
             range:
               -
@@ -186,8 +186,8 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-            provided: ["kube-system","kube-default","kube-nodes"]
-            consumed: ["kube-system","kube-default"]
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
         vmm_domain:
           type: OpenShift
     status: null
