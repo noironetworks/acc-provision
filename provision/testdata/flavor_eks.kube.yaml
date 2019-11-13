@@ -587,6 +587,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         - name: aci-containers-host
           image: noirolabs/aci-containers-host:latest
@@ -812,6 +813,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         - name: aci-gbpserver
           image: noirolabs/gbpserver:latest
