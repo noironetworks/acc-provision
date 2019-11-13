@@ -682,6 +682,7 @@ spec:
             - name: cni-bin
               mountPath: /mnt/cni-bin
       {% endif %}
+      priorityClassName: system-node-critical
       containers:
         - name: aci-containers-host
           image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
@@ -937,6 +938,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         {% if config.kube_config.run_gbp_container %}
         - name: aci-gbpserver

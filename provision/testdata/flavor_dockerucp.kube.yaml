@@ -524,6 +524,7 @@ spec:
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
+      priorityClassName: system-node-critical
       containers:
         - name: aci-containers-host
           image: noiro/aci-containers-host:4.2.2.1.r27
@@ -730,6 +731,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
+      priorityClassName: system-node-critical
       containers:
         - name: snat-operator
           image: noiro/snat-operator:4.2.2.1.r3
