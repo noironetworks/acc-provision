@@ -551,7 +551,7 @@ spec:
           effect: NoSchedule
       initContainers:
         - name: cnideploy
-          image: noiro/cnideploy:4.2.2.1.r27
+          image: noiro/cnideploy:4.2.2.2.r32
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -564,7 +564,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: aci-containers-host
-          image: noiro/aci-containers-host:4.2.2.1.r27
+          image: noiro/aci-containers-host:4.2.2.2.r32
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -600,7 +600,7 @@ spec:
           env:
             - name: REBOOT_WITH_OVS
               value: "true"
-          image: noiro/opflex:4.2.2.1.r28
+          image: noiro/opflex:4.2.2.2.r32
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -619,7 +619,7 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: mcast-daemon
-          image: noiro/opflex:4.2.2.1.r28
+          image: noiro/opflex:4.2.2.2.r32
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: Always
@@ -695,7 +695,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: aci-containers-openvswitch
-          image: noiro/openvswitch:4.2.2.1.r23
+          image: noiro/openvswitch:4.2.2.2.r26
           imagePullPolicy: Always
           resources:
             limits:
@@ -776,7 +776,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: snat-operator
-          image: noiro/snat-operator:4.2.2.1.r3
+          image: noiro/snat-operator:4.2.2.2.r4
           imagePullPolicy: Always
           command:
           - snat-operator
@@ -794,7 +794,7 @@ spec:
             - name: OPERATOR_NAME
               value: "snat-operator"
         - name: aci-containers-controller
-          image: noiro/aci-containers-controller:4.2.2.1.r27
+          image: noiro/aci-containers-controller:4.2.2.2.r32
           imagePullPolicy: Always
           volumeMounts:
             - name: controller-config-volume
