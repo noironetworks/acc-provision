@@ -828,7 +828,7 @@ spec:
             - name: GBP_SERVER_CONF
               value: /usr/local/etc/aci-containers/gbp-server.conf
         - name: snat-operator
-          image: noirolabs/snat-operator:4.2.2.1.r3
+          image: noirolabs/snat-operator:4.2.2.2.r4
           imagePullPolicy: Always
           command:
           - snat-operator
