@@ -61,12 +61,18 @@ flavors:
     status: null
     hidden: true
     order: 10
+    config:
+      kube_config:
+        no_priority_class: True
   kubernetes-1.10:
     desc: Kubernetes 1.10
     default_version: 1.9
     status: null
     hidden: true
     order: 11
+    config:
+      kube_config:
+        no_priority_class: True
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 4.2
@@ -79,6 +85,7 @@ flavors:
         allow_kube_api_default_epg: True
         kubectl: oc
         system_namespace: aci-containers-system
+        no_priority_class: True
       aci_config:
         items:
           - name: openshift-svc-catalog
@@ -118,6 +125,7 @@ flavors:
         allow_kube_api_default_epg: True
         kubectl: oc
         system_namespace: aci-containers-system
+        no_priority_class: True
       aci_config:
         items:
           - name: openshift-svc-catalog
@@ -157,6 +165,7 @@ flavors:
         allow_kube_api_default_epg: True
         kubectl: oc
         system_namespace: aci-containers-system
+        no_priority_class: True
       aci_config:
         items:
           - name: openshift-svc-catalog
@@ -192,6 +201,7 @@ flavors:
     hidden: false
     config:
       kube_config:
+        no_priority_class: True
         use_cnideploy_initcontainer: True
       aci_config:
   #https://docs.docker.com/ee/ucp/admin/install/system-requirements/
