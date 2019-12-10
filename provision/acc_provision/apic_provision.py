@@ -8,6 +8,18 @@ import requests
 import urllib3
 import ipaddress
 
+debug_http = False
+if debug_http:
+    import logging
+    import http.client as http_client
+    http_client.HTTPConnection.debuglevel = 1
+    # You must initialize logging, otherwise you'll not see debug output.
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 try:
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -83,14 +95,16 @@ class Apic(object):
             return "https://%s%s" % (self.addr, path)
         return "http://%s%s" % (self.addr, path)
 
-    def get(self, path, data=None):
-        args = dict(data=data, cookies=self.cookies, verify=self.verify)
+    def get(self, path, data=None, params=None):
+        args = dict(data=data, cookies=self.cookies, verify=self.verify, params=params)
         args.update(timeout=self.timeout)
+        print("getting path: {} {}".format(path, json.dumps(args)))
         return requests.get(self.url(path), **args)
 
     def post(self, path, data):
-        args = dict(data=data, cookies=self.cookies, verify=self.verify)
+        args = dict(json=data, cookies=self.cookies, verify=self.verify)
         args.update(timeout=self.timeout)
+        print("posting {}".format(json.dumps(args)))
         return requests.post(self.url(path), **args)
 
     def delete(self, path, data=None):
@@ -107,8 +121,12 @@ class Apic(object):
         req = requests.post(self.url(path), data=data, verify=False)
         if req.status_code == 200:
             resp = json.loads(req.text)
+            print("Login resp: {}".format(req.text))
             token = resp["imdata"][0]["aaaLogin"]["attributes"]["token"]
             self.cookies = collections.OrderedDict([("APIC-Cookie", token)])
+        else:
+            print("Login failed - {}".format(req.text))
+            print("Addr: {} u: {} p: {}".format(self.addr, self.username, self.password))
         return req
 
     def check_resp(self, resp):
@@ -746,6 +764,482 @@ class ApicKubeConfig(object):
             )
             data["vmmDomP"]["children"].append(vlan_pool_data)
         self.annotateApicObjects(data)
+        return path, data
+
+    def capic_kube_dom(self):
+        vmm_type = "Kubernetes"
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        kube_controller = self.config["kube_config"]["controller"]
+
+        mode = "k8s"
+        scope = "kubernetes"
+
+        path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmDomP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                        ("mode", mode),
+                                        ("enfPref", "sw"),
+                                        ("prefEncapMode", "vxlan"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vmmCtrlrP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("name", vmm_name),
+                                                                    ("mode", mode),
+                                                                    ("scope", scope),
+                                                                    ("rootContName", vmm_name),
+                                                                    (
+                                                                        "hostOrIp",
+                                                                        kube_controller,
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def capic_overlay_epg(self, name):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vrfName = "{}-vrf".format(tn_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "cloudEPg",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        rsToCtx = collections.OrderedDict(
+            [
+                (
+                    "cloudRsCloudEPgCtx",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tnFvCtxName", vrfName),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        data["cloudEPg"]["children"].append(rsToCtx)
+        return data
+
+    def capic_cloudApp(self):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        path = "/api/mo/uni/tn-%s/cloudapp-%s.json" % (tn_name, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "cloudApp",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        epg_d = self.capic_overlay_epg("kube-default")
+        data["cloudApp"]["children"].append(epg_d)
+        epg_s = self.capic_overlay_epg("kube-system")
+        data["cloudApp"]["children"].append(epg_s)
+        epg_n = self.capic_overlay_epg("kube-nodes")
+        data["cloudApp"]["children"].append(epg_n)
+        return path, data
+
+    def capic_overlay(self):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        region = self.config["aci_config"]["vrf"]["region"]
+        vrfName = "{}-vrf".format(tn_name)
+        path = "/api/mo/uni/tn-%s/ctxprofile-%s.json" % (tn_name, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "cloudCtxProfile",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                        ("type", "container-overlay"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        rsToCtx = collections.OrderedDict(
+            [
+                (
+                    "cloudRsToCtx",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tnFvCtxName", vrfName),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        regionDn = "uni/clouddomp/provp-aws/region-{}".format(region)
+        rsToRegion = collections.OrderedDict(
+            [
+                (
+                    "cloudRsCtxProfileToRegion",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tDn", regionDn),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        child_list = [rsToRegion, rsToCtx, self.cloudCidr(pod_subnet)]
+
+        for child in child_list:
+            data["cloudCtxProfile"]["children"].append(child)
+
+        return path, data
+
+    def cloudCidr(self, cidr):
+        cidrMo = collections.OrderedDict(
+            [
+                (
+                    "cloudCidr",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("addr", cidr),
+                                        ("primary", "yes"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(cidr))
+        return cidrMo
+
+    def cloudSubnet(self, cidr):
+        region = self.config["aci_config"]["vrf"]["region"]
+        zone = region + "a"  # FIXME
+        subnetMo = collections.OrderedDict(
+            [
+                (
+                    "cloudSubnet",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("ip", cidr),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        subnetMo["cloudSubnet"]["children"].append(self.zoneAttach(region, zone))
+        return subnetMo
+
+    def zoneAttach(self, region, zone):
+        tDn = "uni/clouddomp/provp-aws/region-{}/zone-{}".format(region, zone)
+        zaMo = collections.OrderedDict(
+            [
+                (
+                    "cloudRsZoneAttach",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tDn", tDn),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        return zaMo
+
+    def capic_overlay_dn_query(self):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        ctxProfDN = "uni/tn-%s/ctxprofile-%s" % (tn_name, vmm_name)
+        filter = "eq(hcloudCtx.delegateDn, \"{}\")".format(ctxProfDN)
+        query = '/api/node/class/hcloudCtx.json?query-target=self&query-target-filter={}'.format(filter)
+        return query
+
+    def capic_subnet_dn_query(self):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        ctxProfDN = "uni/tn-%s/ctxprofile-%s" % (tn_name, vmm_name)
+        subnetDN = "{}/cidr-[{}]/subnet-[{}]".format(ctxProfDN, pod_subnet, pod_subnet)
+        filter = "eq(hcloudSubnet.delegateDn, \"{}\")".format(subnetDN)
+        query = '/api/node/class/hcloudSubnet.json?query-target=self&query-target-filter={}'.format(filter)
+        return query
+
+    def capic_cluster_info(self, overlay_dn):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_type = "Kubernetes"
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+
+        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont.json" % (vmm_type, vmm_name, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmInjectedClusterInfo",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                        ("overlayDn", overlay_dn),
+                                        ("accountName", tn_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return path, data
+
+    def capic_vmm_host(self, hostname, ip, id):
+        vmm_type = "Kubernetes"
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+
+        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont.json" % (vmm_type, vmm_name, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmInjectedHost",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "{}.{}".format(vmm_name, hostname)),
+                                        ("id", id),
+                                        ("mgmtIp", ip),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return path, data
+
+    def hostGen(self):
+        return self.capic_vmm_host("node1", "192.168.101.12", "9876543210")
+
+    def capic_kafka_topic(self):
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        path = "/api/node/mo/uni/userext/kafkaext/kafkatopic-%s.json" % (vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "aaaKafkaTopic",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "{}".format(vmm_name)),
+                                        ("partition", "1"),
+                                        ("replica", "3"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return path, data
+
+    def capic_kafka_acl(self, cn):
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        path = "/api/node/mo/uni/userext/kafkaext/kafkaacl-%s.%s.json" % (vmm_name, cn)
+        data = collections.OrderedDict(
+            [
+                (
+                    "aaaKafkaAcl",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "{}.{}".format(vmm_name, cn)),
+                                        ("certdn", cn),
+                                        ("topic", vmm_name),
+                                        ("opr", "0"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
         return path, data
 
     def nested_dom(self):

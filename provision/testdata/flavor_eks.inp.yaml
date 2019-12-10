@@ -14,6 +14,7 @@ aci_config:
   vrf:                                  # VRF used to create all subnets used by this Kubernetes cluster
     name: defaultVrf          # This should exist, the provisioning tool does not create it
     tenant: kube        # This can be tenant for this cluster (system-id) or common
+    region: us-east-2   # REQUIRED -- your aws region
   l3out:                                # L3out to use for this kubernetes cluster (in the VRF above)
     name: l3out-v1              # This is used to provision external service IPs/LB
     external_networks: 

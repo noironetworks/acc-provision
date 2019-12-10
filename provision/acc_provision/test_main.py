@@ -217,7 +217,7 @@ def test_flavor_localhost():
 def test_flavor_eks():
     run_provision(
         "flavor_eks.inp.yaml",
-        "flavor_eks.kube.yaml",
+        None,
         None,
         overrides={"flavor": "eks"}
     )
