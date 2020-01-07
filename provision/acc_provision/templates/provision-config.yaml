@@ -69,3 +69,6 @@ registry:
 #kube_config:
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
+
+#istio_config:
+  # install_profile: "default"   # override if needed, default is "demo"

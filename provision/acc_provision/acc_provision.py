@@ -190,6 +190,9 @@ def config_default():
             "ep_registry": None,
             "opflex_mode": None
         },
+        "istio_config": {
+            "install_profile": "demo"
+        },
         "registry": {
             "image_prefix": "noiro",
         },
@@ -277,6 +280,7 @@ def config_adjust(args, config, prov_apic, no_random):
     system_namespace = config["kube_config"]["system_namespace"]
     ep_registry = config["kube_config"]["ep_registry"]
     opflex_mode = config["kube_config"]["opflex_mode"]
+    istio_profile = config["istio_config"]["install_profile"]
     tenant = system_id
     token = str(uuid.uuid4())
     if args.version_token:
@@ -312,6 +316,9 @@ def config_adjust(args, config, prov_apic, no_random):
         },
         "node_config": {
             "encap_type": encap_type,
+        },
+        "istio_config": {
+            "install_profile": istio_profile,
         },
         "kube_config": {
             "default_endpoint_group": {
@@ -418,6 +425,9 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
+    if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
+        adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]
+
     if config["net_config"].get("pbr_tracking_non_snat"):
         adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
 
@@ -505,6 +515,19 @@ def is_valid_max_nodes_svc_graph(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_istio_install_profile(xval):
+    if xval is None:
+        # Not a required field - default will be set to demo
+        return True
+    validProfiles = ['demo', 'default', 'minimal', 'sds', 'remote']
+    try:
+        if xval in validProfiles:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be one of the profile in this List: ", validProfiles))
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -540,6 +563,10 @@ def config_validate(flavor_opts, config):
         # Kubernetes config
         "kube_config/max_nodes_svc_graph": (get(("kube_config", "max_nodes_svc_graph")),
                                             is_valid_max_nodes_svc_graph),
+
+        # Istio config
+        "istio_config/install_profile": (get(("istio_config", "install_profile")),
+                                         is_valid_istio_install_profile),
 
         # Network Config
         "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
