@@ -191,7 +191,9 @@ def config_default():
             "opflex_mode": None
         },
         "istio_config": {
-            "install_profile": "demo"
+            "install_profile": "demo",
+            "istio_ns": "istio-system",
+            "istio_operator_ns": "istio-operator"
         },
         "registry": {
             "image_prefix": "noiro",
@@ -281,6 +283,8 @@ def config_adjust(args, config, prov_apic, no_random):
     ep_registry = config["kube_config"]["ep_registry"]
     opflex_mode = config["kube_config"]["opflex_mode"]
     istio_profile = config["istio_config"]["install_profile"]
+    istio_namespace = config["istio_config"]["istio_ns"]
+    istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     tenant = system_id
     token = str(uuid.uuid4())
     if args.version_token:
@@ -331,6 +335,16 @@ def config_adjust(args, config, prov_apic, no_random):
                     "tenant": tenant,
                     "app_profile": "kubernetes",
                     "group": "kube-system",
+                },
+                istio_namespace: {
+                    "tenant": tenant,
+                    "app_profile": "kubernetes",
+                    "group": "kube-istio",
+                },
+                istio_operator_ns: {
+                    "tenant": tenant,
+                    "app_profile": "kubernetes",
+                    "group": "kube-istio",
                 },
             },
             "pod_ip_pool": [

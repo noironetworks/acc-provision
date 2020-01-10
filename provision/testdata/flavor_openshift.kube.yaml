@@ -424,7 +424,15 @@ data:
             "aci-containers-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
-            }
+            },
+            "istio-operator": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "istio-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
         },
         "service-ip-pool": [
             {
@@ -491,7 +499,15 @@ data:
             "aci-containers-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
-            }
+            },
+            "istio-operator": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "istio-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
         }
     }
   opflex-agent-config: |-
