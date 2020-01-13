@@ -593,7 +593,7 @@ None
                                         }
                                     },
                                     {
-                                        "fvRsCons": {
+                                        "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"

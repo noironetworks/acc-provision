@@ -2323,7 +2323,7 @@ class ApicKubeConfig(object):
                                                                                             collections.OrderedDict(
                                                                                                 [
                                                                                                     (
-                                                                                                        "fvRsCons",
+                                                                                                        "fvRsProv",
                                                                                                         collections.OrderedDict(
                                                                                                             [
                                                                                                                 (
