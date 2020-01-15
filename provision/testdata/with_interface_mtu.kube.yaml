@@ -431,8 +431,7 @@ data:
             "kube-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
-            },
-        },
+            }        },
         "service-ip-pool": [
             {
                 "end": "10.3.0.254",
@@ -506,8 +505,7 @@ data:
             "kube-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
-            },
-        }
+            }        }
     }
   opflex-agent-config: |-
     {

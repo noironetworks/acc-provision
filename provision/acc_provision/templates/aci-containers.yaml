@@ -493,8 +493,8 @@ data:
             "{{ns}}": {
                 "policy-space": {{val['tenant']|json}},
                 "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
-            },
-            {% endfor %}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
         },
         "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }},
         "static-service-ip-pool": {{ config.kube_config.static_service_ip_pool|json|indent(width=8) }},
@@ -534,8 +534,8 @@ data:
             "{{ns}}": {
                 "policy-space": {{val['tenant']|json}},
                 "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
-            },
-            {% endfor %}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
         }
     }
   opflex-agent-config: |-
