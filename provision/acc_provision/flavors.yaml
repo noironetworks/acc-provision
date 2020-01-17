@@ -262,6 +262,7 @@ flavors:
   eks:
     desc:         Kubernetes EKS
     default_version: 4.2
+    overlay: True
     config:
       kube_config:
         use_aci_anywhere_crd: True
@@ -274,6 +275,7 @@ flavors:
         no_hostagent_deployment_clusterrole: True
         run_opflex_server_container: True
         run_gbp_container: True
+        exclude_snat_container: True
         use_opflex_server_volume: True
         use_kubeconfig_volume: True
     status: Experimental

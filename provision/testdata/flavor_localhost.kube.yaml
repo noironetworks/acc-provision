@@ -661,7 +661,6 @@ rules:
   resources:
   - epgs
   - contracts
-  - podifs
   verbs:
   - list
   - watch
@@ -669,6 +668,7 @@ rules:
 - apiGroups:
   - "aci.aw"
   resources:
+  - podifs
   - gbpsstates
   - gbpsstates/status
   verbs:
@@ -912,7 +912,7 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: opflex-server
-          image: noirolabs/opflexserver:latest
+          image: noirolabs/opflex-server:latest
           imagePullPolicy: Always
           securityContext:
             capabilities:
@@ -1081,11 +1081,9 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: aci-gbpserver
-          image: noirolabs/gbpserver:latest
+          image: noirolabs/gbp-server:latest
           imagePullPolicy: Always
           volumeMounts:
-            - name: kubeconfig
-              mountPath: /kube
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
           env:
@@ -1122,9 +1120,6 @@ spec:
               path: /status
               port: 8091
       volumes:
-        - name: kubeconfig
-          hostPath:
-            path: /kubeconfig
         - name: aci-user-cert-volume
           secret:
             secretName: aci-user-cert

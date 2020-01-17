@@ -24,9 +24,15 @@ from yaml import SafeLoader
 
 from itertools import combinations
 from OpenSSL import crypto
-from .apic_provision import Apic, ApicKubeConfig
 from jinja2 import Environment, PackageLoader
 from os.path import exists
+import tempfile
+if __package__ is None or __package__ == '':
+    import kafka_cert
+    from apic_provision import Apic, ApicKubeConfig
+else:
+    from . import kafka_cert
+    from .apic_provision import Apic, ApicKubeConfig
 
 
 # This black magic forces pyyaml to load YAML strings as unicode rather
@@ -103,6 +109,12 @@ def yaml_list_dict(l):
             out += "%s%s: %s\n" % (prefix, k, d[k])
             prefix = "    "
     return out
+
+
+class SafeDict(dict):
+    'Provide a default value for missing keys'
+    def __missing__(self, key):
+        return None
 
 
 def list_unicode_strings(l):
@@ -312,6 +324,12 @@ def config_adjust(args, config, prov_apic, no_random):
                 "password": generate_password(no_random),
                 "certfile": "user-%s.crt" % system_id,
                 "keyfile": "user-%s.key" % system_id,
+            },
+            "kafka": {
+            },
+            "subnet_dn": {
+            },
+            "vrf_dn": {
             },
         },
         "net_config": {
@@ -542,6 +560,15 @@ def is_valid_istio_install_profile(xval):
     raise(Exception("Must be one of the profile in this List: ", validProfiles))
 
 
+def isOverlay(flavor):
+    flav = SafeDict(FLAVORS[flavor])
+    ovl = flav["overlay"]
+    if ovl is True:
+        return True
+
+    return False
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -565,52 +592,63 @@ def config_validate(flavor_opts, config):
         "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                         is_valid_refreshtime),
         "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
-        "aci_config/aep": (get(("aci_config", "aep")), required),
         "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
         "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
                                   required),
-        "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
-                                  required),
-        "aci_config/l3out/external-networks":
-        (get(("aci_config", "l3out", "external_networks")), required),
-
-        # Kubernetes config
-        "kube_config/max_nodes_svc_graph": (get(("kube_config", "max_nodes_svc_graph")),
-                                            is_valid_max_nodes_svc_graph),
 
         # Istio config
         "istio_config/install_profile": (get(("istio_config", "install_profile")),
                                          is_valid_istio_install_profile),
 
         # Network Config
-        "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
-                                  required),
-        "net_config/service_vlan": (get(("net_config", "service_vlan")),
-                                    required),
-        "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                   required),
         "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                   required),
-        "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
-                                      required),
-        "net_config/extern_static": (get(("net_config", "extern_static")),
-                                     required),
-        "net_config/node_svc_subnet": (get(("net_config", "node_svc_subnet")),
-                                       required),
-        "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
-                                     is_valid_mtu),
-        "net_config/service_monitor_interval": (get(("net_config", "service_monitor_interval")),
-                                                is_valid_ipsla_interval)
     }
+
+    if isOverlay(config["flavor"]):
+        print("Using overlay")
+        extra_checks = {
+            "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
+        }
+    else:
+        extra_checks = {
+            "aci_config/aep": (get(("aci_config", "aep")), required),
+            "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
+                                      required),
+            "aci_config/l3out/external-networks":
+            (get(("aci_config", "l3out", "external_networks")), required),
+
+            # Kubernetes config
+            "kube_config/max_nodes_svc_graph": (get(("kube_config", "max_nodes_svc_graph")),
+                                                is_valid_max_nodes_svc_graph),
+
+            # Network Config
+            "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
+                                      required),
+            "net_config/service_vlan": (get(("net_config", "service_vlan")),
+                                        required),
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
+            "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
+                                          required),
+            "net_config/extern_static": (get(("net_config", "extern_static")),
+                                         required),
+            "net_config/node_svc_subnet": (get(("net_config", "node_svc_subnet")),
+                                           required),
+            "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
+                                         is_valid_mtu),
+            "net_config/service_monitor_interval": (get(("net_config", "service_monitor_interval")),
+                                                    is_valid_ipsla_interval)
+        }
+
+        if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
+            checks["net_config/kubeapi_vlan"] = (
+                get(("net_config", "kubeapi_vlan")), required)
 
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False:
         checks["aci_config/system_id"] = \
             (get(("aci_config", "system_id")), required)
-
-    if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
-        checks["net_config/kubeapi_vlan"] = (
-            get(("net_config", "kubeapi_vlan")), required)
 
     # Versions
     for field in flavor_opts.get('version_fields', VERSION_FIELDS):
@@ -661,6 +699,7 @@ def config_validate(flavor_opts, config):
     if iso_seg:
         checks["aci_config/isolation_segments"] = (iso_seg, iso_seg_check)
 
+    checks = deep_merge(checks, extra_checks)
     ret = True
     for k in sorted(checks.keys()):
         value, validator = checks[k]
@@ -702,8 +741,11 @@ def config_validate_preexisting(config, prov_apic):
     return True
 
 
-def generate_sample(filep):
-    data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
+def generate_sample(filep, flavor):
+    if flavor == "eks":
+        data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
+    else:
+        data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
         filep.write(data)
     except TypeError:
@@ -1063,7 +1105,7 @@ def provision(args, apic_file, no_random):
 
     # Print sample, if needed
     if args.sample:
-        generate_sample(sys.stdout)
+        generate_sample(sys.stdout, args.flavor)
         return True
 
     # command line config
@@ -1125,7 +1167,10 @@ def provision(args, apic_file, no_random):
                    {"registry": VERSIONS[config["registry"]["version"]]})
 
     # Discoverd state (e.g. infra-vlan) overrides the config file data
-    config = deep_merge(config_discover(config, prov_apic), config)
+    if isOverlay(flavor):
+        config["net_config"]["infra_vlan"] = None
+    else:
+        config = deep_merge(config_discover(config, prov_apic), config)
 
     # Validate APIC access
     if prov_apic is not None:
@@ -1135,9 +1180,12 @@ def provision(args, apic_file, no_random):
             return False
 
     # Validate config
-    if not config_validate(flavor_opts, config):
-        err("Please fix configuration and retry.")
-        return False
+    try:
+        if not config_validate(flavor_opts, config):
+            err("Please fix configuration and retry.")
+            return False
+    except Exception as ex:
+        print("%s") % ex
 
     # Verify if overlapping subnet present in config input file
     if not check_overlapping_subnets(config):
@@ -1163,11 +1211,109 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
 
+    if flavor == "eks":
+        if prov_apic is None:
+            return True
+        print("Configuring cAPIC")
+        apic = get_apic(config)
+        if apic is None:
+            print("APIC login failed")
+            return False
+
+        configurator = ApicKubeConfig(config)
+
+        def prodAcl():
+            return configurator.capic_kafka_acl(config["aci_config"]["system_id"])
+
+        # This is a temporary fix until cAPIC implements its consumer ACL.
+        def consAcl():
+            return configurator.capic_kafka_acl("17D45DC65A53")
+
+        def clusterInfo():
+            query = configurator.capic_overlay_dn_query()
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            overlayDn = resJson["imdata"][0]["hcloudCtx"]["attributes"]["dn"]
+            print("overlayDn: {}".format(overlayDn))
+            return configurator.capic_cluster_info(overlayDn)
+
+        def addMiscConfig(config):
+            query = configurator.capic_subnet_dn_query()
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            subnet_dn = resJson["imdata"][0]["hcloudSubnet"]["attributes"]["dn"]
+            print("subnet_dn is {}".format(subnet_dn))
+            config["aci_config"]["subnet_dn"] = subnet_dn
+            vrf_tenant = config["aci_config"]["vrf"]["tenant"]
+            vrf_name = config["aci_config"]["vrf"]["name"]
+            vrf_dn = "uni/tn-{}/ctx-{}".format(vrf_tenant, vrf_name)
+            config["aci_config"]["vrf_dn"] = vrf_dn
+            return config
+
+        postGens = [configurator.capic_kube_dom, configurator.capic_overlay, configurator.capic_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
+        for pGen in postGens:
+            path, data = pGen()
+            print("Path: {}".format(path))
+            print("data: {}".format(data))
+            try:
+                resp = apic.post(path, data)
+                print("Resp: {}".format(resp.text))
+            except Exception as e:
+                err("Error in provisioning %s: %s" % (path, str(e)))
+
+        config = addKafkaConfig(config)
+        config = addMiscConfig(config)
+
+        gen = flavor_opts.get("template_generator", generate_kube_yaml)
+        gen(config, output_file)
+        return True
+
     # generate output files; and program apic if needed
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
     gen(config, output_file)
     return ret
+
+
+def addKafkaConfig(config):
+    cKey, cCert, caCert = getKafkaCerts(config)
+    config["aci_config"]["kafka"]["key"] = cKey
+    config["aci_config"]["kafka"]["cert"] = cCert
+    config["aci_config"]["kafka"]["cacert"] = caCert
+    brokers = []
+    for host in config["aci_config"]["apic_hosts"]:
+        brokers.append(host + ":9093")
+
+    config["aci_config"]["kafka"]["brokers"] = brokers
+
+    return config
+
+
+def getKafkaCerts(config):
+    wdir = tempfile.mkdtemp()
+    apic_host = config["aci_config"]["apic_hosts"][0]
+    user = config["aci_config"]["apic_login"]["username"]
+    pwd = config["aci_config"]["apic_login"]["password"]
+    cn = config["aci_config"]["system_id"]
+    kafka_cert.logger = kafka_cert.set_logger(wdir, "kc.log")
+    res = kafka_cert.generate(wdir, apic_host, cn, user, pwd)
+    if not res:
+        raise(Exception("Failed to get kafka certs"))
+
+    readDict = {
+        "server.key": "",
+        "server.crt": "",
+        "cacert.crt": "",
+    }
+
+    dir = wdir + "/"
+    for fname in readDict:
+        f = open(dir + fname, "r")
+        readDict[fname] = f.read()
+        f.close()
+
+    os.system('rm -rf ' + wdir)
+    return readDict["server.key"], readDict["server.crt"], readDict["cacert.crt"]
 
 
 def main(args=None, apic_file=None, no_random=False):
