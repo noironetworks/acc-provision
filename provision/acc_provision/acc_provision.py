@@ -960,7 +960,6 @@ def get_apic(config):
     apic_host = config["aci_config"]["apic_hosts"][0]
     apic_username = config["aci_config"]["apic_login"]["username"]
     apic_password = config["aci_config"]["apic_login"]["password"]
-    print(apic_password)
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
     apic = Apic(
