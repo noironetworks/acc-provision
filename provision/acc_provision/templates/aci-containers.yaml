@@ -1078,6 +1078,8 @@ spec:
           volumeMounts:
             - name: opflex-server-config-volume
               mountPath: /usr/local/etc/opflex-server
+            - name: hostvar
+              mountPath: /usr/local/var
         {% endif %}
         - name: mcast-daemon
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
