@@ -925,6 +925,8 @@ spec:
           volumeMounts:
             - name: opflex-server-config-volume
               mountPath: /usr/local/etc/opflex-server
+            - name: hostvar
+              mountPath: /usr/local/var
         - name: mcast-daemon
           image: noirolabs/opflex:latest
           command: ["/bin/sh"]
