@@ -2005,6 +2005,29 @@ class ApicKubeConfig(object):
                                                                                             collections.OrderedDict(
                                                                                                 [
                                                                                                     (
+                                                                                                        "fvRsDomAtt",
+                                                                                                        collections.OrderedDict(
+                                                                                                            [
+                                                                                                                (
+                                                                                                                    "attributes",
+                                                                                                                    collections.OrderedDict(
+                                                                                                                        [
+                                                                                                                            (
+                                                                                                                                "tDn",
+                                                                                                                                "uni/vmmp-%s/dom-%s"
+                                                                                                                                % (vmm_type, vmm_name),
+                                                                                                                            )
+                                                                                                                        ]
+                                                                                                                    ),
+                                                                                                                )
+                                                                                                            ]
+                                                                                                        ),
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                            collections.OrderedDict(
+                                                                                                [
+                                                                                                    (
                                                                                                         "fvRsBd",
                                                                                                         collections.OrderedDict(
                                                                                                             [
