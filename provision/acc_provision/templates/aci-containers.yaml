@@ -970,6 +970,8 @@ spec:
             {% if config.kube_config.run_gbp_container %}
             - name: TENANT
               value: {{config.kube_config.default_endpoint_group.tenant|json}}
+            - name: NODE_EPG
+              value: "kube-nodes"
             {% endif %}
           volumeMounts:
             - name: cni-bin
