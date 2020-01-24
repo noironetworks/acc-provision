@@ -472,6 +472,14 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-Kubernetes/dom-kubernetes1",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-node-bd",
