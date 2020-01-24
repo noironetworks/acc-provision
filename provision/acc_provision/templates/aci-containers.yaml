@@ -200,6 +200,7 @@ spec:
     served: true
     storage: true
 ---
+{% if config.istio_config.install_istio %}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -450,6 +451,7 @@ metadata:
 spec:
   profile: {{ config.istio_config.install_profile }}
 ---
+{% endif %}
 apiVersion: v1
 kind: ConfigMap
 metadata:
