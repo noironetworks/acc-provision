@@ -78,6 +78,20 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  name: snatlocalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatLocalInfo
+    listKind: SnatLocalInfoList
+    plural: snatlocalinfos
+    singular: snatlocalinfo
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
   name: snatpolicies.aci.snat
 spec:
   group: aci.snat
@@ -135,6 +149,35 @@ spec:
     plural: nodeinfos
     singular: nodeinfo
   scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            macaddress:
+              type: string
+            nodename:
+              type: string
+          required:
+          - nodename
+          - macaddress
+          type: object
+        status:
+          type: object
   version: v1
   versions:
   - name: v1
@@ -657,10 +700,11 @@ rules:
   - create
 - apiGroups:
   - "aci.snat"
+  resourceNames:
+  - snat-operator
   resources:
   - snatpolicies/finalizers
   - snatpolicies/status
-  - nodeinfos
   verbs:
   - update
   - create
@@ -671,8 +715,11 @@ rules:
 - apiGroups:
   - "aci.snat"
   resources:
+  - snatlocalinfos
   - snatglobalinfos
   - snatpolicies
+  - snatpolicies/finalizers
+  - snatpolicies/status
   - nodeinfos
   verbs:
   - list
@@ -728,7 +775,7 @@ rules:
 - apiGroups:
   - "aci.snat"
   resources:
-  - snatpolicies
+  - snatlocalinfos
   - snatglobalinfos
   verbs:
   - list
@@ -740,7 +787,6 @@ rules:
   - nodeinfos
   verbs:
   - create
-  - update
   - list
   - watch
   - get
@@ -1045,9 +1091,11 @@ spec:
           env:
             - name: GBP_SERVER_CONF
               value: /usr/local/etc/aci-containers/gbp-server.conf
-        - name: aci-containers-controller
-          image: noirolabs/aci-containers-controller:latest
+        - name: snat-operator
+          image: noirolabs/snat-operator:4.2.2.2.r4
           imagePullPolicy: Always
+          command:
+          - snat-operator
           env:
             - name: WATCH_NAMESPACE
               value: ""
@@ -1055,6 +1103,15 @@ spec:
               value: "aci-containers-system"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "snatglobalinfo"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "snat-operator"
+        - name: aci-containers-controller
+          image: noirolabs/aci-containers-controller:latest
+          imagePullPolicy: Always
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
