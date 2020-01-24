@@ -234,6 +234,15 @@ def test_conflicting_infravlan():
 
 
 @in_testdir
+def test_with_no_istio():
+    run_provision(
+        "with_no_install_istio.inp.yaml",
+        "with_no_install_istio.kube.yaml",
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout

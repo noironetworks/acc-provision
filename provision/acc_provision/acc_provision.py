@@ -203,6 +203,7 @@ def config_default():
             "opflex_mode": None
         },
         "istio_config": {
+            "install_istio": True,
             "install_profile": "demo",
             "istio_ns": "istio-system",
             "istio_operator_ns": "istio-operator"
@@ -456,6 +457,9 @@ def config_adjust(args, config, prov_apic, no_random):
 
     if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
+
+    if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
+        adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
 
     if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
         adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]
