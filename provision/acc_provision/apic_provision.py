@@ -72,6 +72,7 @@ class Apic(object):
         verify=False,
         timeout=None,
         debug=False,
+        capic=False
     ):
         global apic_debug
         apic_debug = debug
@@ -84,6 +85,7 @@ class Apic(object):
         self.verify = verify
         self.timeout = timeout if timeout else apic_default_timeout
         self.debug = debug
+        self.capic = capic
 
         if self.cookies is None:
             self.login()
@@ -102,7 +104,11 @@ class Apic(object):
         return requests.get(self.url(path), **args)
 
     def post(self, path, data):
-        args = dict(json=data, cookies=self.cookies, verify=self.verify)
+        if self.capic:
+            args = dict(json=data, cookies=self.cookies, verify=self.verify)
+        else:
+            # APIC seems to accept request body as form-encoded
+            args = dict(data=data, cookies=self.cookies, verify=self.verify)
         args.update(timeout=self.timeout)
         print("posting {}".format(json.dumps(args)))
         return requests.post(self.url(path), **args)
