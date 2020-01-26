@@ -1226,18 +1226,22 @@ def provision(args, apic_file, no_random):
 
         configurator = ApicKubeConfig(config)
 
+        def getOverlayDn():
+            query = configurator.capic_overlay_dn_query()
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            overlayDn = resJson["imdata"][0]["hcloudCtx"]["attributes"]["dn"]
+            return overlayDn
+
         def prodAcl():
             return configurator.capic_kafka_acl(config["aci_config"]["system_id"])
 
         # This is a temporary fix until cAPIC implements its consumer ACL.
         def consAcl():
-            return configurator.capic_kafka_acl("17D45DC65A53")
+            return configurator.capic_kafka_acl("2DFFD7DC59BA")
 
         def clusterInfo():
-            query = configurator.capic_overlay_dn_query()
-            resp = apic.get(path=query)
-            resJson = json.loads(resp.content)
-            overlayDn = resJson["imdata"][0]["hcloudCtx"]["attributes"]["dn"]
+            overlayDn = getOverlayDn()
             print("overlayDn: {}".format(overlayDn))
             return configurator.capic_cluster_info(overlayDn)
 
@@ -1248,9 +1252,7 @@ def provision(args, apic_file, no_random):
             subnet_dn = resJson["imdata"][0]["hcloudSubnet"]["attributes"]["dn"]
             print("subnet_dn is {}".format(subnet_dn))
             config["aci_config"]["subnet_dn"] = subnet_dn
-            vrf_tenant = config["aci_config"]["vrf"]["tenant"]
-            vrf_name = config["aci_config"]["vrf"]["name"]
-            vrf_dn = "uni/tn-{}/ctx-{}".format(vrf_tenant, vrf_name)
+            vrf_dn = getOverlayDn()
             config["aci_config"]["vrf_dn"] = vrf_dn
             return config
 
