@@ -966,9 +966,10 @@ def get_apic(config):
     apic_password = config["aci_config"]["apic_login"]["password"]
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
+    capic = config["aci_config"]["capic"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug)
+        timeout=timeout, debug=debug, capic=capic)
     if apic.cookies is None:
         return None
     return apic
@@ -1214,11 +1215,13 @@ def provision(args, apic_file, no_random):
         key_data, cert_data = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
+    config["aci_config"]["capic"] = False
 
     if flavor == "eks":
         if prov_apic is None:
             return True
         print("Configuring cAPIC")
+        config["aci_config"]["capic"] = True
         apic = get_apic(config)
         if apic is None:
             print("APIC login failed")
