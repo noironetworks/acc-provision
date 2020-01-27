@@ -1117,7 +1117,8 @@ def provision(args, apic_file, no_random):
     config = {
         "aci_config": {
             "apic_login": {
-            }
+            },
+            "capic": False
         },
         "provision": {
             "prov_apic": prov_apic,
@@ -1215,7 +1216,6 @@ def provision(args, apic_file, no_random):
         key_data, cert_data = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
-    config["aci_config"]["capic"] = False
 
     if flavor == "eks":
         if prov_apic is None:
