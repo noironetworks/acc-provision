@@ -1007,7 +1007,8 @@ class ApicKubeConfig(object):
             ]
         )
         pod_subnet = self.config["net_config"]["pod_subnet"]
-        child_list = [rsToRegion, rsToCtx, self.cloudCidr(pod_subnet)]
+        cidr = pod_subnet.replace(".1/", ".0/")
+        child_list = [rsToRegion, rsToCtx, self.cloudCidr(cidr)]
 
         for child in child_list:
             data["cloudCtxProfile"]["children"].append(child)
@@ -1112,7 +1113,8 @@ class ApicKubeConfig(object):
     def capic_subnet_dn_query(self):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        pod_subnet = self.config["net_config"]["pod_subnet"]
+        pod_gw = self.config["net_config"]["pod_subnet"]
+        pod_subnet = pod_gw.replace(".1/", ".0/")
         ctxProfDN = "uni/tn-%s/ctxprofile-%s" % (tn_name, vmm_name)
         subnetDN = "{}/cidr-[{}]/subnet-[{}]".format(ctxProfDN, pod_subnet, pod_subnet)
         filter = "eq(hcloudSubnet.delegateDn, \"{}\")".format(subnetDN)

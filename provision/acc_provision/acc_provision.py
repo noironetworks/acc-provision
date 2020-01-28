@@ -1241,7 +1241,7 @@ def provision(args, apic_file, no_random):
 
         # This is a temporary fix until cAPIC implements its consumer ACL.
         def consAcl():
-            return configurator.capic_kafka_acl("2DFFD7DC59BA")
+            return configurator.capic_kafka_acl("1EE9AB4924E2")
 
         def clusterInfo():
             overlayDn = getOverlayDn()
