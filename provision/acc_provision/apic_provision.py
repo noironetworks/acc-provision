@@ -100,7 +100,7 @@ class Apic(object):
     def get(self, path, data=None, params=None):
         args = dict(data=data, cookies=self.cookies, verify=self.verify, params=params)
         args.update(timeout=self.timeout)
-        print("getting path: {} {}".format(path, json.dumps(args)))
+        dbg("getting path: {} {}".format(path, json.dumps(args)))
         return requests.get(self.url(path), **args)
 
     def post(self, path, data):
@@ -110,7 +110,7 @@ class Apic(object):
             # APIC seems to accept request body as form-encoded
             args = dict(data=data, cookies=self.cookies, verify=self.verify)
         args.update(timeout=self.timeout)
-        print("posting {}".format(json.dumps(args)))
+        dbg("posting {}".format(json.dumps(args)))
         return requests.post(self.url(path), **args)
 
     def delete(self, path, data=None):
@@ -127,7 +127,7 @@ class Apic(object):
         req = requests.post(self.url(path), data=data, verify=False)
         if req.status_code == 200:
             resp = json.loads(req.text)
-            print("Login resp: {}".format(req.text))
+            dbg("Login resp: {}".format(req.text))
             token = resp["imdata"][0]["aaaLogin"]["attributes"]["token"]
             self.cookies = collections.OrderedDict([("APIC-Cookie", token)])
         else:
