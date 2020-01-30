@@ -747,6 +747,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: TENANT
+              value: "kube"
+            - name: NODE_EPG
+              value: "kubernetes|kube-nodes"
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
