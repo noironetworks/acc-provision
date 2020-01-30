@@ -645,6 +645,9 @@ def config_validate(flavor_opts, config):
                                                     is_valid_ipsla_interval)
         }
 
+        if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
+            del extra_checks["net_config/extern_static"]
+
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
                 get(("net_config", "kubeapi_vlan")), required)
