@@ -967,11 +967,14 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            {% if config.kube_config.run_gbp_container %}
             - name: TENANT
               value: {{config.kube_config.default_endpoint_group.tenant|json}}
+            {% if config.kube_config.run_gbp_container %}
             - name: NODE_EPG
               value: "kube-nodes"
+            {% else %}
+            - name: NODE_EPG
+              value: "kubernetes|kube-nodes"
             {% endif %}
           volumeMounts:
             - name: cni-bin
