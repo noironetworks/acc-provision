@@ -136,6 +136,11 @@ def config_default():
     default_config = {
         "aci_config": {
             "system_id": None,
+            "tenant": {
+                "name": None,
+            },
+            "use_pre_existing_tenant": False,
+            "use_legacy_kube_naming_convention": False,
             "vrf": {
                 "name": None,
                 "tenant": None,
@@ -184,7 +189,7 @@ def config_default():
             "use_cluster_role": True,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
-            "system_namespace": "kube-system",
+            "system_namespace": "aci-containers-system",
             "ovs_memory_limit": "1Gi",
             "reboot_opflex_with_ovs": "true",
             "snat_operator": {
@@ -292,14 +297,34 @@ def config_adjust(args, config, prov_apic, no_random):
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
-    system_namespace = config["kube_config"]["system_namespace"]
     ep_registry = config["kube_config"]["ep_registry"]
     opflex_mode = config["kube_config"]["opflex_mode"]
     istio_profile = config["istio_config"]["install_profile"]
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
-    tenant = system_id
     token = str(uuid.uuid4())
+    if (config["aci_config"]["tenant"]["name"]):
+        config["aci_config"]["use_pre_existing_tenant"] = True
+        tenant = config["aci_config"]["tenant"]["name"]
+    else:
+        tenant = system_id
+    if not config["aci_config"]["use_legacy_kube_naming_convention"]:
+        app_profile = Apic.ACI_PREFIX + system_id
+        default_endpoint_group = Apic.ACI_PREFIX + "default"
+        namespace_endpoint_group = Apic.ACI_PREFIX + "system"
+        config["aci_config"]["nodes_epg"] = Apic.ACI_PREFIX + "nodes"
+    else:
+        app_profile = "kubernetes"
+        default_endpoint_group = "kube-default"
+        namespace_endpoint_group = "kube-system"
+        if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+            config["kube_config"]["system_namespace"] = "aci-containers-system"
+        else:
+            config["kube_config"]["system_namespace"] = "kube-system"
+        config["aci_config"]["nodes_epg"] = "kube-nodes"
+
+    config["aci_config"]["app_profile"] = app_profile
+    system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
         token = args.version_token
 
@@ -346,14 +371,14 @@ def config_adjust(args, config, prov_apic, no_random):
         "kube_config": {
             "default_endpoint_group": {
                 "tenant": tenant,
-                "app_profile": "kubernetes",
-                "group": "kube-default",
+                "app_profile": app_profile,
+                "group": default_endpoint_group,
             },
             "namespace_default_endpoint_group": {
                 system_namespace: {
                     "tenant": tenant,
-                    "app_profile": "kubernetes",
-                    "group": "kube-system",
+                    "app_profile": app_profile,
+                    "group": namespace_endpoint_group,
                 },
                 istio_namespace: {
                     "tenant": tenant,
@@ -486,6 +511,17 @@ def config_adjust(args, config, prov_apic, no_random):
             tenant,
             adj_config['cf_config']['default_endpoint_group']['app_profile'],
             adj_config['cf_config']['node_epg']))
+
+    ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
+
+    # To add kube-system namespace to ACI system EPG
+    adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
+
+    # Add openshift system namespaces to ACI system EPG
+    if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+        ns_list = ["kube-service-catalog", "openshift-console", "openshift-monitoring", "openshift-web-console"]
+        for ns in ns_list:
+            adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
     return adj_config
 
@@ -743,6 +779,20 @@ def config_validate_preexisting(config, prov_apic):
                 warn("L3out not defined in the APIC: %s/%s" %
                      (vrf_tenant, l3out_name))
 
+            # Following code is to detect a legacy cluster
+            # kube_ap = apic.get_ap(config["aci_config"]["system_id"])
+            # if an app profile with the name "kubernetes" exists under system
+            # tenant, this means the cluster was provisioned with older
+            # naming convention. This is a fallback in case the user
+            # forgets to add the field to indicate an existing legacy
+            # cluster.
+            # if kube_ap:
+            #     config["aci_config"]["use_legacy_kube_naming_convention"] = True
+            #     if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+            #         config["kube_config"]["system_namespace"] = "aci-containers-system"
+            #     else:
+            #         config["kube_config"]["system_namespace"] = "kube-system"
+
     except Exception as e:
         warn("Unable to validate resources on APIC: '%s'" % e.message)
     return True
@@ -958,7 +1008,9 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 system_id = config["aci_config"]["system_id"]
                 tenant = config["aci_config"]["vrf"]["tenant"]
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
-                apic.unprovision(apic_config, system_id, tenant, vrf_tenant)
+                cluster_tenant = config["aci_config"]["cluster_tenant"]
+                old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
+                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming)
             ret = False if apic.errors > 0 else True
     return ret
 
@@ -1144,6 +1196,9 @@ def provision(args, apic_file, no_random):
 
     # Create config
     user_config = config_user(config_file)
+    if 'aci_config' in user_config and 'use_legacy_kube_naming_convention' in user_config['aci_config'] and 'tenant' in user_config['aci_config']:
+        err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
+        return False
 
     if user_config:
         if 'versions_url' in user_config and 'path' in user_config['versions_url']:

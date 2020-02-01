@@ -243,6 +243,24 @@ def test_with_no_istio():
 
 
 @in_testdir
+def test_new_naming_convention():
+    run_provision(
+        "with_new_naming_convention.inp.yaml",
+        "with_new_naming_convention.kube.yaml",
+        "with_new_naming_convention.apic.txt"
+    )
+
+
+@in_testdir
+def test_preexisting_tenant():
+    run_provision(
+        "with_preexisting_tenant.inp.yaml",
+        "with_preexisting_tenant.kube.yaml",
+        "with_preexisting_tenant.apic.txt"
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
@@ -343,6 +361,27 @@ def test_overlapping_subnets():
             sys.stderr = sys.__stderr__
             tmperr.seek(0)
         with open("overlapping_subnets.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
+def test_preexisting_kube_convention():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "with_preexisting_kube_convention.inp.yaml",
+                None,
+                None
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("error_preexisting_kube_convention.stdout.txt", "r") as stderr:
             assert tmperr.read() == stderr.read()
 
 

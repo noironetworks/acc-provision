@@ -389,6 +389,26 @@ data:
             "istio-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-istio"
+            },
+            "kube-service-catalog": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-console": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-monitoring": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-web-console": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
             }        },
         "service-ip-pool": [
             {
@@ -463,6 +483,26 @@ data:
             "istio-system": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-istio"
+            },
+            "kube-service-catalog": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-console": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-monitoring": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-web-console": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
             }        }
     }
   opflex-agent-config: |-

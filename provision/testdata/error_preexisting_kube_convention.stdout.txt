@@ -1,0 +1,2 @@
+INFO: Loading configuration from "with_preexisting_kube_convention.inp.yaml"
+ERR:  Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time

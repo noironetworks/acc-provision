@@ -4,6 +4,7 @@ metadata:
   name: aci-containers-system
   labels:
     aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
   annotations:
     openshift.io/node-selector: ''
 ---
@@ -851,7 +852,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
-      priorityClassName: system-node-critical
+      priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-host
           image: noirolabs/aci-containers-host:latest
@@ -1002,7 +1003,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
-      priorityClassName: system-node-critical
+      priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-openvswitch
           image: noirolabs/openvswitch:latest

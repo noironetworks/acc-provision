@@ -481,7 +481,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
-      priorityClassName: system-node-critical
+      priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-host
           image: noiro/aci-containers-host:4.2.2.2.r32
@@ -613,7 +613,7 @@ spec:
       tolerations:
         - operator: Exists
           effect: NoSchedule
-      priorityClassName: system-node-critical
+      priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-openvswitch
           image: noiro/openvswitch:4.2.2.2.r26
