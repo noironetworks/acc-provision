@@ -50,7 +50,7 @@ VERSION_FIELDS = [
     "aci_containers_host_version",
     "opflex_agent_version",
     "aci_containers_controller_version",
-    "snat_operator_version",
+    "aci_containers_operator_version",
     "openvswitch_version",
 ]
 
@@ -946,7 +946,7 @@ def get_jinja_template(file):
     return template
 
 
-def generate_kube_yaml(config, output):
+def generate_kube_yaml(config, output, operator_output, operator_cr_output):
     template = get_jinja_template('aci-containers.yaml')
 
     kube_objects = [
@@ -965,14 +965,42 @@ def generate_kube_yaml(config, output):
         if output == "-":
             outname = "<stdout>"
             applyname = "<filename>"
-            output = sys.stdout
+            if config["aci_config"]["vmm_domain"]["type"] == "Kubernetes":
+                output = "/dev/null"
+            else:
+                output = sys.stdout
         else:
             applyname = os.path.basename(output)
 
         info("Using configuration label aci-containers-config-version=" +
              str(config["registry"]["configuration_version"]))
-        info("Writing kubernetes infrastructure YAML to %s" % outname)
         template.stream(config=config).dump(output)
+
+        # Generate aci-operator file and aci-operator-cr file
+        if config["aci_config"]["vmm_domain"]["type"] == "Kubernetes":
+            temp = ''.join(template.stream(config=config))
+            config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+            op_template = get_jinja_template('aci-operators.yaml')
+            if operator_output and operator_output != "/dev/null":
+                outname = operator_output
+                applyname = operator_output
+                if operator_output == "-":
+                    outname = "<stdout>"
+                    applyname = "<filename>"
+                    operator_output = sys.stdout
+                else:
+                    applyname = os.path.basename(operator_output)
+            op_template.stream(config=config).dump(operator_output)
+
+            op_cr_template = get_jinja_template('aci-operators-cr.yaml')
+            if operator_cr_output and operator_cr_output != "/dev/null":
+                if operator_cr_output == "-":
+                    operator_cr_output = "/dev/null"
+                else:
+                    info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
+            op_cr_template.stream(config=config).dump(operator_cr_output)
+
+        info("Writing kubernetes infrastructure YAML to %s" % outname)
         info("Apply infrastructure YAML using:")
         info("  %s apply -f %s" %
              (config["kube_config"]["kubectl"], applyname))
@@ -987,7 +1015,7 @@ def generate_kube_yaml(config, output):
     return config
 
 
-def generate_cf_yaml(config, output):
+def generate_cf_yaml(config, output, operator_output=None, operator_cr_output=None):
     template = get_jinja_template('aci-cf-containers.yaml')
 
     if output and output != "/dev/null":
@@ -1128,6 +1156,12 @@ def parse_args(show_help):
         '-o', '--output', default="-", metavar='file',
         help='output file for your kubernetes deployment')
     parser.add_argument(
+        '-oo', '--aci_operator_output', default="-", metavar='file',
+        help='output file for your kubernetes operator deployment')
+    parser.add_argument(
+        '-r', '--aci_operator_cr_output', default="-", metavar='file',
+        help='output file for your kubernetes operator deployment custom resource')
+    parser.add_argument(
         '-a', '--apic', action='store_true', default=False,
         help='create/validate the required APIC resources')
     parser.add_argument(
@@ -1201,6 +1235,8 @@ def check_overlapping_subnets(config):
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
+    operator_output_file = args.aci_operator_output
+    operator_cr_output_file = args.aci_operator_cr_output
 
     prov_apic = None
     if args.apic:
@@ -1220,6 +1256,8 @@ def provision(args, apic_file, no_random):
     generate_cert_data = True
     if args.delete:
         output_file = "/dev/null"
+        operator_output_file = "/dev/null"
+        operator_cr_output_file = "/dev/null"
         generate_cert_data = False
 
     # Print sample, if needed
@@ -1393,13 +1431,13 @@ def provision(args, apic_file, no_random):
         config = addMiscConfig(config)
 
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
-        gen(config, output_file)
+        gen(config, output_file, operator_output_file, operator_cr_output_file)
         return True
 
     # generate output files; and program apic if needed
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
-    gen(config, output_file)
+    gen(config, output_file, operator_output_file, operator_cr_output_file)
     return ret
 
 
