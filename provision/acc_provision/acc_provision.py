@@ -778,6 +778,13 @@ def config_validate_preexisting(config, prov_apic):
             if l3out is None:
                 warn("L3out not defined in the APIC: %s/%s" %
                      (vrf_tenant, l3out_name))
+            else:
+                # get l3out context and check if it's the same as vrf in
+                # input config
+                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name)
+                if not result:
+                    warn("L3out %s/%s not configured in the correct VRF %s/%s" %
+                         (vrf_tenant, l3out_name, vrf_tenant, vrf_name))
 
             # Following code is to detect a legacy cluster
             # kube_ap = apic.get_ap(config["aci_config"]["system_id"])

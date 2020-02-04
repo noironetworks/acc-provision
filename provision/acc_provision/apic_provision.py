@@ -188,6 +188,17 @@ class Apic(object):
         path = "/api/mo/uni/tn-%s/out-%s.json" % (tenant, name)
         return self.get_path(path)
 
+    def check_l3out_vrf(self, tenant, name, vrf_name):
+        path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
+        res = False
+        try:
+            tDn = self.get_path(path)["l3extRsEctx"]["attributes"]["tDn"]
+            vrf_dn = "uni/tn-%s/ctx-%s" % (tenant, vrf_name)
+            res = (tDn == vrf_dn)
+        except Exception as e:
+            err("Error in getting configured vrf for %s/%s: %s" % (tenant, name, str(e)))
+        return res
+
     def get_user(self, name):
         path = "/api/node/mo/uni/userext/user-%s.json" % name
         return self.get_path(path)
