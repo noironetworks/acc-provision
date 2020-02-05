@@ -433,6 +433,9 @@ class ApicKubeConfig(object):
 
         update(data, self.kube_user())
         update(data, self.kube_cert())
+        if self.config["aci_config"]["netflow_exporter"]["enable"]:
+            update(data, self.netflow_exporter())
+            update(data, self.netflow_cont())
         return data
 
     def annotateApicObjects(self, data, pre_existing_tenant=False):
@@ -653,6 +656,90 @@ class ApicKubeConfig(object):
                                         ]
                                     )
                                 ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def netflow_exporter(self):
+        exp_name = self.config["aci_config"]["netflow_exporter"]["name"]
+        dstAddr = self.config["aci_config"]["netflow_exporter"]["dstAddr"]
+        dstPort = self.config["aci_config"]["netflow_exporter"]["dstPort"]
+        srcAddr = self.config["aci_config"]["netflow_exporter"]["srcAddr"]
+
+        path = "api/mo/uni/infra/vmmexporterpol-%s.json" % exp_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "netflowVmmExporterPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", exp_name),
+                                        ("dstAddr", dstAddr),
+                                        ("dstPort", dstPort),
+                                        ("srcAddr", srcAddr),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def netflow_cont(self):
+        exp_name = self.config["aci_config"]["netflow_exporter"]["name"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        activeFlowTimeOut = self.config["aci_config"]["netflow_exporter"]["activeFlowTimeOut"]
+
+        path = "api/node/mo/uni/vmmp-Kubernetes/dom-%s/vswitchpolcont.json" % vmm_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmVSwitchPolicyCont",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vmmRsVswitchExporterPol",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("activeFlowTimeOut", activeFlowTimeOut),
+                                                                    ("tDn", "/uni/infra/vmmexporterpol-%s" % exp_name),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ]
                             ),
                         ]
                     ),

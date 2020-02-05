@@ -165,6 +165,14 @@ def config_default():
             "client_cert": False,
             "client_ssl": True,
             "use_inst_tag": True,
+            "netflow_exporter": {
+                "enable": False,
+                "name": None,
+                "dstPort": None,
+                "dstAddr": None,
+                "srcAddr": None,
+                "activeFlowTimeOut": None,
+            },
         },
         "net_config": {
             "node_subnet": None,
@@ -635,7 +643,6 @@ def config_validate(flavor_opts, config):
         "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
         "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
                                   required),
-
         # Istio config
         "istio_config/install_profile": (get(("istio_config", "install_profile")),
                                          is_valid_istio_install_profile),
@@ -687,6 +694,13 @@ def config_validate(flavor_opts, config):
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
                 get(("net_config", "kubeapi_vlan")), required)
+        if (config["aci_config"]["netflow_exporter"]["enable"]):
+            checks["aci_config/netflow_exporter/dstAddr"] = (
+                get(("aci_config", "netflow_exporter", "dstAddr")), required)
+            checks["aci_config/netflow_exporter/dstPort"] = (
+                get(("aci_config", "netflow_exporter", "dstPort")), required)
+            checks["aci_config/netflow_exporter/name"] = (
+                get(("aci_config", "netflow_exporter", "name")), required)
 
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False:
@@ -1213,6 +1227,8 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     deep_merge(config, user_config)
+    if "netflow_exporter" in config["aci_config"]:
+        config["aci_config"]["netflow_exporter"]["enable"] = True
 
     flavor = args.flavor
     if flavor in FLAVORS:
