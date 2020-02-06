@@ -1081,3 +1081,34 @@ None
         ]
     }
 }
+api/mo/uni/infra/vmmexporterpol-test-exporter.json
+{
+    "netflowVmmExporterPol": {
+        "attributes": {
+            "name": "test-exporter",
+            "dstAddr": "10.30.120.111",
+            "dstPort": 2055,
+            "srcAddr": null,
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+api/node/mo/uni/vmmp-Kubernetes/dom-kubernetes1/vswitchpolcont.json
+{
+    "vmmVSwitchPolicyCont": {
+        "attributes": {
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "vmmRsVswitchExporterPol": {
+                    "attributes": {
+                        "activeFlowTimeOut": null,
+                        "tDn": "/uni/infra/vmmexporterpol-test-exporter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
