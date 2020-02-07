@@ -667,6 +667,7 @@ class ApicKubeConfig(object):
 
     def netflow_exporter(self):
         exp_name = self.config["aci_config"]["netflow_exporter"]["name"]
+        version = self.config["aci_config"]["netflow_exporter"]["ver"]
         dstAddr = self.config["aci_config"]["netflow_exporter"]["dstAddr"]
         dstPort = self.config["aci_config"]["netflow_exporter"]["dstPort"]
         srcAddr = self.config["aci_config"]["netflow_exporter"]["srcAddr"]
@@ -683,6 +684,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("name", exp_name),
+                                        ("ver", version),
                                         ("dstAddr", dstAddr),
                                         ("dstPort", dstPort),
                                         ("srcAddr", srcAddr),

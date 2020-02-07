@@ -168,6 +168,7 @@ def config_default():
             "netflow_exporter": {
                 "enable": False,
                 "name": None,
+                "ver": "v5",
                 "dstPort": None,
                 "dstAddr": None,
                 "srcAddr": None,
@@ -608,6 +609,19 @@ def is_valid_istio_install_profile(xval):
     raise(Exception("Must be one of the profile in this List: ", validProfiles))
 
 
+def is_valid_netflow_version(xval):
+    if xval is None:
+        # Not a required field - default will be set to demo
+        return True
+    validVersions = ['v5', 'v9']
+    try:
+        if xval in validVersions:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be one of the versions in this List: ", validVersions))
+
+
 def isOverlay(flavor):
     flav = SafeDict(FLAVORS[flavor])
     ovl = flav["overlay"]
@@ -701,6 +715,8 @@ def config_validate(flavor_opts, config):
                 get(("aci_config", "netflow_exporter", "dstPort")), required)
             checks["aci_config/netflow_exporter/name"] = (
                 get(("aci_config", "netflow_exporter", "name")), required)
+            checks["aci_config/netflow_exporter/ver"] = (
+                get(("aci_config", "netflow_exporter", "ver")), is_valid_netflow_version)
 
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False:
