@@ -24,7 +24,7 @@ setup(
     install_requires=[
           'requests',
           'pyyaml',
-          'jinja2==2.11.1',
+          'jinja2<3.0.0',
           'pyopenssl',
           'ipaddr',
     ],
