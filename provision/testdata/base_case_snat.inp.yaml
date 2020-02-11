@@ -48,6 +48,7 @@ kube_config:
       end: 62000
       ports_per_node: 500
     snat_namespace: test_namespace
+    contract_scope: tenant
   max_nodes_svc_graph: 64
 
 registry:

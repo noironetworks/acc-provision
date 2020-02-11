@@ -211,6 +211,7 @@ def config_default():
                     "ports_per_node": 3000,
                 },
                 "snat_namespace": "aci-containers-system",
+                "contract_scope": "global",
             },
             "max_nodes_svc_graph": 32,
             "ep_registry": None,
@@ -622,6 +623,19 @@ def is_valid_netflow_version(xval):
     raise(Exception("Must be one of the versions in this List: ", validVersions))
 
 
+def is_valid_contract_scope(xval):
+    if xval is None:
+        # Not a required field - default will be set to demo
+        return True
+    validVersions = ['global', 'tenant', 'context']
+    try:
+        if xval in validVersions:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be one of the contract scopes in this List: ", validVersions))
+
+
 def isOverlay(flavor):
     flav = SafeDict(FLAVORS[flavor])
     ovl = flav["overlay"]
@@ -682,6 +696,9 @@ def config_validate(flavor_opts, config):
             # Kubernetes config
             "kube_config/max_nodes_svc_graph": (get(("kube_config", "max_nodes_svc_graph")),
                                                 is_valid_max_nodes_svc_graph),
+
+            "kube_config/snat_operator/contract_scope": (get(("kube_config", "snat_operator", "contract_scope")),
+                                                         is_valid_contract_scope),
 
             # Network Config
             "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
