@@ -6529,53 +6529,37 @@ class ApicKubeConfig(object):
 def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix):
     if items is None or len(items) == 0:
         err("Error in getting items for flavor")
-    # kube-systems needs to provide kube-api contract
+
     if old_naming:
-        provide_kube_api_contract_os = collections.OrderedDict(
-            [
-                (
-                    "fvRsProv",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                        (
-                                            "tnVzBrCPName",
-                                            "kube-api",
-                                        )
-                                    ]
-                                ),
-                            )
-                        ]
-                    ),
-                )
-            ]
-        )
+        api_contract_name = "kube-api"
+        dns_contract_name = "dns"
     else:
-        provide_kube_api_contract_os = collections.OrderedDict(
-            [
-                (
-                    "fvRsProv",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                        (
-                                            "tnVzBrCPName",
-                                            "%s-api" % system_id,
-                                        )
-                                    ]
-                                ),
-                            )
-                        ]
-                    ),
-                )
-            ]
-        )
+        api_contract_name = "%s-api" % (system_id)
+        dns_contract_name = '%s-dns' % (system_id)
+
+    # kube-systems needs to provide kube-api contract
+    provide_kube_api_contract_os = collections.OrderedDict(
+        [
+            (
+                "fvRsProv",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        api_contract_name,
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
     data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_kube_api_contract_os)
 
     # special case for dns contract
@@ -6591,7 +6575,7 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                 [
                                     (
                                         "tnVzBrCPName",
-                                        "dns",
+                                        dns_contract_name,
                                     )
                                 ]
                             ),
