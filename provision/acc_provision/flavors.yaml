@@ -25,42 +25,48 @@ cfFlavorOptions: &anchor
 
 flavors:
   # Upstream Kubernetes
+  kubernetes-1.17:
+    desc: Kubernetes 1.17
+    default_version: 4.2 
+    status: null
+    hidden: false
+    order: 5
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 4.2 
     status: null
     hidden: false
-    order: 5
+    order: 6
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 4.2
     status: null
     hidden: false
-    order: 6
+    order: 7
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 4.2
     status: null
-    hidden: false
-    order: 7
+    hidden: true
+    order: 8
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 4.2
     status: null
     hidden: true
-    order: 8
+    order: 9
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 4.2
     status: null
     hidden: true
-    order: 9
+    order: 10
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 10
+    order: 11
     config:
       kube_config:
         no_priority_class: True
@@ -69,7 +75,7 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 11
+    order: 12
     config:
       kube_config:
         no_priority_class: True
@@ -238,7 +244,7 @@ flavors:
     options: *anchor
     status: null
     hidden: false
-    order: 12
+    order: 13
   k8s-localhost:
     desc: Kubernetes localhost
     default_version: 4.2
@@ -258,7 +264,7 @@ flavors:
         use_kubeconfig_volume: True
     status: Experimental
     hidden: False
-    order: 13
+    order: 14
   eks:
     desc:         Kubernetes EKS
     default_version: 4.2
@@ -281,4 +287,4 @@ flavors:
         use_cnideploy_initcontainer: True
     status: Experimental
     hidden: False
-    order: 14
+    order: 15
