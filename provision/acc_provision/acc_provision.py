@@ -323,6 +323,7 @@ def config_adjust(args, config, prov_apic, no_random):
         default_endpoint_group = Apic.ACI_PREFIX + "default"
         namespace_endpoint_group = Apic.ACI_PREFIX + "system"
         config["aci_config"]["nodes_epg"] = Apic.ACI_PREFIX + "nodes"
+        bd_dn_prefix = "uni/tn-%s/BD-%s%s-" % (tenant, Apic.ACI_PREFIX, system_id)
     else:
         app_profile = "kubernetes"
         default_endpoint_group = "kube-default"
@@ -332,6 +333,7 @@ def config_adjust(args, config, prov_apic, no_random):
         else:
             config["kube_config"]["system_namespace"] = "kube-system"
         config["aci_config"]["nodes_epg"] = "kube-nodes"
+        bd_dn_prefix = "uni/tn-%s/BD-%s-" % (tenant, system_id)
 
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
@@ -361,6 +363,8 @@ def config_adjust(args, config, prov_apic, no_random):
                 "certfile": "user-%s.crt" % system_id,
                 "keyfile": "user-%s.key" % system_id,
             },
+            "node_bd_dn": bd_dn_prefix + "node-bd",
+            "pod_bd_dn": bd_dn_prefix + "pod-bd",
             "kafka": {
             },
             "subnet_dn": {
