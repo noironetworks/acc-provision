@@ -362,6 +362,8 @@ data:
         "aci-vmm-controller": "mykube",
         "aci-policy-tenant": "mykube",
         "require-netpol-annot": false,
+        "aci-podbd-dn": "uni/tn-mykube/BD-aci-containers-mykube-pod-bd",
+        "aci-nodebd-dn": "uni/tn-mykube/BD-aci-containers-mykube-node-bd",
         "aci-service-phys-dom": "mykube-pdom",
         "aci-service-encap": "vlan-4003",
         "aci-service-monitor-interval": 5,

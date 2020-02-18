@@ -361,6 +361,8 @@ data:
         "aci-vmm-controller": "kubernetes1",
         "aci-policy-tenant": "kube",
         "require-netpol-annot": false,
+        "aci-podbd-dn": "uni/tn-kube/BD-kube-pod-bd",
+        "aci-nodebd-dn": "uni/tn-kube/BD-kube-node-bd",
         "aci-service-phys-dom": "kubernetes-control",
         "aci-service-encap": "vlan-4003",
         "aci-service-monitor-interval": 5,
