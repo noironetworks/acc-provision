@@ -34,6 +34,8 @@ def test_base_case():
     run_provision(
         "base_case.inp.yaml",
         "base_case.kube.yaml",
+        "base_case_operator.kube.yaml",
+        "base_case_operator_cr.kube.yaml",
         "base_case.apic.txt"
     )
 
@@ -43,6 +45,8 @@ def test_base_case_snat():
     run_provision(
         "base_case_snat.inp.yaml",
         "base_case_snat.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt"
     )
 
@@ -52,6 +56,8 @@ def test_versions_base_case():
     run_provision(
         "version_wrong_url.inp.yaml",
         "base_case.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt"
     )
 
@@ -61,6 +67,8 @@ def test_base_case_ipv6():
     run_provision(
         "base_case_ipv6.inp.yaml",
         "base_case_ipv6.kube.yaml",
+        None,
+        None,
         "base_case_ipv6.apic.txt"
     )
 
@@ -70,6 +78,8 @@ def test_vlan_case():
     run_provision(
         "vlan_case.inp.yaml",
         "vlan_case.kube.yaml",
+        None,
+        None,
         "vlan_case.apic.txt"
     )
 
@@ -79,6 +89,8 @@ def test_nested_vlan():
     run_provision(
         "nested-vlan.inp.yaml",
         "nested-vlan.kube.yaml",
+        None,
+        None,
         "nested-vlan.apic.txt"
     )
 
@@ -88,6 +100,8 @@ def test_nested_vxlan():
     run_provision(
         "nested-vxlan.inp.yaml",
         "nested-vxlan.kube.yaml",
+        None,
+        None,
         "nested-vxlan.apic.txt"
     )
 
@@ -97,6 +111,8 @@ def test_nested_portgroup():
     run_provision(
         "nested-portgroup.inp.yaml",
         "nested-portgroup.kube.yaml",
+        None,
+        None,
         "nested-portgroup.apic.txt"
     )
 
@@ -106,6 +122,8 @@ def test_nested_elag():
     run_provision(
         "nested-elag.inp.yaml",
         "nested-elag.kube.yaml",
+        None,
+        None,
         "nested-elag.apic.txt"
     )
 
@@ -115,6 +133,8 @@ def test_with_comments():
     run_provision(
         "with_comments.inp.yaml",
         "with_comments.kube.yaml",
+        None,
+        None,
         "with_comments.apic.txt"
     )
 
@@ -124,6 +144,8 @@ def test_with_overrides():
     run_provision(
         "with_overrides.inp.yaml",
         "with_overrides.kube.yaml",
+        None,
+        None,
         "with_overrides.apic.txt"
     )
 
@@ -133,6 +155,8 @@ def test_with_tenant_l3out():
     run_provision(
         "with_tenant_l3out.inp.yaml",
         "with_tenant_l3out.kube.yaml",
+        None,
+        None,
         "with_tenant_l3out.apic.txt"
     )
 
@@ -142,6 +166,8 @@ def test_with_interface_mtu():
     run_provision(
         "with_interface_mtu.inp.yaml",
         "with_interface_mtu.kube.yaml",
+        None,
+        None,
         "with_interface_mtu.apic.txt"
     )
 
@@ -151,6 +177,8 @@ def test_with_apic_refreshtime():
     run_provision(
         "with_refreshtime.inp.yaml",
         "with_refreshtime.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt",
     )
 
@@ -160,6 +188,8 @@ def test_with_pbr_tracking_non_snat():
     run_provision(
         "with_pbr_non_snat.inp.yaml",
         "with_pbr_non_snat.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt",
     )
 
@@ -169,6 +199,8 @@ def test_pod_external_access():
     run_provision(
         "pod_ext_access.inp.yaml",
         "pod_ext_access.kube.yaml",
+        None,
+        None,
         "pod_ext_access.apic.txt"
     )
 
@@ -178,6 +210,8 @@ def test_flavor_openshift_39():
     run_provision(
         "base_case.inp.yaml",
         "flavor_openshift.kube.yaml",
+        None,
+        None,
         "flavor_openshift.apic.txt",
         overrides={"flavor": "openshift-3.9"}
     )
@@ -188,6 +222,8 @@ def test_flavor_dockerucp_30():
     run_provision(
         "base_case.inp.yaml",
         "flavor_dockerucp.kube.yaml",
+        None,
+        None,
         "flavor_dockerucp.apic.txt",
         overrides={"flavor": "docker-ucp-3.0"}
     )
@@ -198,6 +234,8 @@ def test_flavor_cloudfoundry_10():
     run_provision(
         "flavor_cf_10.inp.yaml",
         "flavor_cf_10.cf.yaml",
+        None,
+        None,
         "flavor_cf_10.apic.txt",
         overrides={"flavor": "cloudfoundry-1.0"}
     )
@@ -209,6 +247,8 @@ def test_flavor_localhost():
         "flavor_localhost.inp.yaml",
         "flavor_localhost.kube.yaml",
         None,
+        None,
+        None,
         overrides={"flavor": "k8s-localhost"}
     )
 
@@ -217,6 +257,8 @@ def test_flavor_localhost():
 def test_flavor_eks():
     run_provision(
         "flavor_eks.inp.yaml",
+        None,
+        None,
         None,
         None,
         overrides={"flavor": "eks"}
@@ -228,6 +270,8 @@ def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
         "base_case.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt",
         overrides={"infra_vlan": 4093}
     )
@@ -238,6 +282,8 @@ def test_with_no_istio():
     run_provision(
         "with_no_install_istio.inp.yaml",
         "with_no_install_istio.kube.yaml",
+        None,
+        None,
         "base_case.apic.txt"
     )
 
@@ -247,6 +293,8 @@ def test_new_naming_convention():
     run_provision(
         "with_new_naming_convention.inp.yaml",
         "with_new_naming_convention.kube.yaml",
+        "with_new_naming_convention_operator.kube.yaml",
+        "with_new_naming_convention_operator_cr.kube.yaml",
         "with_new_naming_convention.apic.txt"
     )
 
@@ -256,6 +304,8 @@ def test_new_naming_convention_openshift():
     run_provision(
         "with_new_naming_convention.inp.yaml",
         "with_new_naming_convention_openshift.kube.yaml",
+        None,
+        None,
         "with_new_naming_convention_openshift.apic.txt",
         overrides={"flavor": "openshift-3.9"}
     )
@@ -266,6 +316,8 @@ def test_preexisting_tenant():
     run_provision(
         "with_preexisting_tenant.inp.yaml",
         "with_preexisting_tenant.kube.yaml",
+        None,
+        None,
         "with_preexisting_tenant.apic.txt"
     )
 
@@ -361,6 +413,8 @@ def test_overlapping_subnets():
             run_provision(
                 "with_overlapping_subnets.inp.yaml",
                 None,
+                None,
+                None,
                 None
             )
         except SystemExit:
@@ -382,6 +436,8 @@ def test_preexisting_kube_convention():
             run_provision(
                 "with_preexisting_kube_convention.inp.yaml",
                 None,
+                None,
+                None,
                 None
             )
         except SystemExit:
@@ -399,6 +455,8 @@ def get_args(**overrides):
     arg = {
         "config": None,
         "output": None,
+        "aci_operator_output": None,
+        "aci_operator_cr_output": None,
         "apicfile": None,
         "apic": False,
         "delete": False,
@@ -423,17 +481,30 @@ def get_args(**overrides):
     return args
 
 
-def run_provision(inpfile, expectedkube=None, expectedapic=None,
-                  overrides={}):
+def run_provision(inpfile, expectedkube=None, expectedoperator=None,
+                  expectedoperatorcr=None, expectedapic=None, overrides={}):
     # Exec main
-    with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as apicfile:
-        args = get_args(config=inpfile, output=output.name, **overrides)
+    with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile:
+        args = get_args(config=inpfile, output=output.name, aci_operator_output=operator_output.name, aci_operator_cr_output=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
         if expectedkube is not None:
             if args.debug:
                 shutil.copyfile(output.name, '/tmp/generated_kube.yaml')
             with open(expectedkube, "r") as expected:
                 assert output.read() == expected.read()
+
+        if expectedoperator is not None:
+            if args.debug:
+                shutil.copyfile(operator_output.name, '/tmp/generated_operator.yaml')
+            with open(expectedoperator, "r") as expected:
+                assert operator_output.read() == expected.read()
+
+        if expectedoperatorcr is not None:
+            if args.debug:
+                shutil.copyfile(operator_cr_output.name, '/tmp/generated_operator_cr.yaml')
+            with open(expectedoperatorcr, "r") as expected:
+                assert operator_cr_output.read() == expected.read()
+
         if expectedapic is not None:
             if args.debug:
                 shutil.copyfile(apicfile.name, '/tmp/generated_apic.txt')
@@ -443,7 +514,7 @@ def run_provision(inpfile, expectedkube=None, expectedapic=None,
 
 @in_testdir
 def test_certificate_generation_kubernetes():
-    create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml')
+    create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_output='temp_operator.yaml', aci_operator_cr_output='temp_operator_cr.yaml')
 
 
 @in_testdir

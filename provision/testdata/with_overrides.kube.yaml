@@ -789,7 +789,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-host
-          image: noiro/aci-containers-host:4.2.2.2.r32
+          image: noiro/aci-containers-host:master-test
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -830,7 +830,7 @@ spec:
           env:
             - name: REBOOT_WITH_OVS
               value: "true"
-          image: noiro/opflex:4.2.2.2.r32
+          image: noiro/opflex:master-test
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -849,7 +849,7 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: mcast-daemon
-          image: noiro/opflex:4.2.2.2.r32
+          image: noiro/opflex:master-test
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: Always
@@ -925,7 +925,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-openvswitch
-          image: noiro/openvswitch:4.2.2.2.r26
+          image: noiro/openvswitch:master-test
           imagePullPolicy: Always
           resources:
             limits:
@@ -1006,7 +1006,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: aci-containers-controller
-          image: noiro/aci-containers-controller:4.2.2.2.r32
+          image: noiro/aci-containers-controller:master-test
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
