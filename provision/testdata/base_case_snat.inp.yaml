@@ -49,6 +49,7 @@ kube_config:
       ports_per_node: 500
     snat_namespace: test_namespace
     contract_scope: tenant
+    rdconfig_name: myrdconfig
   max_nodes_svc_graph: 64
 
 registry:

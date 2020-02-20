@@ -975,7 +975,7 @@ spec:
             - name: ACI_SNAGLOBALINFO_NAME
               value: "test_snatglobalinfo"
             - name: ACI_RDCONFIG_NAME
-              value: "routingdomain-config"
+              value: "myrdconfig"
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
