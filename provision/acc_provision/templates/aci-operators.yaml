@@ -444,6 +444,8 @@ data:
         "apic-password": {{config.aci_config.apic_login.password|json}},
         "lb-type": "None",
         {% endif %}
+        "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
+        "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
         "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
         "aci-service-monitor-interval": {{ config.net_config.service_monitor_interval|json }},
