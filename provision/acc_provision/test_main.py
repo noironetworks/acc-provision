@@ -8,6 +8,8 @@ import shutil
 import ssl
 import sys
 import tempfile
+import tarfile
+
 
 from . import acc_provision
 
@@ -34,7 +36,7 @@ def test_base_case():
     run_provision(
         "base_case.inp.yaml",
         "base_case.kube.yaml",
-        "base_case_operator.kube.yaml",
+        "base_case_tar",
         "base_case_operator_cr.kube.yaml",
         "base_case.apic.txt"
     )
@@ -260,7 +262,6 @@ def test_flavor_eks():
         None,
         None,
         None,
-        None,
         overrides={"flavor": "eks"}
     )
 
@@ -293,7 +294,7 @@ def test_new_naming_convention():
     run_provision(
         "with_new_naming_convention.inp.yaml",
         "with_new_naming_convention.kube.yaml",
-        "with_new_naming_convention_operator.kube.yaml",
+        None,
         "with_new_naming_convention_operator_cr.kube.yaml",
         "with_new_naming_convention.apic.txt"
     )
@@ -437,7 +438,6 @@ def test_preexisting_kube_convention():
                 "with_preexisting_kube_convention.inp.yaml",
                 None,
                 None,
-                None,
                 None
             )
         except SystemExit:
@@ -455,8 +455,8 @@ def get_args(**overrides):
     arg = {
         "config": None,
         "output": None,
-        "aci_operator_output": None,
-        "aci_operator_cr_output": None,
+        "output_tar": None,
+        "aci_operator_cr": None,
         "apicfile": None,
         "apic": False,
         "delete": False,
@@ -481,40 +481,45 @@ def get_args(**overrides):
     return args
 
 
-def run_provision(inpfile, expectedkube=None, expectedoperator=None,
+def compare_yaml(expectedyaml, output, debug, generated):
+    if expectedyaml is not None:
+        if debug:
+            shutil.copyfile(output.name, generated)
+        with open(expectedyaml, "r") as expected:
+            assert output.read() == expected.read()
+
+
+def compare_tar(expected, output, debug, generated):
+    if expected is not None:
+        if debug:
+            shutil.copyfile(output, generated)
+        tmp_dir = "tmp_tar"
+        tar_output = tarfile.open(mode="r:gz", name=output, encoding="utf-8")
+        os.mkdir(tmp_dir)
+        tar_output.extractall(path=tmp_dir)
+        result = filecmp.dircmp(expected, tmp_dir)
+        test = len(result.diff_files)
+        shutil.rmtree((tmp_dir))
+        assert test == 0
+
+
+def run_provision(inpfile, expectedkube=None, expectedtar=None,
                   expectedoperatorcr=None, expectedapic=None, overrides={}):
     # Exec main
-    with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile:
-        args = get_args(config=inpfile, output=output.name, aci_operator_output=operator_output.name, aci_operator_cr_output=operator_cr_output.name, **overrides)
+    with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile, tempfile.NamedTemporaryFile('w+', suffix='.tar.gz') as out_tar:
+
+        args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
-        if expectedkube is not None:
-            if args.debug:
-                shutil.copyfile(output.name, '/tmp/generated_kube.yaml')
-            with open(expectedkube, "r") as expected:
-                assert output.read() == expected.read()
 
-        if expectedoperator is not None:
-            if args.debug:
-                shutil.copyfile(operator_output.name, '/tmp/generated_operator.yaml')
-            with open(expectedoperator, "r") as expected:
-                assert operator_output.read() == expected.read()
-
-        if expectedoperatorcr is not None:
-            if args.debug:
-                shutil.copyfile(operator_cr_output.name, '/tmp/generated_operator_cr.yaml')
-            with open(expectedoperatorcr, "r") as expected:
-                assert operator_cr_output.read() == expected.read()
-
-        if expectedapic is not None:
-            if args.debug:
-                shutil.copyfile(apicfile.name, '/tmp/generated_apic.txt')
-            with open(expectedapic, "r") as expected:
-                assert apicfile.read() == expected.read()
+        compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
+        compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
+        compare_yaml(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
+        compare_tar(expectedtar, out_tar.name, args.debug, "/tmp/generated_operator.tar.gz")
 
 
 @in_testdir
 def test_certificate_generation_kubernetes():
-    create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_output='temp_operator.yaml', aci_operator_cr_output='temp_operator_cr.yaml')
+    create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_cr='temp_operator_cr.yaml')
 
 
 @in_testdir
