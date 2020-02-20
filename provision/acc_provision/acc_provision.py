@@ -334,7 +334,7 @@ def config_adjust(args, config, prov_apic, no_random):
         else:
             config["kube_config"]["system_namespace"] = "kube-system"
         config["aci_config"]["nodes_epg"] = "kube-nodes"
-        bd_dn_prefix = "uni/tn-%s/BD-%s-" % (tenant, system_id)
+        bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
 
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
