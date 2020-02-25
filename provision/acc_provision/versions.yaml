@@ -24,6 +24,7 @@ versions:
     aci_containers_controller_version: master-test
     aci_containers_host_version: master-test
     aci_containers_operator_version: master-test
+    aci_istio_operator_version: master-test
     cnideploy_version: master-test
     openvswitch_version: master-test
     opflex_agent_version: master-test
