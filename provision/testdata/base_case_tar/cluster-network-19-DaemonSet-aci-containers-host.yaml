@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
+  name: aci-containers-host
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: aci-containers-host
+      network-plugin: aci-containers
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+      labels:
+        name: aci-containers-host
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: TENANT
+          value: kube
+        - name: NODE_EPG
+          value: kubernetes|kube-nodes
+        image: noiro/aci-containers-host:master-test
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 8090
+        name: aci-containers-host
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+        - mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+          name: opflex-hostconfig-volume
+        - mountPath: /usr/local/etc/aci-containers/
+          name: host-config-volume
+      - env:
+        - name: REBOOT_WITH_OVS
+          value: 'true'
+        image: noiro/opflex:master-test
+        imagePullPolicy: Always
+        name: opflex-agent
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+        - mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+          name: opflex-hostconfig-volume
+        - mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+          name: opflex-config-volume
+      - args:
+        - /usr/local/bin/launch-mcastdaemon.sh
+        command:
+        - /bin/sh
+        image: noiro/opflex:master-test
+        imagePullPolicy: Always
+        name: mcast-daemon
+        volumeMounts:
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      serviceAccountName: aci-containers-host-agent
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /opt
+        name: cni-bin
+      - hostPath:
+          path: /etc
+        name: cni-conf
+      - hostPath:
+          path: /var
+        name: hostvar
+      - hostPath:
+          path: /run
+        name: hostrun
+      - configMap:
+          items:
+          - key: host-agent-config
+            path: host-agent.conf
+          name: aci-containers-config
+        name: host-config-volume
+      - emptyDir:
+          medium: Memory
+        name: opflex-hostconfig-volume
+      - configMap:
+          items:
+          - key: opflex-agent-config
+            path: local.conf
+          name: aci-containers-config
+        name: opflex-config-volume
+  updateStrategy:
+    type: RollingUpdate

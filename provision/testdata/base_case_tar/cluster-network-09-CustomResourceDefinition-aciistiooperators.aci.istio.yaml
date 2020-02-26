@@ -1,0 +1,13 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: aciistiooperators.aci.istio
+spec:
+  group: aci.istio
+  names:
+    kind: AciIstioOperator
+    listKind: AciIstioOperatorList
+    plural: aciistiooperators
+    singular: aciistiooperator
+  scope: Namespaced
+  version: v1

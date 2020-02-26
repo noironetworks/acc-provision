@@ -19,6 +19,7 @@ import uuid
 
 import pkg_resources
 import pkgutil
+import tarfile
 import yaml
 from yaml import SafeLoader
 
@@ -946,9 +947,35 @@ def get_jinja_template(file):
     return template
 
 
-def generate_kube_yaml(config, output, operator_output, operator_cr_output):
-    template = get_jinja_template('aci-containers.yaml')
+def generate_operator_tar(tar_path, cont_docs, oper_docs):
 
+    # YAML file numbers generated start from 4 as first three are
+    # reserved for OpenShift specific files
+    file_start = 4
+    filenames = []
+
+    # Function to construct filenames for each yaml
+    def gen_file_list(docs, counter, filenames):
+        for doc in docs:
+            filename = "cluster-network-" + str(counter).zfill(2) + "-" + doc['kind'] + "-" + doc['metadata']['name'] + ".yaml"
+            filenames.append(os.path.basename(filename))
+            with open(filename, 'w') as outfile:
+                yaml.safe_dump(doc, outfile, default_flow_style=False, encoding="utf-8")
+            counter += 1
+        return counter
+
+    file_start = gen_file_list(cont_docs, file_start, filenames)
+    gen_file_list(oper_docs, file_start, filenames)
+
+    # Create tar for the parsed files and delete the files too
+    tar = tarfile.open(tar_path, "w:gz", encoding="utf-8")
+    for name in filenames:
+        tar.add(name)
+        os.remove(name)
+    tar.close()
+
+
+def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
         "configmap", "secret", "serviceaccount",
         "daemonset", "deployment",
@@ -959,48 +986,74 @@ def generate_kube_yaml(config, output, operator_output, operator_cr_output):
     if config["kube_config"].get("use_cluster_role", False):
         kube_objects.extend(["clusterrolebinding", "clusterrole"])
 
-    if output and output != "/dev/null":
-        outname = output
-        applyname = output
-        if output == "-":
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-containers.yaml')
+        outname = operator_output
+        applyname = operator_output
+        tar_path = operator_tar
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file and tar with the same name.
+        if operator_output == "-":
             outname = "<stdout>"
             applyname = "<filename>"
-            if config["aci_config"]["vmm_domain"]["type"] == "Kubernetes":
-                output = "/dev/null"
-            else:
-                output = sys.stdout
+            operator_output = sys.stdout
         else:
-            applyname = os.path.basename(output)
+            applyname = os.path.basename(operator_output)
+            if not tar_path or tar_path == "-":
+                tar_path = applyname + ".tar.gz"
 
-        info("Using configuration label aci-containers-config-version=" +
-             str(config["registry"]["configuration_version"]))
-        template.stream(config=config).dump(output)
+        # Generate and convert containers deployment to base64 and add as configMap
+        # entry to the operator deployment.
+        temp = ''.join(template.stream(config=config))
+        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+        op_template = get_jinja_template('aci-operators.yaml')
 
-        # Generate aci-operator file and aci-operator-cr file
-        if config["aci_config"]["vmm_domain"]["type"] == "Kubernetes":
-            temp = ''.join(template.stream(config=config))
-            config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
-            op_template = get_jinja_template('aci-operators.yaml')
-            if operator_output and operator_output != "/dev/null":
-                outname = operator_output
-                applyname = operator_output
-                if operator_output == "-":
-                    outname = "<stdout>"
-                    applyname = "<filename>"
-                    operator_output = sys.stdout
-                else:
-                    applyname = os.path.basename(operator_output)
+        # Generate kubernetes deployment
+        template.stream(config=config).dump(operator_output)
+        # Render operator deployment
+        output_from_parsed_template = op_template.render(config=config)
+
+        # If output containers deployment file arg present, append rendered
+        # operator deployment yamls to containers deployment yaml.
+        # This needs to be ultimately(kubectl) applied to install the
+        # ACI CNI. Else print to stdout.
+        if operator_output != sys.stdout:
+            with open(operator_output, "a+") as fh:
+                fh.write("---\n")
+                fh.write(output_from_parsed_template)
+        else:
             op_template.stream(config=config).dump(operator_output)
 
-            op_cr_template = get_jinja_template('aci-operators-cr.yaml')
-            if operator_cr_output and operator_cr_output != "/dev/null":
-                if operator_cr_output == "-":
-                    operator_cr_output = "/dev/null"
-                else:
-                    info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
-            op_cr_template.stream(config=config).dump(operator_cr_output)
+        # The next few files are to generate tar file with each
+        # containers and operator yaml in separate file. This is needed
+        # by OpenShift >= 4.3. If tar_path is provided(-z), we save the tar
+        # with that filename, else we use the provided containers
+        # deployment filepath. If neither is provided, we don't generate
+        # the tar.
+        if tar_path == "-":
+            tar_path = "/dev/null"
+        else:
+            # Generate yamls for containers and operator deployment
+            # which are consumed by the geneate_operator_tar method
+            cont_stream = template.stream(config=config)
+            cont_yamls = ''.join(cont_stream)
+            cont_docs = yaml.load_all(cont_yamls, Loader=yaml.SafeLoader)
+            oper_stream = op_template.stream(config=config)
+            oper_yamls = ''.join(oper_stream)
+            oper_docs = yaml.load_all(oper_yamls, Loader=yaml.SafeLoader)
+            generate_operator_tar(tar_path, cont_docs, oper_docs)
+
+        op_cr_template = get_jinja_template('aci-operators-cr.yaml')
+        if operator_cr_output and operator_cr_output != "/dev/null":
+            if operator_cr_output == "-":
+                operator_cr_output = "/dev/null"
+            else:
+                info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
+        op_cr_template.stream(config=config).dump(operator_cr_output)
 
         info("Writing kubernetes infrastructure YAML to %s" % outname)
+        info("Writing ACI CNI operator tar to %s" % tar_path)
         info("Apply infrastructure YAML using:")
         info("  %s apply -f %s" %
              (config["kube_config"]["kubectl"], applyname))
@@ -1156,11 +1209,11 @@ def parse_args(show_help):
         '-o', '--output', default="-", metavar='file',
         help='output file for your kubernetes deployment')
     parser.add_argument(
-        '-oo', '--aci_operator_output', default="-", metavar='file',
-        help='output file for your kubernetes operator deployment')
+        '-z', '--output_tar', default="-", metavar='file',
+        help='output zipped tar file for your kubernetes deployment')
     parser.add_argument(
-        '-r', '--aci_operator_cr_output', default="-", metavar='file',
-        help='output file for your kubernetes operator deployment custom resource')
+        '-r', '--aci_operator_cr', default="-", metavar='file',
+        help='output file for your aci-operator deployment custom resource')
     parser.add_argument(
         '-a', '--apic', action='store_true', default=False,
         help='create/validate the required APIC resources')
@@ -1184,7 +1237,7 @@ def parse_args(show_help):
         help='set configuration flavor.  Example: openshift-3.6')
     parser.add_argument(
         '-t', '--version-token', default=None, metavar='token',
-        help='set a configuration version token.  Default is UUID.')
+        help='set a configuration version token. Default is UUID.')
 
     # If the input has no arguments, show help output and exit
     if show_help:
@@ -1235,8 +1288,8 @@ def check_overlapping_subnets(config):
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
-    operator_output_file = args.aci_operator_output
-    operator_cr_output_file = args.aci_operator_cr_output
+    output_tar = args.output_tar
+    operator_cr_output_file = args.aci_operator_cr
 
     prov_apic = None
     if args.apic:
@@ -1256,7 +1309,7 @@ def provision(args, apic_file, no_random):
     generate_cert_data = True
     if args.delete:
         output_file = "/dev/null"
-        operator_output_file = "/dev/null"
+        output_tar = "/dev/null"
         operator_cr_output_file = "/dev/null"
         generate_cert_data = False
 
@@ -1431,13 +1484,13 @@ def provision(args, apic_file, no_random):
         config = addMiscConfig(config)
 
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
-        gen(config, output_file, operator_output_file, operator_cr_output_file)
+        gen(config, output_file, output_tar, operator_cr_output_file)
         return True
 
     # generate output files; and program apic if needed
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
-    gen(config, output_file, operator_output_file, operator_cr_output_file)
+    gen(config, output_file, output_tar, operator_cr_output_file)
     return ret
 
 
