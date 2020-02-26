@@ -4592,8 +4592,11 @@ class ApicKubeConfig(object):
         if "items" in self.config["aci_config"].keys():
             self.editItems(self.config, old_naming)
             items = self.config["aci_config"]["items"]
+            kube_api_entries = []
+            if 'kube_api_entries' in self.config["aci_config"]:
+                kube_api_entries = self.config["aci_config"]["kube_api_entries"]
             if vmm_type == "OpenShift":
-                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX)
+                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, kube_api_entries, api_filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
         self.annotateApicObjects(data, pre_existing_tenant)
@@ -4779,7 +4782,7 @@ class ApicKubeConfig(object):
         return path, data
 
 
-def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix):
+def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix, kube_api_entries, api_filter_prefix):
     if items is None or len(items) == 0:
         err("Error in getting items for flavor")
 
@@ -5082,6 +5085,64 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
             os_filter['vzFilter']['children'].append(child)
 
         data['fvTenant']['children'].append(os_filter)
+
+    # Add http, https, etcd entries to kube-api filter for OpenShift 4.3
+    if kube_api_entries:
+        tenant_children = data['fvTenant']['children']
+        api_filter_name = "%sapi-filter" % api_filter_prefix
+        filter_entries = []
+        for child in tenant_children:
+            if 'vzFilter' in child.keys() and child['vzFilter']['attributes']['name'] == api_filter_name:
+                for entry in kube_api_entries:
+                    apic_entry = collections.OrderedDict(
+                        [
+                            (
+                                "vzEntry",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "name",
+                                                        "openshift-%s" % entry['name'],
+                                                    ),
+                                                    (
+                                                        "etherT",
+                                                        entry["etherT"],
+                                                    ),
+                                                    (
+                                                        "prot",
+                                                        entry["prot"],
+                                                    ),
+                                                    (
+                                                        "dFromPort",
+                                                        entry["range"][0],
+                                                    ),
+                                                    (
+                                                        "dToPort",
+                                                        entry["range"][1],
+                                                    ),
+                                                    (
+                                                        "stateful",
+                                                        entry["stateful"],
+                                                    ),
+                                                    (
+                                                        "tcpRules",
+                                                        "",
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    )
+                    filter_entries.append(apic_entry)
+                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                break
 
 
 def dockerucp_flavor_specific_handling(data, ports):

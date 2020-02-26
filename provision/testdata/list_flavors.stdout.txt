@@ -1,7 +1,7 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.3:	Red Hat OpenShift Container Platform 4.3
 INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
 INFO: openshift-3.10:	Red Hat OpenShift Container Platform 3.10
-INFO: openshift-3.9:	Red Hat OpenShift Container Platform 3.9
 INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0
 INFO: kubernetes-1.17:	Kubernetes 1.17
 INFO: kubernetes-1.16:	Kubernetes 1.16
