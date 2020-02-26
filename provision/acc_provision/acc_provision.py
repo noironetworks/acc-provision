@@ -326,6 +326,7 @@ def config_adjust(args, config, prov_apic, no_random):
         namespace_endpoint_group = Apic.ACI_PREFIX + "system"
         config["aci_config"]["nodes_epg"] = Apic.ACI_PREFIX + "nodes"
         bd_dn_prefix = "uni/tn-%s/BD-%s%s-" % (tenant, Apic.ACI_PREFIX, system_id)
+        istio_epg = Apic.ACI_PREFIX + "istio"
     else:
         app_profile = "kubernetes"
         default_endpoint_group = "kube-default"
@@ -336,6 +337,7 @@ def config_adjust(args, config, prov_apic, no_random):
             config["kube_config"]["system_namespace"] = "kube-system"
         config["aci_config"]["nodes_epg"] = "kube-nodes"
         bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
+        istio_epg = "kube-istio"
 
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
@@ -398,13 +400,13 @@ def config_adjust(args, config, prov_apic, no_random):
                 },
                 istio_namespace: {
                     "tenant": tenant,
-                    "app_profile": "kubernetes",
-                    "group": "kube-istio",
+                    "app_profile": app_profile,
+                    "group": istio_epg,
                 },
                 istio_operator_ns: {
                     "tenant": tenant,
-                    "app_profile": "kubernetes",
-                    "group": "kube-istio",
+                    "app_profile": app_profile,
+                    "group": istio_epg,
                 },
             },
             "pod_ip_pool": [

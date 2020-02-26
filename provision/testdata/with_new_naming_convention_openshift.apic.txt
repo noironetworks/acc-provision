@@ -315,6 +315,14 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "aci-containers-kube-pod-bd",
@@ -557,6 +565,72 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
+                                    "name": "aci-containers-istio",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-OpenShift/dom-kube",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "aci-containers-kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
                                     "name": "group1",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 },
@@ -589,6 +663,14 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -663,6 +745,14 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -916,6 +1006,72 @@ None
                 }
             },
             {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-kube-istio-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-9080",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "sFromPort": "9080",
+                                    "sToPort": "9080",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-mixer-9091",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9091",
+                                    "dToPort": "9091",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-prometheus-15090",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "sFromPort": "15090",
+                                    "sToPort": "15090",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-pilot-15010",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "15010",
+                                    "dToPort": "15010",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
                 "vzBrCP": {
                     "attributes": {
                         "name": "aci-containers-kube-api",
@@ -1054,6 +1210,36 @@ None
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
                                                 "tnVzFilterName": "aci-containers-kube-icmp-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-kube-istio",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "istio-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-kube-istio-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }

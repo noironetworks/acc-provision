@@ -313,6 +313,18 @@ def test_new_naming_convention_openshift():
 
 
 @in_testdir
+def test_new_naming_convention_dockerucp():
+    run_provision(
+        "with_new_naming_convention.inp.yaml",
+        "with_new_naming_convention_dockerucp.kube.yaml",
+        None,
+        None,
+        "with_new_naming_convention_dockerucp.apic.txt",
+        overrides={"flavor": "docker-ucp-3.0"}
+    )
+
+
+@in_testdir
 def test_preexisting_tenant():
     run_provision(
         "with_preexisting_tenant.inp.yaml",
