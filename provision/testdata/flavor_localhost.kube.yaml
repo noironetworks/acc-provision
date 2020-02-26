@@ -850,12 +850,6 @@ spec:
           effect: NoSchedule
       priorityClassName: system-node-critical
       containers:
-        - name: aci-istio-operator
-          image: noirolabs/aci-istio-operator:master-test
-          imagePullPolicy: Always
-          env:
-          - name: SYSTEM_NAMESPACE
-            value: kube-system 
         - name: aci-gbpserver
           image: noirolabs/gbp-server:latest
           imagePullPolicy: Always
