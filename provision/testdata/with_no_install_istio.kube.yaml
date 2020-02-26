@@ -301,6 +301,8 @@ rules:
   - list
   - watch
   - get
+  - create
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -328,9 +330,7 @@ rules:
   - daemonsets
   - statefulsets
   verbs:
-  - list
-  - watch
-  - get
+  - '*'
 - apiGroups:
   - ""
   resources:

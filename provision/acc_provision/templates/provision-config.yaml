@@ -71,5 +71,5 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
 
 #istio_config:
-  # install_istio: False          # default is True
+  # install_istio: False         # default is True
   # install_profile: "default"   # override if needed, default is "demo"
