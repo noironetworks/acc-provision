@@ -763,12 +763,6 @@ spec:
         - operator: Exists
           effect: NoSchedule
       containers:
-        - name: aci-istio-operator
-          image: noiro/aci-istio-operator:master-test
-          imagePullPolicy: Always
-          env:
-          - name: SYSTEM_NAMESPACE
-            value: kube-system 
         - name: aci-containers-controller
           image: noiro/aci-containers-controller:master-test
           imagePullPolicy: Always

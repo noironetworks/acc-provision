@@ -764,12 +764,6 @@ spec:
           effect: NoSchedule
       priorityClassName: system-node-critical
       containers:
-        - name: aci-istio-operator
-          image: noiro/aci-istio-operator:master-test
-          imagePullPolicy: Always
-          env:
-          - name: SYSTEM_NAMESPACE
-            value: aci-containers-system 
         - name: aci-containers-controller
           image: noiro/aci-containers-controller:master-test
           imagePullPolicy: Always

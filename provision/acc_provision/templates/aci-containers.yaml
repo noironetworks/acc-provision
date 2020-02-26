@@ -1016,14 +1016,6 @@ spec:
       priorityClassName: system-node-critical
       {% endif %}
       containers:
-        {% if config.istio_config.install_istio %}
-        - name: aci-istio-operator
-          image: {{ config.registry.image_prefix }}/aci-istio-operator:{{ config.registry.aci_istio_operator_version }}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          env:
-          - name: SYSTEM_NAMESPACE
-            value: {{ config.kube_config.system_namespace }} 
-        {% endif %}
         {% if config.kube_config.run_gbp_container %}
         - name: aci-gbpserver
           image: {{ config.registry.image_prefix }}/gbp-server:{{ config.registry.gbp_version }}
