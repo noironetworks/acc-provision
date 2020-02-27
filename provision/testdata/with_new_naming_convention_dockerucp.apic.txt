@@ -168,7 +168,7 @@
                         {
                             "infraRsFuncToEpg": {
                                 "attributes": {
-                                    "tDn": "uni/tn-old_tenant/ap-aci-containers-kube/epg-aci-containers-nodes",
+                                    "tDn": "uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes",
                                     "encap": "vlan-4001",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
@@ -184,7 +184,7 @@
 None
 /api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/phys-kube-pdom].json
 None
-/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-old_tenant/ap-aci-containers-kube/epg-aci-containers-nodes].json
+/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes].json
 None
 /api/mo/uni/infra.json
 {
@@ -259,12 +259,13 @@ None
 None
 /api/mo/uni/tn-common/brc-kube-l3out-allow-all.json
 None
-/api/mo/uni/tn-old_tenant.json
+/api/mo/uni/tn-kube.json
 {
     "fvTenant": {
         "attributes": {
-            "name": "old_tenant",
-            "dn": "uni/tn-old_tenant"
+            "name": "kube",
+            "dn": "uni/tn-kube",
+            "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
@@ -867,6 +868,62 @@ None
                                     "prot": "tcp",
                                     "dFromPort": "8443",
                                     "dToPort": "8443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "ucp-ui-port",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "443",
+                                    "dToPort": "443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "ucp-tls-port",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "12376",
+                                    "dToPort": "12376",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "ucp-kubelet-port",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10250",
+                                    "dToPort": "10250",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "ucp-misc-ports",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "12378",
+                                    "dToPort": "12388",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
