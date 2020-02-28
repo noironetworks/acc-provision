@@ -249,6 +249,9 @@ data:
         "pod-subnet-chunk-size": {{ config.net_config.pod_subnet_chunk_size|json }},
         "node-service-ip-pool": {{ config.kube_config.node_service_ip_pool|json|indent(width=8) }},
         "node-service-subnets": {{ config.kube_config.node_service_gw_subnets|json|indent(width=8) }}
+        {% if config.istio_config.install_istio %}
+        "install-istio": {{ config.istio_config.install_istio|json }}
+        {% endif %}
     }
   host-agent-config: |-
     {
@@ -1043,6 +1046,10 @@ spec:
               value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
             - name: ACI_RDCONFIG_NAME
               value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
+            {% if config.istio_config.install_istio %}
+            - name: SYSTEM_NAMESPACE
+              value: "{{ config.kube_config.system_namespace}}"
+            {% endif %}
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
