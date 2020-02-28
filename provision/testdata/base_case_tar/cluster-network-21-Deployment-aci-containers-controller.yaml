@@ -35,6 +35,8 @@ spec:
           value: snatglobalinfo
         - name: ACI_RDCONFIG_NAME
           value: routingdomain-config
+        - name: SYSTEM_NAMESPACE
+          value: kube-system
         image: noiro/aci-containers-controller:master-test
         imagePullPolicy: Always
         livenessProbe:
