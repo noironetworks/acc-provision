@@ -5,9 +5,10 @@ data:
     : \"/usr/local/etc/aci-cert/user.key\",\n    \"apic-use-inst-tag\": true,\n  \
     \  \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\
     : \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-policy-tenant\"\
-    : \"kube\",\n    \"require-netpol-annot\": false,\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\"\
-    ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\"\
-    : \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
+    : \"kube\",\n    \"require-netpol-annot\": false,\n    \"install-istio\": true,\n\
+    \    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\",\n    \"aci-nodebd-dn\"\
+    : \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\": \"kube-pdom\"\
+    ,\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
     ,\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n        \"default\"\
     \n    ],\n    \"aci-vrf\": \"kube\",\n    \"default-endpoint-group\": {\n    \
@@ -26,7 +27,7 @@ data:
     \         \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"pod-subnet-chunk-size\"\
     : 32,\n    \"node-service-ip-pool\": [\n        {\n            \"end\": \"10.5.0.254\"\
     ,\n            \"start\": \"10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\"\
-    : [\n        \"10.5.0.1/24\"\n    ]\n    \"install-istio\": true\n}"
+    : [\n        \"10.5.0.1/24\"\n    ]\n}"
   host-agent-config: "{\n    \"ep-registry\": null,\n    \"opflex-mode\": null,\n\
     \    \"log-level\": \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\"\
     ,\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n\
