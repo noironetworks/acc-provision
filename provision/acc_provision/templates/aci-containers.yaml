@@ -208,6 +208,9 @@ data:
         "apic-password": {{config.aci_config.apic_login.password|json}},
         "lb-type": "None",
         {% endif %}
+        {% if config.istio_config.install_istio %}
+        "install-istio": {{ config.istio_config.install_istio|json }},
+        {% endif %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
         "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
         "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
@@ -249,9 +252,6 @@ data:
         "pod-subnet-chunk-size": {{ config.net_config.pod_subnet_chunk_size|json }},
         "node-service-ip-pool": {{ config.kube_config.node_service_ip_pool|json|indent(width=8) }},
         "node-service-subnets": {{ config.kube_config.node_service_gw_subnets|json|indent(width=8) }}
-        {% if config.istio_config.install_istio %}
-        "install-istio": {{ config.istio_config.install_istio|json }}
-        {% endif %}
     }
   host-agent-config: |-
     {
