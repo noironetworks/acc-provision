@@ -5118,11 +5118,11 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                                     ),
                                                     (
                                                         "dFromPort",
-                                                        entry["range"][0],
+                                                        str(entry["range"][0]),
                                                     ),
                                                     (
                                                         "dToPort",
-                                                        entry["range"][1],
+                                                        str(entry["range"][1]),
                                                     ),
                                                     (
                                                         "stateful",

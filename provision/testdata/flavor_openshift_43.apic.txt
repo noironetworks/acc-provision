@@ -1008,8 +1008,8 @@ None
                                     "name": "openshift-etcd1",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": 2379,
-                                    "dToPort": 2379,
+                                    "dFromPort": "2379",
+                                    "dToPort": "2379",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -1022,8 +1022,8 @@ None
                                     "name": "openshift-etcd2",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": 9979,
-                                    "dToPort": 9979,
+                                    "dFromPort": "9979",
+                                    "dToPort": "9979",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
