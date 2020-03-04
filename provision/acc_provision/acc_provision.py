@@ -217,7 +217,9 @@ def config_default():
             },
             "max_nodes_svc_graph": 32,
             "ep_registry": None,
-            "opflex_mode": None
+            "opflex_mode": None,
+            "host_agent_cni_bin_path": "/opt",
+            "host_agent_cni_conf_path": "/etc"
         },
         "istio_config": {
             "install_istio": True,
