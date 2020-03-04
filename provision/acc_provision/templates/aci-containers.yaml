@@ -863,10 +863,10 @@ spec:
       volumes:
         - name: cni-bin
           hostPath:
-            path: /opt
+            path: {{ config.kube_config.host_agent_cni_bin_path }}
         - name: cni-conf
           hostPath:
-            path: /etc
+            path: {{ config.kube_config.host_agent_cni_conf_path }}
         - name: hostvar
           hostPath:
             path: /var

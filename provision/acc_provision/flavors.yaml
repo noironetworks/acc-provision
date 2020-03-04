@@ -92,6 +92,8 @@ flavors:
         kubectl: oc
         system_namespace: aci-containers-system
         no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
       aci_config:
         items:
           - name: openshift-svc-catalog
