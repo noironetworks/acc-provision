@@ -7,6 +7,9 @@ metadata:
 {% if config.kube_config.system_namespace == "aci-containers-system" %}
     network-plugin: aci-containers
 {% endif %}
+{% if config.kube_config.use_openshift_run_level %}
+    openshift.io/run-level: "0"
+{% endif %}
   annotations:
     openshift.io/node-selector: ''
 ---
