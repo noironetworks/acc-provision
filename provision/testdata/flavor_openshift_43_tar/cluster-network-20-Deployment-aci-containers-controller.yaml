@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    name: aci-containers-controller
+    network-plugin: aci-containers
+  name: aci-containers-controller
+  namespace: aci-containers-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: aci-containers-controller
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+      labels:
+        name: aci-containers-controller
+        network-plugin: aci-containers
+      name: aci-containers-controller
+      namespace: aci-containers-system
+    spec:
+      containers:
+      - env:
+        - name: WATCH_NAMESPACE
+          value: ''
+        - name: ACI_SNAT_NAMESPACE
+          value: aci-containers-system
+        - name: ACI_SNAGLOBALINFO_NAME
+          value: snatglobalinfo
+        - name: ACI_RDCONFIG_NAME
+          value: routingdomain-config
+        image: noiro/aci-containers-controller:master-test
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 8091
+        name: aci-containers-controller
+        volumeMounts:
+        - mountPath: /usr/local/etc/aci-containers/
+          name: controller-config-volume
+        - mountPath: /usr/local/etc/aci-cert/
+          name: aci-user-cert-volume
+      hostNetwork: true
+      serviceAccountName: aci-containers-controller
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - name: aci-user-cert-volume
+        secret:
+          secretName: aci-user-cert
+      - configMap:
+          items:
+          - key: controller-config
+            path: controller.conf
+          name: aci-containers-config
+        name: controller-config-volume
