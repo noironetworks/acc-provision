@@ -219,7 +219,8 @@ def config_default():
             "ep_registry": None,
             "opflex_mode": None,
             "host_agent_cni_bin_path": "/opt",
-            "host_agent_cni_conf_path": "/etc"
+            "host_agent_cni_conf_path": "/etc",
+            "generate_installer_files": False
         },
         "istio_config": {
             "install_istio": True,
@@ -951,7 +952,7 @@ def get_jinja_template(file):
     return template
 
 
-def generate_operator_tar(tar_path, cont_docs, oper_docs):
+def generate_operator_tar(tar_path, cont_docs, oper_docs, config):
 
     # YAML file numbers generated start from 4 as first three are
     # reserved for OpenShift specific files
@@ -970,6 +971,26 @@ def generate_operator_tar(tar_path, cont_docs, oper_docs):
 
     file_start = gen_file_list(cont_docs, file_start, filenames)
     gen_file_list(oper_docs, file_start, filenames)
+
+    # Create three extra files needed for Openshift 4.3 installer
+    if config["kube_config"]["generate_installer_files"]:
+
+        cnetfile_name = 'cluster-network-03-config.yml'
+        masterfile_name = '99-master-kubelet-node-ip.yaml'
+        workerfile_name = '99-worker-kubelet-node-port.yaml'
+
+        template_cnet = get_jinja_template(cnetfile_name)
+        template_cnet.stream(config=config).dump(cnetfile_name)
+
+        template_master = get_jinja_template(masterfile_name)
+        template_master.stream(config=config).dump(masterfile_name)
+
+        template_worker = get_jinja_template(workerfile_name)
+        template_worker.stream(config=config).dump(workerfile_name)
+
+        filenames.append(cnetfile_name)
+        filenames.append(masterfile_name)
+        filenames.append(workerfile_name)
 
     # Create tar for the parsed files and delete the files too
     tar = tarfile.open(tar_path, "w:gz", encoding="utf-8")
@@ -1046,7 +1067,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             oper_stream = op_template.stream(config=config)
             oper_yamls = ''.join(oper_stream)
             oper_docs = yaml.load_all(oper_yamls, Loader=yaml.SafeLoader)
-            generate_operator_tar(tar_path, cont_docs, oper_docs)
+            generate_operator_tar(tar_path, cont_docs, oper_docs, config)
 
         op_cr_template = get_jinja_template('aci-operators-cr.yaml')
         if operator_cr_output and operator_cr_output != "/dev/null":
