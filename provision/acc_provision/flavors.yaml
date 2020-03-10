@@ -95,6 +95,7 @@ flavors:
         no_priority_class: True
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: True
       aci_config:
         items:
           - name: openshift-svc-catalog

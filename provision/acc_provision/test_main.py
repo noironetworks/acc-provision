@@ -224,7 +224,7 @@ def test_flavor_openshift_43():
     run_provision(
         "base_case.inp.yaml",
         "flavor_openshift_43.kube.yaml",
-        None,
+        "flavor_openshift_43_tar",
         None,
         "flavor_openshift_43.apic.txt",
         overrides={"flavor": "openshift-4.3"}
