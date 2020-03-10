@@ -975,7 +975,7 @@ def generate_operator_tar(tar_path, cont_docs, oper_docs, config):
     # Create three extra files needed for Openshift 4.3 installer
     if config["kube_config"]["generate_installer_files"]:
 
-        cnetfile_name = 'cluster-network-03-config.yml'
+        cnetfile_name = 'cluster-network-03-config.yaml'
         masterfile_name = '99-master-kubelet-node-ip.yaml'
         workerfile_name = '99-worker-kubelet-node-port.yaml'
 
@@ -1026,7 +1026,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         else:
             applyname = os.path.basename(operator_output)
             if not tar_path or tar_path == "-":
-                tar_path = applyname + ".tar.gz"
+                tar_path = operator_output + ".tar.gz"
 
         # Generate and convert containers deployment to base64 and add as configMap
         # entry to the operator deployment.
