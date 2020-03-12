@@ -540,7 +540,7 @@ def config_adjust(args, config, prov_apic, no_random):
 
     # Add openshift system namespaces to ACI system EPG
     if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
-        ns_list = ["kube-service-catalog", "openshift-console", "openshift-monitoring", "openshift-web-console"]
+        ns_list = ["kube-service-catalog", "openshift-console", "openshift-dns", "openshift-monitoring", "openshift-web-console"]
         for ns in ns_list:
             adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
