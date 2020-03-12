@@ -22,12 +22,13 @@ data:
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
     ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-console\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
-    \n        },\n        \"openshift-monitoring\": {\n            \"policy-space\"\
-    : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        },\n  \
-    \      \"openshift-web-console\": {\n            \"policy-space\": \"kube\",\n\
-    \            \"name\": \"kubernetes|kube-system\"\n        }        },\n    \"\
-    service-ip-pool\": [\n        {\n            \"end\": \"10.3.0.254\",\n      \
-    \      \"start\": \"10.3.0.2\"\n        }\n    ],\n    \"snat-contract-scope\"\
+    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
+    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
+    \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
+    : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
+    \   },\n    \"service-ip-pool\": [\n        {\n            \"end\": \"10.3.0.254\"\
+    ,\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n    \"snat-contract-scope\"\
     : \"global\",\n    \"static-service-ip-pool\": [\n        {\n            \"end\"\
     : \"10.4.0.254\",\n            \"start\": \"10.4.0.2\"\n        }\n    ],\n  \
     \  \"allocate-service-ips\": false,\n    \"pod-ip-pool\": [\n        {\n     \
@@ -57,10 +58,12 @@ data:
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
     ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-console\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
-    \n        },\n        \"openshift-monitoring\": {\n            \"policy-space\"\
-    : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        },\n  \
-    \      \"openshift-web-console\": {\n            \"policy-space\": \"kube\",\n\
-    \            \"name\": \"kubernetes|kube-system\"\n        }        }\n}"
+    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
+    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
+    \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
+    : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
+    \   }\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n    }\n}"
 kind: ConfigMap
