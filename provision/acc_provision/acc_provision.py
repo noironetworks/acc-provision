@@ -1505,10 +1505,10 @@ def provision(args, apic_file, no_random):
             config["aci_config"]["overlay_vrf"] = vmm_name + "_overlay"
             return config
 
-	def overlayCtx():
+        def overlayCtx():
             vrfName = config["aci_config"]["vrf"]["name"]
             tn_name = config["aci_config"]["cluster_tenant"]
-            vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" %(tn_name, vrfName)
+            vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" % (tn_name, vrfName)
             resp = apic.get(path=vrf_path)
             resJson = json.loads(resp.content)
             print(resJson)
