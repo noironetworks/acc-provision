@@ -374,6 +374,8 @@ flavors:
     overlay: True
     config:
       kube_config:
+        no_priority_class: True
+        use_openshift_run_level: True
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: False
@@ -388,6 +390,8 @@ flavors:
         use_opflex_server_volume: True
         use_kubeconfig_volume: True
         use_cnideploy_initcontainer: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
     status: Experimental
     hidden: False
     order: 16

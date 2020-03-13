@@ -223,7 +223,11 @@ data:
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
         "aci-l3out": {{config.aci_config.l3out.name|json}},
         "aci-ext-networks": {{ config.aci_config.l3out.external_networks|json|indent(width=8) }},
+        {% if config.flavor == "eks" %}
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
+        {% endif %}
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.flavor == "eks" %}
@@ -266,7 +270,11 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-prefix": {{config.aci_config.system_id|json}},
+        {% if config.flavor == "eks" %}
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
+        {% endif %}
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
@@ -319,6 +327,8 @@ data:
   gbp-server-config: |-
    {
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         {% if config.flavor != "eks" %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
         {% else %}

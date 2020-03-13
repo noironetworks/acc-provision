@@ -388,6 +388,8 @@ def config_adjust(args, config, prov_apic, no_random):
             },
             "vrf_dn": {
             },
+            "overlay_vrf": {
+            },
         },
         "net_config": {
             "infra_vlan": infra_vlan,
@@ -1477,9 +1479,13 @@ def provision(args, apic_file, no_random):
         def prodAcl():
             return configurator.capic_kafka_acl(config["aci_config"]["system_id"])
 
-        # This is a temporary fix until cAPIC implements its consumer ACL.
         def consAcl():
-            return configurator.capic_kafka_acl("1EE9AB4924E2")
+            # query to obtain the consumer common name
+            resp = apic.get(path='/api/node/class/topSystem.json?query-target-filter=and(eq(topSystem.role,"controller"))')
+            resJson = json.loads(resp.content)
+            consCN = resJson["imdata"][0]["topSystem"]["attributes"]["serial"]
+            print("Consumer CN: {}".format(consCN))
+            return configurator.capic_kafka_acl(consCN)
 
         def clusterInfo():
             overlayDn = getOverlayDn()
@@ -1495,9 +1501,21 @@ def provision(args, apic_file, no_random):
             config["aci_config"]["subnet_dn"] = subnet_dn
             vrf_dn = getOverlayDn()
             config["aci_config"]["vrf_dn"] = vrf_dn
+            vmm_name = config["aci_config"]["vmm_domain"]["domain"]
+            config["aci_config"]["overlay_vrf"] = vmm_name + "_overlay"
             return config
 
-        postGens = [configurator.capic_kube_dom, configurator.capic_overlay, configurator.capic_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
+	def overlayCtx():
+            vrfName = config["aci_config"]["vrf"]["name"]
+            tn_name = config["aci_config"]["cluster_tenant"]
+            vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" %(tn_name, vrfName)
+            resp = apic.get(path=vrf_path)
+            resJson = json.loads(resp.content)
+            print(resJson)
+            underlay_ccp = resJson["imdata"][0]["fvRtToCtx"]["attributes"]["tDn"]
+            return configurator.capic_overlay(underlay_ccp)
+
+        postGens = [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
         for pGen in postGens:
             path, data = pGen()
             print("Path: {}".format(path))
