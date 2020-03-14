@@ -32,7 +32,7 @@ def in_testdir(f):
 
 
 @in_testdir
-def test_base_case():
+def test_base1_case():
     run_provision(
         "base_case.inp.yaml",
         "base_case.kube.yaml",
@@ -529,7 +529,7 @@ def compare_tar(expected, output, debug, generated):
         assert test_left == 0
         assert test_right == 0
         assert test_diff == 0
-
+        
 
 def run_provision(inpfile, expectedkube=None, expectedtar=None,
                   expectedoperatorcr=None, expectedapic=None, overrides={}):
