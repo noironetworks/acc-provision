@@ -32,7 +32,7 @@ def in_testdir(f):
 
 
 @in_testdir
-def test_base1_case():
+def test_base_case():
     run_provision(
         "base_case.inp.yaml",
         "base_case.kube.yaml",
@@ -522,13 +522,13 @@ def compare_tar(expected, output, debug, generated):
         os.mkdir(tmp_dir)
         tar_output.extractall(path=tmp_dir)
         result = filecmp.dircmp(expected, tmp_dir)
-        test = len(result.diff_files)
-        test1 = len(result.left_only)
-        print(result.right_only)
-        print(result.funny_files)
+        test_left = len(result.left_only)
+        test_right = len(result.right_only)
+        test_diff = len(result.diff_files)
         shutil.rmtree((tmp_dir))
-        assert test == 0
-        assert test1 == 0
+        assert test_left == 0
+        assert test_right == 0
+        assert test_diff == 0
 
 
 def run_provision(inpfile, expectedkube=None, expectedtar=None,
