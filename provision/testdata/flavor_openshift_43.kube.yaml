@@ -198,7 +198,6 @@ data:
                 "start": "10.4.0.2"
             }
         ],
-        "allocate-service-ips": false,
         "pod-ip-pool": [
             {
                 "end": "10.2.255.254",
