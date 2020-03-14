@@ -84,7 +84,8 @@ flavors:
     default_version: 5.0
     config:
       kube_config:
-        use_external_service_ip_allocator: True
+        use_external_service_ip_allocator: False
+        allow_pods_external_access: True
         use_privileged_containers: True
         use_openshift_security_context_constraints: False
         use_openshift_run_level: True
