@@ -20,10 +20,12 @@ data:
     ,\n            \"name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-service-catalog\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-console\"\
+    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-authentication-operator\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
-    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
+    \n        },\n        \"openshift-console\": {\n            \"policy-space\":\
+    \ \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        },\n  \
+    \      \"openshift-dns\": {\n            \"policy-space\": \"kube\",\n       \
+    \     \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
     : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
@@ -56,10 +58,12 @@ data:
     name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-service-catalog\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-console\"\
+    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-authentication-operator\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
-    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
+    \n        },\n        \"openshift-console\": {\n            \"policy-space\":\
+    \ \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        },\n  \
+    \      \"openshift-dns\": {\n            \"policy-space\": \"kube\",\n       \
+    \     \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-monitoring\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
     : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
