@@ -341,6 +341,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "openshift-monitoring",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -694,6 +702,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "openshift-monitoring",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -776,6 +792,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "openshift-monitoring",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -842,6 +866,7 @@ None
                             "fvSubnet": {
                                 "attributes": {
                                     "ip": "10.2.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -850,6 +875,14 @@ None
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "kube",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "l3out",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
