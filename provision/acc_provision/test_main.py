@@ -522,9 +522,13 @@ def compare_tar(expected, output, debug, generated):
         os.mkdir(tmp_dir)
         tar_output.extractall(path=tmp_dir)
         result = filecmp.dircmp(expected, tmp_dir)
-        test = len(result.diff_files)
+        test_left = len(result.left_only)
+        test_right = len(result.right_only)
+        test_diff = len(result.diff_files)
         shutil.rmtree((tmp_dir))
-        assert test == 0
+        assert test_left == 0
+        assert test_right == 0
+        assert test_diff == 0
 
 
 def run_provision(inpfile, expectedkube=None, expectedtar=None,
