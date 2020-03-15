@@ -56,3 +56,9 @@ rules:
   - list
   - watch
   - get
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  verbs:
+  - get
