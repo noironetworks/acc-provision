@@ -194,6 +194,7 @@ def config_default():
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
             "use_apps_api": "apps/v1",
             "use_apps_apigroup": "apps",
+            "host_agent_openshift_resource": False,
             "use_netpol_apigroup": "networking.k8s.io",
             "use_netpol_annotation": False,
             "use_cluster_role": True,

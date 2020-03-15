@@ -85,6 +85,7 @@ flavors:
     config:
       kube_config:
         use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
         allow_pods_external_access: True
         use_privileged_containers: True
         use_openshift_security_context_constraints: False

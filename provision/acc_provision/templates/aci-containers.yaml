@@ -632,6 +632,14 @@ rules:
   - list
   - watch
   - get
+{% if config.kube_config.host_agent_openshift_resource %}
+- apiGroups:
+  - "config.openshift.io"
+  resources:
+  - infrastructures
+  verbs:
+  - get
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
