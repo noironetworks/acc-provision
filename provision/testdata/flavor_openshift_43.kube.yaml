@@ -165,6 +165,10 @@ data:
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
             },
+            "openshift-authentication": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
             "openshift-authentication-operator": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
@@ -264,6 +268,10 @@ data:
                 "name": "kubernetes|kube-system"
             },
             "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            },
+            "openshift-authentication": {
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
             },

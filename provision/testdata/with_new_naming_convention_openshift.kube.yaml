@@ -164,6 +164,10 @@ data:
                 "policy-space": "kube",
                 "name": "aci-containers-kube|aci-containers-system"
             },
+            "openshift-authentication": {
+                "policy-space": "kube",
+                "name": "aci-containers-kube|aci-containers-system"
+            },
             "openshift-authentication-operator": {
                 "policy-space": "kube",
                 "name": "aci-containers-kube|aci-containers-system"
@@ -264,6 +268,10 @@ data:
                 "name": "aci-containers-kube|aci-containers-system"
             },
             "kube-system": {
+                "policy-space": "kube",
+                "name": "aci-containers-kube|aci-containers-system"
+            },
+            "openshift-authentication": {
                 "policy-space": "kube",
                 "name": "aci-containers-kube|aci-containers-system"
             },
