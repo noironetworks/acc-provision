@@ -348,6 +348,11 @@ def config_adjust(args, config, prov_apic, no_random):
     if args.version_token:
         token = args.version_token
 
+    if extern_static:
+        static_service_ip_pool = [{"start": cidr_split(extern_static)[0], "end": cidr_split(extern_static)[1]}]
+    else:
+        static_service_ip_pool = []
+
     adj_config = {
         "aci_config": {
             "cluster_tenant": tenant,
@@ -437,12 +442,7 @@ def config_adjust(args, config, prov_apic, no_random):
                     "end": cidr_split(extern_dynamic)[1],
                 },
             ],
-            "static_service_ip_pool": [
-                {
-                    "start": cidr_split(extern_static)[0],
-                    "end": cidr_split(extern_static)[1],
-                },
-            ],
+            "static_service_ip_pool": static_service_ip_pool,
             "node_service_ip_pool": [
                 {
                     "start": cidr_split(node_svc_subnet)[0],
@@ -476,12 +476,7 @@ def config_adjust(args, config, prov_apic, no_random):
                     "end": cidr_split(extern_dynamic)[1],
                 },
             ],
-            "static_ext_ip_pool": [
-                {
-                    "start": cidr_split(extern_static)[0],
-                    "end": cidr_split(extern_static)[1],
-                },
-            ],
+            "static_ext_ip_pool": static_service_ip_pool,
             "node_service_ip_pool": [
                 {
                     "start": cidr_split(node_svc_subnet)[0],
@@ -1301,9 +1296,11 @@ def check_overlapping_subnets(config):
         "node_subnet": config["net_config"]["node_subnet"],
         "pod_subnet": config["net_config"]["pod_subnet"],
         "extern_dynamic": config["net_config"]["extern_dynamic"],
-        "extern_static": config["net_config"]["extern_static"],
         "node_svc_subnet": config["net_config"]["node_svc_subnet"]
     }
+    # Don't have extern_static field set for OpenShift flavors
+    if config["net_config"]["extern_static"]:
+        subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
         net1, net2 = ipaddr.IPNetwork(sub1), ipaddr.IPNetwork(sub2)

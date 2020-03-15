@@ -196,12 +196,7 @@ data:
             }
         ],
         "snat-contract-scope": "global",
-        "static-service-ip-pool": [
-            {
-                "end": "10.4.0.254",
-                "start": "10.4.0.2"
-            }
-        ],
+        "static-service-ip-pool": [],
         "pod-ip-pool": [
             {
                 "end": "10.2.255.254",
