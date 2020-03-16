@@ -210,7 +210,7 @@ def test_pod_external_access():
 @in_testdir
 def test_flavor_openshift_310():
     run_provision(
-        "base_case.inp.yaml",
+        "flavor_openshift.inp.yaml",
         "flavor_openshift_310.kube.yaml",
         None,
         None,
@@ -222,7 +222,7 @@ def test_flavor_openshift_310():
 @in_testdir
 def test_flavor_openshift_43():
     run_provision(
-        "base_case.inp.yaml",
+        "flavor_openshift.inp.yaml",
         "flavor_openshift_43.kube.yaml",
         "flavor_openshift_43_tar",
         None,
