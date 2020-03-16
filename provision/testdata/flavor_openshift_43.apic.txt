@@ -996,6 +996,62 @@ None
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-multicast-tcp",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "5353",
+                                    "dToPort": "5353",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-multicast-udp",
+                                    "etherT": "ip",
+                                    "prot": "udp",
+                                    "dFromPort": "5353",
+                                    "dToPort": "5353",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-coreDNS-tcp",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9153",
+                                    "dToPort": "9153",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-coreDNS-udp",
+                                    "etherT": "ip",
+                                    "prot": "udp",
+                                    "dFromPort": "9153",
+                                    "dToPort": "9153",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
                         }
                     ]
                 }
