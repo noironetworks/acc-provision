@@ -1,4 +1,4 @@
-apiVersion: config.openshift.io/v1
+apiVersion: operator.openshift.io/v1
 kind: Network
 metadata:
   creationTimestamp: null
@@ -8,8 +8,7 @@ spec:
   clusterNetwork:
   - cidr: {{ config.net_config.pod_subnet|json }}
     hostPrefix: 23
-  externalIP:
-    policy: {}
-  networkType: CiscoAci
+  defaultNetwork:
+    type: CiscoACI
   serviceNetwork:
-  - 172.30.0.0/16
+  - 172.30.0.0/25
