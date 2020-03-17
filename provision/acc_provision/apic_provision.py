@@ -4593,10 +4593,14 @@ class ApicKubeConfig(object):
             self.editItems(self.config, old_naming)
             items = self.config["aci_config"]["items"]
             kube_api_entries = []
+            dns_entries = []
             if 'kube_api_entries' in self.config["aci_config"]:
                 kube_api_entries = self.config["aci_config"]["kube_api_entries"]
+            if 'dns_entries' in self.config["aci_config"]:
+                dns_entries = self.config["aci_config"]["dns_entries"]
             if vmm_type == "OpenShift":
-                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, kube_api_entries, api_filter_prefix)
+                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX,
+                                                   kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
         self.annotateApicObjects(data, pre_existing_tenant)
@@ -4782,7 +4786,8 @@ class ApicKubeConfig(object):
         return path, data
 
 
-def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix, kube_api_entries, api_filter_prefix):
+def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix,
+                                       kube_api_entries, api_filter_prefix, dns_entries, dns_filter_prefix):
     if items is None or len(items) == 0:
         err("Error in getting items for flavor")
 
@@ -5006,7 +5011,7 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
         )
         data['fvTenant']['children'].append(os_contract)
 
-    # add filter and entires to that subject
+    # add filter and entries to that subject
     for item in items:
         os_filter = collections.OrderedDict(
             [
@@ -5107,6 +5112,63 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                                     (
                                                         "name",
                                                         "openshift-%s" % entry['name'],
+                                                    ),
+                                                    (
+                                                        "etherT",
+                                                        entry["etherT"],
+                                                    ),
+                                                    (
+                                                        "prot",
+                                                        entry["prot"],
+                                                    ),
+                                                    (
+                                                        "dFromPort",
+                                                        str(entry["range"][0]),
+                                                    ),
+                                                    (
+                                                        "dToPort",
+                                                        str(entry["range"][1]),
+                                                    ),
+                                                    (
+                                                        "stateful",
+                                                        entry["stateful"],
+                                                    ),
+                                                    (
+                                                        "tcpRules",
+                                                        "",
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    )
+                    filter_entries.append(apic_entry)
+                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                break
+
+    if dns_entries:
+        dns_filter_name = "%sdns-filter" % dns_filter_prefix
+        tenant_children = data['fvTenant']['children']
+        filter_entries = []
+        for child in tenant_children:
+            if 'vzFilter' in child.keys() and child['vzFilter']['attributes']['name'] == dns_filter_name:
+                for entry in dns_entries:
+                    apic_entry = collections.OrderedDict(
+                        [
+                            (
+                                "vzEntry",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "name",
+                                                        entry['name'],
                                                     ),
                                                     (
                                                         "etherT",
