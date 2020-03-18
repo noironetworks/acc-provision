@@ -214,8 +214,10 @@ data:
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         {% endif %}
+        {% if config.flavor != "eks" %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
         "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
+        {% endif %}
         "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
         "aci-service-monitor-interval": {{ config.net_config.service_monitor_interval|json }},
@@ -811,7 +813,7 @@ spec:
               value: {{config.kube_config.default_endpoint_group.tenant|json}}
             {% if config.kube_config.run_gbp_container %}
             - name: NODE_EPG
-              value: "kube-nodes"
+              value: {{config.aci_config.nodes_epg|json}}
             {% else %}
             - name: NODE_EPG
               value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"

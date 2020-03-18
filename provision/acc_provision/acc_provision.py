@@ -1547,7 +1547,7 @@ def addKafkaConfig(config):
     config["aci_config"]["kafka"]["cacert"] = caCert
     brokers = []
     for host in config["aci_config"]["apic_hosts"]:
-        brokers.append(host + ":9093")
+        brokers.append(host + ":9095")
 
     config["aci_config"]["kafka"]["brokers"] = brokers
 
