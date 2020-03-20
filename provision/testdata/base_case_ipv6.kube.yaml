@@ -213,6 +213,9 @@ data:
         "aci-vrf": "kube",
         "aci-vrf-tenant": "common",
         "service-vlan": 4003,
+        "kubeapi-vlan": 4001,
+        "pod-subnet": "1:2:1:1::1/64",
+        "node-subnet": "1:1:1:1::1/64",
         "encap-type": "vxlan",
         "aci-infra-vlan": 4093,
         "cni-netconfig": [
