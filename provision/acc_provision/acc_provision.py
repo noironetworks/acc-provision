@@ -1505,17 +1505,41 @@ def provision(args, apic_file, no_random):
             config["aci_config"]["overlay_vrf"] = vmm_name + "_overlay"
             return config
 
-        def overlayCtx():
+        def getUnderlayCCP():
             vrfName = config["aci_config"]["vrf"]["name"]
             tn_name = config["aci_config"]["cluster_tenant"]
             vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" % (tn_name, vrfName)
             resp = apic.get(path=vrf_path)
             resJson = json.loads(resp.content)
             print(resJson)
+            if len(resJson["imdata"]) == 0:
+                return ""
+
             underlay_ccp = resJson["imdata"][0]["fvRtToCtx"]["attributes"]["tDn"]
+            return underlay_ccp
+
+        def overlayCtx():
+            underlay_ccp = getUnderlayCCP()
+            # cannot proceed without an underlay ccp
+            assert(underlay_ccp), "Need an underlay ccp"
             return configurator.capic_overlay(underlay_ccp)
 
-        postGens = [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
+        def getTenantAccount():
+            tn_name = config["aci_config"]["cluster_tenant"]
+            tn_path = "/api/mo/uni/tn-%s.json?query-target=subtree&target-subtree-class=cloudAwsProvider" % (tn_name)
+            resp = apic.get(path=tn_path)
+            resJson = json.loads(resp.content)
+            accountId = resJson["imdata"][0]["cloudAwsProvider"]["attributes"]["accountId"]
+            print(accountId)
+
+        # if underlay ccp doesn't exist, create one
+        underlay_posts = []
+        u_ccp = getUnderlayCCP()
+        if not u_ccp:
+            print("Creating VPC, you will need additional settings for IPI\n")
+            underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
+
+        postGens = underlay_posts + [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_overlay_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
         for pGen in postGens:
             path, data = pGen()
             print("Path: {}".format(path))
