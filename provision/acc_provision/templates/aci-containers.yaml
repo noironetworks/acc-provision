@@ -269,6 +269,9 @@ data:
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
         "service-vlan": {{ config.net_config.service_vlan|json }},
+        "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        "pod-subnet": {{ config.net_config.pod_subnet|json }},
+        "node-subnet": {{ config.net_config.node_subnet|json }},
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
         {% if config.net_config.interface_mtu %}
