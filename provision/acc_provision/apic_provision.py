@@ -1216,9 +1216,8 @@ class ApicKubeConfig(object):
         return rsToRegion
 
     def capic_underlay_ccp(self):
-        underlay_cidr = "123.45.0.0/16" # FIXME
+        underlay_cidr = "123.45.0.0/16"  # FIXME
         tn_name = self.config["aci_config"]["cluster_tenant"]
-        region = self.config["aci_config"]["vrf"]["region"]
         underlay_vrf_name = self.config["aci_config"]["vrf"]["name"]
         ccp_name = underlay_vrf_name + "_ccp"
         path = "/api/mo/uni/tn-%s/ctxprofile-%s.json" % (tn_name, ccp_name)
@@ -1281,7 +1280,6 @@ class ApicKubeConfig(object):
     def capic_overlay(self, underlay_ccp_dn):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        region = self.config["aci_config"]["vrf"]["region"]
         overlay_vrf_name = self.get_overlay_vrf_name()
         path = "/api/mo/uni/tn-%s/ctxprofile-%s.json" % (tn_name, vmm_name)
         data = collections.OrderedDict(
