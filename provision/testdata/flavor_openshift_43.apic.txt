@@ -347,6 +347,14 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "openshift-monitoring",
@@ -708,6 +716,14 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "openshift-monitoring",
@@ -793,6 +809,14 @@ None
                                         "fvRsCons": {
                                             "attributes": {
                                                 "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1508,6 +1532,48 @@ None
                                     "prot": "tcp",
                                     "dFromPort": "9094",
                                     "dToPort": "9094",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9095",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9095",
+                                    "dToPort": "9095",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-3000",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "3000",
+                                    "dToPort": "3000",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-8080",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "8080",
+                                    "dToPort": "8080",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
