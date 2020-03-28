@@ -175,6 +175,7 @@ def config_default():
                 "srcAddr": None,
                 "activeFlowTimeOut": None,
             },
+            "kube_default_provide_kube_api": False,
         },
         "net_config": {
             "node_subnet": None,

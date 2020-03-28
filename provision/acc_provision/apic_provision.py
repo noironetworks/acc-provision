@@ -4592,6 +4592,7 @@ class ApicKubeConfig(object):
         if "items" in self.config["aci_config"].keys():
             self.editItems(self.config, old_naming)
             items = self.config["aci_config"]["items"]
+            default_provide_api = self.config["aci_config"]["kube_default_provide_kube_api"]
             kube_api_entries = []
             dns_entries = []
             if 'kube_api_entries' in self.config["aci_config"]:
@@ -4599,7 +4600,7 @@ class ApicKubeConfig(object):
             if 'dns_entries' in self.config["aci_config"]:
                 dns_entries = self.config["aci_config"]["dns_entries"]
             if vmm_type == "OpenShift":
-                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX,
+                openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, default_provide_api,
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
@@ -4786,7 +4787,7 @@ class ApicKubeConfig(object):
         return path, data
 
 
-def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix,
+def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix, default_provide_api,
                                        kube_api_entries, api_filter_prefix, dns_entries, dns_filter_prefix):
     if items is None or len(items) == 0:
         err("Error in getting items for flavor")
@@ -4822,6 +4823,9 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
         ]
     )
     data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_kube_api_contract_os)
+
+    if default_provide_api:
+        data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_kube_api_contract_os)
 
     # special case for dns contract
     consume_dns_contract_os = collections.OrderedDict(
