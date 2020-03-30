@@ -392,6 +392,87 @@ flavors:
         use_cnideploy_initcontainer: True
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
+      aci_config:
+        contracts:
+          - name: allow-all-out
+            underlay: True
+            filter: match-all
+            provided: ["inet-ext"]
+            consumed: ["ul-nodes", "ul-boot"]
+          - name: allow-boot
+            underlay: True
+            filter: match-boot
+            provided: ["ul-boot"]
+            consumed: ["inet-ext"]
+          - name: allow-cidr
+            underlay: True
+            filter: match-oshift
+            provided: ["ul-boot", "ul-nodes"]
+            consumed: ["cidr-ext"]
+          - name: allow-kube
+            underlay: False
+            filter: match-all
+            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+        filters:
+            - name: match-all
+              entries:
+                - name: ent1
+            - name: match-boot
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [22, 22]
+                - name: ent2
+                  prot: tcp
+                  range: [19531, 19531]
+            - name: match-oshift
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [22, 22]
+                - name: ent2
+                  prot: tcp
+                  range: [2379, 2380]
+                - name: ent3
+                  prot: tcp
+                  range: [6443, 6443]
+                - name: ent4
+                  prot: tcp
+                  range: [6641, 6642]
+                - name: ent5
+                  prot: tcp
+                  range: [9000, 9999]
+                - name: ent6
+                  prot: tcp
+                  range: [10250, 10250]
+                - name: ent7
+                  prot: tcp
+                  range: [10257, 10257]
+                - name: ent8
+                  prot: tcp
+                  range: [10259, 10259]
+                - name: ent9
+                  prot: tcp
+                  range: [22623, 22623]
+                - name: ent10
+                  prot: tcp
+                  range: [30000, 32767]
+                - name: ent11
+                  prot: udp
+                  range: [4789, 4789]
+                - name: ent12
+                  prot: udp
+                  range: [6081, 6081]
+                - name: ent13
+                  prot: udp
+                  range: [9000, 9999]
+                - name: ent14
+                  prot: udp
+                  range: [30000, 32767]
+                - name: ent15
+                  prot: icmp
+            
     status: Experimental
     hidden: False
     order: 16

@@ -698,6 +698,8 @@ def config_validate(flavor_opts, config):
         print("Using overlay")
         extra_checks = {
             "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
+            "net_config/machine_cidr": (get(("net_config", "machine_cidr")), required),
+            "net_config/bootstrap_subnet": (get(("net_config", "bootstrap_subnet")), required),
         }
     else:
         extra_checks = {
@@ -1524,6 +1526,39 @@ def provision(args, apic_file, no_random):
             assert(underlay_ccp), "Need an underlay ccp"
             return configurator.capic_overlay(underlay_ccp)
 
+        def underlayCidr():
+            u_ccp = getUnderlayCCP()
+            assert(u_ccp), "Need an underlay ccp"
+            split_ccp = u_ccp.split("/")
+            ccp_name = split_ccp[-1].lstrip("ctxprofile-")
+            cidr = config["net_config"]["machine_cidr"]
+            b_subnet = config["net_config"]["bootstrap_subnet"]
+            n_subnet = config["net_config"]["node_subnet"]
+            return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet])
+
+        def setupCapicContractsInline():
+            # setup filters
+            for f in config["aci_config"]["filters"]:
+                path, data = configurator.make_filter(f)
+                postIt(path, data)
+
+            # setup contracts
+            for f in config["aci_config"]["contracts"]:
+                path, data = configurator.make_contract(f)
+                postIt(path, data)
+
+            return "", None
+
+        def postIt(path, data):
+            if args.debug:
+                print("Path: {}".format(path))
+                print("data: {}".format(data))
+            try:
+                resp = apic.post(path, data)
+                print("Resp: {}".format(resp.text))
+            except Exception as e:
+                err("Error in provisioning %s: %s" % (path, str(e)))
+
         def getTenantAccount():
             tn_name = config["aci_config"]["cluster_tenant"]
             tn_path = "/api/mo/uni/tn-%s.json?query-target=subtree&target-subtree-class=cloudAwsProvider" % (tn_name)
@@ -1538,17 +1573,18 @@ def provision(args, apic_file, no_random):
         if not u_ccp:
             print("Creating VPC, you will need additional settings for IPI\n")
             underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
+        else:
+            underlay_posts = [underlayCidr, configurator.capic_underlay_cloudApp]
+
+        underlay_posts.append(setupCapicContractsInline)
 
         postGens = underlay_posts + [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_overlay_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
         for pGen in postGens:
             path, data = pGen()
-            print("Path: {}".format(path))
-            print("data: {}".format(data))
-            try:
-                resp = apic.post(path, data)
-                print("Resp: {}".format(resp.text))
-            except Exception as e:
-                err("Error in provisioning %s: %s" % (path, str(e)))
+            if not path:  # posted inline
+                continue
+
+            postIt(path, data)
 
         config = addKafkaConfig(config)
         config = addMiscConfig(config)
