@@ -869,7 +869,7 @@ def config_validate_preexisting(config, prov_apic):
 
 
 def generate_sample(filep, flavor):
-    if flavor == "eks":
+    if flavor == "cloud":
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
@@ -1459,7 +1459,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
 
-    if flavor == "eks":
+    if flavor == "cloud":
         if prov_apic is None:
             return True
         print("Configuring cAPIC")

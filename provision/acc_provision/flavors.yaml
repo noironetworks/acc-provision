@@ -368,8 +368,8 @@ flavors:
     status: Experimental
     hidden: False
     order: 15
-  eks:
-    desc:         Kubernetes EKS
+  cloud:
+    desc:         Kubernetes Cloud
     default_version: 5.0
     overlay: True
     config:
