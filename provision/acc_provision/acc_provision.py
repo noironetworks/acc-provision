@@ -1471,6 +1471,18 @@ def provision(args, apic_file, no_random):
 
         configurator = ApicKubeConfig(config)
 
+        def getSubnetID(subnet):
+            tn_name = config["aci_config"]["cluster_tenant"]
+            ccp_name = getUnderlayCCPName()
+            cidr = config["net_config"]["machine_cidr"]
+            subnetDN = "uni/tn-{}/ctxprofile-{}/cidr-[{}]/subnet-[{}]".format(tn_name, ccp_name, cidr, subnet)
+            filter = "eq(hcloudSubnetOper.delegateDn, \"{}\")".format(subnetDN)
+            query = '/api/node/class/hcloudSubnetOper.json?query-target=self&query-target-filter={}'.format(filter)
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
+            return subnetID
+
         def getOverlayDn():
             query = configurator.capic_overlay_dn_query()
             resp = apic.get(path=query)
@@ -1526,11 +1538,15 @@ def provision(args, apic_file, no_random):
             assert(underlay_ccp), "Need an underlay ccp"
             return configurator.capic_overlay(underlay_ccp)
 
-        def underlayCidr():
+        def getUnderlayCCPName():
             u_ccp = getUnderlayCCP()
             assert(u_ccp), "Need an underlay ccp"
             split_ccp = u_ccp.split("/")
             ccp_name = split_ccp[-1].lstrip("ctxprofile-")
+            return ccp_name
+
+        def underlayCidr():
+            ccp_name = getUnderlayCCPName()
             cidr = config["net_config"]["machine_cidr"]
             b_subnet = config["net_config"]["bootstrap_subnet"]
             n_subnet = config["net_config"]["node_subnet"]
@@ -1591,6 +1607,16 @@ def provision(args, apic_file, no_random):
 
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
         gen(config, output_file, output_tar, operator_cr_output_file)
+        m_cidr = config["net_config"]["machine_cidr"]
+        b_subnet = config["net_config"]["bootstrap_subnet"]
+        n_subnet = config["net_config"]["node_subnet"]
+        boot_subnetID = getSubnetID(b_subnet)
+        node_subnetID = getSubnetID(n_subnet)
+        print("\nOpenshift Info")
+        print("----------------")
+        print("\tmachineCIDR: {}".format(m_cidr))
+        print("\tboot_subnet: {}".format(boot_subnetID))
+        print("\tnode_subnet: {}".format(node_subnetID))
         return True
 
     # generate output files; and program apic if needed
