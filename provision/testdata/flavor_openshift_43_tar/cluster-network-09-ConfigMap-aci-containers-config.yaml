@@ -70,7 +70,7 @@ data:
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
     : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
-    \   }\n}"
+    \   },\n    \"enable-drop-log\": true\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n    }\n}"
 kind: ConfigMap

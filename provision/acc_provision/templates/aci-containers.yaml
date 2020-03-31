@@ -297,7 +297,12 @@ data:
             {% endif %}
             }{% if not loop.last %},
             {% endif %}{% endfor %}
-        }
+        },
+        {% if config.drop_log_config.enable %}
+        "enable-drop-log": true
+        {% else %}
+        "enable-drop-log": false
+        {% endif %}
     }
   opflex-agent-config: |-
     {
@@ -585,6 +590,16 @@ rules:
   - list
   - watch
   - get
+{% if config.drop_log_config.enable %}
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+{% endif %}
 {% if config.kube_config.use_aci_anywhere_crd %}
 - apiGroups:
   - "aci.aw"

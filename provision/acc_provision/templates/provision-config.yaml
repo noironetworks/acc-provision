@@ -73,3 +73,6 @@ registry:
 #istio_config:
   # install_istio: False         # default is True
   # install_profile: "default"   # override if needed, default is "demo"
+
+#drop_log_config:
+  # enable: False         # default is True
