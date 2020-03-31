@@ -1610,13 +1610,13 @@ def provision(args, apic_file, no_random):
         m_cidr = config["net_config"]["machine_cidr"]
         b_subnet = config["net_config"]["bootstrap_subnet"]
         n_subnet = config["net_config"]["node_subnet"]
+        p_subnet = config["net_config"]["pod_subnet"].replace(".1/", ".0/")
+        region = config["aci_config"]["vrf"]["region"]
         boot_subnetID = getSubnetID(b_subnet)
         node_subnetID = getSubnetID(n_subnet)
         print("\nOpenshift Info")
         print("----------------")
-        print("\tmachineCIDR: {}".format(m_cidr))
-        print("\tboot_subnet: {}".format(boot_subnetID))
-        print("\tnode_subnet: {}".format(node_subnetID))
+        print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoAci\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
         return True
 
     # generate output files; and program apic if needed
