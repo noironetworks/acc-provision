@@ -348,6 +348,17 @@ def test_preexisting_tenant():
 
 
 @in_testdir
+def test_with_no_drop_log():
+    run_provision(
+        "with_no_drop_log.inp.yaml",
+        "with_no_drop_log.kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout

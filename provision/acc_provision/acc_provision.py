@@ -238,6 +238,9 @@ def config_default():
             "hostagent_log_level": "info",
             "opflexagent_log_level": "info",
         },
+        "drop_log_config": {
+            "enable": True
+        },
     }
     return default_config
 
