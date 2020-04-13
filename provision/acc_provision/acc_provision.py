@@ -1369,6 +1369,7 @@ def provision(args, apic_file, no_random):
     # the APIC
     config["discovered"] = {"infra_vlan": getattr(args, "infra_vlan", None)}
 
+    flavor = args.flavor
     if args.username:
         config["aci_config"]["apic_login"]["username"] = args.username
 
@@ -1382,6 +1383,10 @@ def provision(args, apic_file, no_random):
         err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
         return False
 
+    if flavor == "cloud" and 'use_legacy_kube_naming_convention' in user_config['aci_config']:
+        err("use_legacy_kube_naming_convention not allowed in cloud flavor")
+        return False
+
     if user_config:
         if 'versions_url' in user_config and 'path' in user_config['versions_url']:
             versions_url = user_config['versions_url']['path']
@@ -1391,7 +1396,6 @@ def provision(args, apic_file, no_random):
     if "netflow_exporter" in config["aci_config"]:
         config["aci_config"]["netflow_exporter"]["enable"] = True
 
-    flavor = args.flavor
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
