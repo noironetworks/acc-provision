@@ -1322,7 +1322,7 @@ class ApicKubeConfig(object):
             ]
         )
         rsToRegion = self.capic_rsToRegion()
-        _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets)
+        _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "no")
         child_list = [rsToRegion, rsToCtx, cidr]
 
         for child in child_list:
@@ -1388,7 +1388,7 @@ class ApicKubeConfig(object):
         underlay_ref = self.capic_underlay_p(underlay_ccp_dn)
         pod_subnet = self.config["net_config"]["pod_subnet"]
         cidr = pod_subnet.replace(".1/", ".0/")
-        _, cidrMo = self.cloudCidr(vmm_name, cidr, [cidr])
+        _, cidrMo = self.cloudCidr(vmm_name, cidr, [cidr], "yes")
 
         child_list = [rsToRegion, underlay_ref, rsToCtx, cidrMo]
 
@@ -1397,7 +1397,7 @@ class ApicKubeConfig(object):
 
         return path, data
 
-    def cloudCidr(self, ccp, cidr, subnets):
+    def cloudCidr(self, ccp, cidr, subnets, primary):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         path = "/api/mo/uni/tn-{}/ctxprofile-{}/cidr-[{}].json".format(tn_name, ccp, cidr)
         cidrMo = collections.OrderedDict(
@@ -1411,6 +1411,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("addr", cidr),
+                                        ("primary", primary),
                                     ]
                                 ),
                             ),

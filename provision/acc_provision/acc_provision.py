@@ -1550,7 +1550,7 @@ def provision(args, apic_file, no_random):
             cidr = config["net_config"]["machine_cidr"]
             b_subnet = config["net_config"]["bootstrap_subnet"]
             n_subnet = config["net_config"]["node_subnet"]
-            return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet])
+            return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet], "no")
 
         def setupCapicContractsInline():
             # setup filters
