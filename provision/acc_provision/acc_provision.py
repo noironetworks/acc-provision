@@ -388,6 +388,8 @@ def config_adjust(args, config, prov_apic, no_random):
             },
             "vrf_dn": {
             },
+            "overlay_vrf": {
+            },
         },
         "net_config": {
             "infra_vlan": infra_vlan,
@@ -696,6 +698,8 @@ def config_validate(flavor_opts, config):
         print("Using overlay")
         extra_checks = {
             "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
+            "net_config/machine_cidr": (get(("net_config", "machine_cidr")), required),
+            "net_config/bootstrap_subnet": (get(("net_config", "bootstrap_subnet")), required),
         }
     else:
         extra_checks = {
@@ -865,7 +869,7 @@ def config_validate_preexisting(config, prov_apic):
 
 
 def generate_sample(filep, flavor):
-    if flavor == "eks":
+    if flavor == "cloud":
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
@@ -1365,6 +1369,7 @@ def provision(args, apic_file, no_random):
     # the APIC
     config["discovered"] = {"infra_vlan": getattr(args, "infra_vlan", None)}
 
+    flavor = args.flavor
     if args.username:
         config["aci_config"]["apic_login"]["username"] = args.username
 
@@ -1378,6 +1383,10 @@ def provision(args, apic_file, no_random):
         err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
         return False
 
+    if flavor == "cloud" and 'use_legacy_kube_naming_convention' in user_config['aci_config']:
+        err("use_legacy_kube_naming_convention not allowed in cloud flavor")
+        return False
+
     if user_config:
         if 'versions_url' in user_config and 'path' in user_config['versions_url']:
             versions_url = user_config['versions_url']['path']
@@ -1387,7 +1396,6 @@ def provision(args, apic_file, no_random):
     if "netflow_exporter" in config["aci_config"]:
         config["aci_config"]["netflow_exporter"]["enable"] = True
 
-    flavor = args.flavor
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
@@ -1455,7 +1463,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
 
-    if flavor == "eks":
+    if flavor == "cloud":
         if prov_apic is None:
             return True
         print("Configuring cAPIC")
@@ -1467,6 +1475,18 @@ def provision(args, apic_file, no_random):
 
         configurator = ApicKubeConfig(config)
 
+        def getSubnetID(subnet):
+            tn_name = config["aci_config"]["cluster_tenant"]
+            ccp_name = getUnderlayCCPName()
+            cidr = config["net_config"]["machine_cidr"]
+            subnetDN = "uni/tn-{}/ctxprofile-{}/cidr-[{}]/subnet-[{}]".format(tn_name, ccp_name, cidr, subnet)
+            filter = "eq(hcloudSubnetOper.delegateDn, \"{}\")".format(subnetDN)
+            query = '/api/node/class/hcloudSubnetOper.json?query-target=self&query-target-filter={}'.format(filter)
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
+            return subnetID
+
         def getOverlayDn():
             query = configurator.capic_overlay_dn_query()
             resp = apic.get(path=query)
@@ -1477,9 +1497,13 @@ def provision(args, apic_file, no_random):
         def prodAcl():
             return configurator.capic_kafka_acl(config["aci_config"]["system_id"])
 
-        # This is a temporary fix until cAPIC implements its consumer ACL.
         def consAcl():
-            return configurator.capic_kafka_acl("1EE9AB4924E2")
+            # query to obtain the consumer common name
+            resp = apic.get(path='/api/node/class/topSystem.json?query-target-filter=and(eq(topSystem.role,"controller"))')
+            resJson = json.loads(resp.content)
+            consCN = resJson["imdata"][0]["topSystem"]["attributes"]["serial"]
+            print("Consumer CN: {}".format(consCN))
+            return configurator.capic_kafka_acl(consCN)
 
         def clusterInfo():
             overlayDn = getOverlayDn()
@@ -1495,24 +1519,108 @@ def provision(args, apic_file, no_random):
             config["aci_config"]["subnet_dn"] = subnet_dn
             vrf_dn = getOverlayDn()
             config["aci_config"]["vrf_dn"] = vrf_dn
+            vmm_name = config["aci_config"]["vmm_domain"]["domain"]
+            config["aci_config"]["overlay_vrf"] = vmm_name + "_overlay"
             return config
 
-        postGens = [configurator.capic_kube_dom, configurator.capic_overlay, configurator.capic_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
-        for pGen in postGens:
-            path, data = pGen()
-            print("Path: {}".format(path))
-            print("data: {}".format(data))
+        def getUnderlayCCP():
+            vrfName = config["aci_config"]["vrf"]["name"]
+            tn_name = config["aci_config"]["cluster_tenant"]
+            vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" % (tn_name, vrfName)
+            resp = apic.get(path=vrf_path)
+            resJson = json.loads(resp.content)
+            print(resJson)
+            if len(resJson["imdata"]) == 0:
+                return ""
+
+            underlay_ccp = resJson["imdata"][0]["fvRtToCtx"]["attributes"]["tDn"]
+            return underlay_ccp
+
+        def overlayCtx():
+            underlay_ccp = getUnderlayCCP()
+            # cannot proceed without an underlay ccp
+            assert(underlay_ccp), "Need an underlay ccp"
+            return configurator.capic_overlay(underlay_ccp)
+
+        def getUnderlayCCPName():
+            u_ccp = getUnderlayCCP()
+            assert(u_ccp), "Need an underlay ccp"
+            split_ccp = u_ccp.split("/")
+            ccp_name = split_ccp[-1].lstrip("ctxprofile-")
+            return ccp_name
+
+        def underlayCidr():
+            ccp_name = getUnderlayCCPName()
+            cidr = config["net_config"]["machine_cidr"]
+            b_subnet = config["net_config"]["bootstrap_subnet"]
+            n_subnet = config["net_config"]["node_subnet"]
+            return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet], "no")
+
+        def setupCapicContractsInline():
+            # setup filters
+            for f in config["aci_config"]["filters"]:
+                path, data = configurator.make_filter(f)
+                postIt(path, data)
+
+            # setup contracts
+            for f in config["aci_config"]["contracts"]:
+                path, data = configurator.make_contract(f)
+                postIt(path, data)
+
+            return "", None
+
+        def postIt(path, data):
+            if args.debug:
+                print("Path: {}".format(path))
+                print("data: {}".format(data))
             try:
                 resp = apic.post(path, data)
                 print("Resp: {}".format(resp.text))
             except Exception as e:
                 err("Error in provisioning %s: %s" % (path, str(e)))
 
+        def getTenantAccount():
+            tn_name = config["aci_config"]["cluster_tenant"]
+            tn_path = "/api/mo/uni/tn-%s.json?query-target=subtree&target-subtree-class=cloudAwsProvider" % (tn_name)
+            resp = apic.get(path=tn_path)
+            resJson = json.loads(resp.content)
+            accountId = resJson["imdata"][0]["cloudAwsProvider"]["attributes"]["accountId"]
+            print(accountId)
+
+        # if underlay ccp doesn't exist, create one
+        underlay_posts = []
+        u_ccp = getUnderlayCCP()
+        if not u_ccp:
+            print("Creating VPC, you will need additional settings for IPI\n")
+            underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
+        else:
+            underlay_posts = [underlayCidr, configurator.capic_underlay_cloudApp]
+
+        underlay_posts.append(setupCapicContractsInline)
+
+        postGens = underlay_posts + [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_overlay_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
+        for pGen in postGens:
+            path, data = pGen()
+            if not path:  # posted inline
+                continue
+
+            postIt(path, data)
+
         config = addKafkaConfig(config)
         config = addMiscConfig(config)
 
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
         gen(config, output_file, output_tar, operator_cr_output_file)
+        m_cidr = config["net_config"]["machine_cidr"]
+        b_subnet = config["net_config"]["bootstrap_subnet"]
+        n_subnet = config["net_config"]["node_subnet"]
+        p_subnet = config["net_config"]["pod_subnet"].replace(".1/", ".0/")
+        region = config["aci_config"]["vrf"]["region"]
+        boot_subnetID = getSubnetID(b_subnet)
+        node_subnetID = getSubnetID(n_subnet)
+        print("\nOpenshift Info")
+        print("----------------")
+        print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoAci\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
         return True
 
     # generate output files; and program apic if needed
@@ -1529,7 +1637,7 @@ def addKafkaConfig(config):
     config["aci_config"]["kafka"]["cacert"] = caCert
     brokers = []
     for host in config["aci_config"]["apic_hosts"]:
-        brokers.append(host + ":9093")
+        brokers.append(host + ":9095")
 
     config["aci_config"]["kafka"]["brokers"] = brokers
 

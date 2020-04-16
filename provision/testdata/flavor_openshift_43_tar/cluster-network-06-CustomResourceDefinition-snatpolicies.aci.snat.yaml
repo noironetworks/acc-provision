@@ -29,6 +29,8 @@ spec:
           type: object
         spec:
           properties:
+            destIp:
+              type: array
             selector:
               properties:
                 labels:
@@ -39,6 +41,8 @@ spec:
                 namespace:
                   type: string
               type: object
+            snatIp:
+              type: array
           type: object
   version: v1
   versions:
