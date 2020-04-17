@@ -3,7 +3,6 @@
 #
 aci_config:
   system_id: kube                       # Every opflex cluster on the same fabric must have a distict ID
-  use_legacy_kube_naming_convention: True
   apic_hosts:                           # List of APIC hosts to connect to for APIC API access
     - 127.0.0.1
   vmm_domain:                           # Kubernetes VMM domain configuration
@@ -28,6 +27,8 @@ aci_config:
 # Networks used by Kubernetes
 #
 net_config:
+  machine_cidr: 1.100.0.0/16
+  bootstrap_subnet: 1.100.202.0/24
   node_subnet: 1.100.202.1/24              # Subnet to use for nodes
   pod_subnet: 10.2.56.1/21 # Subnet to use for Kubernetes Pods
   extern_dynamic: 10.3.56.1/21       # Subnet to use for dynamically allocated external services

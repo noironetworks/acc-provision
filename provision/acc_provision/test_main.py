@@ -268,13 +268,13 @@ def test_flavor_localhost():
 
 
 @in_testdir
-def test_flavor_eks():
+def test_flavor_cloud():
     run_provision(
-        "flavor_eks.inp.yaml",
+        "flavor_cloud.inp.yaml",
         None,
         None,
         None,
-        overrides={"flavor": "eks"}
+        overrides={"flavor": "cloud"}
     )
 
 

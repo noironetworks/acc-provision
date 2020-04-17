@@ -993,20 +993,298 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def capic_overlay_epg(self, name):
+    def make_entry(self, e_spec):
+        name = e_spec["name"]
+        data = aci_obj("vzEntry", [('name', name)])
+
+        if 'prot' in e_spec.keys():
+            data["vzEntry"]["attributes"]["etherT"] = "ipv4"
+            data["vzEntry"]["attributes"]["prot"] = e_spec['prot']
+
+        if 'range' in e_spec.keys():
+            data["vzEntry"]["attributes"]["dFromPort"] = str(e_spec['range'][0])
+            data["vzEntry"]["attributes"]["dToPort"] = str(e_spec['range'][1])
+
+        return data
+
+    def vmm_scoped_name(self, name):
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        return "{}_{}".format(vmm_name, name)
+
+    def make_contract(self, c_spec):
         tn_name = self.config["aci_config"]["cluster_tenant"]
-        vrfName = "{}-vrf".format(tn_name)
+        name = self.vmm_scoped_name(c_spec["name"])
+        path = "/api/mo/uni/tn-%s/brc-%s.json" % (tn_name, name)
+        filts = []
+
+        fname = self.vmm_scoped_name(c_spec["filter"])
+        filts.append(aci_obj("vzRsSubjFiltAtt", [('tnVzFilterName', fname)]))
+        subj = aci_obj(
+            "vzSubj",
+            [('name', name + "_sub"),
+             ('consMatchT', "AtleastOne"),
+             ('provMatchT', "AtleastOne"),
+             ('_children', filts)],
+        )
+
+        children = []
+        children.append(subj)
+        return path, aci_obj("vzBrCP", [('name', name), ('_children', children)])
+
+    def make_filter(self, f_spec):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        name = self.vmm_scoped_name(f_spec["name"])
+        path = "/api/mo/uni/tn-%s/flt-%s.json" % (tn_name, name)
+        children = []
+        for e in f_spec["entries"]:
+            emo = self.make_entry(e)
+            children.append(emo)
+
+        return path, aci_obj("vzFilter", [('name', name), ('_children', children)])
+
+    def capic_epg(self, name, vrf_name):
+        children = []
+        children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
+        self.add_configured_contracts(name, children)
+        return aci_obj("cloudEPg", [('name', name), ('_children', children)])
+
+    def capic_cloudApp(self, ap_name):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        path = "/api/mo/uni/tn-%s/cloudapp-%s.json" % (tn_name, ap_name)
         data = collections.OrderedDict(
             [
                 (
-                    "cloudEPg",
+                    "cloudApp",
                     collections.OrderedDict(
                         [
                             (
                                 "attributes",
                                 collections.OrderedDict(
                                     [
-                                        ("name", name),
+                                        ("name", ap_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return path, data
+
+    def capic_overlay_cloudApp(self):
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        path, data = self.capic_cloudApp(vmm_name)
+        overlayVrfName = self.get_overlay_vrf_name()
+
+        epg_list = ["default", "system", "nodes"]
+        for epg in epg_list:
+            epg_obj = self.capic_epg(self.ACI_PREFIX + epg, overlayVrfName)
+            data["cloudApp"]["children"].append(epg_obj)
+        # add custom epgs
+        for epg in self.config["aci_config"].get("custom_epgs", []):
+            epg_obj = self.capic_epg(epg, overlayVrfName)
+            data["cloudApp"]["children"].append(epg_obj)
+
+        return path, data
+
+    def add_configured_contracts(self, name, children):
+        for c in self.config["aci_config"]["contracts"]:
+            if name in c["consumed"]:
+                c_name = self.vmm_scoped_name(c['name'])
+                children.append(aci_obj("fvRsCons", [('tnVzBrCPName', c_name)]))
+        for c in self.config["aci_config"]["contracts"]:
+            if name in c["provided"]:
+                c_name = self.vmm_scoped_name(c['name'])
+                children.append(aci_obj("fvRsProv", [('tnVzBrCPName', c_name)]))
+
+    def capic_underlay_epg(self, name, ipsel):
+        vrf_name = self.config["aci_config"]["vrf"]["name"]
+        match = "IP==\'{}\'".format(ipsel)
+        children = []
+        children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
+        children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        self.add_configured_contracts(name, children)
+
+        epg = aci_obj(
+            "cloudEPg",
+            [('name', name),
+             ('_children', children)],
+        )
+
+        return epg
+
+    def capic_ext_epg(self, name, subnet):
+        vrf_name = self.config["aci_config"]["vrf"]["name"]
+        children = []
+        children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
+        children.append(aci_obj("cloudExtEPSelector", [('name', "sel1"), ("subnet", subnet)]))
+        self.add_configured_contracts(name, children)
+
+        epg = aci_obj(
+            "cloudExtEPg",
+            [('name', name),
+             ('_children', children)],
+        )
+
+        return epg
+
+    def capic_underlay_cloudApp(self):
+        appName = self.vmm_scoped_name("ul_ap")
+        path, data = self.capic_cloudApp(appName)
+
+        boot_epg_obj = self.capic_underlay_epg("ul-boot", self.config["net_config"]["bootstrap_subnet"])
+        data["cloudApp"]["children"].append(boot_epg_obj)
+        node_epg_obj = self.capic_underlay_epg("ul-nodes", self.config["net_config"]["node_subnet"])
+        data["cloudApp"]["children"].append(node_epg_obj)
+
+        cidr_epg_obj = self.capic_ext_epg("cidr-ext", self.config["net_config"]["machine_cidr"])
+        data["cloudApp"]["children"].append(cidr_epg_obj)
+        inet_epg_obj = self.capic_ext_epg("inet-ext", "0.0.0.0/0")
+        data["cloudApp"]["children"].append(inet_epg_obj)
+
+        return path, data
+
+    def capic_underlay_p(self, underlay_ccp_dn):
+        data = collections.OrderedDict(
+            [
+                (
+                    "cloudCtxUnderlayP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        rsToUnderlay = collections.OrderedDict(
+            [
+                (
+                    "cloudRsToUnderlayCtxProfile",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tDn", underlay_ccp_dn),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        data["cloudCtxUnderlayP"]["children"].append(rsToUnderlay)
+        return data
+
+    def get_overlay_vrf_name(self):
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        overlay_vrf_name = vmm_name + "_overlay"
+        return overlay_vrf_name
+
+    def vrf_object(self, vrf_name):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tn_name, vrf_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvCtx",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vrf_name),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                ),
+            ]
+        )
+        return path, data
+
+    def capic_overlay_vrf(self):
+        overlay_vrf_name = self.get_overlay_vrf_name()
+        return self.vrf_object(overlay_vrf_name)
+
+    def capic_underlay_vrf(self):
+        underlay_vrf_name = self.config["aci_config"]["vrf"]["name"]
+        return self.vrf_object(underlay_vrf_name)
+
+    def capic_rsToRegion(self):
+        region = self.config["aci_config"]["vrf"]["region"]
+        regionDn = "uni/clouddomp/provp-aws/region-{}".format(region)
+        rsToRegion = collections.OrderedDict(
+            [
+                (
+                    "cloudRsCtxProfileToRegion",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tDn", regionDn),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                []
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return rsToRegion
+
+    def capic_underlay_ccp(self):
+        underlay_cidr = self.config["net_config"]["machine_cidr"]
+        b_subnet = self.config["net_config"]["bootstrap_subnet"]
+        n_subnet = self.config["net_config"]["node_subnet"]
+        subnets = [b_subnet, n_subnet]
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        underlay_vrf_name = self.config["aci_config"]["vrf"]["name"]
+        ccp_name = underlay_vrf_name + "_ccp"
+        path = "/api/mo/uni/tn-%s/ctxprofile-%s.json" % (tn_name, ccp_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "cloudCtxProfile",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ccp_name),
                                     ]
                                 ),
                             ),
@@ -1023,14 +1301,14 @@ class ApicKubeConfig(object):
         rsToCtx = collections.OrderedDict(
             [
                 (
-                    "cloudRsCloudEPgCtx",
+                    "cloudRsToCtx",
                     collections.OrderedDict(
                         [
                             (
                                 "attributes",
                                 collections.OrderedDict(
                                     [
-                                        ("tnFvCtxName", vrfName),
+                                        ("tnFvCtxName", underlay_vrf_name),
                                     ]
                                 ),
                             ),
@@ -1043,51 +1321,19 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        rsToRegion = self.capic_rsToRegion()
+        _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "no")
+        child_list = [rsToRegion, rsToCtx, cidr]
 
-        data["cloudEPg"]["children"].append(rsToCtx)
-        return data
+        for child in child_list:
+            data["cloudCtxProfile"]["children"].append(child)
 
-    def capic_cloudApp(self):
-        tn_name = self.config["aci_config"]["cluster_tenant"]
-        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        path = "/api/mo/uni/tn-%s/cloudapp-%s.json" % (tn_name, vmm_name)
-        data = collections.OrderedDict(
-            [
-                (
-                    "cloudApp",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                        ("name", vmm_name),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "children",
-                                []
-                            ),
-                        ]
-                    )
-                )
-            ]
-        )
-
-        epg_d = self.capic_overlay_epg("kube-default")
-        data["cloudApp"]["children"].append(epg_d)
-        epg_s = self.capic_overlay_epg("kube-system")
-        data["cloudApp"]["children"].append(epg_s)
-        epg_n = self.capic_overlay_epg("kube-nodes")
-        data["cloudApp"]["children"].append(epg_n)
         return path, data
 
-    def capic_overlay(self):
+    def capic_overlay(self, underlay_ccp_dn):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        region = self.config["aci_config"]["vrf"]["region"]
-        vrfName = "{}-vrf".format(tn_name)
+        overlay_vrf_name = self.get_overlay_vrf_name()
         path = "/api/mo/uni/tn-%s/ctxprofile-%s.json" % (tn_name, vmm_name)
         data = collections.OrderedDict(
             [
@@ -1124,7 +1370,7 @@ class ApicKubeConfig(object):
                                 "attributes",
                                 collections.OrderedDict(
                                     [
-                                        ("tnFvCtxName", vrfName),
+                                        ("tnFvCtxName", overlay_vrf_name),
                                     ]
                                 ),
                             ),
@@ -1138,40 +1384,22 @@ class ApicKubeConfig(object):
             ]
         )
 
-        regionDn = "uni/clouddomp/provp-aws/region-{}".format(region)
-        rsToRegion = collections.OrderedDict(
-            [
-                (
-                    "cloudRsCtxProfileToRegion",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                        ("tDn", regionDn),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "children",
-                                []
-                            ),
-                        ]
-                    )
-                )
-            ]
-        )
+        rsToRegion = self.capic_rsToRegion()
+        underlay_ref = self.capic_underlay_p(underlay_ccp_dn)
         pod_subnet = self.config["net_config"]["pod_subnet"]
         cidr = pod_subnet.replace(".1/", ".0/")
-        child_list = [rsToRegion, rsToCtx, self.cloudCidr(cidr)]
+        _, cidrMo = self.cloudCidr(vmm_name, cidr, [cidr], "yes")
+
+        child_list = [rsToRegion, underlay_ref, rsToCtx, cidrMo]
 
         for child in child_list:
             data["cloudCtxProfile"]["children"].append(child)
 
         return path, data
 
-    def cloudCidr(self, cidr):
+    def cloudCidr(self, ccp, cidr, subnets, primary):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        path = "/api/mo/uni/tn-{}/ctxprofile-{}/cidr-[{}].json".format(tn_name, ccp, cidr)
         cidrMo = collections.OrderedDict(
             [
                 (
@@ -1183,7 +1411,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("addr", cidr),
-                                        ("primary", "yes"),
+                                        ("primary", primary),
                                     ]
                                 ),
                             ),
@@ -1197,8 +1425,9 @@ class ApicKubeConfig(object):
             ]
         )
 
-        cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(cidr))
-        return cidrMo
+        for subnet in subnets:
+            cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
+        return path, cidrMo
 
     def cloudSubnet(self, cidr):
         region = self.config["aci_config"]["vrf"]["region"]
