@@ -27,5 +27,6 @@ setup(
           'jinja2<3.0.0',
           'pyopenssl',
           'ipaddr',
+          'MarkupSafe<2.0',
     ],
 )
