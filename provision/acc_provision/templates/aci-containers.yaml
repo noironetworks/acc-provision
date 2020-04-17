@@ -124,6 +124,10 @@ spec:
                 namespace:
                   type: string
               type: object
+            snatIp:
+              type: array
+            destIp:
+              type: array
           type: object
   version: v1
   versions:
