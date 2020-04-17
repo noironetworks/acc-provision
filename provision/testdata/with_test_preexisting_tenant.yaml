@@ -63,6 +63,10 @@ spec:
                 namespace:
                   type: string
               type: object
+            snatIp:
+              type: array
+            destIp:
+              type: array
           type: object
   version: v1
   versions:
@@ -102,255 +106,19 @@ spec:
   scope: Namespaced
   version: v1
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: istio-operator
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: istiocontrolplanes.install.istio.io
+  name: aciistiooperators.aci.istio
 spec:
-  group: install.istio.io
+  group: aci.istio
   names:
-    kind: IstioControlPlane
-    listKind: IstioControlPlaneList
-    plural: istiocontrolplanes
-    singular: istiocontrolplane
-    shortNames:
-    - icp
+    kind: AciIstioOperator
+    listKind: AciIstioOperatorList
+    plural: aciistiooperators
+    singular: aciistiooperator
   scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values.
-            More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase.
-            More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        spec:
-          description: 'Specification of the desired state of the istio control plane resource.
-            More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
-          type: object
-        status:
-          description: 'Status describes each of istio control plane component status at the current time.
-            0 means NONE, 1 means UPDATING, 2 means HEALTHY, 3 means ERROR, 4 means RECONCILING.
-            More info: https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/v1alpha2.pb.html &
-            https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
-          type: object
-  versions:
-  - name: v1alpha2
-    served: true
-    storage: true
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  namespace: istio-operator
-  name: istio-operator
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  creationTimestamp: null
-  name: istio-operator
-rules:
-# istio groups
-- apiGroups:
-  - authentication.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - config.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - install.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - networking.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - rbac.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - security.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-# k8s groups
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - '*'
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions.apiextensions.k8s.io
-  - customresourcedefinitions
-  verbs:
-  - '*'
-- apiGroups:
-  - apps
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/finalizers
-  - ingresses
-  - replicasets
-  - statefulsets
-  verbs:
-  - '*'
-- apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - '*'
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - '*'
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterrolebindings
-  - clusterroles
-  - roles
-  - rolebindings
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - configmaps  
-  - endpoints
-  - events
-  - namespaces
-  - pods
-  - persistentvolumeclaims
-  - secrets
-  - services
-  - serviceaccounts  
-  verbs:
-  - '*'
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: istio-operator
-subjects:
-- kind: ServiceAccount
-  name: istio-operator
-  namespace: istio-operator
-roleRef:
-  kind: ClusterRole
-  name: istio-operator
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: istio-operator
-  labels:
-    name: istio-operator
-  name: istio-operator-metrics
-spec:
-  ports:
-  - name: http-metrics
-    port: 8383
-    targetPort: 8383
-  selector:
-    name: istio-operator
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: istio-operator
-  name: istio-operator
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: istio-operator
-  template:
-    metadata:
-      labels:
-        name: istio-operator
-    spec:
-      serviceAccountName: istio-operator
-      containers:
-        - name: istio-operator
-          image: docker.io/istio/operator:1.4.0
-          command:
-          - istio-operator
-          - server
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 200m
-              memory: 256Mi
-            requests:
-              cpu: 50m
-              memory: 128Mi
-          env:
-            - name: WATCH_NAMESPACE
-              value: ""
-            - name: LEADER_ELECTION_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: OPERATOR_NAME
-              value: "istio-operator"
----
-apiVersion: install.istio.io/v1alpha2
-kind: IstioControlPlane
-metadata:
-  namespace: istio-operator
-  name: example-istiocontrolplane
-spec:
-  profile: demo
+  version: v1
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -376,6 +144,7 @@ data:
         "aci-vmm-controller": "kube",
         "aci-policy-tenant": "old_tenant",
         "require-netpol-annot": false,
+        "install-istio": true,
         "aci-podbd-dn": "uni/tn-old_tenant/BD-aci-containers-kube-pod-bd",
         "aci-nodebd-dn": "uni/tn-old_tenant/BD-aci-containers-kube-node-bd",
         "aci-service-phys-dom": "kube-pdom",
@@ -400,11 +169,11 @@ data:
             },
             "istio-operator": {
                 "policy-space": "old_tenant",
-                "name": "kubernetes|kube-istio"
+                "name": "aci-containers-kube|aci-containers-istio"
             },
             "istio-system": {
                 "policy-space": "old_tenant",
-                "name": "kubernetes|kube-istio"
+                "name": "aci-containers-kube|aci-containers-istio"
             },
             "kube-system": {
                 "policy-space": "old_tenant",
@@ -453,6 +222,9 @@ data:
         "aci-vrf": "kube",
         "aci-vrf-tenant": "common",
         "service-vlan": 4003,
+        "kubeapi-vlan": 4001,
+        "pod-subnet": "10.2.0.1/16",
+        "node-subnet": "10.1.0.1/16",
         "encap-type": "vxlan",
         "aci-infra-vlan": 4093,
         "cni-netconfig": [
@@ -478,16 +250,17 @@ data:
             },
             "istio-operator": {
                 "policy-space": "old_tenant",
-                "name": "kubernetes|kube-istio"
+                "name": "aci-containers-kube|aci-containers-istio"
             },
             "istio-system": {
                 "policy-space": "old_tenant",
-                "name": "kubernetes|kube-istio"
+                "name": "aci-containers-kube|aci-containers-istio"
             },
             "kube-system": {
                 "policy-space": "old_tenant",
                 "name": "aci-containers-kube|aci-containers-system"
-            }        }
+            }        },
+        "enable-drop-log": true
     }
   opflex-agent-config: |-
     {
@@ -556,10 +329,13 @@ rules:
   - services
   - events
   - replicationcontrollers
+  - serviceaccounts
   verbs:
   - list
   - watch
   - get
+  - create
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -571,6 +347,32 @@ rules:
   - create
   - update
   - delete
+- apiGroups:
+  - "rbac.authorization.k8s.io"
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - "install.istio.io"
+  resources:
+  - istiocontrolplanes
+  verbs:
+  - '*'
+- apiGroups:
+  - "aci.istio"
+  resources:
+  - aciistiooperators
+  - aciistiooperator
+  verbs:
+  - '*'
 - apiGroups:
   - "networking.k8s.io"
   resources:
@@ -587,9 +389,7 @@ rules:
   - daemonsets
   - statefulsets
   verbs:
-  - list
-  - watch
-  - get
+  - '*'
 - apiGroups:
   - ""
   resources:
@@ -661,6 +461,14 @@ rules:
   - list
   - watch
   - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 - apiGroups:
   - "networking.k8s.io"
   resources:
@@ -762,7 +570,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-host
-          image: noiro/aci-containers-host:4.2.2.2.r32
+          image: noiro/aci-containers-host:master-test
           imagePullPolicy: Always
           securityContext:
             capabilities:
@@ -802,7 +610,7 @@ spec:
           env:
             - name: REBOOT_WITH_OVS
               value: "true"
-          image: noiro/opflex:4.2.2.2.r32
+          image: noiro/opflex:master-test
           imagePullPolicy: Always
           securityContext:
             capabilities:
@@ -820,7 +628,7 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: mcast-daemon
-          image: noiro/opflex:4.2.2.2.r32
+          image: noiro/opflex:master-test
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: Always
@@ -894,7 +702,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: aci-containers-openvswitch
-          image: noiro/openvswitch:4.2.2.2.r26
+          image: noiro/openvswitch:master-test
           imagePullPolicy: Always
           resources:
             limits:
@@ -974,7 +782,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: aci-containers-controller
-          image: noiro/aci-containers-controller:4.2.2.2.r32
+          image: noiro/aci-containers-controller:master-test
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -985,6 +793,8 @@ spec:
               value: "snatglobalinfo"
             - name: ACI_RDCONFIG_NAME
               value: "routingdomain-config"
+            - name: SYSTEM_NAMESPACE
+              value: "aci-containers-system"
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
@@ -1004,3 +814,135 @@ spec:
             items:
               - key: controller-config
                 path: controller.conf
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-operator
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+  name: aci-containers:operator
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers:operator
+  labels:
+    aci-containers-config-version: "dummy"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers:operator
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-operator
+  namespace: aci-containers-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aci-containers-operator
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    name: aci-containers-operator
+    network-plugin: aci-containers
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: aci-containers-operator
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: aci-containers-operator
+      namespace: aci-containers-system
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        name: aci-containers-operator
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - image: noiro/aci-containers-operator:master-test
+        imagePullPolicy: Always
+        name: aci-containers-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: aci-operator-config
+          mountPath: /usr/local/etc/aci-containers/
+        env:
+        - name: SYSTEM_NAMESPACE
+          value: "aci-containers-system"
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: aci-containers-operator
+      serviceAccountName: aci-containers-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - name: aci-operator-config
+        configMap:
+          name: aci-operator-config
+          items:
+            - key: spec
+              path: aci-operator.conf
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: acicontainersoperators.aci.ctrl
+spec:
+  group: aci.ctrl
+  names:
+    kind: AciContainersOperator
+    listKind: AciContainersOperatorList
+    plural: acicontainersoperators
+    singular: acicontainersoperator
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-operator-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {    
+        "flavor": "kubernetes-1.15",
+        "config": "YXBpVmVyc2lvbjogdjEKa2luZDogTmFtZXNwYWNlCm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLXN5c3RlbQogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICBhbm5vdGF0aW9uczoKICAgIG9wZW5zaGlmdC5pby9ub2RlLXNlbGVjdG9yOiAnJwotLS0KYXBpVmVyc2lvbjogYXBpZXh0ZW5zaW9ucy5rOHMuaW8vdjFiZXRhMQpraW5kOiBDdXN0b21SZXNvdXJjZURlZmluaXRpb24KbWV0YWRhdGE6CiAgbmFtZTogc25hdGdsb2JhbGluZm9zLmFjaS5zbmF0CnNwZWM6CiAgZ3JvdXA6IGFjaS5zbmF0CiAgbmFtZXM6CiAgICBraW5kOiBTbmF0R2xvYmFsSW5mbwogICAgbGlzdEtpbmQ6IFNuYXRHbG9iYWxJbmZvTGlzdAogICAgcGx1cmFsOiBzbmF0Z2xvYmFsaW5mb3MKICAgIHNpbmd1bGFyOiBzbmF0Z2xvYmFsaW5mbwogIHNjb3BlOiBOYW1lc3BhY2VkCiAgdmVyc2lvbjogdjEKLS0tCmFwaVZlcnNpb246IGFwaWV4dGVuc2lvbnMuazhzLmlvL3YxYmV0YTEKa2luZDogQ3VzdG9tUmVzb3VyY2VEZWZpbml0aW9uCm1ldGFkYXRhOgogIG5hbWU6IHNuYXRwb2xpY2llcy5hY2kuc25hdApzcGVjOgogIGdyb3VwOiBhY2kuc25hdAogIG5hbWVzOgogICAga2luZDogU25hdFBvbGljeQogICAgbGlzdEtpbmQ6IFNuYXRQb2xpY3lMaXN0CiAgICBwbHVyYWw6IHNuYXRwb2xpY2llcwogICAgc2luZ3VsYXI6IHNuYXRwb2xpY3kKICBzY29wZTogQ2x1c3RlcgogIHN1YnJlc291cmNlczoKICAgIHN0YXR1czoge30KICB2YWxpZGF0aW9uOgogICAgb3BlbkFQSVYzU2NoZW1hOgogICAgICBwcm9wZXJ0aWVzOgogICAgICAgIGFwaVZlcnNpb246CiAgICAgICAgICBkZXNjcmlwdGlvbjogJ0FQSVZlcnNpb24gZGVmaW5lcyB0aGUgdmVyc2lvbmVkIHNjaGVtYSBvZiB0aGlzIHJlcHJlc2VudGF0aW9uCiAgICAgICAgICAgIG9mIGFuIG9iamVjdC4gU2VydmVycyBzaG91bGQgY29udmVydCByZWNvZ25pemVkIHNjaGVtYXMgdG8gdGhlIGxhdGVzdAogICAgICAgICAgICBpbnRlcm5hbCB2YWx1ZSwgYW5kIG1heSByZWplY3QgdW5yZWNvZ25pemVkIHZhbHVlcy4gTW9yZSBpbmZvOiBodHRwczovL2dpdC5rOHMuaW8vY29tbXVuaXR5L2NvbnRyaWJ1dG9ycy9kZXZlbC9hcGktY29udmVudGlvbnMubWQjcmVzb3VyY2VzJwogICAgICAgICAgdHlwZTogc3RyaW5nCiAgICAgICAga2luZDoKICAgICAgICAgIGRlc2NyaXB0aW9uOiAnS2luZCBpcyBhIHN0cmluZyB2YWx1ZSByZXByZXNlbnRpbmcgdGhlIFJFU1QgcmVzb3VyY2UgdGhpcwogICAgICAgICAgICBvYmplY3QgcmVwcmVzZW50cy4gU2VydmVycyBtYXkgaW5mZXIgdGhpcyBmcm9tIHRoZSBlbmRwb2ludCB0aGUgY2xpZW50CiAgICAgICAgICAgIHN1Ym1pdHMgcmVxdWVzdHMgdG8uIENhbm5vdCBiZSB1cGRhdGVkLiBJbiBDYW1lbENhc2UuIE1vcmUgaW5mbzogaHR0cHM6Ly9naXQuazhzLmlvL2NvbW11bml0eS9jb250cmlidXRvcnMvZGV2ZWwvYXBpLWNvbnZlbnRpb25zLm1kI3R5cGVzLWtpbmRzJwogICAgICAgICAgdHlwZTogc3RyaW5nCiAgICAgICAgbWV0YWRhdGE6CiAgICAgICAgICB0eXBlOiBvYmplY3QKICAgICAgICBzcGVjOgogICAgICAgICAgcHJvcGVydGllczoKICAgICAgICAgICAgc2VsZWN0b3I6CiAgICAgICAgICAgICAgcHJvcGVydGllczoKICAgICAgICAgICAgICAgIGxhYmVsczoKICAgICAgICAgICAgICAgICAgdHlwZTogb2JqZWN0CiAgICAgICAgICAgICAgICAgIHByb3BlcnRpZXM6CiAgICAgICAgICAgICAgICAgICAgYWRkaXRpb25hbFByb3BlcnRpZXM6CiAgICAgICAgICAgICAgICAgICAgICB0eXBlOiBzdHJpbmcKICAgICAgICAgICAgICAgIG5hbWVzcGFjZToKICAgICAgICAgICAgICAgICAgdHlwZTogc3RyaW5nCiAgICAgICAgICAgICAgdHlwZTogb2JqZWN0CiAgICAgICAgICAgIHNuYXRJcDoKICAgICAgICAgICAgICB0eXBlOiBhcnJheQogICAgICAgICAgICBkZXN0SXA6CiAgICAgICAgICAgICAgdHlwZTogYXJyYXkKICAgICAgICAgIHR5cGU6IG9iamVjdAogIHZlcnNpb246IHYxCiAgdmVyc2lvbnM6CiAgLSBuYW1lOiB2MQogICAgc2VydmVkOiB0cnVlCiAgICBzdG9yYWdlOiB0cnVlCi0tLQphcGlWZXJzaW9uOiBhcGlleHRlbnNpb25zLms4cy5pby92MWJldGExCmtpbmQ6IEN1c3RvbVJlc291cmNlRGVmaW5pdGlvbgptZXRhZGF0YToKICBuYW1lOiBub2RlaW5mb3MuYWNpLnNuYXQKc3BlYzoKICBncm91cDogYWNpLnNuYXQKICBuYW1lczoKICAgIGtpbmQ6IE5vZGVJbmZvCiAgICBsaXN0S2luZDogTm9kZUluZm9MaXN0CiAgICBwbHVyYWw6IG5vZGVpbmZvcwogICAgc2luZ3VsYXI6IG5vZGVpbmZvCiAgc2NvcGU6IE5hbWVzcGFjZWQKICB2ZXJzaW9uOiB2MQogIHZlcnNpb25zOgogIC0gbmFtZTogdjEKICAgIHNlcnZlZDogdHJ1ZQogICAgc3RvcmFnZTogdHJ1ZQotLS0KYXBpVmVyc2lvbjogYXBpZXh0ZW5zaW9ucy5rOHMuaW8vdjFiZXRhMQpraW5kOiBDdXN0b21SZXNvdXJjZURlZmluaXRpb24KbWV0YWRhdGE6CiAgbmFtZTogcmRjb25maWdzLmFjaS5zbmF0CnNwZWM6CiAgZ3JvdXA6IGFjaS5zbmF0CiAgbmFtZXM6CiAgICBraW5kOiBSZENvbmZpZwogICAgbGlzdEtpbmQ6IFJkQ29uZmlnTGlzdAogICAgcGx1cmFsOiByZGNvbmZpZ3MKICAgIHNpbmd1bGFyOiByZGNvbmZpZwogIHNjb3BlOiBOYW1lc3BhY2VkCiAgdmVyc2lvbjogdjEKLS0tCmFwaVZlcnNpb246IGFwaWV4dGVuc2lvbnMuazhzLmlvL3YxYmV0YTEKa2luZDogQ3VzdG9tUmVzb3VyY2VEZWZpbml0aW9uCm1ldGFkYXRhOgogIG5hbWU6IGFjaWlzdGlvb3BlcmF0b3JzLmFjaS5pc3RpbwpzcGVjOgogIGdyb3VwOiBhY2kuaXN0aW8KICBuYW1lczoKICAgIGtpbmQ6IEFjaUlzdGlvT3BlcmF0b3IKICAgIGxpc3RLaW5kOiBBY2lJc3Rpb09wZXJhdG9yTGlzdAogICAgcGx1cmFsOiBhY2lpc3Rpb29wZXJhdG9ycwogICAgc2luZ3VsYXI6IGFjaWlzdGlvb3BlcmF0b3IKICBzY29wZTogTmFtZXNwYWNlZAogIHZlcnNpb246IHYxCi0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29uZmlnCiAgbmFtZXNwYWNlOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCmRhdGE6CiAgY29udHJvbGxlci1jb25maWc6IHwtCiAgICB7CiAgICAgICAgImxvZy1sZXZlbCI6ICJpbmZvIiwKICAgICAgICAiYXBpYy1ob3N0cyI6IFsKICAgICAgICAgICAgIjEwLjMwLjEyMC4xMDAiCiAgICAgICAgXSwKICAgICAgICAiYXBpYy11c2VybmFtZSI6ICJrdWJlIiwKICAgICAgICAiYXBpYy1wcml2YXRlLWtleS1wYXRoIjogIi91c3IvbG9jYWwvZXRjL2FjaS1jZXJ0L3VzZXIua2V5IiwKICAgICAgICAiYXBpYy11c2UtaW5zdC10YWciOiB0cnVlLAogICAgICAgICJhY2ktcHJlZml4IjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLXR5cGUiOiAiS3ViZXJuZXRlcyIsCiAgICAgICAgImFjaS12bW0tZG9tYWluIjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLWNvbnRyb2xsZXIiOiAia3ViZSIsCiAgICAgICAgImFjaS1wb2xpY3ktdGVuYW50IjogIm9sZF90ZW5hbnQiLAogICAgICAgICJyZXF1aXJlLW5ldHBvbC1hbm5vdCI6IGZhbHNlLAogICAgICAgICJpbnN0YWxsLWlzdGlvIjogdHJ1ZSwKICAgICAgICAiYWNpLXBvZGJkLWRuIjogInVuaS90bi1vbGRfdGVuYW50L0JELWFjaS1jb250YWluZXJzLWt1YmUtcG9kLWJkIiwKICAgICAgICAiYWNpLW5vZGViZC1kbiI6ICJ1bmkvdG4tb2xkX3RlbmFudC9CRC1hY2ktY29udGFpbmVycy1rdWJlLW5vZGUtYmQiLAogICAgICAgICJhY2ktc2VydmljZS1waHlzLWRvbSI6ICJrdWJlLXBkb20iLAogICAgICAgICJhY2ktc2VydmljZS1lbmNhcCI6ICJ2bGFuLTQwMDMiLAogICAgICAgICJhY2ktc2VydmljZS1tb25pdG9yLWludGVydmFsIjogNSwKICAgICAgICAiYWNpLXBici10cmFja2luZy1ub24tc25hdCI6IGZhbHNlLAogICAgICAgICJhY2ktdnJmLXRlbmFudCI6ICJjb21tb24iLAogICAgICAgICJhY2ktbDNvdXQiOiAibDNvdXQiLAogICAgICAgICJhY2ktZXh0LW5ldHdvcmtzIjogWwogICAgICAgICAgICAiZGVmYXVsdCIKICAgICAgICBdLAogICAgICAgICJhY2ktdnJmIjogImt1YmUiLAogICAgICAgICJkZWZhdWx0LWVuZHBvaW50LWdyb3VwIjogewogICAgICAgICAgICAicG9saWN5LXNwYWNlIjogIm9sZF90ZW5hbnQiLAogICAgICAgICAgICAibmFtZSI6ICJhY2ktY29udGFpbmVycy1rdWJlfGFjaS1jb250YWluZXJzLWRlZmF1bHQiCiAgICAgICAgfSwKICAgICAgICAibWF4LW5vZGVzLXN2Yy1ncmFwaCI6IDMyLAogICAgICAgICJuYW1lc3BhY2UtZGVmYXVsdC1lbmRwb2ludC1ncm91cCI6IHsKICAgICAgICAgICAgImFjaS1jb250YWluZXJzLXN5c3RlbSI6IHsKICAgICAgICAgICAgICAgICJwb2xpY3ktc3BhY2UiOiAib2xkX3RlbmFudCIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJhY2ktY29udGFpbmVycy1rdWJlfGFjaS1jb250YWluZXJzLXN5c3RlbSIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImlzdGlvLW9wZXJhdG9yIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJvbGRfdGVuYW50IiwKICAgICAgICAgICAgICAgICJuYW1lIjogImFjaS1jb250YWluZXJzLWt1YmV8YWNpLWNvbnRhaW5lcnMtaXN0aW8iCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJpc3Rpby1zeXN0ZW0iOiB7CiAgICAgICAgICAgICAgICAicG9saWN5LXNwYWNlIjogIm9sZF90ZW5hbnQiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiYWNpLWNvbnRhaW5lcnMta3ViZXxhY2ktY29udGFpbmVycy1pc3RpbyIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImt1YmUtc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJvbGRfdGVuYW50IiwKICAgICAgICAgICAgICAgICJuYW1lIjogImFjaS1jb250YWluZXJzLWt1YmV8YWNpLWNvbnRhaW5lcnMtc3lzdGVtIgogICAgICAgICAgICB9ICAgICAgICB9LAogICAgICAgICJzZXJ2aWNlLWlwLXBvb2wiOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJlbmQiOiAiMTAuMy4wLjI1NCIsCiAgICAgICAgICAgICAgICAic3RhcnQiOiAiMTAuMy4wLjIiCiAgICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJzbmF0LWNvbnRyYWN0LXNjb3BlIjogImdsb2JhbCIsCiAgICAgICAgInN0YXRpYy1zZXJ2aWNlLWlwLXBvb2wiOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJlbmQiOiAiMTAuNC4wLjI1NCIsCiAgICAgICAgICAgICAgICAic3RhcnQiOiAiMTAuNC4wLjIiCiAgICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJwb2QtaXAtcG9vbCI6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImVuZCI6ICIxMC4yLjI1NS4yNTQiLAogICAgICAgICAgICAgICAgInN0YXJ0IjogIjEwLjIuMC4yIgogICAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAicG9kLXN1Ym5ldC1jaHVuay1zaXplIjogMzIsCiAgICAgICAgIm5vZGUtc2VydmljZS1pcC1wb29sIjogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAiZW5kIjogIjEwLjUuMC4yNTQiLAogICAgICAgICAgICAgICAgInN0YXJ0IjogIjEwLjUuMC4yIgogICAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAibm9kZS1zZXJ2aWNlLXN1Ym5ldHMiOiBbCiAgICAgICAgICAgICIxMC41LjAuMS8yNCIKICAgICAgICBdCiAgICB9CiAgaG9zdC1hZ2VudC1jb25maWc6IHwtCiAgICB7CiAgICAgICAgImVwLXJlZ2lzdHJ5IjogbnVsbCwKICAgICAgICAib3BmbGV4LW1vZGUiOiBudWxsLAogICAgICAgICJsb2ctbGV2ZWwiOiAiaW5mbyIsCiAgICAgICAgImFjaS1zbmF0LW5hbWVzcGFjZSI6ICJhY2ktY29udGFpbmVycy1zeXN0ZW0iLAogICAgICAgICJhY2ktdm1tLXR5cGUiOiAiS3ViZXJuZXRlcyIsCiAgICAgICAgImFjaS12bW0tZG9tYWluIjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLWNvbnRyb2xsZXIiOiAia3ViZSIsCiAgICAgICAgImFjaS1wcmVmaXgiOiAia3ViZSIsCiAgICAgICAgImFjaS12cmYiOiAia3ViZSIsCiAgICAgICAgImFjaS12cmYtdGVuYW50IjogImNvbW1vbiIsCiAgICAgICAgInNlcnZpY2UtdmxhbiI6IDQwMDMsCiAgICAgICAgImt1YmVhcGktdmxhbiI6IDQwMDEsCiAgICAgICAgInBvZC1zdWJuZXQiOiAiMTAuMi4wLjEvMTYiLAogICAgICAgICJub2RlLXN1Ym5ldCI6ICIxMC4xLjAuMS8xNiIsCiAgICAgICAgImVuY2FwLXR5cGUiOiAidnhsYW4iLAogICAgICAgICJhY2ktaW5mcmEtdmxhbiI6IDQwOTMsCiAgICAgICAgImNuaS1uZXRjb25maWciOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJnYXRld2F5IjogIjEwLjIuMC4xIiwKICAgICAgICAgICAgICAgICJyb3V0ZXMiOiBbCiAgICAgICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICAgICAiZHN0IjogIjAuMC4wLjAvMCIsCiAgICAgICAgICAgICAgICAgICAgICAgICJndyI6ICIxMC4yLjAuMSIKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICAgInN1Ym5ldCI6ICIxMC4yLjAuMC8xNiIKICAgICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgImRlZmF1bHQtZW5kcG9pbnQtZ3JvdXAiOiB7CiAgICAgICAgICAgICJwb2xpY3ktc3BhY2UiOiAib2xkX3RlbmFudCIsCiAgICAgICAgICAgICJuYW1lIjogImFjaS1jb250YWluZXJzLWt1YmV8YWNpLWNvbnRhaW5lcnMtZGVmYXVsdCIKICAgICAgICB9LAogICAgICAgICJuYW1lc3BhY2UtZGVmYXVsdC1lbmRwb2ludC1ncm91cCI6IHsKICAgICAgICAgICAgImFjaS1jb250YWluZXJzLXN5c3RlbSI6IHsKICAgICAgICAgICAgICAgICJwb2xpY3ktc3BhY2UiOiAib2xkX3RlbmFudCIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJhY2ktY29udGFpbmVycy1rdWJlfGFjaS1jb250YWluZXJzLXN5c3RlbSIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImlzdGlvLW9wZXJhdG9yIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJvbGRfdGVuYW50IiwKICAgICAgICAgICAgICAgICJuYW1lIjogImFjaS1jb250YWluZXJzLWt1YmV8YWNpLWNvbnRhaW5lcnMtaXN0aW8iCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJpc3Rpby1zeXN0ZW0iOiB7CiAgICAgICAgICAgICAgICAicG9saWN5LXNwYWNlIjogIm9sZF90ZW5hbnQiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiYWNpLWNvbnRhaW5lcnMta3ViZXxhY2ktY29udGFpbmVycy1pc3RpbyIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImt1YmUtc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJvbGRfdGVuYW50IiwKICAgICAgICAgICAgICAgICJuYW1lIjogImFjaS1jb250YWluZXJzLWt1YmV8YWNpLWNvbnRhaW5lcnMtc3lzdGVtIgogICAgICAgICAgICB9ICAgICAgICB9LAogICAgICAgICJlbmFibGUtZHJvcC1sb2ciOiB0cnVlCiAgICB9CiAgb3BmbGV4LWFnZW50LWNvbmZpZzogfC0KICAgIHsKICAgICAgICAibG9nIjogewogICAgICAgICAgICAibGV2ZWwiOiAiaW5mbyIKICAgICAgICB9LAogICAgICAgICJvcGZsZXgiOiB7CiAgICAgICAgfQogICAgfQotLS0KYXBpVmVyc2lvbjogdjEKa2luZDogQ29uZmlnTWFwCm1ldGFkYXRhOgogIG5hbWU6IHNuYXQtb3BlcmF0b3ItY29uZmlnCiAgbmFtZXNwYWNlOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCmRhdGE6CiAgICAic3RhcnQiOiAiNTAwMCIKICAgICJlbmQiOiAiNjUwMDAiCiAgICAicG9ydHMtcGVyLW5vZGUiOiAiMzAwMCIKLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlY3JldAptZXRhZGF0YToKICBuYW1lOiBhY2ktdXNlci1jZXJ0CiAgbmFtZXNwYWNlOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgpkYXRhOgogIHVzZXIua2V5OiBMUzB0TFMxQ1JVZEpUaUJRVWtsV1FWUkZJRXRGV1MwdExTMHRDazFKU1VOa1owbENRVVJCVGtKbmEzRm9hMmxIT1hjd1FrRlJSVVpCUVZORFFXMUJkMmRuU21OQlowVkJRVzlIUWtGT2NpdEJLMmRQUzJKQlZsWnlTbk1LWWpNcldsZGlZMjVXV0c4dloyUjFlRWxVYTNadE1EbHJaV2xHUTI0clZYQXZVMGRrY1hZMlFXZ3JhbXhLWmtZM2RYWXJSbWREU25SRGVFUTROM0ZaZHdvd2NUVkVZMGRXVEVsalprWTBXbFZpT1VJNGNrcFhTMEpKTm5kS1puaDBUV1pHZFZWT1dUSTBZMmQzVVhCS2NYSk5WWEZCUkhvdlRWY3JkM0phWldoekNsTnVSbk41WlhkWVVqTTRPR1ZTTjBWTGFrUlhaV2RrU25sUVkxaEJaMDFDUVVGRlEyZFpRamxCV0dJeFdtWkNRMEpWZUVJclZXZEZWRWROTnlzMFdEa0tha2hpZVVVd1FteDRiR3RtYW5Kc2QyUjJiVk01VFRjM0t6SmFObVJMUVdkUU16TlVVazB2VUhkRlRVOVpOMUp1WkVKdksxZzJlRVJ6Vm1SalZFcEplUW8xVm5jNGVGVmFiSElyWVhWRlQyeHpNbHB1V25neE1XVTFlbWczYzFVelRtbzFTek0xUWxkU09VZFVXRW8yVUUxa2NGUTBPV3hDT1dKc2JFMXFSSEpNQ2pjck5XSkRjMlIxTmpOUE9FdGhUamxaVVVwQ1FWQkhUV0p3U0hCR2MzUkRNV05YUjNCU1VYZ3phWGRHSzFwTVdVRnlRVlZpUTB0aVYxRm1ZbWxhVkhBS1ExTTRSR2RQYlhsVk4zVkxWRkpMYVVNck1sSlpWRk16Y0hKTVZqVTNSM1ptWmtaNFNtcFVkMGQ1YTBOUlVVUnZSMEozWmpWcFQzTjVkVTFSVG5vM1N3cFNhWEppUkRCS04xSTJXV1ZSYTBwYUszQkRaVXQzZVN0T2VVbHhlR2d3VEVKRWJVSjViVk5MZGxnd1YwVkxRMmwwVDJkd2FUTXlSbGRDYjNGSWFtWXpDazFSWnk5QmEwSk1Ra3hTY1dWS2RuUnpUMjh6YlV0UE5HRXJlREpsTjNsU1ZVdHJNVU52UzNwR1RrSklNRzVWWlZoSGJsQjNhVlJPWWl0aU1XWm1VMFlLTjNaSlNtSklaRzFMWjNWS2VUQnNWVTVCTjBoYU56ZFlMMmxLVWtGclFXcHVZbVZNUzFwNmJEUnJhVkEzTTNCcFVHWjRURzB6TjJaUWFrb3JlVVJ2TkFwYWNIZFZkVnBTSzBORFdHeElTSFpQWldad09VMVdjbGRqTldWcVkwTXZSMkZETmsxWFdYbE5hblZYVFN0NFFYQnFZM1YyUVd0RlFYcFpLM0F4TkRCRENuaDNjSEk1Tld4cGJtNTJWMk5ETjA0M01EaEJTa1pwYlRNdlJsVXhNRWRFYnpjM2VVbFBTVFZvS3pVek4wcGlXV1J0TlRVMWFFOWxTQzlMYWxObGEyZ0tSVVkwVFcxNFVsQnRhWFE1T1hjOVBRb3RMUzB0TFVWT1JDQlFVa2xXUVZSRklFdEZXUzB0TFMwdENnPT0KICB1c2VyLmNydDogTFMwdExTMUNSVWRKVGlCRFJWSlVTVVpKUTBGVVJTMHRMUzB0Q2sxSlNVSTJSRU5EUVZaRlEwRm5VRzlOUVRCSFExTnhSMU5KWWpORVVVVkNRbEZWUVUxRWQzaERla0ZLUW1kT1ZrSkJXVlJCYkZaVVRWSlpkMFpCV1VRS1ZsRlJTMFJCTVVSaFdFNXFZbmxDVkdWWVRqQmFWekY2VFZKVmQwVjNXVVJXVVZGRVJFRjRWbU15Vm5sSlJ6Rm9ZbTFTYkZwWVFYZElhR05PVFZSamR3cE9WRVV5VFdwRmVVOVVUWGRYYUdOT1RXcGpkMDVVUlRCTmFrVjVUMVJOZDFkcVFUaE5VWE4zUTFGWlJGWlJVVWRGZDBwV1ZYcEZWMDFDVVVkQk1WVkZDa05uZDA1Uk1teDZXVEk0WjFVemJIcGtSMVowWTNwRlZrMUNUVWRCTVZWRlFYZDNUVlpZVG14amFVSjBXVmMxYTFwWFZuZE5TVWRtVFVFd1IwTlRjVWNLVTBsaU0wUlJSVUpCVVZWQlFUUkhUa0ZFUTBKcFVVdENaMUZFWVM5blVHOUVhVzEzUmxaaGVXSkhPUzl0Vm0welNqRldObEEwU0dKelUwVTFURFYwVUFwYVNHOW9VWEF2YkV0bU1HaHVZWElyWjBsbWJ6VlRXSGhsTjNJdmFGbEJhV0pSYzFFdlR6WnRUVTVMZFZFelFteFRlVWhJZUdWSFZrY3ZVV1pMZVZacENtZFRUM05EV0RoaVZFaDRZbXhFVjA1MVNFbE5SVXRUWVhGNlJrdG5RVGd2ZWtaMmMwc3lXRzlpUlhCNFlrMXVjMFl3WkM5UVNHdGxlRU52ZHpGdWIwZ0tVMk5xTTBaM1NVUkJVVUZDVFVFd1IwTlRjVWRUU1dJelJGRkZRa0pSVlVGQk5FZENRVWhZSzJ0TVZHVTJURU5CUW1WM2JVTlVkazF6YW5WelNHUndXZ3ByYVRBeEsyNVJOMHRvYmtWU1lrSnRMM1JhTlhOaldrVTBZM1JKY1dOb00yNTVNVVZKVkVoT2RGbFhTMEpPTkVOa1ZVdGphblpFVnpKb01uWnJTR1ZuQ25KMFdXSldLMEZoUlhOeE1HMDBka2RHT1VWdGRuUXhZM0E1V1RReFNYbE5RbHBaY1hjNFl5OVdNVUYwYlZKUlkxSlVXVkZCT0VnelQwWkVZMmg1UWpJS01FcElVMFJ1UW05VE4yWm1VMkpDZUFvdExTMHRMVVZPUkNCRFJWSlVTVVpKUTBGVVJTMHRMUzB0Q2c9PQotLS0KYXBpVmVyc2lvbjogdjEKa2luZDogU2VydmljZUFjY291bnQKbWV0YWRhdGE6CiAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogIG5hbWVzcGFjZTogYWNpLWNvbnRhaW5lcnMtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlcnZpY2VBY2NvdW50Cm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLWhvc3QtYWdlbnQKICBuYW1lc3BhY2U6IGFjaS1jb250YWluZXJzLXN5c3RlbQogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlCm1ldGFkYXRhOgogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICBuYW1lOiBhY2ktY29udGFpbmVyczpjb250cm9sbGVyCnJ1bGVzOgotIGFwaUdyb3VwczoKICAtICIiCiAgcmVzb3VyY2VzOgogIC0gbm9kZXMKICAtIG5hbWVzcGFjZXMKICAtIHBvZHMKICAtIGVuZHBvaW50cwogIC0gc2VydmljZXMKICAtIGV2ZW50cwogIC0gcmVwbGljYXRpb25jb250cm9sbGVycwogIC0gc2VydmljZWFjY291bnRzCiAgdmVyYnM6CiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0CiAgLSBjcmVhdGUKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtICIiCiAgcmVzb3VyY2VzOgogIC0gY29uZmlnbWFwcwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAogIC0gY3JlYXRlCiAgLSB1cGRhdGUKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtICJyYmFjLmF1dGhvcml6YXRpb24uazhzLmlvIgogIHJlc291cmNlczoKICAtIGNsdXN0ZXJyb2xlcwogIC0gY2x1c3RlcnJvbGViaW5kaW5ncwogIHZlcmJzOgogIC0gJyonCi0gYXBpR3JvdXBzOgogIC0gImFwaWV4dGVuc2lvbnMuazhzLmlvIgogIHJlc291cmNlczoKICAtIGN1c3RvbXJlc291cmNlZGVmaW5pdGlvbnMKICB2ZXJiczoKICAtICcqJwotIGFwaUdyb3VwczoKICAtICJpbnN0YWxsLmlzdGlvLmlvIgogIHJlc291cmNlczoKICAtIGlzdGlvY29udHJvbHBsYW5lcwogIHZlcmJzOgogIC0gJyonCi0gYXBpR3JvdXBzOgogIC0gImFjaS5pc3RpbyIKICByZXNvdXJjZXM6CiAgLSBhY2lpc3Rpb29wZXJhdG9ycwogIC0gYWNpaXN0aW9vcGVyYXRvcgogIHZlcmJzOgogIC0gJyonCi0gYXBpR3JvdXBzOgogIC0gIm5ldHdvcmtpbmcuazhzLmlvIgogIHJlc291cmNlczoKICAtIG5ldHdvcmtwb2xpY2llcwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAotIGFwaUdyb3VwczoKICAtICJhcHBzIgogIHJlc291cmNlczoKICAtIGRlcGxveW1lbnRzCiAgLSByZXBsaWNhc2V0cwogIC0gZGFlbW9uc2V0cwogIC0gc3RhdGVmdWxzZXRzCiAgdmVyYnM6CiAgLSAnKicKLSBhcGlHcm91cHM6CiAgLSAiIgogIHJlc291cmNlczoKICAtIG5vZGVzCiAgLSBzZXJ2aWNlcy9zdGF0dXMKICB2ZXJiczoKICAtIHVwZGF0ZQotIGFwaUdyb3VwczoKICAtICJtb25pdG9yaW5nLmNvcmVvcy5jb20iCiAgcmVzb3VyY2VzOgogIC0gc2VydmljZW1vbml0b3JzCiAgdmVyYnM6CiAgLSBnZXQKICAtIGNyZWF0ZQotIGFwaUdyb3VwczoKICAtICJhY2kuc25hdCIKICByZXNvdXJjZXM6CiAgLSBzbmF0cG9saWNpZXMvZmluYWxpemVycwogIC0gc25hdHBvbGljaWVzL3N0YXR1cwogIC0gbm9kZWluZm9zCiAgdmVyYnM6CiAgLSB1cGRhdGUKICAtIGNyZWF0ZQogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAogIC0gZGVsZXRlCi0gYXBpR3JvdXBzOgogIC0gImFjaS5zbmF0IgogIHJlc291cmNlczoKICAtIHNuYXRnbG9iYWxpbmZvcwogIC0gc25hdHBvbGljaWVzCiAgLSBub2RlaW5mb3MKICAtIHJkY29uZmlncwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAogIC0gY3JlYXRlCiAgLSB1cGRhdGUKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtIGFwcHMub3BlbnNoaWZ0LmlvCiAgcmVzb3VyY2VzOgogIC0gZGVwbG95bWVudGNvbmZpZ3MKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogIG5hbWU6IGFjaS1jb250YWluZXJzOmhvc3QtYWdlbnQKcnVsZXM6Ci0gYXBpR3JvdXBzOgogIC0gIiIKICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbmFtZXNwYWNlcwogIC0gcG9kcwogIC0gZW5kcG9pbnRzCiAgLSBzZXJ2aWNlcwogIC0gcmVwbGljYXRpb25jb250cm9sbGVycwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAogIC0gdXBkYXRlCi0gYXBpR3JvdXBzOgogIC0gIiIKICByZXNvdXJjZXM6CiAgLSBldmVudHMKICB2ZXJiczoKICAtIGNyZWF0ZQogIC0gcGF0Y2gKLSBhcGlHcm91cHM6CiAgLSAibmV0d29ya2luZy5rOHMuaW8iCiAgcmVzb3VyY2VzOgogIC0gbmV0d29ya3BvbGljaWVzCiAgdmVyYnM6CiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0Ci0gYXBpR3JvdXBzOgogIC0gImFwcHMiCiAgcmVzb3VyY2VzOgogIC0gZGVwbG95bWVudHMKICAtIHJlcGxpY2FzZXRzCiAgdmVyYnM6CiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0Ci0gYXBpR3JvdXBzOgogIC0gImFjaS5zbmF0IgogIHJlc291cmNlczoKICAtIHNuYXRwb2xpY2llcwogIC0gc25hdGdsb2JhbGluZm9zCiAgLSByZGNvbmZpZ3MKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKLSBhcGlHcm91cHM6CiAgLSAiYWNpLnNuYXQiCiAgcmVzb3VyY2VzOgogIC0gbm9kZWluZm9zCiAgdmVyYnM6CiAgLSBjcmVhdGUKICAtIHVwZGF0ZQogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAotLS0KYXBpVmVyc2lvbjogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pby92MQpraW5kOiBDbHVzdGVyUm9sZUJpbmRpbmcKbWV0YWRhdGE6CiAgbmFtZTogYWNpLWNvbnRhaW5lcnM6Y29udHJvbGxlcgogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IGFjaS1jb250YWluZXJzOmNvbnRyb2xsZXIKc3ViamVjdHM6Ci0ga2luZDogU2VydmljZUFjY291bnQKICBuYW1lOiBhY2ktY29udGFpbmVycy1jb250cm9sbGVyCiAgbmFtZXNwYWNlOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGVCaW5kaW5nCm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzOmhvc3QtYWdlbnQKICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15Igpyb2xlUmVmOgogIGFwaUdyb3VwOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvCiAga2luZDogQ2x1c3RlclJvbGUKICBuYW1lOiBhY2ktY29udGFpbmVyczpob3N0LWFnZW50CnN1YmplY3RzOgotIGtpbmQ6IFNlcnZpY2VBY2NvdW50CiAgbmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdC1hZ2VudAogIG5hbWVzcGFjZTogYWNpLWNvbnRhaW5lcnMtc3lzdGVtCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERhZW1vblNldAptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVycy1ob3N0CiAgbmFtZXNwYWNlOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCnNwZWM6CiAgdXBkYXRlU3RyYXRlZ3k6CiAgICB0eXBlOiBSb2xsaW5nVXBkYXRlCiAgc2VsZWN0b3I6CiAgICBtYXRjaExhYmVsczoKICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdAogICAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICB0ZW1wbGF0ZToKICAgIG1ldGFkYXRhOgogICAgICBsYWJlbHM6CiAgICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdAogICAgICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogICAgICBhbm5vdGF0aW9uczoKICAgICAgICBzY2hlZHVsZXIuYWxwaGEua3ViZXJuZXRlcy5pby9jcml0aWNhbC1wb2Q6ICcnCiAgICBzcGVjOgogICAgICBob3N0TmV0d29yazogdHJ1ZQogICAgICBob3N0UElEOiB0cnVlCiAgICAgIGhvc3RJUEM6IHRydWUKICAgICAgc2VydmljZUFjY291bnROYW1lOiBhY2ktY29udGFpbmVycy1ob3N0LWFnZW50CiAgICAgIHRvbGVyYXRpb25zOgogICAgICAgIC0gb3BlcmF0b3I6IEV4aXN0cwogICAgICAgICAgZWZmZWN0OiBOb1NjaGVkdWxlCiAgICAgIHByaW9yaXR5Q2xhc3NOYW1lOiBzeXN0ZW0tY2x1c3Rlci1jcml0aWNhbAogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdAogICAgICAgICAgaW1hZ2U6IG5vaXJvL2FjaS1jb250YWluZXJzLWhvc3Q6bWFzdGVyLXRlc3QKICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogQWx3YXlzCiAgICAgICAgICBzZWN1cml0eUNvbnRleHQ6CiAgICAgICAgICAgIGNhcGFiaWxpdGllczoKICAgICAgICAgICAgICBhZGQ6CiAgICAgICAgICAgICAgICAtIFNZU19BRE1JTgogICAgICAgICAgICAgICAgLSBORVRfQURNSU4KICAgICAgICAgICAgICAgIC0gU1lTX1BUUkFDRQogICAgICAgICAgZW52OgogICAgICAgICAgICAtIG5hbWU6IEtVQkVSTkVURVNfTk9ERV9OQU1FCiAgICAgICAgICAgICAgdmFsdWVGcm9tOgogICAgICAgICAgICAgICAgZmllbGRSZWY6CiAgICAgICAgICAgICAgICAgIGZpZWxkUGF0aDogc3BlYy5ub2RlTmFtZQogICAgICAgICAgICAtIG5hbWU6IFRFTkFOVAogICAgICAgICAgICAgIHZhbHVlOiAib2xkX3RlbmFudCIKICAgICAgICAgICAgLSBuYW1lOiBOT0RFX0VQRwogICAgICAgICAgICAgIHZhbHVlOiAiYWNpLWNvbnRhaW5lcnMta3ViZXxhY2ktY29udGFpbmVycy1ub2RlcyIKICAgICAgICAgIHZvbHVtZU1vdW50czoKICAgICAgICAgICAgLSBuYW1lOiBjbmktYmluCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvbW50L2NuaS1iaW4KICAgICAgICAgICAgLSBuYW1lOiBjbmktY29uZgogICAgICAgICAgICAgIG1vdW50UGF0aDogL21udC9jbmktY29uZgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgICAgICAgIC0gbmFtZTogb3BmbGV4LWhvc3Rjb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9vcGZsZXgtYWdlbnQtb3ZzL2Jhc2UtY29uZi5kCiAgICAgICAgICAgIC0gbmFtZTogaG9zdC1jb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9hY2ktY29udGFpbmVycy8KICAgICAgICAgIGxpdmVuZXNzUHJvYmU6CiAgICAgICAgICAgIGh0dHBHZXQ6CiAgICAgICAgICAgICAgcGF0aDogL3N0YXR1cwogICAgICAgICAgICAgIHBvcnQ6IDgwOTAKICAgICAgICAtIG5hbWU6IG9wZmxleC1hZ2VudAogICAgICAgICAgZW52OgogICAgICAgICAgICAtIG5hbWU6IFJFQk9PVF9XSVRIX09WUwogICAgICAgICAgICAgIHZhbHVlOiAidHJ1ZSIKICAgICAgICAgIGltYWdlOiBub2lyby9vcGZsZXg6bWFzdGVyLXRlc3QKICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogQWx3YXlzCiAgICAgICAgICBzZWN1cml0eUNvbnRleHQ6CiAgICAgICAgICAgIGNhcGFiaWxpdGllczoKICAgICAgICAgICAgICBhZGQ6CiAgICAgICAgICAgICAgICAtIE5FVF9BRE1JTgogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgICAgICAgIC0gbmFtZTogb3BmbGV4LWhvc3Rjb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9vcGZsZXgtYWdlbnQtb3ZzL2Jhc2UtY29uZi5kCiAgICAgICAgICAgIC0gbmFtZTogb3BmbGV4LWNvbmZpZy12b2x1bWUKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvZXRjL29wZmxleC1hZ2VudC1vdnMvY29uZi5kCiAgICAgICAgLSBuYW1lOiBtY2FzdC1kYWVtb24KICAgICAgICAgIGltYWdlOiBub2lyby9vcGZsZXg6bWFzdGVyLXRlc3QKICAgICAgICAgIGNvbW1hbmQ6IFsiL2Jpbi9zaCJdCiAgICAgICAgICBhcmdzOiBbIi91c3IvbG9jYWwvYmluL2xhdW5jaC1tY2FzdGRhZW1vbi5zaCJdCiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IEFsd2F5cwogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgIHJlc3RhcnRQb2xpY3k6IEFsd2F5cwogICAgICB2b2x1bWVzOgogICAgICAgIC0gbmFtZTogY25pLWJpbgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC9vcHQKICAgICAgICAtIG5hbWU6IGNuaS1jb25mCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL2V0YwogICAgICAgIC0gbmFtZTogaG9zdHZhcgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC92YXIKICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgIGhvc3RQYXRoOgogICAgICAgICAgICBwYXRoOiAvcnVuCiAgICAgICAgLSBuYW1lOiBob3N0LWNvbmZpZy12b2x1bWUKICAgICAgICAgIGNvbmZpZ01hcDoKICAgICAgICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29uZmlnCiAgICAgICAgICAgIGl0ZW1zOgogICAgICAgICAgICAgIC0ga2V5OiBob3N0LWFnZW50LWNvbmZpZwogICAgICAgICAgICAgICAgcGF0aDogaG9zdC1hZ2VudC5jb25mCiAgICAgICAgLSBuYW1lOiBvcGZsZXgtaG9zdGNvbmZpZy12b2x1bWUKICAgICAgICAgIGVtcHR5RGlyOgogICAgICAgICAgICBtZWRpdW06IE1lbW9yeQogICAgICAgIC0gbmFtZTogb3BmbGV4LWNvbmZpZy12b2x1bWUKICAgICAgICAgIGNvbmZpZ01hcDoKICAgICAgICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29uZmlnCiAgICAgICAgICAgIGl0ZW1zOgogICAgICAgICAgICAgIC0ga2V5OiBvcGZsZXgtYWdlbnQtY29uZmlnCiAgICAgICAgICAgICAgICBwYXRoOiBsb2NhbC5jb25mCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERhZW1vblNldAptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVycy1vcGVudnN3aXRjaAogIG5hbWVzcGFjZTogYWNpLWNvbnRhaW5lcnMtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwpzcGVjOgogIHVwZGF0ZVN0cmF0ZWd5OgogICAgdHlwZTogUm9sbGluZ1VwZGF0ZQogIHNlbGVjdG9yOgogICAgbWF0Y2hMYWJlbHM6CiAgICAgIG5hbWU6IGFjaS1jb250YWluZXJzLW9wZW52c3dpdGNoCiAgICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogIHRlbXBsYXRlOgogICAgbWV0YWRhdGE6CiAgICAgIGxhYmVsczoKICAgICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1vcGVudnN3aXRjaAogICAgICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogICAgICBhbm5vdGF0aW9uczoKICAgICAgICBzY2hlZHVsZXIuYWxwaGEua3ViZXJuZXRlcy5pby9jcml0aWNhbC1wb2Q6ICcnCiAgICBzcGVjOgogICAgICBob3N0TmV0d29yazogdHJ1ZQogICAgICBob3N0UElEOiB0cnVlCiAgICAgIGhvc3RJUEM6IHRydWUKICAgICAgc2VydmljZUFjY291bnROYW1lOiBhY2ktY29udGFpbmVycy1ob3N0LWFnZW50CiAgICAgIHRvbGVyYXRpb25zOgogICAgICAgIC0gb3BlcmF0b3I6IEV4aXN0cwogICAgICAgICAgZWZmZWN0OiBOb1NjaGVkdWxlCiAgICAgIHByaW9yaXR5Q2xhc3NOYW1lOiBzeXN0ZW0tY2x1c3Rlci1jcml0aWNhbAogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogYWNpLWNvbnRhaW5lcnMtb3BlbnZzd2l0Y2gKICAgICAgICAgIGltYWdlOiBub2lyby9vcGVudnN3aXRjaDptYXN0ZXItdGVzdAogICAgICAgICAgaW1hZ2VQdWxsUG9saWN5OiBBbHdheXMKICAgICAgICAgIHJlc291cmNlczoKICAgICAgICAgICAgbGltaXRzOgogICAgICAgICAgICAgIG1lbW9yeTogIjFHaSIKICAgICAgICAgIHNlY3VyaXR5Q29udGV4dDoKICAgICAgICAgICAgY2FwYWJpbGl0aWVzOgogICAgICAgICAgICAgIGFkZDoKICAgICAgICAgICAgICAgIC0gTkVUX0FETUlOCiAgICAgICAgICAgICAgICAtIFNZU19NT0RVTEUKICAgICAgICAgICAgICAgIC0gU1lTX05JQ0UKICAgICAgICAgICAgICAgIC0gSVBDX0xPQ0sKICAgICAgICAgIGVudjoKICAgICAgICAgICAgLSBuYW1lOiBPVlNfUlVORElSCiAgICAgICAgICAgICAgdmFsdWU6IC91c3IvbG9jYWwvdmFyL3J1bi9vcGVudnN3aXRjaAogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgICAgICAgIC0gbmFtZTogaG9zdGV0YwogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC9ldGMKICAgICAgICAgICAgLSBuYW1lOiBob3N0bW9kdWxlcwogICAgICAgICAgICAgIG1vdW50UGF0aDogL2xpYi9tb2R1bGVzCiAgICAgICAgICBsaXZlbmVzc1Byb2JlOgogICAgICAgICAgICBleGVjOgogICAgICAgICAgICAgIGNvbW1hbmQ6CiAgICAgICAgICAgICAgICAtIC91c3IvbG9jYWwvYmluL2xpdmVuZXNzLW92cy5zaAogICAgICByZXN0YXJ0UG9saWN5OiBBbHdheXMKICAgICAgdm9sdW1lczoKICAgICAgICAtIG5hbWU6IGhvc3RldGMKICAgICAgICAgIGhvc3RQYXRoOgogICAgICAgICAgICBwYXRoOiAvZXRjCiAgICAgICAgLSBuYW1lOiBob3N0dmFyCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL3ZhcgogICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC9ydW4KICAgICAgICAtIG5hbWU6IGhvc3Rtb2R1bGVzCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL2xpYi9tb2R1bGVzCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERlcGxveW1lbnQKbWV0YWRhdGE6CiAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogIG5hbWVzcGFjZTogYWNpLWNvbnRhaW5lcnMtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgpzcGVjOgogIHJlcGxpY2FzOiAxCiAgc3RyYXRlZ3k6CiAgICB0eXBlOiBSZWNyZWF0ZQogIHNlbGVjdG9yOgogICAgbWF0Y2hMYWJlbHM6CiAgICAgIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbnRyb2xsZXIKICAgICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCiAgdGVtcGxhdGU6CiAgICBtZXRhZGF0YToKICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogICAgICBuYW1lc3BhY2U6IGFjaS1jb250YWluZXJzLXN5c3RlbQogICAgICBsYWJlbHM6CiAgICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogICAgICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogICAgICBhbm5vdGF0aW9uczoKICAgICAgICBzY2hlZHVsZXIuYWxwaGEua3ViZXJuZXRlcy5pby9jcml0aWNhbC1wb2Q6ICcnCiAgICBzcGVjOgogICAgICBob3N0TmV0d29yazogdHJ1ZQogICAgICBzZXJ2aWNlQWNjb3VudE5hbWU6IGFjaS1jb250YWluZXJzLWNvbnRyb2xsZXIKICAgICAgdG9sZXJhdGlvbnM6CiAgICAgICAgLSBvcGVyYXRvcjogRXhpc3RzCiAgICAgICAgICBlZmZlY3Q6IE5vU2NoZWR1bGUKICAgICAgcHJpb3JpdHlDbGFzc05hbWU6IHN5c3RlbS1ub2RlLWNyaXRpY2FsCiAgICAgIGNvbnRhaW5lcnM6CiAgICAgICAgLSBuYW1lOiBhY2ktY29udGFpbmVycy1jb250cm9sbGVyCiAgICAgICAgICBpbWFnZTogbm9pcm8vYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcjptYXN0ZXItdGVzdAogICAgICAgICAgaW1hZ2VQdWxsUG9saWN5OiBBbHdheXMKICAgICAgICAgIGVudjoKICAgICAgICAgICAgLSBuYW1lOiBXQVRDSF9OQU1FU1BBQ0UKICAgICAgICAgICAgICB2YWx1ZTogIiIKICAgICAgICAgICAgLSBuYW1lOiBBQ0lfU05BVF9OQU1FU1BBQ0UKICAgICAgICAgICAgICB2YWx1ZTogImFjaS1jb250YWluZXJzLXN5c3RlbSIKICAgICAgICAgICAgLSBuYW1lOiBBQ0lfU05BR0xPQkFMSU5GT19OQU1FCiAgICAgICAgICAgICAgdmFsdWU6ICJzbmF0Z2xvYmFsaW5mbyIKICAgICAgICAgICAgLSBuYW1lOiBBQ0lfUkRDT05GSUdfTkFNRQogICAgICAgICAgICAgIHZhbHVlOiAicm91dGluZ2RvbWFpbi1jb25maWciCiAgICAgICAgICAgIC0gbmFtZTogU1lTVEVNX05BTUVTUEFDRQogICAgICAgICAgICAgIHZhbHVlOiAiYWNpLWNvbnRhaW5lcnMtc3lzdGVtIgogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IGNvbnRyb2xsZXItY29uZmlnLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC9ldGMvYWNpLWNvbnRhaW5lcnMvCiAgICAgICAgICAgIC0gbmFtZTogYWNpLXVzZXItY2VydC12b2x1bWUKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvZXRjL2FjaS1jZXJ0LwogICAgICAgICAgbGl2ZW5lc3NQcm9iZToKICAgICAgICAgICAgaHR0cEdldDoKICAgICAgICAgICAgICBwYXRoOiAvc3RhdHVzCiAgICAgICAgICAgICAgcG9ydDogODA5MQogICAgICB2b2x1bWVzOgogICAgICAgIC0gbmFtZTogYWNpLXVzZXItY2VydC12b2x1bWUKICAgICAgICAgIHNlY3JldDoKICAgICAgICAgICAgc2VjcmV0TmFtZTogYWNpLXVzZXItY2VydAogICAgICAgIC0gbmFtZTogY29udHJvbGxlci1jb25maWctdm9sdW1lCiAgICAgICAgICBjb25maWdNYXA6CiAgICAgICAgICAgIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbmZpZwogICAgICAgICAgICBpdGVtczoKICAgICAgICAgICAgICAtIGtleTogY29udHJvbGxlci1jb25maWcKICAgICAgICAgICAgICAgIHBhdGg6IGNvbnRyb2xsZXIuY29uZgo="
+    }
