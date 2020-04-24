@@ -32,7 +32,7 @@ def in_testdir(f):
 
 
 @in_testdir
-def test_base_case():
+def test_base_case_simple():
     run_provision(
         "base_case.inp.yaml",
         "base_case.kube.yaml",
@@ -302,7 +302,7 @@ def test_with_no_istio():
 
 
 @in_testdir
-def test_new_naming_convention():
+def test_new_naming_convention_simple():
     run_provision(
         "with_new_naming_convention.inp.yaml",
         "with_new_naming_convention.kube.yaml",

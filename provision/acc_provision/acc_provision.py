@@ -957,7 +957,7 @@ def get_jinja_template(file):
     return template
 
 
-def generate_operator_tar(tar_path, cont_docs, oper_docs, config):
+def generate_operator_tar(tar_path, cont_docs, config):
 
     # YAML file numbers generated start from 4 as first three are
     # reserved for OpenShift specific files
@@ -974,8 +974,7 @@ def generate_operator_tar(tar_path, cont_docs, oper_docs, config):
             counter += 1
         return counter
 
-    file_start = gen_file_list(cont_docs, file_start, filenames)
-    gen_file_list(oper_docs, file_start, filenames)
+    gen_file_list(cont_docs, file_start, filenames)
 
     # Create three extra files needed for Openshift 4.3 installer
     if config["kube_config"]["generate_installer_files"]:
@@ -1033,25 +1032,34 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             if not tar_path or tar_path == "-":
                 tar_path = operator_output + ".tar.gz"
 
-        # Generate and convert containers deployment to base64 and add as configMap
-        # entry to the operator deployment.
         temp = ''.join(template.stream(config=config))
-        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
-        op_template = get_jinja_template('aci-operators.yaml')
+        parsed_temp = temp.split("---")
 
-        # Generate kubernetes deployment
-        template.stream(config=config).dump(operator_output)
-        # Render operator deployment
+        # Find the place where to put the acioperators configmap
+        for cmap_idx in range(len(parsed_temp)):
+            current_yaml = yaml.safe_load(parsed_temp[cmap_idx])
+            if current_yaml['kind'] == 'ConfigMap':
+                break
+
+        # Generate and convert containers deployment to base64 and add
+        # as configMap entry to the operator deployment.
+        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+        oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
+        cmap_temp = ''.join(oper_cmap_template.stream(config=config))
+
+        op_template = get_jinja_template('aci-operators.yaml')
         output_from_parsed_template = op_template.render(config=config)
 
-        # If output containers deployment file arg present, append rendered
-        # operator deployment yamls to containers deployment yaml.
-        # This needs to be ultimately(kubectl) applied to install the
-        # ACI CNI. Else print to stdout.
+        # Generate acioperator CRD from template and add it to top
+        op_crd_template = get_jinja_template('aci-operators-crd.yaml')
+        op_crd_output = op_crd_template.render(config=config)
+
+        new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+        new_deployment_file = '---'.join(new_parsed_yaml)
+
         if operator_output != sys.stdout:
             with open(operator_output, "a+") as fh:
-                fh.write("---\n")
-                fh.write(output_from_parsed_template)
+                fh.write(new_deployment_file)
         else:
             op_template.stream(config=config).dump(operator_output)
 
@@ -1064,15 +1072,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         if tar_path == "-":
             tar_path = "/dev/null"
         else:
-            # Generate yamls for containers and operator deployment
-            # which are consumed by the geneate_operator_tar method
-            cont_stream = template.stream(config=config)
-            cont_yamls = ''.join(cont_stream)
-            cont_docs = yaml.load_all(cont_yamls, Loader=yaml.SafeLoader)
-            oper_stream = op_template.stream(config=config)
-            oper_yamls = ''.join(oper_stream)
-            oper_docs = yaml.load_all(oper_yamls, Loader=yaml.SafeLoader)
-            generate_operator_tar(tar_path, cont_docs, oper_docs, config)
+            deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
+            generate_operator_tar(tar_path, deployment_docs, config)
 
         op_cr_template = get_jinja_template('aci-operators-cr.yaml')
         if operator_cr_output and operator_cr_output != "/dev/null":
