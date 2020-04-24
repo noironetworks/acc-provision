@@ -890,16 +890,88 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-  name: aci-containers:operator
+  name: aci-containers-operator
 rules:
 - apiGroups:
-  - '*'
+  - apiextensions.k8s.io
   resources:
-  - '*'
+  - customresourcedefinitions
   verbs:
   - '*'
-- nonResourceURLs:
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
   - '*'
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - namespaces
+  - configmaps
+  - secrets
+  - pods
+  - services
+  - serviceaccounts
+  - serviceaccounts/token
+  - endpoints
+  - events
+  verbs:
+  - '*'
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - acicontainersoperators
+  - acicontainersoperators/status
+  - acicontainersoperators/finalizers
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - aci.snat
+  resources:
+  - snatpolicies
+  - snatglobalinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - aci.snat
+  resources:
+  - nodeinfos
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - networks
   verbs:
   - '*'
 ---
