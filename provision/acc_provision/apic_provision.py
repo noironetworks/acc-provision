@@ -4220,7 +4220,7 @@ class ApicKubeConfig(object):
                                                                                             [
                                                                                                 (
                                                                                                     "name",
-                                                                                                    "istio-pilot-15010",
+                                                                                                    "istio-pilot-15010:12",
                                                                                                 ),
                                                                                                 (
                                                                                                     "etherT",
@@ -4236,7 +4236,53 @@ class ApicKubeConfig(object):
                                                                                                 ),
                                                                                                 (
                                                                                                     "dToPort",
-                                                                                                    "15010",
+                                                                                                    "15012",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "stateful",
+                                                                                                    "no",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tcpRules",
+                                                                                                    "",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vzEntry",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "istio-pilot2-15014",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "etherT",
+                                                                                                    "ip",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "prot",
+                                                                                                    "tcp",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "dFromPort",
+                                                                                                    "15014",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "dToPort",
+                                                                                                    "15014",
                                                                                                 ),
                                                                                                 (
                                                                                                     "stateful",

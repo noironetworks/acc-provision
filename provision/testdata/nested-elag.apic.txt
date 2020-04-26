@@ -900,11 +900,25 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "istio-pilot-15010",
+                                    "name": "istio-pilot-15010:12",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "15010",
-                                    "dToPort": "15010",
+                                    "dToPort": "15012",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-pilot2-15014",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "15014",
+                                    "dToPort": "15014",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
