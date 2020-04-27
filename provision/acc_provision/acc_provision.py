@@ -1058,7 +1058,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         new_deployment_file = '---'.join(new_parsed_yaml)
 
         if operator_output != sys.stdout:
-            with open(operator_output, "a+") as fh:
+            with open(operator_output, "w") as fh:
                 fh.write(new_deployment_file)
         else:
             op_template.stream(config=config).dump(operator_output)
