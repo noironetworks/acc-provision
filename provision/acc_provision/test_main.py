@@ -302,6 +302,17 @@ def test_with_no_istio():
 
 
 @in_testdir
+def test_with_default_profile():
+    run_provision(
+        "with_istio_default_profile.inp.yaml",
+        "with_istio_default_profile.kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
 def test_new_naming_convention_simple():
     run_provision(
         "with_new_naming_convention.inp.yaml",
