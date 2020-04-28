@@ -218,6 +218,7 @@ data:
         {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
+        "istio-profile": {{ config.istio_config.install_profile|json }},
         {% endif %}
         {% if config.flavor != "cloud" %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
@@ -477,6 +478,7 @@ rules:
   - "install.istio.io"
   resources:
   - istiocontrolplanes
+  - istiooperators
   verbs:
   - '*'
 - apiGroups:

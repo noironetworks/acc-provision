@@ -51,6 +51,7 @@ rules:
   - install.istio.io
   resources:
   - istiocontrolplanes
+  - istiooperators
   verbs:
   - '*'
 - apiGroups:
