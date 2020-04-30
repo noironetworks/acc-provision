@@ -1325,7 +1325,7 @@ class ApicKubeConfig(object):
             ]
         )
         rsToRegion = self.capic_rsToRegion()
-        _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "no")
+        _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "yes")
         child_list = [rsToRegion, rsToCtx, cidr]
 
         for child in child_list:
