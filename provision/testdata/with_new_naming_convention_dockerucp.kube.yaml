@@ -923,10 +923,7 @@ rules:
   - acicontainersoperators/status
   - acicontainersoperators/finalizers
   verbs:
-  - get
-  - list
-  - update
-  - watch
+  - '*'
 - apiGroups:
   - aci.snat
   resources:
