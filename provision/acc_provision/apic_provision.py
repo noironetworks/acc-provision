@@ -281,9 +281,12 @@ class Apic(object):
         self.clean_tagged_resources(system_id, tenant)
 
     def check_valid_annotation(self, path):
-        data = self.get_path(path)
-        if data['fvTenant']['attributes']['annotation'] == aciContainersOwnerAnnotation:
-            return True
+        try:
+            data = self.get_path(path)
+            if data['fvTenant']['attributes']['annotation'] == aciContainersOwnerAnnotation:
+                return True
+        except Exception as e:
+            dbg("Unable to find APIC object %s: %s" % (path, str(e)))
         return False
 
     def check_no_ap(self, path):
