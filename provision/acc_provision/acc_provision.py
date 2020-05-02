@@ -1485,6 +1485,9 @@ def provision(args, apic_file, no_random):
             query = '/api/node/class/hcloudSubnetOper.json?query-target=self&query-target-filter={}'.format(filter)
             resp = apic.get(path=query)
             resJson = json.loads(resp.content)
+            if args.debug:
+                print("query: {}".format(query))
+                print("resp: {}".format(resJson))
             subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
             return subnetID
 
@@ -1547,7 +1550,9 @@ def provision(args, apic_file, no_random):
             u_ccp = getUnderlayCCP()
             assert(u_ccp), "Need an underlay ccp"
             split_ccp = u_ccp.split("/")
-            ccp_name = split_ccp[-1].lstrip("ctxprofile-")
+            ccp_name = split_ccp[-1].replace("ctxprofile-", "")
+            if args.debug:
+                print("UnderlayCCPName: {}".format(ccp_name))
             return ccp_name
 
         def underlayCidr():
@@ -1595,7 +1600,8 @@ def provision(args, apic_file, no_random):
             print("Creating VPC, you will need additional settings for IPI\n")
             underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
         else:
-            underlay_posts = [underlayCidr, configurator.capic_underlay_cloudApp]
+            # if existing vpc, cidr and subnet should be created as well
+            underlay_posts = [configurator.capic_underlay_cloudApp]
 
         underlay_posts.append(setupCapicContractsInline)
 
