@@ -965,7 +965,7 @@ rules:
 - apiGroups:
   - config.openshift.io
   resources:
-  - networks
+  - '*'
   verbs:
   - '*'
 ---
