@@ -55,6 +55,7 @@ spec:
       hostIPC: true
       hostNetwork: true
       hostPID: true
+      priorityClassName: acicni-priority
       restartPolicy: Always
       serviceAccountName: aci-containers-host-agent
       tolerations:
