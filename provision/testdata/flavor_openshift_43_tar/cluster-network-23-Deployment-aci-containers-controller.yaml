@@ -48,6 +48,7 @@ spec:
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
       hostNetwork: true
+      priorityClassName: acicni-priority
       serviceAccountName: aci-containers-controller
       tolerations:
       - effect: NoSchedule

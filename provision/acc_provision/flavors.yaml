@@ -84,6 +84,7 @@ flavors:
     default_version: 5.0
     config:
       kube_config:
+        use_acicni_priority_class: True
         use_external_service_ip_allocator: False
         host_agent_openshift_resource: True
         allow_pods_external_access: True

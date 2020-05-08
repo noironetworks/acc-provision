@@ -14,6 +14,16 @@ metadata:
   annotations:
     openshift.io/node-selector: ''
 ---
+{% if config.kube_config.use_acicni_priority_class %}
+apiVersion: scheduling.k8s.io/v1beta1
+kind: PriorityClass
+metadata:
+  name: acicni-priority
+value: 1000000000
+globalDefault: false
+description: "This priority class is used for ACI-CNI resources"
+---
+{% endif %}
 {% if config.kube_config.use_aci_anywhere_crd %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -799,6 +809,9 @@ spec:
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
       {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
+      {% endif %}
       containers:
         - name: aci-containers-host
           image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
@@ -978,6 +991,9 @@ spec:
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
       {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
+      {% endif %}
       containers:
         - name: aci-containers-openvswitch
           image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
@@ -1066,6 +1082,9 @@ spec:
           effect: NoSchedule
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
+      {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
       {% endif %}
       containers:
         {% if config.kube_config.run_gbp_container %}
