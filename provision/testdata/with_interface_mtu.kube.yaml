@@ -930,6 +930,7 @@ rules:
   - get
 - apiGroups:
   - config.openshift.io
+  - operator.openshift.io
   resources:
   - '*'
   verbs:
