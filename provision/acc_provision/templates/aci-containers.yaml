@@ -835,6 +835,8 @@ spec:
             {% if config.kube_config.run_gbp_container %}
             - name: NODE_EPG
               value: {{config.aci_config.nodes_epg|json}}
+            - name: OPFLEX_MODE
+              value: overlay
             {% else %}
             - name: NODE_EPG
               value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
