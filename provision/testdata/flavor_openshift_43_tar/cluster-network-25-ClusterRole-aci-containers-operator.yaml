@@ -86,3 +86,13 @@ rules:
   - '*'
   verbs:
   - '*'
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
