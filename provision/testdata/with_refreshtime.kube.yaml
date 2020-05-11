@@ -936,6 +936,16 @@ rules:
   - '*'
   verbs:
   - '*'
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -994,6 +1004,8 @@ spec:
         env:
         - name: SYSTEM_NAMESPACE
           value: "kube-system"
+        - name: ACC_PROVISION_FLAVOR
+          value: "kubernetes-1.15"
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
