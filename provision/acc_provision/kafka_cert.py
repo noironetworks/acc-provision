@@ -74,7 +74,7 @@ def set_logger(logdir, logfile):
     logpath = logdir + '/' + logfile
     try:
         if not os.path.exists(logpath):
-            print('Log file %s does not exist yet. Create file') % logpath
+            print("Log file {} does not exist yet. Create file".format(logpath))
             with open(logpath, 'w'):
                 pass
         mask = stat.S_IROTH | stat.S_IRGRP
@@ -82,7 +82,7 @@ def set_logger(logdir, logfile):
             print('Set read permission for %s') % logpath
             os.chmod(logpath, 0o666)
     except Exception as e:
-        print("Exception %s setting logger") % e
+        print("Exception {} setting logger".format(e))
         pass
     logger = logging.getLogger(__name__)
     hdlr = logging.FileHandler(logpath)

@@ -415,6 +415,11 @@ flavors:
             filter: match-all
             provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
             consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+          - name: allow-kube-api
+            scope: tenant
+            filter: match-all
+            provided: ["ul-boot"]
+            consumed: ["aci-containers-default"]
         filters:
             - name: match-all
               entries:
@@ -427,6 +432,11 @@ flavors:
                 - name: ent2
                   prot: tcp
                   range: [19531, 19531]
+            - name: match-kube-api
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [443, 443]
             - name: match-oshift
               entries:
                 - name: ent1
