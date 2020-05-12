@@ -1318,6 +1318,11 @@ def check_overlapping_subnets(config):
     return True
 
 
+def gwToSubnet(gw):
+    u_gw = '{}'.format(str(gw))
+    return str(ipaddress.ip_network(u_gw, strict=False))
+
+
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
@@ -1469,19 +1474,27 @@ def provision(args, apic_file, no_random):
             return True
         print("Configuring cAPIC")
         config["aci_config"]["capic"] = True
+
+        def adjust_cidrs():
+            cidr = gwToSubnet(config["net_config"]["machine_cidr"])
+            b_subnet = gwToSubnet(config["net_config"]["bootstrap_subnet"])
+            n_subnet = gwToSubnet(config["net_config"]["node_subnet"])
+            config["net_config"]["machine_cidr"] = cidr
+            config["net_config"]["bootstrap_subnet"] = b_subnet
+            config["net_config"]["node_subnet"] = n_subnet
+
         apic = get_apic(config)
         if apic is None:
             print("APIC login failed")
             return False
 
+        adjust_cidrs()
         configurator = ApicKubeConfig(config)
 
         def getSubnetID(subnet):
             tn_name = config["aci_config"]["cluster_tenant"]
             ccp_name = getUnderlayCCPName()
             cidr = config["net_config"]["machine_cidr"]
-            cidr = gwToSubnet(cidr)
-            subnet = gwToSubnet(subnet)
             subnetDN = "uni/tn-{}/ctxprofile-{}/cidr-[{}]/subnet-[{}]".format(tn_name, ccp_name, cidr, subnet)
             filter = "eq(hcloudSubnetOper.delegateDn, \"{}\")".format(subnetDN)
             query = '/api/node/class/hcloudSubnetOper.json?query-target=self&query-target-filter={}'.format(filter)
@@ -1559,9 +1572,9 @@ def provision(args, apic_file, no_random):
 
         def underlayCidr():
             ccp_name = getUnderlayCCPName()
-            cidr = gwToSubnet(config["net_config"]["machine_cidr"])
-            b_subnet = gwToSubnet(config["net_config"]["bootstrap_subnet"])
-            n_subnet = gwToSubnet(config["net_config"]["node_subnet"])
+            cidr = config["net_config"]["machine_cidr"]
+            b_subnet = config["net_config"]["bootstrap_subnet"]
+            n_subnet = config["net_config"]["node_subnet"]
             return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet], "no")
 
         def setupCapicContractsInline():
@@ -1595,10 +1608,6 @@ def provision(args, apic_file, no_random):
             accountId = resJson["imdata"][0]["cloudAwsProvider"]["attributes"]["accountId"]
             print(accountId)
 
-        def gwToSubnet(gw):
-            u_gw = '{}'.format(str(gw))
-            return ipaddress.ip_network(u_gw, strict=False)
-
         # if underlay ccp doesn't exist, create one
         underlay_posts = []
         u_ccp = getUnderlayCCP()
@@ -1624,7 +1633,7 @@ def provision(args, apic_file, no_random):
 
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
         gen(config, output_file, output_tar, operator_cr_output_file)
-        m_cidr = gwToSubnet(config["net_config"]["machine_cidr"])
+        m_cidr = config["net_config"]["machine_cidr"]
         b_subnet = config["net_config"]["bootstrap_subnet"]
         n_subnet = config["net_config"]["node_subnet"]
         p_subnet = config["net_config"]["pod_subnet"].replace(".1/", ".0/")
