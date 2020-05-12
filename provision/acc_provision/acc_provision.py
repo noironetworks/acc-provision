@@ -1596,9 +1596,8 @@ def provision(args, apic_file, no_random):
             print(accountId)
 
         def gwToSubnet(gw):
-            if sys.version_info.major == 3:
-                unicode = str
-            return ipaddress.ip_network(unicode(gw), strict=False)
+            u_gw = '{}'.format(str(gw))
+            return ipaddress.ip_network(u_gw, strict=False)
 
         # if underlay ccp doesn't exist, create one
         underlay_posts = []

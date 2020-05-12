@@ -1032,7 +1032,11 @@ class ApicKubeConfig(object):
 
         children = []
         children.append(subj)
-        return path, aci_obj("vzBrCP", [('name', name), ('_children', children)])
+        p_list = []
+        if "scope" in c_spec:
+            p_list.append(('scope', c_spec["scope"]))
+        p_list = p_list + [('name', name), ('_children', children)]
+        return path, aci_obj("vzBrCP", p_list)
 
     def make_filter(self, f_spec):
         tn_name = self.config["aci_config"]["cluster_tenant"]
