@@ -438,17 +438,19 @@ class ApicKubeConfig(object):
             update(data, self.netflow_cont())
         return data
 
-    def annotateApicObjects(self, data, pre_existing_tenant=False):
+    def annotateApicObjects(self, data, pre_existing_tenant=False, ann=aciContainersOwnerAnnotation):
+        # apic objects are dicts of length 1
+        assert(len(data) <= 1)
         for key, value in data.items():
             if "children" in value.keys():
                 children = value["children"]
                 for i in range(len(children)):
-                    self.annotateApicObjects(children[i])
+                    self.annotateApicObjects(children[i], ann=ann)
             break
         if not key == "fvTenant":
-            data[key]["attributes"]["annotation"] = aciContainersOwnerAnnotation
+            data[key]["attributes"]["annotation"] = ann
         elif not (data[key]["attributes"]["name"] == "common") and not (pre_existing_tenant):
-            data[key]["attributes"]["annotation"] = aciContainersOwnerAnnotation
+            data[key]["attributes"]["annotation"] = ann
 
     def pdom_pool(self):
         pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
@@ -1518,7 +1520,7 @@ class ApicKubeConfig(object):
         vmm_type = "Kubernetes"
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
 
-        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont.json" % (vmm_type, vmm_name, vmm_name)
+        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont/info.json" % (vmm_type, vmm_name, vmm_name)
         data = collections.OrderedDict(
             [
                 (

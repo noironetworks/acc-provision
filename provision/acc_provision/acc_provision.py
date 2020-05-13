@@ -1323,6 +1323,71 @@ def gwToSubnet(gw):
     return str(ipaddress.ip_network(u_gw, strict=False))
 
 
+class MoCleaner(object):
+    def __init__(self, apic, config, debug=False):
+        vmm_name = config["aci_config"]["vmm_domain"]["domain"]
+        tn_name = config["aci_config"]["cluster_tenant"]
+        annStr = "orchestrator:acc-provision-{}-{}".format(tn_name, vmm_name)
+        self.apic = apic
+        self.annStr = annStr
+        self.debug = debug
+        self.paths = []
+        self.classes = []
+        self.vmm_name = vmm_name
+
+    def getAnnStr(self):
+        return self.annStr
+
+    def record(self, path, data):
+        self.paths.append(path)
+        for klass in data.keys():
+            self.classes.append(klass)
+            if self.debug:
+                print("MoCleaner.record: path: {} class: {}".format(path, klass))
+
+    def deleteCandidate(self, p):
+        resp = self.apic.get(path=p)
+        resJson = json.loads(resp.content)
+        if len(resJson["imdata"]) == 0:
+            return False
+        for key, value in resJson["imdata"][0].items():
+            if "attributes" in value.keys():
+                att = value["attributes"]
+                if "annotation" in att.keys():
+                    if att["annotation"] == self.annStr:
+                        return True
+        return False
+
+    def doIt(self):
+        for p in reversed(self.paths):
+            to_del = self.deleteCandidate(p)
+            if not to_del:
+                if self.debug:
+                    print("MoCleaner: skipping {}".format(p))
+                continue
+            resp = self.apic.delete(p)
+            if self.debug:
+                print("MoCleaner.doIt: path: {} resp: {}".format(p, resp.text))
+        inj_path = "/api/node/mo/comp/prov-Kubernetes/ctrlr-[{}]-{}/injcont.json".format(self.vmm_name, self.vmm_name)
+        query = "{}?query-target=children&rsp-prop-include=naming-only".format(inj_path)
+        resp = self.apic.get(path=query)
+        resJson = json.loads(resp.content)
+        if len(resJson["imdata"]) == 0:
+            print("Nothing left to delete")
+            return
+        print("Deleting {} injected objects".format(len(resJson["imdata"])))
+        for child in resJson["imdata"]:
+            for key, value in child.items():
+                if "attributes" in value.keys():
+                    att = value["attributes"]
+                    if "dn" in att.keys():
+                        child_dn = att["dn"]
+                        c_path = "/api/node/mo/{}.json".format(child_dn)
+                        resp = self.apic.delete(c_path)
+                        if self.debug:
+                            print("MoCleaner.doIt: path: {} resp: {}".format(c_path, resp.text))
+
+
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
@@ -1490,6 +1555,7 @@ def provision(args, apic_file, no_random):
 
         adjust_cidrs()
         configurator = ApicKubeConfig(config)
+        deleter = MoCleaner(apic, config, args.debug)
 
         def getSubnetID(subnet):
             tn_name = config["aci_config"]["cluster_tenant"]
@@ -1510,6 +1576,8 @@ def provision(args, apic_file, no_random):
             query = configurator.capic_overlay_dn_query()
             resp = apic.get(path=query)
             resJson = json.loads(resp.content)
+            if len(resJson["imdata"]) == 0:
+                return ""
             overlayDn = resJson["imdata"][0]["hcloudCtx"]["attributes"]["dn"]
             return overlayDn
 
@@ -1558,7 +1626,7 @@ def provision(args, apic_file, no_random):
         def overlayCtx():
             underlay_ccp = getUnderlayCCP()
             # cannot proceed without an underlay ccp
-            assert(underlay_ccp), "Need an underlay ccp"
+            assert(underlay_ccp or args.delete), "Need an underlay ccp"
             return configurator.capic_overlay(underlay_ccp)
 
         def getUnderlayCCPName():
@@ -1591,6 +1659,13 @@ def provision(args, apic_file, no_random):
             return "", None
 
         def postIt(path, data):
+            if args.delete:
+                deleter.record(path, data)
+                return
+
+            # annotate before posting
+            annStr = deleter.getAnnStr()
+            configurator.annotateApicObjects(data, ann=annStr)
             if args.debug:
                 print("Path: {}".format(path))
                 print("data: {}".format(data))
@@ -1598,7 +1673,7 @@ def provision(args, apic_file, no_random):
                 resp = apic.post(path, data)
                 print("Resp: {}".format(resp.text))
             except Exception as e:
-                err("Error in provisioning %s: %s" % (path, str(e)))
+                err("Error in provisioning {}: {}".format(path, str(e)))
 
         def getTenantAccount():
             tn_name = config["aci_config"]["cluster_tenant"]
@@ -1611,8 +1686,9 @@ def provision(args, apic_file, no_random):
         # if underlay ccp doesn't exist, create one
         underlay_posts = []
         u_ccp = getUnderlayCCP()
-        if not u_ccp:
-            print("Creating VPC, you will need additional settings for IPI\n")
+        if not u_ccp or args.delete:
+            if not args.delete:
+                print("Creating VPC, you will need additional settings for IPI\n")
             underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
         else:
             # if existing vpc, cidr and subnet should be created as well
@@ -1627,6 +1703,9 @@ def provision(args, apic_file, no_random):
                 continue
 
             postIt(path, data)
+        if args.delete:
+            deleter.doIt()
+            return True
 
         config = addKafkaConfig(config)
         config = addMiscConfig(config)
