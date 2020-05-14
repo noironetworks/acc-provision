@@ -7,6 +7,7 @@ aci_config:
   apic_login:
     username: admin
     password: noir0123
+  apic_version: 5.0
   aep: kube-aep
   vrf:
     name: kubernetes-vrf

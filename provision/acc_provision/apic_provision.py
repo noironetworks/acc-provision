@@ -96,6 +96,7 @@ class Apic(object):
             self.login()
             if self.cookies is not None:
                 apic_cookies[(addr, username, ssl)] = self.cookies
+        self.apic_version = self.get_apic_version()
 
     def url(self, path):
         if self.ssl:
@@ -280,6 +281,17 @@ class Apic(object):
         # Finally clean any stray resources in common
         self.clean_tagged_resources(system_id, tenant)
 
+    def get_apic_version(self):
+        path = "/api/node/class/firmwareCtrlrRunning.json?&"
+        version = 1.0
+        try:
+            data = self.get_path(path)
+            versionStr = data['firmwareCtrlrRunning']['attributes']['version']
+            version = float(versionStr.split('(')[0])
+        except Exception as e:
+            dbg("Unable to get APIC version object %s: %s" % (path, str(e)))
+        return version
+
     def check_valid_annotation(self, path):
         try:
             data = self.get_path(path)
@@ -395,7 +407,7 @@ class ApicKubeConfig(object):
             print(path, file=outfilep)
             print(data, file=outfilep)
 
-    def get_config(self):
+    def get_config(self, apic_version):
         def assert_attributes_is_first_key(data):
             """Check that attributes is the first key in the JSON."""
             if isinstance(data, collections.Mapping) and "attributes" in data:
@@ -425,6 +437,8 @@ class ApicKubeConfig(object):
         update(data, self.nested_dom())
         update(data, self.associate_aep())
         update(data, self.opflex_cert())
+        if apic_version >= 5.0:
+            update(data, self.cluster_info())
 
         update(data, self.l3out_tn())
         update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
@@ -451,6 +465,75 @@ class ApicKubeConfig(object):
             data[key]["attributes"]["annotation"] = ann
         elif not (data[key]["attributes"]["name"] == "common") and not (pre_existing_tenant):
             data[key]["attributes"]["annotation"] = ann
+
+    def cluster_info(self):
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        accProvisionInput = self.config["user_input"]
+        key_data = cert_data = ''
+        if self.config["aci_config"]["sync_login"]["key_data"]:
+            key_data = self.config["aci_config"]["sync_login"]["key_data"].decode('ascii')
+        if self.config["aci_config"]["sync_login"]["cert_data"]:
+            cert_data = self.config["aci_config"]["sync_login"]["cert_data"].decode('ascii')
+
+        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont/info.json" % (vmm_type, vmm_name, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmInjectedClusterInfo",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                        ("accountName", tn_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vmmInjectedClusterDetails",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "accProvisionInput",
+                                                                        accProvisionInput,
+                                                                    ),
+                                                                    (
+                                                                        "userKey",
+                                                                        key_data,
+                                                                    ),
+                                                                    (
+                                                                        "userCert",
+                                                                        cert_data,
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ]
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        return path, data
 
     def pdom_pool(self):
         pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
