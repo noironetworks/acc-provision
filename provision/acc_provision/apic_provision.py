@@ -1090,7 +1090,7 @@ class ApicKubeConfig(object):
         path, data = self.capic_cloudApp(vmm_name)
         overlayVrfName = self.get_overlay_vrf_name()
 
-        epg_list = ["default", "system", "nodes"]
+        epg_list = ["default", "system", "nodes", "inet-out"]
         for epg in epg_list:
             epg_obj = self.capic_epg(self.ACI_PREFIX + epg, overlayVrfName)
             data["cloudApp"]["children"].append(epg_obj)

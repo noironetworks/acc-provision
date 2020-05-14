@@ -1148,3 +1148,14 @@ spec:
               - key: gbp-server-config
                 path: gbp-server.conf
               {% endif %}
+{% if config.flavor == "cloud" %}
+---
+apiVersion: aci.aw/v1
+kind: PodIF
+metadata:
+  name: inet-route
+  namespace: kube-system
+status:
+  epg: aci-containers-inet-out
+  ipaddr: 0.0.0.0/0
+{% endif %}
