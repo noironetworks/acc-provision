@@ -1275,7 +1275,7 @@ def parse_args(show_help):
         help='set a configuration version token. Default is UUID.')
     parser.add_argument(
         '--test-data-out', default=None, metavar='file',
-        help='save test data to file')
+        help='capture apic responses for test replay. E.g. ../testdata/apic_xx.json')
     parser.add_argument(
         '--skip-kafka-certs', action='store_true', default=False,
         help='skip kafka certificate generation')
