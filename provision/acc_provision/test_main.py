@@ -148,7 +148,7 @@ def test_with_overrides():
         "with_overrides.kube.yaml",
         None,
         None,
-        "with_overrides.apic.txt"
+        "with_overrides.apic.txt",
     )
 
 

@@ -13,6 +13,7 @@ import json
 import os
 import os.path
 import random
+import re
 import string
 import sys
 import uuid
@@ -136,6 +137,7 @@ def config_default():
     # Default values for configuration
     default_config = {
         "aci_config": {
+            "apic_version": 1.0,
             "system_id": None,
             "tenant": {
                 "name": None,
@@ -250,11 +252,16 @@ def config_user(config_file):
     if config_file:
         if config_file == "-":
             info("Loading configuration from \"STDIN\"")
-            config = yaml.safe_load(sys.stdin)
+            data = sys.stdin.read()
+            config = yaml.safe_load(data)
         else:
             info("Loading configuration from \"%s\"" % config_file)
             with open(config_file, 'r') as file:
                 config = yaml.safe_load(file)
+            with open(config_file, 'r') as file:
+                data = file.read()
+        user_input = re.sub('password:.*', '', data)
+        config["user_input"] = user_input
     if config is None:
         config = {}
     return config
@@ -1156,7 +1163,7 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     configurator = ApicKubeConfig(config)
     for k, v in flavor_opts.get("apic", {}).items():
         setattr(configurator, k, v)
-    apic_config = configurator.get_config()
+    apic_config = configurator.get_config(config["aci_config"]["apic_version"])
     if apic_file:
         if apic_file == "-":
             info("Writing apic configuration to \"STDOUT\"")
@@ -1498,9 +1505,11 @@ def provision(args, apic_file, no_random):
     # Validate APIC access
     if prov_apic is not None:
         apic = get_apic(config)
+        apic_version = apic.apic_version
         if apic is None:
             err("Not able to login to the APIC, please check username or password")
             return False
+        config["aci_config"]["apic_version"] = apic_version
 
     # Validate config
     try:
@@ -1725,9 +1734,9 @@ def provision(args, apic_file, no_random):
         return True
 
     # generate output files; and program apic if needed
-    ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
     gen(config, output_file, output_tar, operator_cr_output_file)
+    ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 
 
