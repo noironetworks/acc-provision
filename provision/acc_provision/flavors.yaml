@@ -377,6 +377,7 @@ flavors:
       kube_config:
         no_priority_class: True
         use_openshift_run_level: True
+        system_namespace: aci-containers-system
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: False

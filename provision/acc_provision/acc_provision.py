@@ -827,6 +827,9 @@ def config_validate(flavor_opts, config):
 
 def config_validate_preexisting(config, prov_apic):
     try:
+        if isOverlay(config["flavor"]):
+            return True
+
         if prov_apic is not None:
             apic = get_apic(config)
             if apic is None:
@@ -871,7 +874,7 @@ def config_validate_preexisting(config, prov_apic):
             #         config["kube_config"]["system_namespace"] = "kube-system"
 
     except Exception as e:
-        warn("Unable to validate resources on APIC: '%s'" % e.message)
+        warn("Unable to validate resources on APIC: {}".format(e))
     return True
 
 
@@ -1199,10 +1202,11 @@ def get_apic(config):
     apic_password = config["aci_config"]["apic_login"]["password"]
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
+    save_to = config["provision"]["save_to"]
     capic = config["aci_config"]["capic"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug, capic=capic)
+        timeout=timeout, debug=debug, capic=capic, save_to=save_to)
     if apic.cookies is None:
         return None
     return apic
@@ -1276,6 +1280,12 @@ def parse_args(show_help):
     parser.add_argument(
         '-t', '--version-token', default=None, metavar='token',
         help='set a configuration version token. Default is UUID.')
+    parser.add_argument(
+        '--test-data-out', default=None, metavar='file',
+        help='capture apic responses for test replay. E.g. ../testdata/apic_xx.json')
+    parser.add_argument(
+        '--skip-kafka-certs', action='store_true', default=False,
+        help='skip kafka certificate generation')
 
     # If the input has no arguments, show help output and exit
     if show_help:
@@ -1438,6 +1448,8 @@ def provision(args, apic_file, no_random):
         "provision": {
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
+            "save_to": args.test_data_out,
+            "skip-kafka-certs": args.skip_kafka_certs,
         },
     }
 
@@ -1714,11 +1726,13 @@ def provision(args, apic_file, no_random):
             postIt(path, data)
         if args.delete:
             deleter.doIt()
+            apic.save()
             return True
 
         config = addKafkaConfig(config)
         config = addMiscConfig(config)
 
+        print("Config is: {}".format(config["kube_config"]))
         gen = flavor_opts.get("template_generator", generate_kube_yaml)
         gen(config, output_file, output_tar, operator_cr_output_file)
         m_cidr = config["net_config"]["machine_cidr"]
@@ -1731,6 +1745,7 @@ def provision(args, apic_file, no_random):
         print("\nOpenshift Info")
         print("----------------")
         print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoAci\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
+        apic.save()
         return True
 
     # generate output files; and program apic if needed
@@ -1742,11 +1757,12 @@ def provision(args, apic_file, no_random):
 
 def addKafkaConfig(config):
     cKey, cCert, caCert = getKafkaCerts(config)
-    config["aci_config"]["kafka"]["key"] = cKey
-    config["aci_config"]["kafka"]["cert"] = cCert
-    config["aci_config"]["kafka"]["cacert"] = caCert
+    config["aci_config"]["kafka"]["key"] = cKey.encode()
+    config["aci_config"]["kafka"]["cert"] = cCert.encode()
+    config["aci_config"]["kafka"]["cacert"] = caCert.encode()
     brokers = []
     for host in config["aci_config"]["apic_hosts"]:
+        host = host.split(":")[0]
         brokers.append(host + ":9095")
 
     config["aci_config"]["kafka"]["brokers"] = brokers
@@ -1755,6 +1771,8 @@ def addKafkaConfig(config):
 
 
 def getKafkaCerts(config):
+    if config["provision"]["skip-kafka-certs"]:
+        return "none", "none", "none"
     wdir = tempfile.mkdtemp()
     apic_host = config["aci_config"]["apic_hosts"][0]
     user = config["aci_config"]["apic_login"]["username"]
