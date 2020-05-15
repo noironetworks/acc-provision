@@ -1,7 +1,7 @@
 usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-o file] [-z file] [-r file] [-a] [-d] [-u name]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
-                        [-t token]
+                        [-t token] [--test-data-out file] [--skip-kafka-certs]
 
 Provision an ACI/Kubernetes installation
 
@@ -29,3 +29,5 @@ optional arguments:
                         set configuration flavor. Example: openshift-3.6
   -t token, --version-token token
                         set a configuration version token. Default is UUID.
+  --test-data-out file  save test data to file
+  --skip-kafka-certs    skip kafka certificate generation

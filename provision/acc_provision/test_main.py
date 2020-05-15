@@ -9,9 +9,11 @@ import ssl
 import sys
 import tempfile
 import tarfile
+import json
 
 
 from . import acc_provision
+from . import fake_apic
 
 
 debug = False
@@ -269,13 +271,35 @@ def test_flavor_localhost():
 
 @in_testdir
 def test_flavor_cloud():
+    with open("apic_test_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
+    run_provision(
+        "flavor_cloud.inp.yaml",
+        "flavor_cloud.kube.yaml",
+        None,
+        None,
+        overrides={"flavor": "cloud", "apic": True, "password": "test"}
+    )
+    apic.shutdown()
+
+
+@in_testdir
+def test_flavor_cloud_delete():
+    with open("apic_delete_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
+    assert(len(fake_apic.fake_deletes) != 0)
     run_provision(
         "flavor_cloud.inp.yaml",
         None,
         None,
         None,
-        overrides={"flavor": "cloud"}
+        overrides={"flavor": "cloud", "apic": True, "password": "test", "delete": True}
     )
+    apic.shutdown()
+    # verify all deletes were executed
+    assert(len(fake_apic.fake_deletes) == 0)
 
 
 @in_testdir
@@ -515,6 +539,8 @@ def get_args(**overrides):
         "flavor": "kubernetes-1.15",
         "version_token": "dummy",
         "release": False,
+        "test_data_out": None,
+        "skip_kafka_certs": True,
         # infra_vlan is not part of command line input, but we do
         # pass it as a command line arg in unit tests to pass in
         # configuration which would otherwise be discovered from

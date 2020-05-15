@@ -2,6 +2,10 @@
 # Minimal Makefile to run aci-containers-provisioning tests
 #
 
+.EXPORT_ALL_VARIABLES:
+# because fake apic server is insecure
+PYTHONWARNINGS = ignore:Unverified HTTPS request
+
 dist: test
 	python setup.py sdist
 
