@@ -916,6 +916,12 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
   - aci.snat
   resources:
   - snatpolicies
