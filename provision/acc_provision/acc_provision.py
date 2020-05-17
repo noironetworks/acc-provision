@@ -386,6 +386,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 "password": generate_password(no_random),
                 "certfile": "user-%s.crt" % system_id,
                 "keyfile": "user-%s.key" % system_id,
+                "cert_reused": False,
             },
             "node_bd_dn": bd_dn_prefix + "node-bd",
             "pod_bd_dn": bd_dn_prefix + "pod-bd",
@@ -901,6 +902,7 @@ def generate_password(no_random):
 
 
 def generate_cert(username, cert_file, key_file):
+    reused = False
     if not exists(cert_file) or not exists(key_file):
         info("Generating certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
@@ -939,6 +941,7 @@ def generate_cert(username, cert_file, key_file):
             keyp.write(key_data)
     else:
         # Do not overwrite previously generated data if it exists
+        reused = True
         info("Reusing existing certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
         info("  Certificate file: \"%s\"" % cert_file)
@@ -946,7 +949,7 @@ def generate_cert(username, cert_file, key_file):
             cert_data = certp.read()
         with open(key_file, "rb") as keyp:
             key_data = keyp.read()
-    return key_data, cert_data
+    return key_data, cert_data, reused
 
 
 def get_jinja_template(file):
@@ -1356,6 +1359,10 @@ class MoCleaner(object):
         return self.annStr
 
     def record(self, path, data):
+        if path in self.paths:
+            if self.debug:
+                print("MoCleaner.record: path: {} already added".format(path))
+            return
         self.paths.append(path)
         for klass in data.keys():
             self.classes.append(klass)
@@ -1376,6 +1383,7 @@ class MoCleaner(object):
         return False
 
     def doIt(self):
+        print("Processing {} objects to delete".format(len(self.paths)))
         for p in reversed(self.paths):
             to_del = self.deleteCandidate(p)
             if not to_del:
@@ -1550,10 +1558,12 @@ def provision(args, apic_file, no_random):
     certfile = config["aci_config"]["sync_login"]["certfile"]
     keyfile = config["aci_config"]["sync_login"]["keyfile"]
     key_data, cert_data = None, None
+    reused = True
     if generate_cert_data:
-        key_data, cert_data = generate_cert(username, certfile, keyfile)
+        key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
+    config["aci_config"]["sync_login"]["cert_reused"] = reused
 
     if flavor == "cloud":
         if prov_apic is None:
@@ -1704,16 +1714,26 @@ def provision(args, apic_file, no_random):
             accountId = resJson["imdata"][0]["cloudAwsProvider"]["attributes"]["accountId"]
             print(accountId)
 
-        # if underlay ccp doesn't exist, create one
         underlay_posts = []
+        # if the cert_file was created or the sync user does not exist
+        # create it
+        sync_user = config["aci_config"]["sync_login"]["username"]
+        post_user = not config["aci_config"]["sync_login"]["cert_reused"]
+        post_user = post_user or not apic.get_user(sync_user)
+        post_user = post_user or args.delete
+        if post_user:
+            underlay_posts.append(configurator.kube_user)
+            underlay_posts.append(configurator.kube_cert)
+
+        # if underlay ccp doesn't exist, create one
         u_ccp = getUnderlayCCP()
         if not u_ccp or args.delete:
             if not args.delete:
                 print("Creating VPC, you will need additional settings for IPI\n")
-            underlay_posts = [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
+            underlay_posts += [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
         else:
             # if existing vpc, cidr and subnet should be created as well
-            underlay_posts = [configurator.capic_underlay_cloudApp]
+            underlay_posts += [configurator.capic_underlay_cloudApp]
 
         underlay_posts.append(setupCapicContractsInline)
 

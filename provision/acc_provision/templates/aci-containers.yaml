@@ -210,10 +210,8 @@ data:
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
-        {% if config.flavor != "cloud" %}
         "apic-username": {{config.aci_config.sync_login.username|json}},
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
-        {% endif %}
         "apic-use-inst-tag": {{config.aci_config.use_inst_tag|json}},
         "aci-prefix": {{config.aci_config.system_id|json}},
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
@@ -222,8 +220,6 @@ data:
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         "require-netpol-annot": {{config.kube_config.use_netpol_annotation|json}},
         {% if config.flavor == "cloud" %}
-        "apic-username": {{config.aci_config.apic_login.username|json}},
-        "apic-password": {{config.aci_config.apic_login.password|json}},
         "lb-type": "None",
         {% endif %}
         {% if config.istio_config.install_istio %}
@@ -353,8 +349,8 @@ data:
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
         "apic": {
             "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
-            "apic-username": {{config.aci_config.apic_login.username|json}},
-            "apic-password": {{config.aci_config.apic_login.password|json}},
+            "apic-username": {{config.aci_config.sync_login.username|json}},
+            "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
             "kafka": {
                 "brokers": {{config.aci_config.kafka.brokers|json|indent(width=16)}},
                 "client-key-path": "/certs/kafka-client.key",
@@ -1099,6 +1095,8 @@ spec:
         {% if config.flavor == "cloud" %}
             - name: kafka-certs
               mountPath: /certs
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
         {% endif %}
           env:
             - name: GBP_SERVER_CONF
