@@ -27,3 +27,5 @@ versions:
     cnideploy_version: master-test
     openvswitch_version: master-test
     opflex_agent_version: master-test
+    opflex_server_version: master-test
+    gbp_version: master-test
