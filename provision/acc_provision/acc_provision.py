@@ -1224,6 +1224,9 @@ def get_apic(config):
     debug = config["provision"]["debug_apic"]
     save_to = config["provision"]["save_to"]
     capic = config["aci_config"]["capic"]
+
+    if config["aci_config"]["apic_proxy"]:
+        apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
         timeout=timeout, debug=debug, capic=capic, save_to=save_to)
@@ -1300,6 +1303,9 @@ def parse_args(show_help):
     parser.add_argument(
         '-t', '--version-token', default=None, metavar='token',
         help='set a configuration version token. Default is UUID.')
+    parser.add_argument(
+        '--apic-proxy', default=None, metavar='addr',
+        help=argparse.SUPPRESS)
     parser.add_argument(
         '--test-data-out', default=None, metavar='file',
         help='capture apic responses for test replay. E.g. ../testdata/apic_xx.json')
@@ -1468,7 +1474,8 @@ def provision(args, apic_file, no_random):
         "aci_config": {
             "apic_login": {
             },
-            "capic": False
+            "capic": False,
+            "apic_proxy": args.apic_proxy,
         },
         "provision": {
             "prov_apic": prov_apic,

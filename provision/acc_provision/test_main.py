@@ -527,6 +527,7 @@ def get_args(**overrides):
         "output": None,
         "output_tar": None,
         "aci_operator_cr": None,
+        "apic_proxy": None,
         "apicfile": None,
         "apic": False,
         "delete": False,
