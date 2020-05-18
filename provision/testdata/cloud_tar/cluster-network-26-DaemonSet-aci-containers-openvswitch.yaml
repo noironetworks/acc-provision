@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
+  name: aci-containers-openvswitch
+  namespace: aci-containers-system
+spec:
+  selector:
+    matchLabels:
+      name: aci-containers-openvswitch
+      network-plugin: aci-containers
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+      labels:
+        name: aci-containers-openvswitch
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - env:
+        - name: OVS_RUNDIR
+          value: /usr/local/var/run/openvswitch
+        image: noirolabs/openvswitch:ci_test
+        imagePullPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/liveness-ovs.sh
+        name: aci-containers-openvswitch
+        resources:
+          limits:
+            memory: 1Gi
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+            - SYS_NICE
+            - IPC_LOCK
+        volumeMounts:
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+        - mountPath: /usr/local/etc
+          name: hostetc
+        - mountPath: /lib/modules
+          name: hostmodules
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      restartPolicy: Always
+      serviceAccountName: aci-containers-host-agent
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /etc
+        name: hostetc
+      - hostPath:
+          path: /var
+        name: hostvar
+      - hostPath:
+          path: /run
+        name: hostrun
+      - hostPath:
+          path: /lib/modules
+        name: hostmodules
+  updateStrategy:
+    type: RollingUpdate

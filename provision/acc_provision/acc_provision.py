@@ -224,7 +224,8 @@ def config_default():
             "opflex_mode": None,
             "host_agent_cni_bin_path": "/opt",
             "host_agent_cni_conf_path": "/etc",
-            "generate_installer_files": False
+            "generate_installer_files": False,
+            "generate_cnet_file": False
         },
         "istio_config": {
             "install_istio": True,
@@ -990,24 +991,23 @@ def generate_operator_tar(tar_path, cont_docs, config):
     gen_file_list(cont_docs, file_start, filenames)
 
     # Create three extra files needed for Openshift 4.3 installer
-    if config["kube_config"]["generate_installer_files"]:
-
+    extra_files = []
+    gen_inst_files = config["kube_config"]["generate_installer_files"]
+    gen_cnet_file = config["kube_config"]["generate_cnet_file"]
+    if gen_inst_files or gen_cnet_file:
         cnetfile_name = 'cluster-network-03-config.yaml'
+        extra_files.append(cnetfile_name)
+
+    if gen_inst_files:
         masterfile_name = '99-master-kubelet-node-ip.yaml'
         workerfile_name = '99-worker-kubelet-node-port.yaml'
+        extra_files.append(masterfile_name)
+        extra_files.append(workerfile_name)
 
-        template_cnet = get_jinja_template(cnetfile_name)
-        template_cnet.stream(config=config).dump(cnetfile_name)
-
-        template_master = get_jinja_template(masterfile_name)
-        template_master.stream(config=config).dump(masterfile_name)
-
-        template_worker = get_jinja_template(workerfile_name)
-        template_worker.stream(config=config).dump(workerfile_name)
-
-        filenames.append(cnetfile_name)
-        filenames.append(masterfile_name)
-        filenames.append(workerfile_name)
+    for x_file in extra_files:
+        x_template = get_jinja_template(x_file)
+        x_template.stream(config=config).dump(x_file)
+        filenames.append(x_file)
 
     # Create tar for the parsed files and delete the files too
     tar = tarfile.open(tar_path, "w:gz", encoding="utf-8")
@@ -1764,7 +1764,7 @@ def provision(args, apic_file, no_random):
         node_subnetID = getSubnetID(n_subnet)
         print("\nOpenshift Info")
         print("----------------")
-        print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoAci\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
+        print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoACI\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
         apic.save()
         return True
 
