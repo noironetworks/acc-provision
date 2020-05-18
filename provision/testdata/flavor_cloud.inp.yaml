@@ -11,7 +11,6 @@ aci_config:
   vrf:                          # This VRF used to create all kubernetes EPs
     name: ULjj
     tenant: kuber
-    #cloud_account: 474903782115       # Cloud Account ID
     region: us-east-2                    # REQUIRED -- your aws region
   #custom_epgs:                 # List of additional endpoint-group names
   #  - epg-a            # to configure for use with annotations
