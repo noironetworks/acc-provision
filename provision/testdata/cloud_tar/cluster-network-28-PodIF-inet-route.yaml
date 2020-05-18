@@ -1,0 +1,8 @@
+apiVersion: aci.aw/v1
+kind: PodIF
+metadata:
+  name: inet-route
+  namespace: kube-system
+status:
+  epg: aci-containers-inet-out
+  ipaddr: 0.0.0.0/0

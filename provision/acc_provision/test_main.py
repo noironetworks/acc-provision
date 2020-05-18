@@ -277,7 +277,7 @@ def test_flavor_cloud():
     run_provision(
         "flavor_cloud.inp.yaml",
         "flavor_cloud.kube.yaml",
-        None,
+        "cloud_tar",
         None,
         overrides={"flavor": "cloud", "apic": True, "password": "test"}
     )
@@ -567,6 +567,7 @@ def compare_tar(expected, output, debug, generated):
             shutil.copyfile(output, generated)
         tmp_dir = "tmp_tar"
         tar_output = tarfile.open(mode="r:gz", name=output, encoding="utf-8")
+        shutil.rmtree(tmp_dir, ignore_errors=True)
         os.mkdir(tmp_dir)
         tar_output.extractall(path=tmp_dir)
         result = filecmp.dircmp(expected, tmp_dir)
