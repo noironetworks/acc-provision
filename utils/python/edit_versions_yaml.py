@@ -14,13 +14,15 @@ def read_yaml_file(file):
     return orig_data
 
 
-def modify_yaml(opt0, opt1, opt2, opt3, data):
+def modify_yaml(opt0, opt1, opt2, opt3, opt4, data):
     data['versions'][float(opt0)]['openvswitch_version'] = opt3
     data['versions'][float(opt0)]['opflex_agent_version'] = opt2
+    data['versions'][float(opt0)]['opflex_server_version'] = opt2
     data['versions'][float(opt0)]['cnideploy_version'] = opt1
     data['versions'][float(opt0)]['aci_containers_controller_version'] = opt1
     data['versions'][float(opt0)]['aci_containers_host_version'] = opt1
     data['versions'][float(opt0)]['aci_containers_operator_version'] = opt1
+    data['versions'][float(opt0)]['gbp_version'] = opt4
     return data
 
 
@@ -38,6 +40,9 @@ def main():
     parser.add_option("--acicontainers",
                       dest="acicontainers",
                       help="last successful build for AciContainers(controller, host-agent, acioperator and cnideploy) job")
+    parser.add_option("--gbpserver",
+                      dest="gbpserver",
+                      help="last successful build for GBPserver-container")
     parser.add_option("--opflex-container",
                       dest="opflex_container",
                       help="last successful build for OpFlex-container")
@@ -50,7 +55,7 @@ def main():
         parser.error("Required parameter(s) missing")
 
     orig_data = read_yaml_file(VERSIONS_PATH)
-    data = modify_yaml(opts.release_branch, opts.acicontainers, opts.opflex_container, opts.ovs_container, orig_data)
+    data = modify_yaml(opts.release_branch, opts.acicontainers, opts.opflex_container, opts.ovs_container, opts.gbpserver, orig_data)
     os.remove(VERSIONS_PATH)
     create_new_yaml(VERSIONS_PATH, data)
 
