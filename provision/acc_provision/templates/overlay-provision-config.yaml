@@ -12,23 +12,23 @@ aci_config:
     name: vpcVrf                # This is the vrf attached to the CCP. Will be created
                                 # if not present
     tenant: testTenant
-    region: region-xxx          # REQUIRED -- your aws region
+    region: region-xxx          # your aws region
   #custom_epgs:                 # List of additional endpoint-group names
-  #  - epg-a            # to configure for use with annotations
+  #  - epg-a                    # to configure for use with annotations
   #  - custom_group2
 
 #
 # Networks used by ACI containers/IPI
 #
 net_config:
-  pod_subnet: 14.3.0.1/16       # Subnet to use for Kubernetes pods
+  pod_subnet: 10.14.0.1/16      # Subnet to use for Kubernetes pods
   machine_cidr: 10.0.0.0/16     # cidr for openshift host VMs
   bootstrap_subnet: 10.0.0.0/24 # must be part of machine_cidr
   node_subnet: 10.0.0.1/24      # must be part of machine_cidr
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
-  node_svc_subnet: 10.5.0.1/24  # remove
-  opflex_server_port: 19999 # remove
+  node_svc_subnet: 10.5.0.1/24  
+  opflex_server_port: 19999 
   #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
   #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
                                 # default is 5, set to 0 to disable, max: 65535
@@ -39,14 +39,14 @@ net_config:
 # Configuration for container registry
 # Update if a custom container registry has been setup
 #
-registry:
-  image_prefix: noirolabs                   # e.g: registry.example.com/noiro
-  aci_containers_host_version: gui_test
-  opflex_agent_version: gui_test
-  opflex_server_version: gui_test
-  openvswitch_version: gui_test
-  gbp_version: gui_test
-  aci_containers_controller_version: gui_test
+#registry:
+#  image_prefix: <prefix>                   # e.g: registry.example.com/noiro
+#  aci_containers_host_version: <version>
+#  opflex_agent_version: <version>
+#  opflex_server_version: <version>
+#  openvswitch_version: <version>
+#  gbp_version: <version>
+#  aci_containers_controller_version: <version>
   
   # image_pull_secret: secret_name      # (if needed)
 
