@@ -4241,7 +4241,7 @@ class ApicKubeConfig(object):
                                                                                             [
                                                                                                 (
                                                                                                     "name",
-                                                                                                    "istio-mixer-9091",
+                                                                                                    "istio-mixer-9090:91",
                                                                                                 ),
                                                                                                 (
                                                                                                     "etherT",
@@ -4253,7 +4253,7 @@ class ApicKubeConfig(object):
                                                                                                 ),
                                                                                                 (
                                                                                                     "dFromPort",
-                                                                                                    "9091",
+                                                                                                    "9090",
                                                                                                 ),
                                                                                                 (
                                                                                                     "dToPort",
