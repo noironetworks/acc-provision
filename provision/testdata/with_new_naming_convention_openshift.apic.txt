@@ -1029,10 +1029,10 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "istio-mixer-9091",
+                                    "name": "istio-mixer-9090:91",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": "9091",
+                                    "dFromPort": "9090",
                                     "dToPort": "9091",
                                     "stateful": "no",
                                     "tcpRules": "",
