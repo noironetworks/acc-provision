@@ -515,6 +515,9 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
+    if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+        adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
+
     if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
         adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
 
@@ -633,6 +636,19 @@ def is_valid_istio_install_profile(xval):
     raise(Exception("Must be one of the profile in this List: ", validProfiles))
 
 
+def is_valid_image_pull_policy(xval):
+    if xval is None:
+        # Not a required field - default will be set to Always
+        return True
+    validPullPolicies = ['Always', 'IfNotPresent', 'Never']
+    try:
+        if xval in validPullPolicies:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be one of the values in this List: ", validPullPolicies))
+
+
 def is_valid_netflow_version(xval):
     if xval is None:
         # Not a required field - default will be set to demo
@@ -697,7 +713,8 @@ def config_validate(flavor_opts, config):
         # Istio config
         "istio_config/install_profile": (get(("istio_config", "install_profile")),
                                          is_valid_istio_install_profile),
-
+        "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
+                                          is_valid_image_pull_policy),
         # Network Config
         "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                   required),

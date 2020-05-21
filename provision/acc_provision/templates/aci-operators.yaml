@@ -158,7 +158,7 @@ spec:
     spec:
       containers:
       - image: {{ config.registry.image_prefix }}/aci-containers-operator:{{ config.registry.aci_containers_operator_version }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
         name: aci-containers-operator
         resources: {}
         terminationMessagePath: /dev/termination-log
