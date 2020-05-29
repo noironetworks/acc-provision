@@ -1072,6 +1072,15 @@ rules:
   - watch
   - get
 - apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  - gbpsstates
+  - gbpsstates/status
+  verbs:
+  - "*"
+- apiGroups:
   - config.openshift.io
   - operator.openshift.io
   resources:

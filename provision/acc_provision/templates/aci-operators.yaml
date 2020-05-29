@@ -94,6 +94,17 @@ rules:
   - list
   - watch
   - get
+{% if config.flavor == "cloud" %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  - gbpsstates
+  - gbpsstates/status
+  verbs:
+  - "*"
+{% endif %}
 - apiGroups:
   - config.openshift.io
   - operator.openshift.io
