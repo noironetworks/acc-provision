@@ -726,6 +726,7 @@ def config_validate(flavor_opts, config):
             "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
             "net_config/machine_cidr": (get(("net_config", "machine_cidr")), required),
             "net_config/bootstrap_subnet": (get(("net_config", "bootstrap_subnet")), required),
+            "cloud/provider": (get(("cloud", "provider")), required),
         }
     else:
         extra_checks = {
@@ -1649,6 +1650,7 @@ def provision(args, apic_file, no_random):
 
         def clusterInfo():
             overlayDn = getOverlayDn()
+            assert(overlayDn or args.delete), "Need an overlayDn"
             print("overlayDn: {}".format(overlayDn))
             return configurator.capic_cluster_info(overlayDn)
 
@@ -1730,6 +1732,19 @@ def provision(args, apic_file, no_random):
             except Exception as e:
                 err("Error in provisioning {}: {}".format(path, str(e)))
 
+        def setupZoneInfo():
+            if "zone" in config["cloud"]:
+                return  # user specified zone
+            region = config["aci_config"]["vrf"]["region"]
+            provider = config["cloud"]["provider"]
+            regionDn = "/api/mo/uni/clouddomp/provp-{}/region-{}.json".format(provider, region)
+            query = "{}?query-target=children&target-subtree-class=cloudZone&rsp-prop-include=naming-only".format(regionDn)
+            resp = apic.get(path=query)
+            resJson = json.loads(resp.content)
+            zone = resJson["imdata"][0]["cloudZone"]["attributes"]["name"]
+            print("Using zone {}".format(zone))
+            config["cloud"]["zone"] = zone
+
         def getTenantAccount():
             tn_name = config["aci_config"]["cluster_tenant"]
             tn_path = "/api/mo/uni/tn-%s.json?query-target=subtree&target-subtree-class=cloudAwsProvider" % (tn_name)
@@ -1749,6 +1764,8 @@ def provision(args, apic_file, no_random):
             underlay_posts.append(configurator.kube_user)
             underlay_posts.append(configurator.kube_cert)
 
+        # update zone information as necessary
+        setupZoneInfo()
         # if underlay ccp doesn't exist, create one
         u_ccp = getUnderlayCCP()
         if not u_ccp or args.delete:
