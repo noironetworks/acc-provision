@@ -58,8 +58,7 @@ spec:
       restartPolicy: Always
       serviceAccountName: aci-containers-host-agent
       tolerations:
-      - effect: NoSchedule
-        operator: Exists
+      - operator: Exists
       volumes:
       - hostPath:
           path: /etc
