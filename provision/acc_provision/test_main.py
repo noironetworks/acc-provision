@@ -245,7 +245,7 @@ def test_flavor_dockerucp_30():
     )
 
 
-@in_testdir
+'''@in_testdir
 def test_flavor_cloudfoundry_10():
     run_provision(
         "flavor_cf_10.inp.yaml",
@@ -254,7 +254,7 @@ def test_flavor_cloudfoundry_10():
         None,
         "flavor_cf_10.apic.txt",
         overrides={"flavor": "cloudfoundry-1.0"}
-    )
+    )'''
 
 
 @in_testdir
@@ -424,7 +424,7 @@ def test_devnull_errors():
             assert tmperr.read() == stderr.read()
 
 
-@in_testdir
+'''@in_testdir
 def test_flavor_cf_devnull_errors():
     with tempfile.NamedTemporaryFile("w+") as tmperr:
         sys.stderr = tmperr
@@ -439,7 +439,7 @@ def test_flavor_cf_devnull_errors():
             sys.stderr = sys.__stderr__
             tmperr.seek(0)
         with open("flavor_cf_devnull.stderr.txt", "r") as stderr:
-            assert tmperr.read() == stderr.read()
+            assert tmperr.read() == stderr.read()'''
 
 
 @in_testdir
@@ -600,9 +600,9 @@ def test_certificate_generation_kubernetes():
     create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_cr='temp_operator_cr.yaml')
 
 
-@in_testdir
+'''@in_testdir
 def test_certificate_generation_cloud_foundry():
-    create_certificate("flavor_cf_10.inp.yaml", "user.crt", output='temp.yaml', flavor="cloudfoundry-1.0")
+    create_certificate("flavor_cf_10.inp.yaml", "user.crt", output='temp.yaml', flavor="cloudfoundry-1.0")'''
 
 
 def create_certificate(input_file, cert_file, **overrides):

@@ -25,48 +25,54 @@ cfFlavorOptions: &anchor
 
 flavors:
   # Upstream Kubernetes
+  kubernetes-1.18:
+    desc: Kubernetes 1.18
+    default_version: 5.0 
+    status: null
+    hidden: false
+    order: 7
   kubernetes-1.17:
     desc: Kubernetes 1.17
     default_version: 5.0
     status: null
     hidden: false
-    order: 6
+    order: 8
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 5.0 
     status: null
     hidden: false
-    order: 7
+    order: 9
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 5.0
     status: null
-    hidden: false
-    order: 8
+    hidden: true
+    order: 10
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 5.0
     status: null
     hidden: true
-    order: 9
+    order: 11
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 5.0
     status: null
     hidden: true
-    order: 10
+    order: 12
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 5.0
     status: null
     hidden: true
-    order: 11
+    order: 13
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 12
+    order: 14
     config:
       kube_config:
         no_priority_class: True
@@ -75,10 +81,108 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 13
+    order: 15
     config:
       kube_config:
         no_priority_class: True
+  openshift-4.4:
+    desc: Red Hat OpenShift Container Platform 4.4
+    default_version: 5.0
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -   
+                [9095, 9095]
+              -   
+                [3000, 3000]
+              -   
+                [8080, 8080]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp 
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp 
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp 
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp 
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+    status: null
+    hidden: false
+    order: 1
   openshift-4.3:
     desc: Red Hat OpenShift Container Platform 4.3
     default_version: 5.0
@@ -176,7 +280,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 1
+    order: 2
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 5.0
@@ -218,7 +322,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 2
+    order: 3
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
     default_version: 5.0
@@ -259,8 +363,8 @@ flavors:
       istio_config:
         install_istio: False
     status: null
-    hidden: false
-    order: 3
+    hidden: true
+    order: 4
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
     default_version: 5.0
@@ -302,7 +406,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 4
+    order: 5
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
@@ -336,19 +440,7 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-    order: 5
-  # CloudFoundry
-  cloudfoundry-1.0:
-    desc: CloudFoundry cf-deployment 1.x
-    default_version: 4.1
-    config:
-      aci_config:
-         vmm_domain:
-           type: CloudFoundry
-    options: *anchor
-    status: null
-    hidden: false
-    order: 14
+    order: 6
   k8s-localhost:
     desc: Kubernetes localhost
     default_version: 5.0
@@ -368,7 +460,7 @@ flavors:
         use_kubeconfig_volume: True
     status: Experimental
     hidden: False
-    order: 15
+    order: 16
   cloud:
     desc:         Kubernetes Cloud
     default_version: 5.0
@@ -487,4 +579,4 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 16
+    order: 17
