@@ -191,6 +191,7 @@ def config_default():
             "service_monitor_interval": 5,
             "pbr_tracking_non_snat": False,
             "interface_mtu": None,
+            "second_kubeapi_portgroup": False,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -225,7 +226,8 @@ def config_default():
             "host_agent_cni_bin_path": "/opt",
             "host_agent_cni_conf_path": "/etc",
             "generate_installer_files": False,
-            "generate_cnet_file": False
+            "generate_cnet_file": False,
+            "generate_apic_file": False
         },
         "istio_config": {
             "install_istio": True,
@@ -403,6 +405,8 @@ def config_adjust(args, config, prov_apic, no_random):
         "net_config": {
             "infra_vlan": infra_vlan,
             "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
+            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
+            "node_network_gateway": cidr_split(node_subnet)[2],
         },
         "node_config": {
             "encap_type": encap_type,
@@ -1011,6 +1015,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
     extra_files = []
     gen_inst_files = config["kube_config"]["generate_installer_files"]
     gen_cnet_file = config["kube_config"]["generate_cnet_file"]
+    gen_apic_file = config["kube_config"]["generate_apic_file"]
     if gen_inst_files or gen_cnet_file:
         cnetfile_name = 'cluster-network-03-config.yaml'
         extra_files.append(cnetfile_name)
@@ -1020,6 +1025,10 @@ def generate_operator_tar(tar_path, cont_docs, config):
         workerfile_name = '99-worker-kubelet-node-port.yaml'
         extra_files.append(masterfile_name)
         extra_files.append(workerfile_name)
+
+    if gen_apic_file:
+        apic_name = 'apic.json'
+        extra_files.append(apic_name)
 
     for x_file in extra_files:
         x_template = get_jinja_template(x_file)
