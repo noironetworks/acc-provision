@@ -282,7 +282,7 @@ def test_flavor_localhost():
 
 
 @in_testdir
-def test_flavor_cloud():
+def test_flavor_cloud_base():
     with open("apic_test_data.json") as data_file:
         data = json.loads(data_file.read())
     apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
