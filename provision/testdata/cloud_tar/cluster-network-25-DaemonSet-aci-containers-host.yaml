@@ -116,7 +116,7 @@ spec:
       hostNetwork: true
       hostPID: true
       initContainers:
-      - image: noirolabs/cnideploy:5.0.1.0.r57
+      - image: noirolabs/cnideploy:5.1.1.0.r57
         imagePullPolicy: Always
         name: cnideploy
         securityContext:
