@@ -65,6 +65,7 @@ rules:
   - aci.snat
   resources:
   - nodeinfos
+  - snatlocalinfos
   verbs:
   - create
   - update
