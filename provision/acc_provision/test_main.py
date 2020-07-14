@@ -566,18 +566,20 @@ def get_args(**overrides):
     return args
 
 
-def compare_yaml(expectedyaml, output, debug, generated):
+def copy_file(expectedyaml, output, debug, generated):
     if expectedyaml is not None:
         if debug:
             shutil.copyfile(output.name, generated)
+
+
+def compare_yaml(expectedyaml, output, debug, generated):
+    if expectedyaml is not None:
         with open(expectedyaml, "r") as expected:
             assert output.read() == expected.read()
 
 
 def compare_tar(expected, output, debug, generated):
     if expected is not None:
-        if debug:
-            shutil.copyfile(output, generated)
         tmp_dir = "tmp_tar"
         tar_output = tarfile.open(mode="r:gz", name=output, encoding="utf-8")
         shutil.rmtree(tmp_dir, ignore_errors=True)
@@ -600,6 +602,11 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
 
         args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
+
+        copy_file(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
+        copy_file(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
+        copy_file(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
+        copy_file(expectedtar, out_tar, args.debug, "/tmp/generated_operator.tar.gz")
 
         compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
         compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
