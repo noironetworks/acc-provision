@@ -318,6 +318,17 @@ def cidr_split(cidr):
     return str(first), str(last), str(n[1]), str(n.network_address), mask
 
 
+def normalize_cidr(cidr):
+    # To convert CIDR network ending with .1 to .0. For eg, convert 10.0.0.1/16 to 10.0.0.0/16
+    rtr, _ = cidr.split('/')
+    ip = ipaddress.ip_address(rtr)
+    if ip.version == 4:
+        n = ipaddress.IPv4Network(cidr, strict=False)
+    else:
+        n = ipaddress.IPv6Network(cidr, strict=False)
+    return str(n)
+
+
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
@@ -407,6 +418,8 @@ def config_adjust(args, config, prov_apic, no_random):
             "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
             "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
             "node_network_gateway": cidr_split(node_subnet)[2],
+            "pod_network": normalize_cidr(pod_subnet),
+            "node_network": normalize_cidr(node_subnet),
         },
         "node_config": {
             "encap_type": encap_type,
