@@ -234,6 +234,18 @@ def test_flavor_openshift_43():
 
 
 @in_testdir
+def test_flavor_openshift_44_openstack():
+    run_provision(
+        "flavor_openshift.inp.yaml",
+        "flavor_openshift_44_openstack.kube.yaml",
+        None,
+        None,
+        "flavor_openshift_44_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.4-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_44_esx():
     run_provision(
         "nested-portgroup.inp.yaml",

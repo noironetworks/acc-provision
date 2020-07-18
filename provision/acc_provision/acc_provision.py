@@ -178,6 +178,7 @@ def config_default():
                 "activeFlowTimeOut": None,
             },
             "kube_default_provide_kube_api": False,
+            "disable_node_bd_creation": False,
         },
         "net_config": {
             "node_subnet": None,
