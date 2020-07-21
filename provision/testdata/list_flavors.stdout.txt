@@ -1,6 +1,6 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.4-openstack:	Red Hat OpenShift Container Platform 4.4 on OpenStack
 INFO: openshift-4.4-esx:	Openshift 4.4 ESX
-INFO: openshift-4.4:	Red Hat OpenShift Container Platform 4.4
 INFO: openshift-4.3:	Red Hat OpenShift Container Platform 4.3
 INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
 INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0
