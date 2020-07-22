@@ -236,7 +236,7 @@ def test_flavor_openshift_43():
 @in_testdir
 def test_flavor_openshift_44_openstack():
     run_provision(
-        "flavor_openshift.inp.yaml",
+        "flavor_openshift_44_openstack.inp.yaml",
         "flavor_openshift_44_openstack.kube.yaml",
         None,
         None,
