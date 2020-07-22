@@ -110,7 +110,6 @@ flavors:
         host_agent_cni_conf_path: /etc/kubernetes
         generate_installer_files: True
       aci_config:
-        kube_bd_name: neutron-bd-test
         disable_node_bd_creation: True
         kube_default_provide_kube_api: True
         items:
