@@ -525,7 +525,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "",
+                                                "tnFvBDName": "neutron-bd-test",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
