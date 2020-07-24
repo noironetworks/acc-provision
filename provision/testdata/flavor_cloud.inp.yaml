@@ -60,3 +60,7 @@ kube_config:
 
 istio_config:
   install_istio: False          # default is True
+
+cloud:
+  provider: aws
+  zone: a

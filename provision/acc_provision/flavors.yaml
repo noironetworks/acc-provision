@@ -421,11 +421,6 @@ flavors:
             filter: match-all
             provided: ["aci-containers-inet-out"]
             consumed: ["aci-containers-default"]
-          - name: allow-azure
-            underlay: True
-            filter: match-az-oshift
-            provided: ["ul-boot", "ul-nodes"]
-            consumed: ["inet-ext"]
         filters:
             - name: match-all
               entries:
@@ -495,17 +490,6 @@ flavors:
                   range: [30000, 32767]
                 - name: ent15
                   prot: icmp
-            - name: match-az-oshift
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [80, 80]
-                - name: ent2
-                  prot: tcp
-                  range: [443, 443]
-                - name: ent3
-                  prot: tcp
-                  range: [6443, 6443]
             
     status: Experimental
     hidden: False
