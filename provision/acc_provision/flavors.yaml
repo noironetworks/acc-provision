@@ -108,7 +108,9 @@ flavors:
         no_priority_class: True
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
-        generate_installer_files: True
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
       aci_config:
         disable_node_bd_creation: True
         kube_default_provide_kube_api: True

@@ -866,6 +866,12 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: host-config-volume
               mountPath: /usr/local/etc/aci-containers/
+            {% if config.kube_config.use_host_netns_volume %}
+            - mountPath: /run/netns
+              name: host-run-netns
+              readOnly: true
+              mountPropagation: HostToContainer
+            {% endif %}
           livenessProbe:
             httpGet:
               path: /status
@@ -964,6 +970,11 @@ spec:
                 path: local.conf
         {% if config.kube_config.use_opflex_server_volume %}
         - name: opflex-server-config-volume
+        {% endif %}
+        {% if config.kube_config.use_host_netns_volume %}
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
         {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}

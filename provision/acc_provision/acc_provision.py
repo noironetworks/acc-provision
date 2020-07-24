@@ -229,7 +229,8 @@ def config_default():
             "host_agent_cni_conf_path": "/etc",
             "generate_installer_files": False,
             "generate_cnet_file": False,
-            "generate_apic_file": False
+            "generate_apic_file": False,
+            "use_host_netns_volume": False,
         },
         "istio_config": {
             "install_istio": True,
