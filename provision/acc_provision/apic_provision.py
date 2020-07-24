@@ -1353,7 +1353,8 @@ class ApicKubeConfig(object):
 
     def capic_rsToRegion(self):
         region = self.config["aci_config"]["vrf"]["region"]
-        regionDn = "uni/clouddomp/provp-aws/region-{}".format(region)
+        provider = self.config["cloud"]["provider"]
+        regionDn = "uni/clouddomp/provp-{}/region-{}".format(provider, region)
         rsToRegion = collections.OrderedDict(
             [
                 (
@@ -1545,7 +1546,7 @@ class ApicKubeConfig(object):
 
     def cloudSubnet(self, cidr):
         region = self.config["aci_config"]["vrf"]["region"]
-        zone = region + "a"  # FIXME
+        zone = self.config["cloud"]["zone"]
         subnetMo = collections.OrderedDict(
             [
                 (
@@ -1574,7 +1575,8 @@ class ApicKubeConfig(object):
         return subnetMo
 
     def zoneAttach(self, region, zone):
-        tDn = "uni/clouddomp/provp-aws/region-{}/zone-{}".format(region, zone)
+        provider = self.config["cloud"]["provider"]
+        tDn = "uni/clouddomp/provp-{}/region-{}/zone-{}".format(provider, region, zone)
         zaMo = collections.OrderedDict(
             [
                 (

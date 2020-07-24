@@ -736,7 +736,13 @@ flavors:
               entries:
                 - name: ent1
                   prot: tcp
+                  range: [80, 80]
+                - name: ent2
+                  prot: tcp
                   range: [443, 443]
+                - name: ent3
+                  prot: tcp
+                  range: [6443, 6443]
             - name: match-oshift
               entries:
                 - name: ent1
