@@ -238,7 +238,7 @@ def test_flavor_openshift_44_openstack():
     run_provision(
         "flavor_openshift_44_openstack.inp.yaml",
         "flavor_openshift_44_openstack.kube.yaml",
-        None,
+        "flavor_openshift_44_openstack_tar",
         None,
         "flavor_openshift_44_openstack.apic.txt",
         overrides={"flavor": "openshift-4.4-openstack"}
