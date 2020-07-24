@@ -141,6 +141,7 @@
     "vmmUsrCustomAggr": {
         "attributes": {
             "name": "kube-test",
+            "encapMode": "trunk",
             "promMode": "Enabled",
             "annotation": "orchestrator:aci-containers-controller"
         },

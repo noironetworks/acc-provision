@@ -111,6 +111,7 @@
     "vmmUsrCustomAggr": {
         "attributes": {
             "name": "kube",
+            "encapMode": "trunk",
             "promMode": "Disabled",
             "annotation": "orchestrator:aci-containers-controller"
         },

@@ -141,6 +141,7 @@
     "vmmUsrCustomAggr": {
         "attributes": {
             "name": "kube-test",
+            "encapMode": "trunk",
             "promMode": "Enabled",
             "annotation": "orchestrator:aci-containers-controller"
         },
@@ -189,6 +190,7 @@
     "vmmUsrCustomAggr": {
         "attributes": {
             "name": "kube_vlan_4001",
+            "encapMode": "access",
             "promMode": "Enabled",
             "annotation": "orchestrator:aci-containers-controller"
         },
