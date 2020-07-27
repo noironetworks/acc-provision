@@ -28,13 +28,12 @@ from itertools import combinations
 from OpenSSL import crypto
 from jinja2 import Environment, PackageLoader
 from os.path import exists
-import tempfile
 if __package__ is None or __package__ == '':
-    import kafka_cert
     from apic_provision import Apic, ApicKubeConfig
+    from cloud_provision import CloudProvision
 else:
-    from . import kafka_cert
     from .apic_provision import Apic, ApicKubeConfig
+    from .cloud_provision import CloudProvision
 
 
 # This black magic forces pyyaml to load YAML strings as unicode rather
@@ -1630,268 +1629,19 @@ def provision(args, apic_file, no_random):
         print("Configuring cAPIC")
         config["aci_config"]["capic"] = True
 
-        def adjust_cidrs():
-            cidr = gwToSubnet(config["net_config"]["machine_cidr"])
-            b_subnet = gwToSubnet(config["net_config"]["bootstrap_subnet"])
-            n_subnet = gwToSubnet(config["net_config"]["node_subnet"])
-            config["net_config"]["machine_cidr"] = cidr
-            config["net_config"]["bootstrap_subnet"] = b_subnet
-            config["net_config"]["node_subnet"] = n_subnet
-
         apic = get_apic(config)
         if apic is None:
             print("APIC login failed")
             return False
 
-        adjust_cidrs()
-        configurator = ApicKubeConfig(config)
-        deleter = MoCleaner(apic, config, args.debug)
-
-        def getSubnetID(subnet):
-            tn_name = config["aci_config"]["cluster_tenant"]
-            ccp_name = getUnderlayCCPName()
-            cidr = config["net_config"]["machine_cidr"]
-            subnetDN = "uni/tn-{}/ctxprofile-{}/cidr-[{}]/subnet-[{}]".format(tn_name, ccp_name, cidr, subnet)
-            filter = "eq(hcloudSubnetOper.delegateDn, \"{}\")".format(subnetDN)
-            query = '/api/node/class/hcloudSubnetOper.json?query-target=self&query-target-filter={}'.format(filter)
-            resp = apic.get(path=query)
-            resJson = json.loads(resp.content)
-            if args.debug:
-                print("query: {}".format(query))
-                print("resp: {}".format(resJson))
-            subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
-            return subnetID
-
-        def getOverlayDn():
-            query = configurator.capic_overlay_dn_query()
-            resp = apic.get(path=query)
-            resJson = json.loads(resp.content)
-            if len(resJson["imdata"]) == 0:
-                return ""
-            overlayDn = resJson["imdata"][0]["hcloudCtx"]["attributes"]["dn"]
-            return overlayDn
-
-        def prodAcl():
-            return configurator.capic_kafka_acl(config["aci_config"]["system_id"])
-
-        def consAcl():
-            # query to obtain the consumer common name
-            resp = apic.get(path='/api/node/class/topSystem.json?query-target-filter=and(eq(topSystem.role,"controller"))')
-            resJson = json.loads(resp.content)
-            consCN = resJson["imdata"][0]["topSystem"]["attributes"]["serial"]
-            print("Consumer CN: {}".format(consCN))
-            return configurator.capic_kafka_acl(consCN)
-
-        def clusterInfo():
-            overlayDn = getOverlayDn()
-            assert(overlayDn or args.delete), "Need an overlayDn"
-            print("overlayDn: {}".format(overlayDn))
-            return configurator.capic_cluster_info(overlayDn)
-
-        def addMiscConfig(config):
-            query = configurator.capic_subnet_dn_query()
-            resp = apic.get(path=query)
-            resJson = json.loads(resp.content)
-            subnet_dn = resJson["imdata"][0]["hcloudSubnet"]["attributes"]["dn"]
-            print("subnet_dn is {}".format(subnet_dn))
-            config["aci_config"]["subnet_dn"] = subnet_dn
-            vrf_dn = getOverlayDn()
-            config["aci_config"]["vrf_dn"] = vrf_dn
-            vmm_name = config["aci_config"]["vmm_domain"]["domain"]
-            config["aci_config"]["overlay_vrf"] = vmm_name + "_overlay"
-            return config
-
-        def getUnderlayCCP():
-            vrfName = config["aci_config"]["vrf"]["name"]
-            tn_name = config["aci_config"]["cluster_tenant"]
-            vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" % (tn_name, vrfName)
-            resp = apic.get(path=vrf_path)
-            resJson = json.loads(resp.content)
-            print(resJson)
-            if len(resJson["imdata"]) == 0:
-                return ""
-
-            underlay_ccp = resJson["imdata"][0]["fvRtToCtx"]["attributes"]["tDn"]
-            return underlay_ccp
-
-        def overlayCtx():
-            underlay_ccp = getUnderlayCCP()
-            # cannot proceed without an underlay ccp
-            assert(underlay_ccp or args.delete), "Need an underlay ccp"
-            return configurator.capic_overlay(underlay_ccp)
-
-        def getUnderlayCCPName():
-            u_ccp = getUnderlayCCP()
-            assert(u_ccp), "Need an underlay ccp"
-            split_ccp = u_ccp.split("/")
-            ccp_name = split_ccp[-1].replace("ctxprofile-", "")
-            if args.debug:
-                print("UnderlayCCPName: {}".format(ccp_name))
-            return ccp_name
-
-        def underlayCidr():
-            ccp_name = getUnderlayCCPName()
-            cidr = config["net_config"]["machine_cidr"]
-            b_subnet = config["net_config"]["bootstrap_subnet"]
-            n_subnet = config["net_config"]["node_subnet"]
-            return configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet], "no")
-
-        def setupCapicContractsInline():
-            # setup filters
-            for f in config["aci_config"]["filters"]:
-                path, data = configurator.make_filter(f)
-                postIt(path, data)
-
-            # setup contracts
-            for f in config["aci_config"]["contracts"]:
-                path, data = configurator.make_contract(f)
-                postIt(path, data)
-
-            return "", None
-
-        def postIt(path, data):
-            if args.delete:
-                deleter.record(path, data)
-                return
-
-            # annotate before posting
-            annStr = deleter.getAnnStr()
-            configurator.annotateApicObjects(data, ann=annStr)
-            if args.debug:
-                print("Path: {}".format(path))
-                print("data: {}".format(data))
-            try:
-                resp = apic.post(path, data)
-                print("Resp: {}".format(resp.text))
-            except Exception as e:
-                err("Error in provisioning {}: {}".format(path, str(e)))
-
-        def setupZoneInfo():
-            if "zone" in config["cloud"]:
-                return  # user specified zone
-            region = config["aci_config"]["vrf"]["region"]
-            provider = config["cloud"]["provider"]
-            regionDn = "/api/mo/uni/clouddomp/provp-{}/region-{}.json".format(provider, region)
-            query = "{}?query-target=children&target-subtree-class=cloudZone&rsp-prop-include=naming-only".format(regionDn)
-            resp = apic.get(path=query)
-            resJson = json.loads(resp.content)
-            zone = resJson["imdata"][0]["cloudZone"]["attributes"]["name"]
-            print("Using zone {}".format(zone))
-            config["cloud"]["zone"] = zone
-
-        def getTenantAccount():
-            tn_name = config["aci_config"]["cluster_tenant"]
-            tn_path = "/api/mo/uni/tn-%s.json?query-target=subtree&target-subtree-class=cloudAwsProvider" % (tn_name)
-            resp = apic.get(path=tn_path)
-            resJson = json.loads(resp.content)
-            accountId = resJson["imdata"][0]["cloudAwsProvider"]["attributes"]["accountId"]
-            print(accountId)
-
-        underlay_posts = []
-        # if the cert_file was created or the sync user does not exist
-        # create it
-        sync_user = config["aci_config"]["sync_login"]["username"]
-        post_user = not config["aci_config"]["sync_login"]["cert_reused"]
-        post_user = post_user or not apic.get_user(sync_user)
-        post_user = post_user or args.delete
-        if post_user:
-            underlay_posts.append(configurator.kube_user)
-            underlay_posts.append(configurator.kube_cert)
-
-        # update zone information as necessary
-        setupZoneInfo()
-        # if underlay ccp doesn't exist, create one
-        u_ccp = getUnderlayCCP()
-        if not u_ccp or args.delete:
-            if not args.delete:
-                print("Creating VPC, you will need additional settings for IPI\n")
-            underlay_posts += [configurator.capic_underlay_vrf, configurator.capic_underlay_cloudApp, configurator.capic_underlay_ccp]
-        else:
-            # if existing vpc, cidr and subnet should be created as well
-            underlay_posts += [configurator.capic_underlay_cloudApp]
-
-        underlay_posts.append(setupCapicContractsInline)
-
-        postGens = underlay_posts + [configurator.capic_kube_dom, configurator.capic_overlay_vrf, overlayCtx, configurator.capic_overlay_cloudApp, clusterInfo, configurator.capic_kafka_topic, prodAcl, consAcl]
-        for pGen in postGens:
-            path, data = pGen()
-            if not path:  # posted inline
-                continue
-
-            postIt(path, data)
-        if args.delete:
-            deleter.doIt()
-            apic.save()
-            return True
-
-        config = addKafkaConfig(config)
-        config = addMiscConfig(config)
-
-        print("Config is: {}".format(config["kube_config"]))
-        gen = flavor_opts.get("template_generator", generate_kube_yaml)
-        gen(config, output_file, output_tar, operator_cr_output_file)
-        m_cidr = config["net_config"]["machine_cidr"]
-        b_subnet = config["net_config"]["bootstrap_subnet"]
-        n_subnet = config["net_config"]["node_subnet"]
-        p_subnet = config["net_config"]["pod_subnet"].replace(".1/", ".0/")
-        region = config["aci_config"]["vrf"]["region"]
-        boot_subnetID = getSubnetID(b_subnet)
-        node_subnetID = getSubnetID(n_subnet)
-        print("\nOpenshift Info")
-        print("----------------")
-        print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoACI\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
-        apic.save()
-        return True
+        cloud_prov = CloudProvision(apic, config, args)
+        return cloud_prov.Run(flavor_opts, generate_kube_yaml)
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
     gen(config, output_file, output_tar, operator_cr_output_file)
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
-
-
-def addKafkaConfig(config):
-    cKey, cCert, caCert = getKafkaCerts(config)
-    config["aci_config"]["kafka"]["key"] = cKey.encode()
-    config["aci_config"]["kafka"]["cert"] = cCert.encode()
-    config["aci_config"]["kafka"]["cacert"] = caCert.encode()
-    brokers = []
-    for host in config["aci_config"]["apic_hosts"]:
-        host = host.split(":")[0]
-        brokers.append(host + ":9095")
-
-    config["aci_config"]["kafka"]["brokers"] = brokers
-
-    return config
-
-
-def getKafkaCerts(config):
-    if config["provision"]["skip-kafka-certs"]:
-        return "none", "none", "none"
-    wdir = tempfile.mkdtemp()
-    apic_host = config["aci_config"]["apic_hosts"][0]
-    user = config["aci_config"]["apic_login"]["username"]
-    pwd = config["aci_config"]["apic_login"]["password"]
-    cn = config["aci_config"]["system_id"]
-    kafka_cert.logger = kafka_cert.set_logger(wdir, "kc.log")
-    res = kafka_cert.generate(wdir, apic_host, cn, user, pwd)
-    if not res:
-        raise(Exception("Failed to get kafka certs"))
-
-    readDict = {
-        "server.key": "",
-        "server.crt": "",
-        "cacert.crt": "",
-    }
-
-    dir = wdir + "/"
-    for fname in readDict:
-        f = open(dir + fname, "r")
-        readDict[fname] = f.read()
-        f.close()
-
-    os.system('rm -rf ' + wdir)
-    return readDict["server.key"], readDict["server.crt"], readDict["cacert.crt"]
 
 
 def main(args=None, apic_file=None, no_random=False):
