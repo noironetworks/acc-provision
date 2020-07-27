@@ -1771,10 +1771,10 @@ class ApicKubeConfig(object):
         system_id = self.config["aci_config"]["system_id"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         nvmm_portgroup = "%s_vlan_%d" % (system_id, kubeapi_vlan)
-        path, data = self.build_nested_dom_data(nvmm_portgroup, False, False, True, "access")
+        path, data = self.build_nested_dom_data(nvmm_portgroup, False, False, True)
         return path, data
 
-    def build_nested_dom_data(self, nvmm_portgroup, infravlan, servicevlan, kubeapivlan, encapMode="trunk"):
+    def build_nested_dom_data(self, nvmm_portgroup, infravlan, servicevlan, kubeapivlan):
         # Build a nested dom object based on the portgroup name and the
         # VLANs required(using booleans arguments for each VLAN)
         nvmm_type = self.get_nested_domain_type()
@@ -1802,7 +1802,6 @@ class ApicKubeConfig(object):
                                 "attributes",
                                 collections.OrderedDict(
                                     [("name", nvmm_portgroup),
-                                     ("encapMode", encapMode),
                                      ("promMode", promMode)]
                                 ),
                             ),
