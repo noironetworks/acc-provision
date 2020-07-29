@@ -230,6 +230,7 @@ def config_default():
             "generate_cnet_file": False,
             "generate_apic_file": False,
             "use_host_netns_volume": False,
+            "enable_endpointslice": False,
         },
         "istio_config": {
             "install_istio": True,
@@ -345,6 +346,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_profile = config["istio_config"]["install_profile"]
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
+    enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     token = str(uuid.uuid4())
     disable_node_bd_creation = config["aci_config"]["disable_node_bd_creation"]
     if (config["aci_config"]["tenant"]["name"]):
@@ -493,6 +495,7 @@ def config_adjust(args, config, prov_apic, no_random):
             ],
             "ep_registry": ep_registry,
             "opflex_mode": opflex_mode,
+            "enable_endpointslice": enable_endpointslice,
         },
         "cf_config": {
             "default_endpoint_group": {
