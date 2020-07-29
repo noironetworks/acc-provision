@@ -121,7 +121,7 @@ class CloudProvision(object):
         u_ccp = self.getUnderlayCCP()
         if not u_ccp or self.args.delete:
             if not self.args.delete:
-                print("Creating VPC, you will need additional settings for IPI\n")
+                print("Creating underlay\n")
             underlay_posts += [self.configurator.capic_underlay_vrf, self.configurator.capic_underlay_cloudApp, self.configurator.capic_underlay_ccp]
         else:
             # if existing vpc, cidr and subnet should be created as well
@@ -144,7 +144,8 @@ class CloudProvision(object):
         self.addKafkaConfig()
         self.addMiscConfig()
 
-        print("Config is: {}".format(self.config["kube_config"]))
+        if self.args.debug:
+            print("Config is: {}".format(self.config["kube_config"]))
         gen = flavor_opts.get("template_generator", kube_yaml_gen_func)
         output_file = self.args.output
         output_tar = self.args.output_tar
@@ -203,13 +204,15 @@ class CloudProvision(object):
         resp = self.apic.get(path='/api/node/class/topSystem.json?query-target-filter=and(eq(topSystem.role,"controller"))')
         resJson = json.loads(resp.content)
         consCN = resJson["imdata"][0]["topSystem"]["attributes"]["serial"]
-        print("Consumer CN: {}".format(consCN))
+        if self.args.debug:
+            print("Consumer CN: {}".format(consCN))
         return self.configurator.capic_kafka_acl(consCN)
 
     def clusterInfo(self):
         overlayDn = self.getOverlayDn()
         assert(overlayDn or self.args.delete), "Need an overlayDn"
-        print("overlayDn: {}".format(overlayDn))
+        if self.args.debug:
+            print("overlayDn: {}".format(overlayDn))
         return self.configurator.capic_cluster_info(overlayDn)
 
     def addMiscConfig(self):
@@ -217,7 +220,8 @@ class CloudProvision(object):
         resp = self.apic.get(path=query)
         resJson = json.loads(resp.content)
         subnet_dn = resJson["imdata"][0]["hcloudSubnet"]["attributes"]["dn"]
-        print("subnet_dn is {}".format(subnet_dn))
+        if self.args.debug:
+            print("subnet_dn is {}".format(subnet_dn))
         self.config["aci_config"]["subnet_dn"] = subnet_dn
         vrf_dn = self.getOverlayDn()
         self.config["aci_config"]["vrf_dn"] = vrf_dn
@@ -230,7 +234,8 @@ class CloudProvision(object):
         vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json?query-target=subtree&target-subtree-class=fvRtToCtx" % (tn_name, vrfName)
         resp = self.apic.get(path=vrf_path)
         resJson = json.loads(resp.content)
-        print(resJson)
+        if self.args.debug:
+            print(resJson)
         if len(resJson["imdata"]) == 0:
             return ""
 
@@ -285,7 +290,8 @@ class CloudProvision(object):
             print("data: {}".format(data))
         try:
             resp = self.apic.post(path, data)
-            print("Resp: {}".format(resp.text))
+            if self.args.debug:
+                print("Resp: {}".format(resp.text))
         except Exception as e:
             err("Error in provisioning {}: {}".format(path, str(e)))
 
