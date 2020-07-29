@@ -8,7 +8,7 @@ Source:		acc_provision-%{version}.tar.gz
 BuildArch:	x86_64
 BuildRequires:	python2-devel
 BuildRequires:	python-pbr
-BuildRequires:	python-setuptools
+BuildRequires:	python2-setuptools
 Requires:	pyOpenSSL >= 0.13
 Requires:	PyYAML >= 3.10
 Requires:	python-requests >= 2.2
