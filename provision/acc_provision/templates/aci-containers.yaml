@@ -757,6 +757,9 @@ metadata:
 users:
   - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-controller
   - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-host-agent
+{% if config.kube_config.openshift_security_constraint_operator_serviceaccount %}
+  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-operator
+{% endif %}
 allowHostDirVolumePlugin: true
 allowHostIPC: true
 allowHostNetwork: true
