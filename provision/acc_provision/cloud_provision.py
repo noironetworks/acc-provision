@@ -99,6 +99,7 @@ class CloudProvision(object):
         self.apic = apic
         self.config = config
         self.args = user_args
+        self.cfg_validate()
 
     def Run(self, flavor_opts, kube_yaml_gen_func):
         self.adjust_cidrs()
@@ -122,10 +123,10 @@ class CloudProvision(object):
         if not u_ccp or self.args.delete:
             if not self.args.delete:
                 print("Creating underlay\n")
-            underlay_posts += [self.configurator.capic_underlay_vrf, self.configurator.capic_underlay_cloudApp, self.configurator.capic_underlay_ccp]
+            underlay_posts += [self.configurator.capic_underlay_vrf, self.underlayCloudApp, self.configurator.capic_underlay_ccp]
         else:
             # if existing vpc, cidr and subnet should be created as well
-            underlay_posts += [self.configurator.capic_underlay_cloudApp]
+            underlay_posts += [self.underlayCloudApp]
 
         underlay_posts.append(self.setupCapicContractsInline)
 
@@ -164,6 +165,32 @@ class CloudProvision(object):
         self.apic.save()
         return True
 
+    def cfg_validate(self):
+        required = []
+        if self.args.flavor == "cloud":
+            required = [
+                "net_config/machine_cidr",
+                "net_config/bootstrap_subnet",
+                "cloud/provider"
+            ]
+        else:
+            required = [
+                "cloud/provider"
+            ]
+        for req in required:
+            if self.cfg_get(req) is None:
+                raise(Exception("{} is required".format(req)))
+
+    def cfg_get(self, key):
+        keys = key.split("/")
+        c = self.config
+        for k in keys:
+            if k in c:
+                c = c[k]
+            else:
+                return None
+        return c
+
     def adjust_cidrs(self):
         cidr = gwToSubnet(self.config["net_config"]["machine_cidr"])
         b_subnet = gwToSubnet(self.config["net_config"]["bootstrap_subnet"])
@@ -186,6 +213,18 @@ class CloudProvision(object):
             print("resp: {}".format(resJson))
         subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
         return subnetID
+
+    def underlayCloudApp(self):
+        if self.args.flavor == "cloud":
+            return self.configurator.capic_underlay_cloudApp()
+
+        appName = self.configurator.vmm_scoped_name("ul_ap")
+        path, data = self.configurator.capic_cloudApp(appName)
+        node_epg_obj = self.capic_underlay_epg("ul-nodes", self.config["net_config"]["node_subnet"])
+        data["cloudApp"]["children"].append(node_epg_obj)
+        inet_epg_obj = self.capic_ext_epg("inet-ext", "0.0.0.0/0")
+        data["cloudApp"]["children"].append(inet_epg_obj)
+        return path, data
 
     def getOverlayDn(self):
         query = self.configurator.capic_overlay_dn_query()
