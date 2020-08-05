@@ -214,8 +214,8 @@ class Apic(object):
         path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children" % (vmmdom)
         tDn = self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
         return tDn
-        #vpath = "/api/node/mo/%s.json" % (tDn)
-        #vlan_pool_name = self.get_path(vpath)["attributes"]["name"]
+        # vpath = "/api/node/mo/%s.json" % (tDn)
+        # vlan_pool_name = self.get_path(vpath)["attributes"]["name"]
 
     def check_l3out_vrf(self, tenant, name, vrf_name):
         path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
@@ -1773,19 +1773,19 @@ class ApicKubeConfig(object):
         nvmm_type = self.get_nested_domain_type()
         if nvmm_type != "VMware" or not self.config["net_config"]["second_kubeapi_portgroup"] or not self.config["net_config"]["kubeapi_vlan"]:
             return
-        
+
         path, data = self.add_apivlan_to_vmm_vlanpool()
         return path, data
 
     def add_apivlan_to_vmm_vlanpool(self):
-        #url: https://10.30.120.180/api/node/mo/uni/infra/vlanns-[hypf-vswitch-vlan-pool]-dynamic/from-[vlan-35]-to-[vlan-35].json
-        #payload{"fvnsEncapBlk":{"attributes":{"dn":"uni/infra/vlanns-[hypf-vswitch-vlan-pool]-dynamic/from-[vlan-35]-to-[vlan-35]","from":"vlan-35","to":"vlan-35","rn":"from-[vlan-35]-to-[vlan-35]","status":"created"},"children":[]}}
+        # url: https://10.30.120.180/api/node/mo/uni/infra/vlanns-[hypf-vswitch-vlan-pool]-dynamic/from-[vlan-35]-to-[vlan-35].json
+        # payload{"fvnsEncapBlk":{"attributes":{"dn":"uni/infra/vlanns-[hypf-vswitch-vlan-pool]-dynamic/from-[vlan-35]-to-[vlan-35]","from":"vlan-35","to":"vlan-35","rn":"from-[vlan-35]-to-[vlan-35]","status":"created"},"children":[]}}
 
-        nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
+        # nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
-        #vpath = apic.get_vmmdom_vlanpool_tDn(nvmm_name)
+        # vpath = apic.get_vmmdom_vlanpool_tDn(nvmm_name)
         vpath = self.config['aci_config']['vmm_domain']['nested_inside']['vlan_pool']
-  
+
         path = "/api/node/mo/%s/from-[vlan-%s]-to-[vlan-%s].json" % (vpath, kubeapi_vlan, kubeapi_vlan)
         data = collections.OrderedDict(
             [
@@ -1793,18 +1793,18 @@ class ApicKubeConfig(object):
                     "fvnsEncapBlk",
                     collections.OrderedDict(
                         [
-                           (
-                              "attributes",
-                              collections.OrderedDict(
-                                 [
-                                   ("dn", "%s/from-[vlan-%s]-to-[vlan-%s]" % (vpath, kubeapi_vlan, kubeapi_vlan) ),
-                                   ("allocMode", "static"),
-                                   ("from", "vlan-%s" % kubeapi_vlan),
-                                   ("to", "vlan-%s" % kubeapi_vlan),
-                                   ("rn", "from-[vlan-%s]-to-[vlan-%s]" % (kubeapi_vlan, kubeapi_vlan))
-                                 ]
-                              ),
-                           ),
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("dn", "%s/from-[vlan-%s]-to-[vlan-%s]" % (vpath, kubeapi_vlan, kubeapi_vlan)),
+                                        ("allocMode", "static"),
+                                        ("from", "vlan-%s" % kubeapi_vlan),
+                                        ("to", "vlan-%s" % kubeapi_vlan),
+                                        ("rn", "from-[vlan-%s]-to-[vlan-%s]" % (kubeapi_vlan, kubeapi_vlan))
+                                    ]
+                                ),
+                            ),
                         ]
                     ),
                 ),
@@ -1812,7 +1812,7 @@ class ApicKubeConfig(object):
         )
         data["fvnsEncapBlk"]["children"] = []
 
-        #self.annotateApicObjects(data)
+        # self.annotateApicObjects(data)
         return path, data
 
     def nested_dom_second_portgroup(self):
@@ -1824,16 +1824,16 @@ class ApicKubeConfig(object):
         return path, data
 
     def add_vmm_domain_association(self):
-        #url: https://10.30.120.180/api/node/mo/uni/tn-ocp4aci/ap-aci-containers-ocp4aci/epg-aci-containers-nodes.json
-        #payload{"fvRsDomAtt":{"attributes":{"resImedcy":"immediate","tDn":"uni/vmmp-VMware/dom-hypflex-vswitch","instrImedcy":"immediate","encap":"vlan-35","status":"created"},"children":[{"vmmSecP":{"attributes":{"status":"created"},"children":[]}}]}}
+        # url: https://10.30.120.180/api/node/mo/uni/tn-ocp4aci/ap-aci-containers-ocp4aci/epg-aci-containers-nodes.json
+        # payload{"fvRsDomAtt":{"attributes":{"resImedcy":"immediate","tDn":"uni/vmmp-VMware/dom-hypflex-vswitch","instrImedcy":"immediate","encap":"vlan-35","status":"created"},"children":[{"vmmSecP":{"attributes":{"status":"created"},"children":[]}}]}}
 
         system_id = self.config["aci_config"]["system_id"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         custom_epg_name = "%s_vlan_%d" % (system_id, kubeapi_vlan)
         nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
-        tdn = "uni/vmmp-VMware/dom-%s" % ( nvmm_name)
+        tdn = "uni/vmmp-VMware/dom-%s" % (nvmm_name)
         vlan_encap = "vlan-%s" % (kubeapi_vlan)
-  
+
         path = "/api/node/mo/uni/tn-%s/ap-aci-containers-%s/epg-aci-containers-nodes.json" % (
             system_id,
             system_id
@@ -1845,25 +1845,25 @@ class ApicKubeConfig(object):
                     "fvRsDomAtt",
                     collections.OrderedDict(
                         [
-                           (
-                              "attributes",
-                              collections.OrderedDict(
-                                 [
-                                   ("resImedcy", "immediate"),
-                                   ("tDn", tdn),
-                                   ("instrImedcy", "immediate"),
-                                   ("customEpgName", custom_epg_name),
-                                   ("encap", vlan_encap),
-                                 ]
-                              ),
-                           ),
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("resImedcy", "immediate"),
+                                        ("tDn", tdn),
+                                        ("instrImedcy", "immediate"),
+                                        ("customEpgName", custom_epg_name),
+                                        ("encap", vlan_encap),
+                                    ]
+                                ),
+                            ),
                         ]
                     ),
                 ),
             ]
         )
         data["fvRsDomAtt"]["children"] = []
-     
+
         self.annotateApicObjects(data)
         return path, data
 

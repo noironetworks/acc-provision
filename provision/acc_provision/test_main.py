@@ -260,7 +260,7 @@ def test_flavor_openshift_44_openstack():
 @in_testdir
 def test_flavor_openshift_44_esx():
     run_provision(
-        "nested-portgroup.inp.yaml",
+        "flavor_openshift_44_esx.inp.yaml",
         "flavor_openshift_44_esx.kube.yaml",
         "flavor_openshift_44_esx_tar",
         None,
