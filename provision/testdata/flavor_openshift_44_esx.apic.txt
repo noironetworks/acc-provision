@@ -184,36 +184,6 @@
         ]
     }
 }
-/api/mo/uni/vmmp-VMware/dom-myvmware/usrcustomaggr-kube_vlan_4001.json
-{
-    "vmmUsrCustomAggr": {
-        "attributes": {
-            "name": "kube_vlan_4001",
-            "promMode": "Enabled",
-            "annotation": "orchestrator:aci-containers-controller"
-        },
-        "children": [
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-4001",
-                        "to": "vlan-4001",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-1000",
-                        "to": "vlan-2000",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            }
-        ]
-    }
-}
 /api/mo/uni/infra.json
 {
     "infraAttEntityP": {
@@ -1510,6 +1480,33 @@ None
                 }
             }
         ]
+    }
+}
+/api/node/mo/vlan-pool-test/from-[vlan-4001]-to-[vlan-4001].json
+{
+    "fvnsEncapBlk": {
+        "attributes": {
+            "dn": "vlan-pool-test/from-[vlan-4001]-to-[vlan-4001]",
+            "allocMode": "static",
+            "from": "vlan-4001",
+            "to": "vlan-4001",
+            "rn": "from-[vlan-4001]-to-[vlan-4001]"
+        },
+        "children": []
+    }
+}
+/api/node/mo/uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes.json
+{
+    "fvRsDomAtt": {
+        "attributes": {
+            "resImedcy": "immediate",
+            "tDn": "uni/vmmp-VMware/dom-myvmware",
+            "instrImedcy": "immediate",
+            "customEpgName": "kube_vlan_4001",
+            "encap": "vlan-4001",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": []
     }
 }
 /api/mo/uni/tn-common/out-l3out/instP-default.json
