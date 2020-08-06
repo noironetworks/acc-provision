@@ -179,7 +179,7 @@ def config_default():
             },
             "kube_default_provide_kube_api": False,
             "disable_node_bd_creation": False,
-            "kube_bd_name": None,
+            "preexisting_kube_bd": None,
         },
         "net_config": {
             "node_subnet": None,
@@ -229,7 +229,8 @@ def config_default():
             "host_agent_cni_conf_path": "/etc",
             "generate_installer_files": False,
             "generate_cnet_file": False,
-            "generate_apic_file": False
+            "generate_apic_file": False,
+            "use_host_netns_volume": False,
         },
         "istio_config": {
             "install_istio": True,
@@ -346,6 +347,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     token = str(uuid.uuid4())
+    disable_node_bd_creation = config["aci_config"]["disable_node_bd_creation"]
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
         tenant = config["aci_config"]["tenant"]["name"]
@@ -370,6 +372,10 @@ def config_adjust(args, config, prov_apic, no_random):
         bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
         istio_epg = "kube-istio"
 
+    node_bd_dn = bd_dn_prefix + "node-bd"
+    pod_bd_dn = bd_dn_prefix + "pod-bd"
+    if disable_node_bd_creation:
+        node_bd_dn = "uni/tn-%s/BD-%s" % (tenant, config["aci_config"]["preexisting_kube_bd"])
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -404,8 +410,8 @@ def config_adjust(args, config, prov_apic, no_random):
                 "keyfile": "user-%s.key" % system_id,
                 "cert_reused": False,
             },
-            "node_bd_dn": bd_dn_prefix + "node-bd",
-            "pod_bd_dn": bd_dn_prefix + "pod-bd",
+            "node_bd_dn": node_bd_dn,
+            "pod_bd_dn": pod_bd_dn,
             "kafka": {
             },
             "subnet_dn": {
@@ -782,6 +788,10 @@ def config_validate(flavor_opts, config):
 
         if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
             del extra_checks["net_config/extern_static"]
+
+        if (config["aci_config"]["disable_node_bd_creation"]):
+            checks["aci_config/disable_node_bd_creation"] = (
+                get(("aci_config", "preexisting_kube_bd")), required)
 
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (

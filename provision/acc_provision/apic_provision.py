@@ -2695,7 +2695,7 @@ class ApicKubeConfig(object):
         kube_prefix = "kube-"
         old_naming = self.config["aci_config"]["use_legacy_kube_naming_convention"]
         disable_node_bd = self.config["aci_config"]["disable_node_bd_creation"]
-        kube_bd_name = self.config["aci_config"]["kube_bd_name"]
+        kube_bd_name = self.config["aci_config"]["preexisting_kube_bd"]
         if old_naming:
             contract_prefix = ""
             api_contract_prefix = kube_prefix
