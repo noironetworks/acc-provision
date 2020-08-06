@@ -1755,25 +1755,41 @@ class ApicKubeConfig(object):
             return
 
         system_id = self.config["aci_config"]["system_id"]
+        nvmm_portgroup = self.config["aci_config"]["vmm_domain"]["nested_inside"]["portgroup"]
+        if nvmm_portgroup is None:
+            nvmm_portgroup = system_id
+        path, data = self.build_nested_dom_data(nvmm_portgroup, True, True, True)
+        return path, data
+
+    def nested_dom_second_portgroup(self):
+        nvmm_type = self.get_nested_domain_type()
+        if nvmm_type != "VMware" or not self.config["net_config"]["second_kubeapi_portgroup"] or not self.config["net_config"]["kubeapi_vlan"]:
+            return
+
+        system_id = self.config["aci_config"]["system_id"]
+        kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+        nvmm_portgroup = "%s_vlan_%d" % (system_id, kubeapi_vlan)
+        path, data = self.build_nested_dom_data(nvmm_portgroup, False, False, True)
+        return path, data
+
+    def build_nested_dom_data(self, nvmm_portgroup, infravlan, servicevlan, kubeapivlan):
+        # Build a nested dom object based on the portgroup name and the
+        # VLANs required(using booleans arguments for each VLAN)
+        nvmm_type = self.get_nested_domain_type()
         nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
         nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
         encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
-        infra_vlan = self.config["net_config"]["infra_vlan"]
-        service_vlan = self.config["net_config"]["service_vlan"]
 
         promMode = "Disabled"
         if encap_type == "vlan":
             promMode = "Enabled"
-
-        nvmm_portgroup = self.config["aci_config"]["vmm_domain"]["nested_inside"]["portgroup"]
-        if nvmm_portgroup is None:
-            nvmm_portgroup = system_id
 
         path = "/api/mo/uni/vmmp-%s/dom-%s/usrcustomaggr-%s.json" % (
             nvmm_type,
             nvmm_name,
             nvmm_portgroup,
         )
+
         data = collections.OrderedDict(
             [
                 (
@@ -1787,73 +1803,64 @@ class ApicKubeConfig(object):
                                      ("promMode", promMode)]
                                 ),
                             ),
-                            (
-                                "children",
-                                [
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "fvnsEncapBlk",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    (
-                                                                        "from",
-                                                                        "vlan-%d"
-                                                                        % infra_vlan,
-                                                                    ),
-                                                                    (
-                                                                        "to",
-                                                                        "vlan-%d"
-                                                                        % infra_vlan,
-                                                                    ),
-                                                                ]
-                                                            ),
-                                                        )
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "fvnsEncapBlk",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    (
-                                                                        "from",
-                                                                        "vlan-%d"
-                                                                        % service_vlan,
-                                                                    ),
-                                                                    (
-                                                                        "to",
-                                                                        "vlan-%d"
-                                                                        % service_vlan,
-                                                                    ),
-                                                                ]
-                                                            ),
-                                                        )
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                ],
-                            ),
                         ]
                     ),
                 )
             ]
         )
-        if self.use_kubeapi_vlan:
+        data["vmmUsrCustomAggr"]["children"] = []
+
+        if infravlan:
+            infra_vlan = self.config["net_config"]["infra_vlan"]
+            data["vmmUsrCustomAggr"]["children"].append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvnsEncapBlk",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("from", "vlan-%d" % infra_vlan),
+                                                ("to", "vlan-%d" % infra_vlan),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            )
+
+        if servicevlan:
+            service_vlan = self.config["net_config"]["service_vlan"]
+            data["vmmUsrCustomAggr"]["children"].append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvnsEncapBlk",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("from", "vlan-%d" % service_vlan),
+                                                ("to", "vlan-%d" % service_vlan),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            )
+
+        if kubeapivlan:
             kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
             data["vmmUsrCustomAggr"]["children"].append(
                 collections.OrderedDict(
@@ -1877,135 +1884,6 @@ class ApicKubeConfig(object):
                     ]
                 )
             )
-        if encap_type == "vlan":
-            vlan_range = self.config["aci_config"]["vmm_domain"]["vlan_range"]
-            data["vmmUsrCustomAggr"]["children"].append(
-                collections.OrderedDict(
-                    [
-                        (
-                            "fvnsEncapBlk",
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "attributes",
-                                        collections.OrderedDict(
-                                            [
-                                                (
-                                                    "from",
-                                                    "vlan-%d" % vlan_range["start"],
-                                                ),
-                                                ("to", "vlan-%d" % vlan_range["end"]),
-                                            ]
-                                        ),
-                                    )
-                                ]
-                            ),
-                        )
-                    ]
-                )
-            )
-        if nvmm_elag_name:
-            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (
-                nvmm_name,
-                nvmm_elag_name,
-            )
-            data["vmmUsrCustomAggr"]["children"].append(
-                collections.OrderedDict(
-                    [
-                        (
-                            "vmmRsUsrAggrLagPolAtt",
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "attributes",
-                                        collections.OrderedDict(
-                                            [
-                                                ("status", ""),
-                                                ("tDn", nvmm_elag_dn),
-                                            ]
-                                        ),
-                                    )
-                                ]
-                            ),
-                        )
-                    ]
-                )
-            )
-        self.annotateApicObjects(data)
-        return path, data
-
-    def nested_dom_second_portgroup(self):
-        nvmm_type = self.get_nested_domain_type()
-        if nvmm_type != "VMware" or not self.config["net_config"]["second_kubeapi_portgroup"] or not self.config["net_config"]["kubeapi_vlan"]:
-            return
-        system_id = self.config["aci_config"]["system_id"]
-        nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
-        nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
-        encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
-        kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
-
-        promMode = "Disabled"
-        if encap_type == "vlan":
-            promMode = "Enabled"
-
-        nvmm_portgroup = "%s_vlan_%d" % (system_id, kubeapi_vlan)
-        path = "/api/mo/uni/vmmp-%s/dom-%s/usrcustomaggr-%s.json" % (
-            nvmm_type,
-            nvmm_name,
-            nvmm_portgroup,
-        )
-
-        data = collections.OrderedDict(
-            [
-                (
-                    "vmmUsrCustomAggr",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [("name", nvmm_portgroup),
-                                     ("promMode", promMode)]
-                                ),
-                            ),
-                            (
-                                "children",
-                                [
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "fvnsEncapBlk",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    (
-                                                                        "from",
-                                                                        "vlan-%d"
-                                                                        % kubeapi_vlan,
-                                                                    ),
-                                                                    (
-                                                                        "to",
-                                                                        "vlan-%d"
-                                                                        % kubeapi_vlan,
-                                                                    ),
-                                                                ]
-                                                            ),
-                                                        )
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                ],
-                            ),
-                        ]
-                    ),
-                )
-            ]
-        )
 
         if encap_type == "vlan":
             vlan_range = self.config["aci_config"]["vmm_domain"]["vlan_range"]
