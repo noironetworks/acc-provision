@@ -179,6 +179,7 @@ def config_default():
             },
             "kube_default_provide_kube_api": False,
             "disable_node_bd_creation": False,
+            "kube_bd_name": None,
         },
         "net_config": {
             "node_subnet": None,
