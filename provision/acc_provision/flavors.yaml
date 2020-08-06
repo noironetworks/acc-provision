@@ -183,7 +183,7 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
-    status: null
+    status: Experimental
     hidden: false
     order: 0
   openshift-4.4:
