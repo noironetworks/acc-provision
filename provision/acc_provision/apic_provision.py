@@ -2694,6 +2694,7 @@ class ApicKubeConfig(object):
         aci_prefix = "%s%s-" % (self.ACI_PREFIX, system_id)
         kube_prefix = "kube-"
         old_naming = self.config["aci_config"]["use_legacy_kube_naming_convention"]
+        disable_node_bd = self.config["aci_config"]["disable_node_bd_creation"]
         if old_naming:
             contract_prefix = ""
             api_contract_prefix = kube_prefix
@@ -2714,6 +2715,11 @@ class ApicKubeConfig(object):
             epg_prefix = self.ACI_PREFIX
             subj_prefix = self.ACI_PREFIX
             v6_sub_prefix = aci_prefix
+
+        if disable_node_bd:
+            node_bd_name = ""
+        else:
+            node_bd_name = "%snode-bd" % bd_prefix
 
         kube_default_children = [
             collections.OrderedDict(
@@ -3362,7 +3368,7 @@ class ApicKubeConfig(object):
                                                                                                                         [
                                                                                                                             (
                                                                                                                                 "tnFvBDName",
-                                                                                                                                "%snode-bd" % bd_prefix,
+                                                                                                                                node_bd_name,
                                                                                                                             )
                                                                                                                         ]
                                                                                                                     ),
@@ -3556,89 +3562,6 @@ class ApicKubeConfig(object):
                                                                                             ),
                                                                                         ],
                                                                                     ),
-                                                                                ]
-                                                                            ),
-                                                                        )
-                                                                    ]
-                                                                ),
-                                                            ],
-                                                        ),
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "fvBD",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    (
-                                                                        "name",
-                                                                        "%snode-bd" % bd_prefix,
-                                                                    ),
-                                                                    (
-                                                                        "arpFlood",
-                                                                        yesno(True),
-                                                                    ),
-                                                                ]
-                                                            ),
-                                                        ),
-                                                        (
-                                                            "children",
-                                                            [
-                                                                collections.OrderedDict(
-                                                                    [
-                                                                        (
-                                                                            "fvSubnet",
-                                                                            node_subnet_obj,
-                                                                        )
-                                                                    ]
-                                                                ),
-                                                                collections.OrderedDict(
-                                                                    [
-                                                                        (
-                                                                            "fvRsCtx",
-                                                                            collections.OrderedDict(
-                                                                                [
-                                                                                    (
-                                                                                        "attributes",
-                                                                                        collections.OrderedDict(
-                                                                                            [
-                                                                                                (
-                                                                                                    "tnFvCtxName",
-                                                                                                    kube_vrf,
-                                                                                                )
-                                                                                            ]
-                                                                                        ),
-                                                                                    )
-                                                                                ]
-                                                                            ),
-                                                                        )
-                                                                    ]
-                                                                ),
-                                                                collections.OrderedDict(
-                                                                    [
-                                                                        (
-                                                                            "fvRsBDToOut",
-                                                                            collections.OrderedDict(
-                                                                                [
-                                                                                    (
-                                                                                        "attributes",
-                                                                                        collections.OrderedDict(
-                                                                                            [
-                                                                                                (
-                                                                                                    "tnL3extOutName",
-                                                                                                    kube_l3out,
-                                                                                                )
-                                                                                            ]
-                                                                                        ),
-                                                                                    )
                                                                                 ]
                                                                             ),
                                                                         )
@@ -4916,6 +4839,92 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+
+        if not disable_node_bd:
+            node_bd_object = collections.OrderedDict(
+                [
+                    (
+                        "fvBD",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                "%snode-bd" % bd_prefix,
+                                            ),
+                                            (
+                                                "arpFlood",
+                                                yesno(True),
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "fvSubnet",
+                                                    node_subnet_obj,
+                                                )
+                                            ]
+                                        ),
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "fvRsCtx",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "tnFvCtxName",
+                                                                            kube_vrf,
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            )
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        ),
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "fvRsBDToOut",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "tnL3extOutName",
+                                                                            kube_l3out,
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            )
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        ),
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data["fvTenant"]["children"].insert(1, node_bd_object)
 
         if eade is not True:
             del data["fvTenant"]["children"][2]["fvBD"]["children"][2]
