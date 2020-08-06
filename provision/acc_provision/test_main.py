@@ -619,6 +619,14 @@ def test_certificate_generation_kubernetes():
     create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_cr='temp_operator_cr.yaml')
 
 
+@in_testdir
+def test_normalize_cidr():
+    ipv4 = acc_provision.normalize_cidr('10.8.0.1/16')
+    assert ipv4 == '10.8.0.0/16'
+    ipv6 = acc_provision.normalize_cidr('2001:db8::8a2e:370:0001/16')
+    assert ipv6 == '2001::/16'
+
+
 '''@in_testdir
 def test_certificate_generation_cloud_foundry():
     create_certificate("flavor_cf_10.inp.yaml", "user.crt", output='temp.yaml', flavor="cloudfoundry-1.0")'''
