@@ -222,6 +222,18 @@ def test_flavor_openshift_310():
 
 
 @in_testdir
+def test_flavor_openshift_311():
+    run_provision(
+        "flavor_openshift.inp.yaml",
+        "flavor_openshift_311.kube.yaml",
+        None,
+        None,
+        "flavor_openshift_311.apic.txt",
+        overrides={"flavor": "openshift-3.11"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_43():
     run_provision(
         "flavor_openshift.inp.yaml",

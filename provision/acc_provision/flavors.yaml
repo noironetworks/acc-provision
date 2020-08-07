@@ -496,6 +496,7 @@ flavors:
         use_external_service_ip_allocator: True
         use_privileged_containers: True
         use_openshift_security_context_constraints: True
+        openshift_security_constraint_operator_serviceaccount: True
         use_cnideploy_initcontainer: True
         allow_kube_api_default_epg: True
         kubectl: oc
