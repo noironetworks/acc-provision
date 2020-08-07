@@ -794,3 +794,18 @@ flavors:
     status: Experimental
     hidden: False
     order: 18
+  RKE-1.1.5-rc0:
+    desc: Rancher Kubernetes Engine min version 1.1.5-rc0
+    default_version: 5.0
+    options:
+      template_generator: generate_rancher_yaml
+    config:
+      aci_config:
+        vmm_domain:
+          type: Kubernetes
+          provider: Rancher
+      istio_config:
+        install_istio: False
+    hidden: False
+    status: null
+    order: 19

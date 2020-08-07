@@ -1071,6 +1071,29 @@ def generate_operator_tar(tar_path, cont_docs, config):
     tar.close()
 
 
+def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-network-provider-cluster.yml')
+        outname = operator_output
+        # At this time, we do not use the aci-containers-operator with Rancher.
+        # The template to generate ACI CNI components is upstream in RKE code
+        # Here we generate the input file to feed into RKE, which looks almost
+        # the same as the acc-provision_input file
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing Rancher network provider portion of cluster.yml to %s" % outname)
+        info("Use this network provider section in the cluster.yml you use with RKE")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
 def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
         "configmap", "secret", "serviceaccount",
@@ -1636,12 +1659,13 @@ def provision(args, apic_file, no_random):
         if apic is None:
             print("APIC login failed")
             return False
-
         cloud_prov = CloudProvision(apic, config, args)
         return cloud_prov.Run(flavor_opts, generate_kube_yaml)
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
+    if not callable(gen):
+        gen = globals()[gen]
     gen(config, output_file, output_tar, operator_cr_output_file)
 
     if (config['flavor'] == "openshift-4.4-esx" and prov_apic is not None):

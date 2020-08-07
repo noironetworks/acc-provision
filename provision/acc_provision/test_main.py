@@ -430,6 +430,26 @@ def test_with_no_drop_log():
 
 
 @in_testdir
+def test_flavor_RKE_1_1_5_rc0_base():
+    run_provision(
+        "flavor_RKE_1_1_5_rc0.inp.yaml",
+        "flavor_RKE_1_1_5_rc0.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_1_5_rc0.apic.txt",
+        overrides={"flavor": "RKE-1.1.5-rc0"}
+    )
+    run_provision(
+        "flavor_RKE_1_1_5_rc0.inp2.yaml",
+        "flavor_RKE_1_1_5_rc0.rke2.yaml",
+        None,
+        None,
+        "flavor_RKE_1_1_5_rc0.apic2.txt",
+        overrides={"flavor": "RKE-1.1.5-rc0"}
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
