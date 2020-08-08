@@ -22,6 +22,7 @@ rules:
   - get
   - patch
   - create
+  - update
   - delete
 - apiGroups:
   - ''
