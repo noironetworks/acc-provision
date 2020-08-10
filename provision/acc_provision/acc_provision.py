@@ -1579,7 +1579,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
 
-    if flavor == "cloud":
+    if flavor == "cloud" or flavor == "aks":
         if prov_apic is None:
             return True
         print("Configuring cAPIC")

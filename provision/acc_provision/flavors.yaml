@@ -747,6 +747,7 @@ flavors:
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
         generate_cnet_file: True
+        opflex_mode: overlay
       aci_config:
         contracts:
           - name: allow-all-out
