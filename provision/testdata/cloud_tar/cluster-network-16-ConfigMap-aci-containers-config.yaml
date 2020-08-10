@@ -42,19 +42,19 @@ data:
     ,\n             \"subnet\": \"acct-[kuber]/region-[us-east-2]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]/cidr-[14.3.0.0/16]/subnet-[14.3.0.0/16]\"\
     ,\n             \"vrf\": \"acct-[kuber]/region-[us-east-2]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]\"\
     \n         }\n     }\n}"
-  host-agent-config: "{\n    \"ep-registry\": \"k8s\",\n    \"opflex-mode\": \"overlay\"\
-    ,\n    \"log-level\": \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\"\
-    ,\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\"\
-    ,\n    \"aci-vmm-controller\": \"clusterjj\",\n    \"aci-prefix\": \"clusterjj\"\
-    ,\n    \"aci-vrf\": \"clusterjj_overlay\",\n    \"aci-vrf-tenant\": \"kuber\"\
-    ,\n    \"service-vlan\": null,\n    \"kubeapi-vlan\": null,\n    \"pod-subnet\"\
-    : \"14.3.0.1/16\",\n    \"node-subnet\": \"31.0.1.0/24\",\n    \"encap-type\"\
-    : \"vxlan\",\n    \"aci-infra-vlan\": null,\n    \"cni-netconfig\": [\n      \
-    \  {\n            \"gateway\": \"14.3.0.1\",\n            \"routes\": [\n    \
-    \            {\n                    \"dst\": \"0.0.0.0/0\",\n                \
-    \    \"gw\": \"14.3.0.1\"\n                }\n            ],\n            \"subnet\"\
-    : \"14.3.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\": {\n    \
-    \    \"policy-space\": \"kuber\",\n        \"name\": \"aci-containers-default\"\
+  host-agent-config: "{\n    \"app-profile\": \"aci-containers-clusterjj\",\n    \"\
+    ep-registry\": \"k8s\",\n    \"opflex-mode\": \"overlay\",\n    \"log-level\"\
+    : \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\
+    : \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"aci-vmm-controller\"\
+    : \"clusterjj\",\n    \"aci-prefix\": \"clusterjj\",\n    \"aci-vrf\": \"clusterjj_overlay\"\
+    ,\n    \"aci-vrf-tenant\": \"kuber\",\n    \"service-vlan\": null,\n    \"kubeapi-vlan\"\
+    : null,\n    \"pod-subnet\": \"14.3.0.1/16\",\n    \"node-subnet\": \"31.0.1.0/24\"\
+    ,\n    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": null,\n    \"cni-netconfig\"\
+    : [\n        {\n            \"gateway\": \"14.3.0.1\",\n            \"routes\"\
+    : [\n                {\n                    \"dst\": \"0.0.0.0/0\",\n        \
+    \            \"gw\": \"14.3.0.1\"\n                }\n            ],\n       \
+    \     \"subnet\": \"14.3.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
+    : {\n        \"policy-space\": \"kuber\",\n        \"name\": \"aci-containers-default\"\
     \n    },\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
     : {\n            \"policy-space\": \"kuber\",\n        \"name\": \"aci-containers-default\"\
     \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
