@@ -290,6 +290,7 @@ data:
     }
   host-agent-config: |-
     {
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         "log-level": {{config.logging.hostagent_log_level|json}},
