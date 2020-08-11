@@ -10,24 +10,25 @@ data:
     ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\"\
     : \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
-    ,\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n        \"default\"\
-    \n    ],\n    \"aci-vrf\": \"kube\",\n    \"default-endpoint-group\": {\n    \
-    \    \"policy-space\": \"kube\",\n        \"name\": \"kubernetes|kube-default\"\
-    \n    },\n    \"max-nodes-svc-graph\": 32,\n    \"namespace-default-endpoint-group\"\
-    : {\n        \"istio-operator\": {\n            \"policy-space\": \"kube\",\n\
-    \            \"name\": \"kubernetes|kube-istio\"\n        },\n        \"istio-system\"\
+    ,\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-l3out\": \"l3out\"\
+    ,\n    \"aci-ext-networks\": [\n        \"default\"\n    ],\n    \"aci-vrf\":\
+    \ \"kube\",\n    \"default-endpoint-group\": {\n        \"policy-space\": \"kube\"\
+    ,\n        \"name\": \"kubernetes|kube-default\"\n    },\n    \"max-nodes-svc-graph\"\
+    : 32,\n    \"namespace-default-endpoint-group\": {\n        \"istio-operator\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-istio\"\
-    \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        }        },\n   \
-    \ \"service-ip-pool\": [\n        {\n            \"end\": \"10.3.0.254\",\n  \
-    \          \"start\": \"10.3.0.2\"\n        }\n    ],\n    \"snat-contract-scope\"\
-    : \"global\",\n    \"static-service-ip-pool\": [\n        {\n            \"end\"\
-    : \"10.4.0.254\",\n            \"start\": \"10.4.0.2\"\n        }\n    ],\n  \
-    \  \"pod-ip-pool\": [\n        {\n            \"end\": \"10.2.255.254\",\n   \
-    \         \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"pod-subnet-chunk-size\"\
-    : 32,\n    \"node-service-ip-pool\": [\n        {\n            \"end\": \"10.5.0.254\"\
-    ,\n            \"start\": \"10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\"\
-    : [\n        \"10.5.0.1/24\"\n    ]\n}"
+    \n        },\n        \"istio-system\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-system\"\
+    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
+    \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
+    : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
+    \  \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\": [\n \
+    \       {\n            \"end\": \"10.4.0.254\",\n            \"start\": \"10.4.0.2\"\
+    \n        }\n    ],\n    \"pod-ip-pool\": [\n        {\n            \"end\": \"\
+    10.2.255.254\",\n            \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"\
+    pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\": [\n        {\n   \
+    \         \"end\": \"10.5.0.254\",\n            \"start\": \"10.5.0.2\"\n    \
+    \    }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n   \
+    \ ]\n}"
   host-agent-config: "{\n    \"app-profile\": \"kubernetes\",\n    \"ep-registry\"\
     : null,\n    \"opflex-mode\": null,\n    \"log-level\": \"info\",\n    \"aci-snat-namespace\"\
     : \"aci-containers-system\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\

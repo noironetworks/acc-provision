@@ -9,15 +9,16 @@ data:
     ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-neutron-bd-test\",\n    \"aci-service-phys-dom\"\
     : \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
-    ,\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n        \"default\"\
-    \n    ],\n    \"aci-vrf\": \"kube\",\n    \"default-endpoint-group\": {\n    \
-    \    \"policy-space\": \"kube\",\n        \"name\": \"kubernetes|kube-default\"\
-    \n    },\n    \"max-nodes-svc-graph\": 32,\n    \"namespace-default-endpoint-group\"\
-    : {\n        \"aci-containers-system\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"istio-operator\"\
-    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-istio\"\
-    \n        },\n        \"istio-system\": {\n            \"policy-space\": \"kube\"\
-    ,\n            \"name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-service-catalog\"\
+    ,\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-l3out\": \"l3out\"\
+    ,\n    \"aci-ext-networks\": [\n        \"default\"\n    ],\n    \"aci-vrf\":\
+    \ \"kube\",\n    \"default-endpoint-group\": {\n        \"policy-space\": \"kube\"\
+    ,\n        \"name\": \"kubernetes|kube-default\"\n    },\n    \"max-nodes-svc-graph\"\
+    : 32,\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
+    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
+    \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
+    kube\",\n            \"name\": \"kubernetes|kube-istio\"\n        },\n       \
+    \ \"istio-system\": {\n            \"policy-space\": \"kube\",\n            \"\
+    name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-service-catalog\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
     ,\n            \"name\": \"kubernetes|kube-system\"\n        },\n        \"openshift-authentication\"\
