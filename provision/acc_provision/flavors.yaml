@@ -675,7 +675,7 @@ flavors:
     overlay: True
     config:
       cloud:
-        provider: aks
+        provider: azure
       kube_config:
         no_priority_class: True
         system_namespace: kube-system

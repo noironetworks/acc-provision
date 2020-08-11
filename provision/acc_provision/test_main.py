@@ -339,6 +339,21 @@ def test_flavor_cloud_delete():
 
 
 @in_testdir
+def test_flavor_aks_base():
+    with open("apic_aks_test_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
+    run_provision(
+        "flavor_aks.inp.yaml",
+        "flavor_aks.kube.yaml",
+        None,
+        None,
+        overrides={"flavor": "aks", "apic": True, "password": "test"}
+    )
+    apic.shutdown()
+
+
+@in_testdir
 def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
