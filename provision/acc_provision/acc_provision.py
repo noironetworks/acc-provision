@@ -371,6 +371,7 @@ def config_adjust(args, config, prov_apic, no_random):
         bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
         istio_epg = "kube-istio"
 
+    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
     if disable_node_bd_creation:
@@ -401,6 +402,9 @@ def config_adjust(args, config, prov_apic, no_random):
                     "start": None,
                     "end": None,
                 }
+            },
+            "vrf": {
+                "dn": aci_vrf_dn,
             },
             "sync_login": {
                 "username": system_id,
@@ -889,8 +893,9 @@ def config_validate_preexisting(config, prov_apic):
 
             vrf_tenant = config["aci_config"]["vrf"]["tenant"]
             vrf_name = config["aci_config"]["vrf"]["name"]
+            vrf_dn = config["aci_config"]["vrf"]["dn"]
             l3out_name = config["aci_config"]["l3out"]["name"]
-            vrf = apic.get_vrf(vrf_tenant, vrf_name)
+            vrf = apic.get_vrf(vrf_dn)
             if vrf is None:
                 warn("VRF not defined in the APIC: %s/%s" %
                      (vrf_tenant, vrf_name))
@@ -901,7 +906,7 @@ def config_validate_preexisting(config, prov_apic):
             else:
                 # get l3out context and check if it's the same as vrf in
                 # input config
-                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name)
+                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
                 if not result:
                     warn("L3out %s/%s not configured in the correct VRF %s/%s" %
                          (vrf_tenant, l3out_name, vrf_tenant, vrf_name))

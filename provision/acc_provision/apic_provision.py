@@ -202,8 +202,8 @@ class Apic(object):
         path = "/api/mo/uni/infra/attentp-%s.json" % aep_name
         return self.get_path(path)
 
-    def get_vrf(self, tenant, name):
-        path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tenant, name)
+    def get_vrf(self, dn):
+        path = "/api/mo/%s.json" % dn
         return self.get_path(path)
 
     def get_l3out(self, tenant, name):
@@ -217,12 +217,11 @@ class Apic(object):
         # vpath = "/api/node/mo/%s.json" % (tDn)
         # vlan_pool_name = self.get_path(vpath)["attributes"]["name"]
 
-    def check_l3out_vrf(self, tenant, name, vrf_name):
+    def check_l3out_vrf(self, tenant, name, vrf_name, vrf_dn):
         path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
         res = False
         try:
             tDn = self.get_path(path)["l3extRsEctx"]["attributes"]["tDn"]
-            vrf_dn = "uni/tn-%s/ctx-%s" % (tenant, vrf_name)
             res = (tDn == vrf_dn)
         except Exception as e:
             err("Error in getting configured vrf for %s/%s: %s" % (tenant, name, str(e)))
