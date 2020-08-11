@@ -590,6 +590,10 @@ def config_adjust(args, config, prov_apic, no_random):
         for ns in ns_list:
             adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
+    if not config["aci_config"]["vmm_domain"].get("injected_cluster_type"):
+        adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
+    if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
+        adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
     return adj_config
 
 

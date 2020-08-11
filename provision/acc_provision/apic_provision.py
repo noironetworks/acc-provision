@@ -499,6 +499,8 @@ class ApicKubeConfig(object):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        vmm_inj_cluster_type = self.config["aci_config"]["vmm_domain"]["injected_cluster_type"]
+        vmm_inj_cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
         accProvisionInput = self.config["user_input"]
         key_data = cert_data = ''
         if self.config["aci_config"]["sync_login"]["key_data"]:
@@ -519,6 +521,8 @@ class ApicKubeConfig(object):
                                     [
                                         ("name", vmm_name),
                                         ("accountName", tn_name),
+                                        ("type", vmm_inj_cluster_type),
+                                        ("provider", vmm_inj_cluster_provider)
                                     ]
                                 ),
                             ),

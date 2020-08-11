@@ -201,7 +201,9 @@ None
     "vmmInjectedClusterInfo": {
         "attributes": {
             "name": "kubernetes1",
-            "accountName": "demo"
+            "accountName": "demo",
+            "type": "",
+            "provider": ""
         },
         "children": [
             {
