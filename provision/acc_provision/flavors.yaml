@@ -803,7 +803,8 @@ flavors:
       aci_config:
         vmm_domain:
           type: Kubernetes
-          provider: Rancher
+          injected_cluster_type: RKE
+          injected_cluster_provider: Rancher
       istio_config:
         install_istio: False
     hidden: False
