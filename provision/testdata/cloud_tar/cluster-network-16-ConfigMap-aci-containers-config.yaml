@@ -9,9 +9,10 @@ data:
     \    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
     ,\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"kuber\"\
-    ,\n    \"aci-l3out\": null,\n    \"aci-ext-networks\": null,\n    \"aci-vrf\"\
-    : \"clusterjj_overlay\",\n    \"default-endpoint-group\": {\n        \"policy-space\"\
-    : \"kuber\",\n        \"name\": \"aci-containers-default\"\n    },\n    \"max-nodes-svc-graph\"\
+    ,\n    \"aci-vrf-dn\": \"uni/tn-kuber/ctx-ULjj\",\n    \"aci-l3out\": null,\n\
+    \    \"aci-ext-networks\": null,\n    \"aci-vrf\": \"clusterjj_overlay\",\n  \
+    \  \"default-endpoint-group\": {\n        \"policy-space\": \"kuber\",\n     \
+    \   \"name\": \"aci-containers-default\"\n    },\n    \"max-nodes-svc-graph\"\
     : 32,\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
     : {\n            \"policy-space\": \"kuber\",\n        \"name\": \"aci-containers-default\"\
     \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
