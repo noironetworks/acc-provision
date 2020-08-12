@@ -177,7 +177,7 @@ def config_default():
                 "activeFlowTimeOut": None,
             },
             "kube_default_provide_kube_api": False,
-            "disable_node_bd_creation": False,
+            "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
         },
         "net_config": {
@@ -348,7 +348,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     token = str(uuid.uuid4())
-    disable_node_bd_creation = config["aci_config"]["disable_node_bd_creation"]
+    disable_node_subnet_creation = config["aci_config"]["disable_node_subnet_creation"]
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
         tenant = config["aci_config"]["tenant"]["name"]
@@ -376,8 +376,10 @@ def config_adjust(args, config, prov_apic, no_random):
     aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
-    if disable_node_bd_creation:
+
+    if disable_node_subnet_creation:
         node_bd_dn = "uni/tn-%s/BD-%s" % (tenant, config["aci_config"]["preexisting_kube_bd"])
+
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -502,12 +504,12 @@ def config_adjust(args, config, prov_apic, no_random):
             "enable_endpointslice": enable_endpointslice,
         },
         "cf_config": {
+            "node_subnet_cidr": "%s/%s" % cidr_split(node_subnet)[3:],
             "default_endpoint_group": {
                 "tenant": tenant,
                 "app_profile": "cloudfoundry",
                 "group": "cf-app-default",
             },
-            "node_subnet_cidr": "%s/%s" % cidr_split(node_subnet)[3:],
             "node_epg": "cf-node",
             "app_ip_pool": [
                 {
@@ -539,6 +541,7 @@ def config_adjust(args, config, prov_apic, no_random):
             "configuration_version": token,
         }
     }
+
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
         adj_config["aci_config"]["apic_refreshtime"] = apic_refreshtime
@@ -795,10 +798,6 @@ def config_validate(flavor_opts, config):
 
         if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
             del extra_checks["net_config/extern_static"]
-
-        if (config["aci_config"]["disable_node_bd_creation"]):
-            checks["aci_config/disable_node_bd_creation"] = (
-                get(("aci_config", "preexisting_kube_bd")), required)
 
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
@@ -1409,11 +1408,12 @@ def get_versions(versions_url):
 def check_overlapping_subnets(config):
     """check if subnets are overlapping."""
     subnet_info = {
-        "node_subnet": config["net_config"]["node_subnet"],
         "pod_subnet": config["net_config"]["pod_subnet"],
+        "node_subnet": config["net_config"]["node_subnet"],
         "extern_dynamic": config["net_config"]["extern_dynamic"],
         "node_svc_subnet": config["net_config"]["node_svc_subnet"]
     }
+
     # Don't have extern_static field set for OpenShift flavors
     if config["net_config"]["extern_static"]:
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
