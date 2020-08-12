@@ -8,6 +8,6 @@ INFO: kubernetes-1.18:	Kubernetes 1.18
 INFO: kubernetes-1.17:	Kubernetes 1.17
 INFO: kubernetes-1.16:	Kubernetes 1.16
 INFO: k8s-localhost:	Kubernetes localhost [Experimental]
-INFO: cloud:	Openshift IPI/AWS [Experimental]
 INFO: aks:	Azure Kubernetes Service [Experimental]
+INFO: cloud:	Openshift IPI/AWS [Experimental]
 INFO: RKE-1.1.5-rc0:	Rancher Kubernetes Engine min version 1.1.5-rc0
