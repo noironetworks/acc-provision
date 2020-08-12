@@ -186,10 +186,13 @@ class CloudProvision(object):
             required = [
                 "net_config/machine_cidr",
                 "net_config/bootstrap_subnet",
+                "net_config/node_subnet",
                 "cloud/provider"
             ]
         else:
             required = [
+                "net_config/machine_cidr",
+                "net_config/node_subnet",
                 "cloud/provider"
             ]
         for req in required:

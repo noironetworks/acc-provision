@@ -753,6 +753,8 @@ def config_validate(flavor_opts, config):
         # Network Config
         "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                   required),
+        "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                   required),
     }
 
     if isOverlay(config["flavor"]):
@@ -779,8 +781,6 @@ def config_validate(flavor_opts, config):
                                       required),
             "net_config/service_vlan": (get(("net_config", "service_vlan")),
                                         required),
-            "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                       required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
             "net_config/extern_static": (get(("net_config", "extern_static")),
