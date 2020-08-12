@@ -233,14 +233,14 @@ data:
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         "require-netpol-annot": {{config.kube_config.use_netpol_annotation|json}},
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
         "lb-type": "None",
         {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
         {% endif %}
-        {% if config.kube_config.opflex_mode != "overlay" %}
+        {% if not config.aci_config.capic %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
         "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
         {% endif %}
@@ -252,14 +252,14 @@ data:
         "aci-vrf-dn": {{ config.aci_config.vrf.dn|json }},
         "aci-l3out": {{config.aci_config.l3out.name|json}},
         "aci-ext-networks": {{ config.aci_config.l3out.external_networks|json|indent(width=8) }},
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
         {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         {% endif %}
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
             "name": {{config.kube_config.default_endpoint_group.group|json}}
         {% else %}
             "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
@@ -270,7 +270,7 @@ data:
             {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
             "{{ns}}": {
                 "policy-space": {{val['tenant']|json}},
-            {% if config.kube_config.opflex_mode == "overlay" %}
+            {% if config.aci_config.capic %}
             "name": {{config.kube_config.default_endpoint_group.group|json}}
             {% else %}
                 "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
@@ -303,7 +303,7 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-prefix": {{config.aci_config.system_id|json}},
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
         {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
@@ -321,7 +321,7 @@ data:
         "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }},
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
             "name": {{config.kube_config.default_endpoint_group.group|json}}
         {% else %}
             "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
@@ -331,7 +331,7 @@ data:
             {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
             "{{ns}}": {
                 "policy-space": {{val['tenant']|json}},
-            {% if config.kube_config.opflex_mode == "overlay" %}
+            {% if config.aci_config.capic %}
             "name": {{config.kube_config.default_endpoint_group.group|json}}
             {% else %}
                 "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
@@ -365,7 +365,7 @@ data:
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
-        {% if config.kube_config.opflex_mode != "overlay" %}
+        {% if not config.aci_config.capic %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
         {% else %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
@@ -413,7 +413,7 @@ metadata:
 data:
   user.key: {{config.aci_config.sync_login.key_data|base64enc}}
   user.crt: {{config.aci_config.sync_login.cert_data|base64enc}}
-{% if config.kube_config.opflex_mode == "overlay" %}
+{% if config.aci_config.capic %}
 ---
 apiVersion: v1
 kind: Secret
@@ -1144,7 +1144,7 @@ spec:
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
             - name: kafka-certs
               mountPath: /certs
             - name: aci-user-cert-volume
@@ -1180,7 +1180,7 @@ spec:
               path: /status
               port: 8091
       volumes:
-        {% if config.kube_config.opflex_mode == "overlay" %}
+        {% if config.aci_config.capic %}
         - name: kafka-certs
           secret:
             secretName: kafka-client-certificates
@@ -1198,7 +1198,7 @@ spec:
               - key: gbp-server-config
                 path: gbp-server.conf
               {% endif %}
-{% if config.kube_config.opflex_mode == "overlay" %}
+{% if config.aci_config.capic %}
 ---
 apiVersion: aci.aw/v1
 kind: PodIF

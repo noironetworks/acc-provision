@@ -5,7 +5,7 @@ aci_config:
   system_id: aksA           # Every opflex cluster must have a distinct ID
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
   apic_hosts:                   # List of cAPIC hosts to connect for APIC API
-  - localhost:50000
+  - localhost:50001
   tenant:
     name: aks1
   vrf:                          # This VRF used to create all kubestnetes EPs

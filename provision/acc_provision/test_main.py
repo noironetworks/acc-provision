@@ -310,12 +310,39 @@ def test_flavor_cloud_base():
     with open("apic_test_data.json") as data_file:
         data = json.loads(data_file.read())
     apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        return False
+
     run_provision(
         "flavor_cloud.inp.yaml",
         "flavor_cloud.kube.yaml",
         "cloud_tar",
         None,
-        overrides={"flavor": "cloud", "apic": True, "password": "test"}
+        overrides={"flavor": "cloud", "apic": True, "password": "test"},
+        cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+
+
+@in_testdir
+def test_flavor_aks_base():
+    with open("apic_aks_test_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        return False
+
+    run_provision(
+        "flavor_aks.inp.yaml",
+        "flavor_aks.kube.yaml",
+        None,
+        None,
+        overrides={"flavor": "aks", "apic": True, "password": "test"},
+        cleanupFunc=clean_apic
     )
     apic.shutdown()
 
@@ -325,32 +352,23 @@ def test_flavor_cloud_delete():
     with open("apic_delete_data.json") as data_file:
         data = json.loads(data_file.read())
     apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        return False
+
     assert(len(fake_apic.fake_deletes) != 0)
     run_provision(
         "flavor_cloud.inp.yaml",
         None,
         None,
         None,
-        overrides={"flavor": "cloud", "apic": True, "password": "test", "delete": True}
+        overrides={"flavor": "cloud", "apic": True, "password": "test", "delete": True},
+        cleanupFunc=clean_apic
     )
     apic.shutdown()
     # verify all deletes were executed
     assert(len(fake_apic.fake_deletes) == 0)
-
-
-@in_testdir
-def test_flavor_aks_base():
-    with open("apic_aks_test_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
-    run_provision(
-        "flavor_aks.inp.yaml",
-        "flavor_aks.kube.yaml",
-        None,
-        None,
-        overrides={"flavor": "aks", "apic": True, "password": "test"}
-    )
-    apic.shutdown()
 
 
 @in_testdir
@@ -631,13 +649,13 @@ def copy_file(expectedyaml, output, debug, generated):
             shutil.copyfile(output.name, generated)
 
 
-def compare_yaml(expectedyaml, output, debug, generated):
+def compare_yaml(expectedyaml, output, debug, generated, cleanupFunc):
     if expectedyaml is not None:
         with open(expectedyaml, "r") as expected:
-            assert output.read() == expected.read()
+            assert output.read() == expected.read(), cleanupFunc()
 
 
-def compare_tar(expected, output, debug, generated):
+def compare_tar(expected, output, debug, generated, cleanupFunc):
     if expected is not None:
         tmp_dir = "tmp_tar"
         tar_output = tarfile.open(mode="r:gz", name=output, encoding="utf-8")
@@ -649,13 +667,18 @@ def compare_tar(expected, output, debug, generated):
         test_right = len(result.right_only)
         test_diff = len(result.diff_files)
         shutil.rmtree((tmp_dir))
-        assert test_left == 0
-        assert test_right == 0
-        assert test_diff == 0
+        assert test_left == 0, cleanupFunc()
+        assert test_right == 0, cleanupFunc()
+        assert test_diff == 0, cleanupFunc()
+
+
+def return_false():
+    return False
 
 
 def run_provision(inpfile, expectedkube=None, expectedtar=None,
-                  expectedoperatorcr=None, expectedapic=None, overrides={}):
+                  expectedoperatorcr=None, expectedapic=None, overrides={},
+                  cleanupFunc=return_false):
     # Exec main
     with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile, tempfile.NamedTemporaryFile('w+', suffix='.tar.gz') as out_tar:
 
@@ -667,10 +690,10 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
         copy_file(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
         copy_file(expectedtar, out_tar, args.debug, "/tmp/generated_operator.tar.gz")
 
-        compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
-        compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
-        compare_yaml(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
-        compare_tar(expectedtar, out_tar.name, args.debug, "/tmp/generated_operator.tar.gz")
+        compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml", cleanupFunc)
+        compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
+        compare_yaml(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt", cleanupFunc)
+        compare_tar(expectedtar, out_tar.name, args.debug, "/tmp/generated_operator.tar.gz", cleanupFunc)
 
 
 @in_testdir
