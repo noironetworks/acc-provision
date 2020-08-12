@@ -525,7 +525,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "neutron-bd-test",
+                                                "tnFvBDName": "kube-node-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -809,6 +809,33 @@ None
                                         }
                                     }
                                 ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "fvBD": {
+                    "attributes": {
+                        "name": "kube-node-bd",
+                        "arpFlood": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "fvRsCtx": {
+                                "attributes": {
+                                    "tnFvCtxName": "kube",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
                             }
                         }
                     ]
