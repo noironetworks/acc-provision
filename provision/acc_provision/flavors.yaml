@@ -670,7 +670,7 @@ flavors:
     hidden: False
     order: 17
   aks:
-    desc:         Azure Kubernetes Service
+    desc: Azure Kubernetes Service
     default_version: 5.0
     overlay: True
     config:
@@ -720,7 +720,7 @@ flavors:
     hidden: False
     order: 18
   cloud:
-    desc:         Openshift IPI/AWS
+    desc: Openshift IPI/AWS
     default_version: 5.0
     overlay: True
     config:
