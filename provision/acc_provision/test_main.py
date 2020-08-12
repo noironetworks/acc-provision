@@ -56,17 +56,6 @@ def test_base_case_snat():
 
 
 @in_testdir
-def test_base_case_qos():
-    run_provision(
-        "base_case_qos.inp.yaml",
-        "base_case_qos.kube.yaml",
-        None,
-        None,
-        "base_case.apic.txt"
-    )
-
-
-@in_testdir
 def test_versions_base_case():
     run_provision(
         "version_wrong_url.inp.yaml",

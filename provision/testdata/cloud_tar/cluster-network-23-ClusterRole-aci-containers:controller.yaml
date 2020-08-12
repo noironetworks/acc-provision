@@ -114,6 +114,18 @@ rules:
   - update
   - delete
 - apiGroups:
+  - aci.qos
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
   - apps.openshift.io
   resources:
   - deploymentconfigs
