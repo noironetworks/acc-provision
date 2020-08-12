@@ -669,11 +669,63 @@ flavors:
     status: Experimental
     hidden: False
     order: 17
-  cloud:
-    desc:         Kubernetes Cloud
+  aks:
+    desc: Azure Kubernetes Service
     default_version: 5.0
     overlay: True
     config:
+      cloud:
+        provider: azure
+      kube_config:
+        no_priority_class: True
+        system_namespace: kube-system
+        use_aci_anywhere_crd: True
+        pod_exec_resources_controller: True
+        skip_namespace_resource_hostagent: False
+        skip_replicationcontroller_resource_hostagent: False
+        skip_default_endpoint_group: True
+        all_access_controller_clusterrole: True
+        no_hostagent_networking_clusterrole: False
+        no_hostagent_deployment_clusterrole: False
+        run_opflex_server_container: True
+        run_gbp_container: True
+        exclude_snat_container: True
+        use_opflex_server_volume: True
+        use_kubeconfig_volume: True
+        use_cnideploy_initcontainer: True
+        generate_cnet_file: True
+        ep_registry: k8s
+        opflex_mode: overlay
+      aci_config:
+        contracts:
+          - name: allow-all-out
+            underlay: True
+            filter: match-all
+            provided: ["inet-ext"]
+            consumed: ["ul-nodes"]
+          - name: allow-kube
+            underlay: False
+            filter: match-all
+            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+          - name: allow-inet-out
+            filter: match-all
+            provided: ["aci-containers-inet-out"]
+            consumed: ["aci-containers-default"]
+        filters:
+            - name: match-all
+              entries:
+                - name: ent1
+    status: Experimental
+    hidden: False
+    order: 18
+  cloud:
+    desc: Openshift IPI/AWS
+    default_version: 5.0
+    overlay: True
+    config:
+      cloud:
+        provider: aws
       kube_config:
         no_priority_class: True
         use_openshift_run_level: True
@@ -695,6 +747,7 @@ flavors:
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
         generate_cnet_file: True
+        opflex_mode: overlay
       aci_config:
         contracts:
           - name: allow-all-out
@@ -793,7 +846,7 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 18
+    order: 19
   RKE-1.1.5-rc0:
     desc: Rancher Kubernetes Engine min version 1.1.5-rc0
     default_version: 5.0
@@ -809,4 +862,4 @@ flavors:
         install_istio: False
     hidden: False
     status: null
-    order: 19
+    order: 20

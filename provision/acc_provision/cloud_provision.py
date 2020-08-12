@@ -99,6 +99,7 @@ class CloudProvision(object):
         self.apic = apic
         self.config = config
         self.args = user_args
+        self.cfg_validate()
 
     def Run(self, flavor_opts, kube_yaml_gen_func):
         self.adjust_cidrs()
@@ -122,10 +123,10 @@ class CloudProvision(object):
         if not u_ccp or self.args.delete:
             if not self.args.delete:
                 print("Creating underlay\n")
-            underlay_posts += [self.configurator.capic_underlay_vrf, self.configurator.capic_underlay_cloudApp, self.configurator.capic_underlay_ccp]
+            underlay_posts += [self.configurator.capic_underlay_vrf, self.underlayCloudApp, self.configurator.capic_underlay_ccp]
         else:
             # if existing vpc, cidr and subnet should be created as well
-            underlay_posts += [self.configurator.capic_underlay_cloudApp]
+            underlay_posts += [self.underlayCloudApp]
 
         underlay_posts.append(self.setupCapicContractsInline)
 
@@ -151,6 +152,14 @@ class CloudProvision(object):
         output_tar = self.args.output_tar
         operator_cr_output_file = self.args.aci_operator_cr
         gen(self.config, output_file, output_tar, operator_cr_output_file)
+        if self.args.flavor == "aks":
+            self.print_aks_setup()
+        else:
+            self.print_openshift_setup()
+        self.apic.save()
+        return True
+
+    def print_openshift_setup(self):
         m_cidr = self.config["net_config"]["machine_cidr"]
         b_subnet = self.config["net_config"]["bootstrap_subnet"]
         n_subnet = self.config["net_config"]["node_subnet"]
@@ -161,16 +170,51 @@ class CloudProvision(object):
         print("\nOpenshift Info")
         print("----------------")
         print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoACI\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
-        self.apic.save()
-        return True
+
+    def print_aks_setup(self):
+        with open(".acirc", "w") as rcfile:
+            n_subnet = self.config["net_config"]["node_subnet"]
+            node_subnetID = self.getSubnetID(n_subnet)
+            region = self.config["aci_config"]["vrf"]["region"]
+            infoStr = 'export AZ_CAPIC_SUBNET_ID="{}"\nexport AZ_CAPIC_REGION="{}"'.format(node_subnetID, region)
+            print(infoStr)
+            rcfile.write(infoStr)
+
+    def cfg_validate(self):
+        required = []
+        if self.args.flavor == "cloud":
+            required = [
+                "net_config/machine_cidr",
+                "net_config/bootstrap_subnet",
+                "net_config/node_subnet",
+                "cloud/provider"
+            ]
+        else:
+            required = [
+                "net_config/machine_cidr",
+                "net_config/node_subnet",
+                "cloud/provider"
+            ]
+        for req in required:
+            if self.cfg_get(req) is None:
+                raise(Exception("{} is required".format(req)))
+
+    def cfg_get(self, key):
+        keys = key.split("/")
+        c = self.config
+        for k in keys:
+            if k in c:
+                c = c[k]
+            else:
+                return None
+        return c
 
     def adjust_cidrs(self):
-        cidr = gwToSubnet(self.config["net_config"]["machine_cidr"])
-        b_subnet = gwToSubnet(self.config["net_config"]["bootstrap_subnet"])
-        n_subnet = gwToSubnet(self.config["net_config"]["node_subnet"])
-        self.config["net_config"]["machine_cidr"] = cidr
-        self.config["net_config"]["bootstrap_subnet"] = b_subnet
-        self.config["net_config"]["node_subnet"] = n_subnet
+        adj_list = ["machine_cidr", "bootstrap_subnet", "node_subnet"]
+        for nwKey in adj_list:
+            if nwKey in self.config["net_config"]:
+                adjNw = gwToSubnet(self.config["net_config"][nwKey])
+                self.config["net_config"][nwKey] = adjNw
 
     def getSubnetID(self, subnet):
         tn_name = self.config["aci_config"]["cluster_tenant"]
@@ -186,6 +230,18 @@ class CloudProvision(object):
             print("resp: {}".format(resJson))
         subnetID = resJson["imdata"][0]["hcloudSubnetOper"]["attributes"]["cloudProviderId"]
         return subnetID
+
+    def underlayCloudApp(self):
+        if self.args.flavor == "cloud":
+            return self.configurator.capic_underlay_cloudApp()
+
+        appName = self.configurator.vmm_scoped_name("ul_ap")
+        path, data = self.configurator.capic_cloudApp(appName)
+        node_epg_obj = self.configurator.capic_underlay_epg("ul-nodes", self.config["net_config"]["node_subnet"])
+        data["cloudApp"]["children"].append(node_epg_obj)
+        inet_epg_obj = self.configurator.capic_ext_epg("inet-ext", "0.0.0.0/0")
+        data["cloudApp"]["children"].append(inet_epg_obj)
+        return path, data
 
     def getOverlayDn(self):
         query = self.configurator.capic_overlay_dn_query()

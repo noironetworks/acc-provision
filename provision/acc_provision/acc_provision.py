@@ -753,15 +753,13 @@ def config_validate(flavor_opts, config):
         # Network Config
         "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                   required),
+        "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                   required),
     }
 
     if isOverlay(config["flavor"]):
-        print("Using overlay")
         extra_checks = {
             "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
-            "net_config/machine_cidr": (get(("net_config", "machine_cidr")), required),
-            "net_config/bootstrap_subnet": (get(("net_config", "bootstrap_subnet")), required),
-            "cloud/provider": (get(("cloud", "provider")), required),
         }
     else:
         extra_checks = {
@@ -783,8 +781,6 @@ def config_validate(flavor_opts, config):
                                       required),
             "net_config/service_vlan": (get(("net_config", "service_vlan")),
                                         required),
-            "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                       required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
             "net_config/extern_static": (get(("net_config", "extern_static")),
@@ -1430,81 +1426,6 @@ def check_overlapping_subnets(config):
     return True
 
 
-def gwToSubnet(gw):
-    u_gw = '{}'.format(str(gw))
-    return str(ipaddress.ip_network(u_gw, strict=False))
-
-
-class MoCleaner(object):
-    def __init__(self, apic, config, debug=False):
-        vmm_name = config["aci_config"]["vmm_domain"]["domain"]
-        tn_name = config["aci_config"]["cluster_tenant"]
-        annStr = "orchestrator:acc-provision-{}-{}".format(tn_name, vmm_name)
-        self.apic = apic
-        self.annStr = annStr
-        self.debug = debug
-        self.paths = []
-        self.classes = []
-        self.vmm_name = vmm_name
-
-    def getAnnStr(self):
-        return self.annStr
-
-    def record(self, path, data):
-        if path in self.paths:
-            if self.debug:
-                print("MoCleaner.record: path: {} already added".format(path))
-            return
-        self.paths.append(path)
-        for klass in data.keys():
-            self.classes.append(klass)
-            if self.debug:
-                print("MoCleaner.record: path: {} class: {}".format(path, klass))
-
-    def deleteCandidate(self, p):
-        resp = self.apic.get(path=p)
-        resJson = json.loads(resp.content)
-        if len(resJson["imdata"]) == 0:
-            return False
-        for key, value in resJson["imdata"][0].items():
-            if "attributes" in value.keys():
-                att = value["attributes"]
-                if "annotation" in att.keys():
-                    if att["annotation"] == self.annStr:
-                        return True
-        return False
-
-    def doIt(self):
-        print("Processing {} objects to delete".format(len(self.paths)))
-        for p in reversed(self.paths):
-            to_del = self.deleteCandidate(p)
-            if not to_del:
-                if self.debug:
-                    print("MoCleaner: skipping {}".format(p))
-                continue
-            resp = self.apic.delete(p)
-            if self.debug:
-                print("MoCleaner.doIt: path: {} resp: {}".format(p, resp.text))
-        inj_path = "/api/node/mo/comp/prov-Kubernetes/ctrlr-[{}]-{}/injcont.json".format(self.vmm_name, self.vmm_name)
-        query = "{}?query-target=children&rsp-prop-include=naming-only".format(inj_path)
-        resp = self.apic.get(path=query)
-        resJson = json.loads(resp.content)
-        if len(resJson["imdata"]) == 0:
-            print("Nothing left to delete")
-            return
-        print("Deleting {} injected objects".format(len(resJson["imdata"])))
-        for child in resJson["imdata"]:
-            for key, value in child.items():
-                if "attributes" in value.keys():
-                    att = value["attributes"]
-                    if "dn" in att.keys():
-                        child_dn = att["dn"]
-                        c_path = "/api/node/mo/{}.json".format(child_dn)
-                        resp = self.apic.delete(c_path)
-                        if self.debug:
-                            print("MoCleaner.doIt: path: {} resp: {}".format(c_path, resp.text))
-
-
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
@@ -1658,7 +1579,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
 
-    if flavor == "cloud":
+    if flavor == "cloud" or flavor == "aks":
         if prov_apic is None:
             return True
         print("Configuring cAPIC")

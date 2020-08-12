@@ -1393,9 +1393,13 @@ class ApicKubeConfig(object):
 
     def capic_underlay_ccp(self):
         underlay_cidr = self.config["net_config"]["machine_cidr"]
-        b_subnet = self.config["net_config"]["bootstrap_subnet"]
-        n_subnet = self.config["net_config"]["node_subnet"]
-        subnets = [b_subnet, n_subnet]
+        snetKeys = ["bootstrap_subnet", "node_subnet"]
+        subnets = []
+        for sk in snetKeys:
+            if sk in self.config["net_config"]:
+                snet = self.config["net_config"][sk]
+                subnets.append(snet)
+
         tn_name = self.config["aci_config"]["cluster_tenant"]
         underlay_vrf_name = self.config["aci_config"]["vrf"]["name"]
         ccp_name = underlay_vrf_name + "_ccp"
