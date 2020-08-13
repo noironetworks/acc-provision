@@ -1078,7 +1078,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
 
 def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster.yml')
+        template = get_jinja_template('aci-network-provider-cluster.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
