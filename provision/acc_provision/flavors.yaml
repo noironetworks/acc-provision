@@ -112,7 +112,7 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
-        disable_node_bd_creation: True
+        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
