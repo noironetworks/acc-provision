@@ -4,7 +4,7 @@ metadata:
   labels:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers:host-agent
 rules:
 - apiGroups:
   - ''
@@ -14,27 +14,26 @@ rules:
   - pods
   - endpoints
   - services
-  - events
   - replicationcontrollers
   verbs:
   - list
   - watch
   - get
-  - patch
-  - create
   - update
-  - delete
 - apiGroups:
   - ''
   resources:
-  - configmaps
+  - events
   verbs:
-  - list
-  - watch
-  - get
   - create
-  - update
-  - delete
+  - patch
+- apiGroups:
+  - aci.aw
+  resources:
+  - podifs
+  - podifs/status
+  verbs:
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -48,56 +47,40 @@ rules:
   resources:
   - deployments
   - replicasets
-  - daemonsets
-  - statefulsets
   verbs:
-  - '*'
-- apiGroups:
-  - ''
-  resources:
-  - nodes
-  - services/status
-  verbs:
-  - update
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - aci.snat
-  resources:
-  - snatpolicies/finalizers
-  - snatpolicies/status
-  - nodeinfos
-  verbs:
-  - update
-  - create
   - list
   - watch
   - get
-  - delete
 - apiGroups:
   - aci.snat
   resources:
-  - snatglobalinfos
   - snatpolicies
-  - nodeinfos
+  - snatglobalinfos
   - rdconfigs
   verbs:
   - list
   - watch
   - get
+- apiGroups:
+  - aci.qos
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
   - create
   - update
   - delete
+  - patch
 - apiGroups:
-  - apps.openshift.io
+  - aci.snat
   resources:
-  - deploymentconfigs
+  - nodeinfos
+  - snatlocalinfos
   verbs:
+  - create
+  - update
   - list
   - watch
   - get

@@ -28,13 +28,6 @@ rules:
   - create
   - patch
 - apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  - podifs/status
-  verbs:
-  - '*'
-- apiGroups:
   - networking.k8s.io
   resources:
   - networkpolicies
@@ -62,6 +55,18 @@ rules:
   - watch
   - get
 - apiGroups:
+  - aci.qos
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
   - aci.snat
   resources:
   - nodeinfos
@@ -71,6 +76,12 @@ rules:
   - update
   - list
   - watch
+  - get
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  verbs:
   - get
 - apiGroups:
   - discovery.k8s.io

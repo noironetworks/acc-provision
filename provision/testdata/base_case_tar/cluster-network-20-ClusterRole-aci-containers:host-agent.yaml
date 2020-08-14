@@ -55,6 +55,18 @@ rules:
   - watch
   - get
 - apiGroups:
+  - aci.qos
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
   - aci.snat
   resources:
   - nodeinfos
