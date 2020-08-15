@@ -1253,11 +1253,15 @@ class ApicKubeConfig(object):
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
         children.append(aci_obj("cloudExtEPSelector", [('name', "sel1"), ("subnet", subnet)]))
         self.add_configured_contracts(name, children)
+        attr = [('name', name)]
+        if subnet == "0.0.0.0/0":
+            attr = attr + [('routeReachability', 'internet')]
+
+        attr = attr + [('_children', children)]
 
         epg = aci_obj(
             "cloudExtEPg",
-            [('name', name),
-             ('_children', children)],
+            attr,
         )
 
         return epg

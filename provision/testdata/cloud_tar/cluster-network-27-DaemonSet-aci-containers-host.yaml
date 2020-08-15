@@ -26,7 +26,7 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: TENANT
-          value: kuber
+          value: csrtest
         - name: NODE_EPG
           value: aci-containers-nodes
         - name: OPFLEX_MODE
