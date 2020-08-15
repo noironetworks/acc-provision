@@ -348,7 +348,6 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     token = str(uuid.uuid4())
-    disable_node_subnet_creation = config["aci_config"]["disable_node_subnet_creation"]
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
         tenant = config["aci_config"]["tenant"]["name"]
@@ -376,9 +375,6 @@ def config_adjust(args, config, prov_apic, no_random):
     aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
-
-    if disable_node_subnet_creation:
-        node_bd_dn = "uni/tn-%s/BD-%s" % (tenant, config["aci_config"]["preexisting_kube_bd"])
 
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
