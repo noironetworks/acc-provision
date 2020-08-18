@@ -521,15 +521,6 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "encap": "vlan-4001",
-                                                "tDn": "uni/phys-kube-pdom",
-                                                "annotation": "orchestrator:aci-containers-controller"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "fvRsDomAtt": {
-                                            "attributes": {
                                                 "tDn": "uni/vmmp-OpenShift/dom-kube",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -539,6 +530,15 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "aci-containers-kube-node-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "encap": "vlan-4001",
+                                                "tDn": "uni/phys-kube-pdom",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
