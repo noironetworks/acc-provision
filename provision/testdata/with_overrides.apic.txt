@@ -485,15 +485,6 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "encap": "vlan-4001",
-                                                "tDn": "uni/phys-kubernetes-control",
-                                                "annotation": "orchestrator:aci-containers-controller"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "fvRsDomAtt": {
-                                            "attributes": {
                                                 "tDn": "uni/vmmp-Kubernetes/dom-kubernetes1",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -503,6 +494,15 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-node-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "encap": "vlan-4001",
+                                                "tDn": "uni/phys-kubernetes-control",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
