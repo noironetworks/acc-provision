@@ -2821,6 +2821,7 @@ class ApicKubeConfig(object):
             v6_sub_prefix = aci_prefix
 
         node_bd_name = "%snode-bd" % bd_prefix
+        node_epg_name = "%snodes" % epg_prefix
 
         kube_default_children = [
             collections.OrderedDict(
@@ -3287,7 +3288,7 @@ class ApicKubeConfig(object):
                                                                                             [
                                                                                                 (
                                                                                                     "name",
-                                                                                                    "%snodes" % epg_prefix,
+                                                                                                    node_epg_name,
                                                                                                 )
                                                                                             ]
                                                                                         ),
@@ -3398,34 +3399,6 @@ class ApicKubeConfig(object):
                                                                                                                                 "%s-l3out-allow-all"
                                                                                                                                 % system_id,
                                                                                                                             )
-                                                                                                                        ]
-                                                                                                                    ),
-                                                                                                                )
-                                                                                                            ]
-                                                                                                        ),
-                                                                                                    )
-                                                                                                ]
-                                                                                            ),
-                                                                                            collections.OrderedDict(
-                                                                                                [
-                                                                                                    (
-                                                                                                        "fvRsDomAtt",
-                                                                                                        collections.OrderedDict(
-                                                                                                            [
-                                                                                                                (
-                                                                                                                    "attributes",
-                                                                                                                    collections.OrderedDict(
-                                                                                                                        [
-                                                                                                                            (
-                                                                                                                                "encap",
-                                                                                                                                "vlan-%s"
-                                                                                                                                % kubeapi_vlan,
-                                                                                                                            ),
-                                                                                                                            (
-                                                                                                                                "tDn",
-                                                                                                                                "uni/phys-%s"
-                                                                                                                                % phys_name,
-                                                                                                                            ),
                                                                                                                         ]
                                                                                                                     ),
                                                                                                                 )
@@ -5023,6 +4996,44 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+
+        # If flavor requires adding kubeapi VLAN, add corresponding
+        # fvRsDomAtt object to node-epg
+        if self.use_kubeapi_vlan:
+            kubeapi_dom_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvRsDomAtt",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "encap",
+                                                "vlan-%s"
+                                                % kubeapi_vlan,
+                                            ),
+                                            (
+                                                "tDn",
+                                                "uni/phys-%s"
+                                                % phys_name,
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            for i, child in enumerate(data["fvTenant"]["children"]):
+                if "fvAp" in child.keys():
+                    for j, ap_child in enumerate(child["fvAp"]["children"]):
+                        if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
+                            epg_object = ap_child["fvAEPg"]["children"]
+                            epg_object.append(kubeapi_dom_obj)
 
         # If flavor requires not creating node subnet, remove it from
         # the data object
