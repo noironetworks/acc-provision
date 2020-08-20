@@ -7,7 +7,6 @@ URL:		http://github.com/noironetworks/aci-containers/provision
 Source:		acc_provision-%{version}.tar.gz
 BuildArch:	x86_64
 BuildRequires:	python2-devel
-BuildRequires:	python-pbr
 BuildRequires:	python2-setuptools
 Requires:	pyOpenSSL >= 0.13
 Requires:	PyYAML >= 3.10
