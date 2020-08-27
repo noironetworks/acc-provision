@@ -1480,6 +1480,76 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
+                                    "name": "openshift-monitoring-1936",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "1936",
+                                    "dToPort": "1936",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-2112",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "2112",
+                                    "dToPort": "2112",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-3000",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "3000",
+                                    "dToPort": "3000",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-8080",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "8080",
+                                    "dToPort": "8081",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9001",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9001",
+                                    "dToPort": "9001",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
                                     "name": "openshift-monitoring-9091",
                                     "etherT": "ip",
                                     "prot": "tcp",
@@ -1522,11 +1592,11 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "openshift-monitoring-3000",
+                                    "name": "openshift-monitoring-9099",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": "3000",
-                                    "dToPort": "3000",
+                                    "dFromPort": "9099",
+                                    "dToPort": "9101",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -1536,11 +1606,95 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "openshift-monitoring-8080",
+                                    "name": "openshift-monitoring-9192",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": "8080",
-                                    "dToPort": "8080",
+                                    "dFromPort": "9192",
+                                    "dToPort": "9192",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9393",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9393",
+                                    "dToPort": "9393",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-9537",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9537",
+                                    "dToPort": "9537",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-10250",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10250",
+                                    "dToPort": "10250",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-10257",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10257",
+                                    "dToPort": "10257",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-10259",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10259",
+                                    "dToPort": "10259",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "openshift-monitoring-60000",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "60000",
+                                    "dToPort": "60000",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
