@@ -1,5 +1,5 @@
 network:
-  plugin: "ACI"
+  plugin: "aci"
   aci_network_provider:
     system_id: "{{ config.aci_config.system_id }}"
     {% if config.aci_config.apic_refreshtime %}
