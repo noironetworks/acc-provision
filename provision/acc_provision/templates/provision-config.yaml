@@ -41,7 +41,12 @@ aci_config:
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
+  node_subnet_scope:            # Valid option are private, shared and public. Public and Private can't be configured at the same time. 
+    - public                    # Default is public
+    - shared  
   pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes
+  pod_subnet_scope:             # Valid option are private, shared and public. Public and Private can't be configured at the same time. 
+    - private                   # Default is private
                                 #   Pods/CloudFoundry containers
   #vip_subnet: 10.3.0.1/16      # Subnet to use for virtual IPs
                                 #   (CloudFoundry only)

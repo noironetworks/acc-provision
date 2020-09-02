@@ -182,7 +182,9 @@ def config_default():
         },
         "net_config": {
             "node_subnet": None,
+            "node_subnet_scope": ['public'],
             "pod_subnet": None,
+            "pod_subnet_scope": ['private'],
             "pod_subnet_chunk_size": 32,
             "extern_dynamic": None,
             "extern_static": None,
