@@ -920,7 +920,9 @@ spec:
               mountPath: /mnt/cni-bin
       {% endif %}
       {% if not config.kube_config.no_priority_class %}
+      {% if not config.kube_config.older_k8s_version or (config.aci_config.use_legacy_kube_naming_convention and config.kube_config.older_k8s_version) %}
       priorityClassName: system-cluster-critical
+      {% endif %}
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
@@ -1114,7 +1116,9 @@ spec:
       tolerations:
         - operator: Exists
       {% if not config.kube_config.no_priority_class %}
+      {% if not config.kube_config.older_k8s_version or (config.aci_config.use_legacy_kube_naming_convention and config.kube_config.older_k8s_version) %}
       priorityClassName: system-cluster-critical
+      {% endif %}
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
@@ -1206,7 +1210,9 @@ spec:
         - operator: Exists
           effect: NoSchedule
       {% if not config.kube_config.no_priority_class %}
+      {% if not config.kube_config.older_k8s_version or (config.aci_config.use_legacy_kube_naming_convention and config.kube_config.older_k8s_version) %}
       priorityClassName: system-node-critical
+      {% endif %}
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority

@@ -281,6 +281,18 @@ def test_flavor_dockerucp_30():
     )
 
 
+@in_testdir
+def test_flavor_k8s116():
+    run_provision(
+        "base_case_new_naming_convention.inp.yaml",
+        "old_k8s_flavor.kube.yaml",
+        None,
+        None,
+        None,
+        overrides={"flavor": "kubernetes-1.16"}
+    )
+
+
 '''@in_testdir
 def test_flavor_cloudfoundry_10():
     run_provision(
@@ -649,7 +661,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.15",
+        "flavor": "kubernetes-1.18",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,

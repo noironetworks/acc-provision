@@ -32,7 +32,7 @@ spec:
         - name: SYSTEM_NAMESPACE
           value: kube-system
         - name: ACC_PROVISION_FLAVOR
-          value: kubernetes-1.15
+          value: kubernetes-1.18
         image: noiro/aci-containers-operator:5.1.1.0.r57
         imagePullPolicy: Always
         name: aci-containers-operator

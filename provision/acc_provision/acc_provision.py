@@ -55,6 +55,14 @@ VERSION_FIELDS = [
     "openvswitch_version",
 ]
 
+OLDER_K8S_VERSIONS = {
+    "kubernetes-1.12",
+    "kubernetes-1.13",
+    "kubernetes-1.14",
+    "kubernetes-1.15",
+    "kubernetes-1.16",
+}
+
 
 FLAVORS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/flavors.yaml"
 VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/versions.yaml"
@@ -386,6 +394,11 @@ def config_adjust(args, config, prov_apic, no_random):
     else:
         static_service_ip_pool = []
 
+    if config["flavor"] in OLDER_K8S_VERSIONS:
+        older_k8s_version = True
+    else:
+        older_k8s_version = False
+
     adj_config = {
         "aci_config": {
             "cluster_tenant": tenant,
@@ -439,6 +452,7 @@ def config_adjust(args, config, prov_apic, no_random):
             "install_profile": istio_profile,
         },
         "kube_config": {
+            "older_k8s_version": older_k8s_version,
             "default_endpoint_group": {
                 "tenant": tenant,
                 "app_profile": app_profile,
