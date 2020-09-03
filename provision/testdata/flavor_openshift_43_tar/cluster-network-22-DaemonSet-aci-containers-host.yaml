@@ -29,7 +29,7 @@ spec:
           value: kube
         - name: NODE_EPG
           value: kubernetes|kube-nodes
-        image: noiro/aci-containers-host:5.0.2.1.05bf1b8
+        image: noiro/aci-containers-host:5.0.2.2.05bf1b8
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -61,7 +61,7 @@ spec:
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
-        image: noiro/opflex:5.0.2.1.05bf1b8
+        image: noiro/opflex:5.0.2.2.05bf1b8
         imagePullPolicy: Always
         name: opflex-agent
         securityContext:
@@ -84,7 +84,7 @@ spec:
         - /usr/local/bin/launch-mcastdaemon.sh
         command:
         - /bin/sh
-        image: noiro/opflex:5.0.2.1.05bf1b8
+        image: noiro/opflex:5.0.2.2.05bf1b8
         imagePullPolicy: Always
         name: mcast-daemon
         securityContext:
@@ -100,7 +100,7 @@ spec:
       hostNetwork: true
       hostPID: true
       initContainers:
-      - image: noiro/cnideploy:5.0.2.1.05bf1b8
+      - image: noiro/cnideploy:5.0.2.2.05bf1b8
         imagePullPolicy: Always
         name: cnideploy
         securityContext:

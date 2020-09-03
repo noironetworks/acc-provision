@@ -1121,7 +1121,7 @@ spec:
         network-plugin: aci-containers
     spec:
       containers:
-      - image: noirolabs/aci-containers-operator:5.0.2.1.05bf1b8
+      - image: noirolabs/aci-containers-operator:5.0.2.2.05bf1b8
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
