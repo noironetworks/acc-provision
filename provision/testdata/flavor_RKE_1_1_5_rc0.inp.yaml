@@ -8,7 +8,7 @@ aci_config:
   apic_login:
     username: admin
     password: noir0123
-  apic_version: 5.0
+  apic_version: 5.1
   aep: rke-aep
   vrf:
     name: rke

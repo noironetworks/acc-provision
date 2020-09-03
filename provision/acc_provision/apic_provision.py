@@ -460,10 +460,11 @@ class ApicKubeConfig(object):
         update(data, self.vdom_pool())
         update(data, self.mcast_pool())
         update(data, self.phys_dom())
-        update(data, self.kube_dom())
+        update(data, self.kube_dom(apic_version))
         update(data, self.nested_dom())
         update(data, self.associate_aep())
         update(data, self.opflex_cert())
+        self.apic_version = apic_version
         if apic_version >= 5.0:
             update(data, self.cluster_info())
 
@@ -925,7 +926,7 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def kube_dom(self):
+    def kube_dom(self, apic_version):
         vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
         encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
@@ -933,6 +934,7 @@ class ApicKubeConfig(object):
         mpool_name = self.config["aci_config"]["vmm_domain"]["mcast_pool"]
         vpool_name = self.config["aci_config"]["vmm_domain"]["vlan_pool"]
         kube_controller = self.config["kube_config"]["controller"]
+        cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
 
         mode = "k8s"
         scope = "kubernetes"
@@ -942,6 +944,8 @@ class ApicKubeConfig(object):
         elif vmm_type == "CloudFoundry":
             mode = "cf"
             scope = "cloudfoundry"
+        elif apic_version >= 5.1 and cluster_provider == "Rancher":
+            mode = "rancher"
 
         path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_name)
         data = collections.OrderedDict(

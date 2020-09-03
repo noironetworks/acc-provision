@@ -1,5 +1,5 @@
 network:
-  plugin: "ACI"
+  plugin: "aci"
   aci_network_provider:
     system_id: "rke"
     apic_hosts: ["\"10.30.120.100\""]
