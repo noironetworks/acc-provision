@@ -700,6 +700,8 @@ spec:
         network-plugin: aci-containers
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9612"
     spec:
       hostNetwork: true
       hostPID: true
