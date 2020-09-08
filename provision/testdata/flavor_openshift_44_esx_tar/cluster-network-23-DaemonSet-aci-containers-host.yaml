@@ -14,9 +14,9 @@ spec:
   template:
     metadata:
       annotations:
+        prometheus.io/port: '9612'
+        prometheus.io/scrape: 'true'
         scheduler.alpha.kubernetes.io/critical-pod: ''
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9612"
       labels:
         name: aci-containers-host
         network-plugin: aci-containers
