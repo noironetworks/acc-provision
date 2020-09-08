@@ -2,14 +2,14 @@
 # Configuration for ACI Fabric
 #
 aci_config:
-  system_id: aksA           # Every opflex cluster must have a distinct ID
+  system_id: akstest           # Every opflex cluster must have a distinct ID
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
   apic_hosts:                   # List of cAPIC hosts to connect for APIC API
   - localhost:50001
   tenant:
     name: aks1
   vrf:                          # This VRF used to create all kubestnetes EPs
-    name: ul_aks
+    name: ul_akstest
     tenant: aks1
     region: westus                   # REQUIRED -- your aws region
   #custom_epgs:                 # List of additional endpoint-group names
@@ -20,8 +20,8 @@ aci_config:
 # Networks used by ACI containers
 #
 net_config:
-  machine_cidr: 33.0.0.0/16
-  node_subnet: 33.0.1.0/24
+  machine_cidr: 43.0.0.0/16
+  node_subnet: 43.0.1.0/24
   pod_subnet: 14.3.0.1/16       # Subnet to use for Kubernetes
                                 #   Pods/CloudFoundry containers
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs

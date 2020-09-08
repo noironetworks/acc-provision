@@ -61,6 +61,20 @@ spec:
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
       hostNetwork: true
+      initContainers:
+      - command:
+        - gbpserver
+        - -init
+        - -config-path
+        - /usr/local/etc/aci-containers/gbp-server.conf
+        image: noirolabs/gbp-server-batch:ci_test
+        imagePullPolicy: Always
+        name: stateinit
+        volumeMounts:
+        - mountPath: /usr/local/etc/aci-containers/
+          name: controller-config-volume
+        - mountPath: /usr/local/etc/aci-cert/
+          name: aci-user-cert-volume
       serviceAccountName: aci-containers-controller
       tolerations:
       - effect: NoSchedule

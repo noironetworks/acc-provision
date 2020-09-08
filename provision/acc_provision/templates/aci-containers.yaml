@@ -272,6 +272,9 @@ data:
     {
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        {% if config.aci_config.capic %}
+        "max-csr-tunnels": 2,
+        {% endif %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
@@ -419,7 +422,9 @@ data:
         {% if not config.aci_config.capic %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
         {% else %}
+        "csr-list": "10.10.0.68,10.10.0.4",
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
+        "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
         "apic": {
             "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
             "apic-username": {{config.aci_config.sync_login.username|json}},
@@ -1254,6 +1259,22 @@ spec:
             httpGet:
               path: /status
               port: 8091
+      {% if config.aci_config.capic %}
+      initContainers:
+        - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          name: stateinit
+          command:
+            - gbpserver
+            - -init
+            - -config-path
+            - /usr/local/etc/aci-containers/gbp-server.conf
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+      {% endif %}
       volumes:
         {% if config.aci_config.capic %}
         - name: kafka-certs

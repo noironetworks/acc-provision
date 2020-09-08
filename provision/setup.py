@@ -28,5 +28,6 @@ setup(
           'pyopenssl',
           'ipaddr',
           'MarkupSafe<2.0',
+          'boto3',
     ],
 )
