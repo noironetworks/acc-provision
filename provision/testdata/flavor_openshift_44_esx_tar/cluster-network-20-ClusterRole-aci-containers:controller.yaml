@@ -4,7 +4,7 @@ metadata:
   labels:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers:controller
 rules:
 - apiGroups:
   - ''
@@ -14,27 +14,33 @@ rules:
   - pods
   - endpoints
   - services
+  - events
   - replicationcontrollers
   verbs:
   - list
   - watch
   - get
+  - patch
+  - create
   - update
+  - delete
 - apiGroups:
   - ''
   resources:
-  - events
+  - configmaps
   verbs:
+  - list
+  - watch
+  - get
   - create
-  - patch
+  - update
+  - delete
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  - list
-  - watch
-  - get
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -48,20 +54,51 @@ rules:
   resources:
   - deployments
   - replicasets
+  - daemonsets
+  - statefulsets
   verbs:
-  - list
-  - watch
+  - '*'
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - services/status
+  verbs:
+  - update
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
   - get
+  - create
 - apiGroups:
   - aci.snat
   resources:
-  - snatpolicies
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  - nodeinfos
+  verbs:
+  - update
+  - create
+  - list
+  - watch
+  - get
+  - delete
+- apiGroups:
+  - aci.snat
+  resources:
   - snatglobalinfos
+  - snatpolicies
+  - nodeinfos
   - rdconfigs
   verbs:
   - list
   - watch
   - get
+  - create
+  - update
+  - delete
 - apiGroups:
   - aci.qos
   resources:
@@ -75,13 +112,19 @@ rules:
   - delete
   - patch
 - apiGroups:
-  - aci.snat
+  - aci.netflow
   resources:
-  - nodeinfos
-  - snatlocalinfos
+  - netflowpolicies
   verbs:
-  - create
+  - list
+  - watch
+  - get
   - update
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs:
   - list
   - watch
   - get

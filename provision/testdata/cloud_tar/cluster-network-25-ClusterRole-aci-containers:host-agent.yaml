@@ -4,7 +4,7 @@ metadata:
   labels:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers:host-agent
 rules:
 - apiGroups:
   - ''
@@ -14,53 +14,32 @@ rules:
   - pods
   - endpoints
   - services
-  - events
   - replicationcontrollers
-  - serviceaccounts
   verbs:
   - list
   - watch
   - get
-  - patch
-  - create
   - update
-  - delete
 - apiGroups:
   - ''
   resources:
-  - configmaps
+  - events
   verbs:
-  - list
-  - watch
-  - get
   - create
-  - update
-  - delete
+  - patch
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  - '*'
+  - list
+  - watch
+  - get
 - apiGroups:
-  - rbac.authorization.k8s.io
+  - aci.aw
   resources:
-  - clusterroles
-  - clusterrolebindings
-  verbs:
-  - '*'
-- apiGroups:
-  - install.istio.io
-  resources:
-  - istiocontrolplanes
-  - istiooperators
-  verbs:
-  - '*'
-- apiGroups:
-  - aci.istio
-  resources:
-  - aciistiooperators
-  - aciistiooperator
+  - podifs
+  - podifs/status
   verbs:
   - '*'
 - apiGroups:
@@ -76,51 +55,20 @@ rules:
   resources:
   - deployments
   - replicasets
-  - daemonsets
-  - statefulsets
   verbs:
-  - '*'
-- apiGroups:
-  - ''
-  resources:
-  - nodes
-  - services/status
-  verbs:
-  - update
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - aci.snat
-  resources:
-  - snatpolicies/finalizers
-  - snatpolicies/status
-  - nodeinfos
-  verbs:
-  - update
-  - create
   - list
   - watch
   - get
-  - delete
 - apiGroups:
   - aci.snat
   resources:
-  - snatglobalinfos
   - snatpolicies
-  - nodeinfos
+  - snatglobalinfos
   - rdconfigs
   verbs:
   - list
   - watch
   - get
-  - create
-  - update
-  - delete
 - apiGroups:
   - aci.qos
   resources:
@@ -134,10 +82,22 @@ rules:
   - delete
   - patch
 - apiGroups:
-  - apps.openshift.io
+  - aci.netflow
   resources:
-  - deploymentconfigs
+  - netflowpolicies
   verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
+  - aci.snat
+  resources:
+  - nodeinfos
+  - snatlocalinfos
+  verbs:
+  - create
+  - update
   - list
   - watch
   - get

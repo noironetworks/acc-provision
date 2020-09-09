@@ -243,6 +243,36 @@ spec:
                   minimum: 0
                   maximum: 56
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: netflowpolicies.aci.netflow
+spec:
+  group: aci.netflow
+  version: v1alpha
+  names:
+    kind: NetflowPolicy
+    listKind: NetflowPolicyList
+    plural: netflowpolicies
+    singular: netflowpolicy
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        spec:
+          properties:
+            flowSamplingPolicy:
+              properties:
+                dstAddr:
+                dstPort:
+                type:
+                activeFlowTimeOut:
+                idleFlowTimeOut:
+---
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -674,6 +704,15 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - "aci.netflow"
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
   - apps.openshift.io
   resources:
   - deploymentconfigs
@@ -785,6 +824,15 @@ rules:
   - update
   - delete
   - patch
+- apiGroups:
+  - "aci.netflow"
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
 - apiGroups:
   - "aci.snat"
   resources:
