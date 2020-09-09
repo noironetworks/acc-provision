@@ -36,13 +36,6 @@ rules:
   - watch
   - get
 - apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  - podifs/status
-  verbs:
-  - '*'
-- apiGroups:
   - networking.k8s.io
   resources:
   - networkpolicies
@@ -81,6 +74,15 @@ rules:
   - update
   - delete
   - patch
+- apiGroups:
+  - aci.netflow
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
 - apiGroups:
   - aci.snat
   resources:
