@@ -876,6 +876,27 @@ flavors:
       template_generator: generate_rancher_yaml
     config:
       aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
         vmm_domain:
           type: Kubernetes
           injected_cluster_type: RKE

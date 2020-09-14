@@ -779,6 +779,62 @@ None
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "metrics-kubelet",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10250",
+                                    "dToPort": "10250",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "monitoring-node",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9796",
+                                    "dToPort": "9796",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "monitoring-ingress",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10254",
+                                    "dToPort": "10254",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "rancher-ui",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "443",
+                                    "dToPort": "443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
                         }
                     ]
                 }
