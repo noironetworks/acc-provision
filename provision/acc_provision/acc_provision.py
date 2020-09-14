@@ -6,7 +6,6 @@ import argparse
 import base64
 import copy
 import functools
-import ipaddr
 import ipaddress
 import requests
 import json
@@ -1401,7 +1400,7 @@ def check_overlapping_subnets(config):
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
-        net1, net2 = ipaddr.IPNetwork(sub1), ipaddr.IPNetwork(sub2)
+        net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
         out = net1.overlaps(net2)
         if out:
             return False
