@@ -5137,6 +5137,8 @@ class ApicKubeConfig(object):
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
+            elif flavor == "RKE-1.1.5-rc0":
+                rke_flavor_specific_handling(data, items)
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
 
@@ -5745,6 +5747,61 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
 
 
 def dockerucp_flavor_specific_handling(data, ports):
+
+    if ports is None or len(ports) == 0:
+        err("Error in getting ports for flavor")
+    else:
+        for port in ports:
+            extra_port = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                port["name"],
+                                            ),
+                                            (
+                                                "etherT",
+                                                port["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                port["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port["range"][0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port["range"][1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(port["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+
+
+def rke_flavor_specific_handling(data, ports):
 
     if ports is None or len(ports) == 0:
         err("Error in getting ports for flavor")
