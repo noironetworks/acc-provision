@@ -1083,9 +1083,12 @@ class ApicKubeConfig(object):
         return path, aci_obj("vzFilter", [('name', name), ('_children', children)])
 
     def capic_epg(self, name, vrf_name):
+        provider = self.config["cloud"]["provider"]
         children = []
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
         self.add_configured_contracts(name, children)
+        if name == "ul-nodes" and provider == "azure":
+            return aci_obj("cloudSvcEPg", [('name', name), ('deploymentType', "CloudNativeManaged"), ('type', "Azure-AksCluster"), ('accessType', "public&private"), ('_children', children)])
         return aci_obj("cloudEPg", [('name', name), ('_children', children)])
 
     def capic_cloudApp(self, ap_name):
@@ -1143,12 +1146,19 @@ class ApicKubeConfig(object):
                 children.append(aci_obj("fvRsProv", [('tnVzBrCPName', c_name)]))
 
     def capic_underlay_epg(self, name, ipsel):
+        provider = self.config["cloud"]["provider"]
         vrf_name = self.config["aci_config"]["vrf"]["name"]
         match = "IP==\'{}\'".format(ipsel)
         children = []
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
-        children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        if name == "ul-nodes" and provider == "azure":
+            children.append(aci_obj("cloudSvcEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        else:
+            children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
         self.add_configured_contracts(name, children)
+
+        if name == "ul-nodes" and provider == "azure":
+            return aci_obj("cloudSvcEPg", [('name', name), ('deploymentType', "CloudNativeManaged"), ('type', "Azure-AksCluster"), ('accessType', "PublicAndPrivate"), ('_children', children)])
 
         epg = aci_obj(
             "cloudEPg",
@@ -1373,6 +1383,19 @@ class ApicKubeConfig(object):
         rsToRegion = self.capic_rsToRegion()
         _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "yes")
         child_list = [rsToRegion, rsToCtx, cidr]
+        if "transit_subnet" in self.config["net_config"]:
+            assert "routerP" in self.config["oper"]
+            # add transit subnet
+            t_net = self.config["net_config"]["transit_subnet"]
+            region = self.config["aci_config"]["vrf"]["region"]
+            zone = self.config["cloud"]["zone"]
+            z_attach = self.zoneAttach(region, zone)
+            t_subnet = aci_obj("cloudSubnet", [('ip', t_net), ('usage', 'gateway'), ('scope', "public,shared"), ('_children', [z_attach]), ])
+            cidr["cloudCidr"]["children"].append(t_subnet)
+            # attach routerP
+            rp = self.config["oper"]["routerP"]
+            rsToTouterP = aci_obj("cloudRsCtxProfileToGatewayRouterP", [('tDn', rp), ])
+            child_list.append(rsToTouterP)
 
         for child in child_list:
             data["cloudCtxProfile"]["children"].append(child)
@@ -1475,12 +1498,16 @@ class ApicKubeConfig(object):
         )
 
         for subnet in subnets:
-            cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
+            if subnet:
+                cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
         return path, cidrMo
 
     def cloudSubnet(self, cidr):
         region = self.config["aci_config"]["vrf"]["region"]
         zone = self.config["cloud"]["zone"]
+        props = [("ip", cidr)]
+        if cidr in self.config["private_subnets"]:
+            props.append(("routingType", "unmanaged"))
         subnetMo = collections.OrderedDict(
             [
                 (
@@ -1490,9 +1517,7 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [
-                                        ("ip", cidr),
-                                    ]
+                                    props,
                                 ),
                             ),
                             (

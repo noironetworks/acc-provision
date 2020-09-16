@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   controller-config: "{\n    \"flavor\": \"cloud\",\n    \"log-level\": \"info\",\n\
     \    \"apic-hosts\": [\n        \"localhost:50000\"\n    ],\n    \"max-csr-tunnels\"\
-    : 2,\n    \"apic-username\": \"clusterjj\",\n    \"apic-private-key-path\": \"\
+    : 0,\n    \"apic-username\": \"clusterjj\",\n    \"apic-private-key-path\": \"\
     /usr/local/etc/aci-cert/user.key\",\n    \"apic-use-inst-tag\": true,\n    \"\
     aci-prefix\": \"clusterjj\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\
     : \"clusterjj\",\n    \"aci-vmm-controller\": \"clusterjj\",\n    \"aci-policy-tenant\"\
@@ -32,9 +32,9 @@ data:
     \ ]\n}"
   gbp-server-config: "{\n     \"aci-policy-tenant\": \"csrtest\",\n     \"aci-vrf\"\
     : \"clusterjj_overlay\",\n     \"aci-vmm-domain\": \"clusterjj\",\n     \"csr-list\"\
-    : \"10.10.0.68,10.10.0.4\",\n     \"pod-subnet\": \"14.3.0.1/16\",\n     \"vrf-encap-id\"\
-    : 2785281,\n     \"apic\": {\n         \"apic-hosts\": [\n         \"localhost:50000\"\
-    \n     ],\n         \"apic-username\": \"clusterjj\",\n         \"apic-private-key-path\"\
+    : \"\",\n     \"pod-subnet\": \"14.3.0.1/16\",\n     \"vrf-encap-id\": 2785281,\n\
+    \     \"apic\": {\n         \"apic-hosts\": [\n         \"localhost:50000\"\n\
+    \     ],\n         \"apic-username\": \"clusterjj\",\n         \"apic-private-key-path\"\
     : \"/usr/local/etc/aci-cert/user.key\",\n         \"kafka\": {\n             \"\
     brokers\": [\n                 \"localhost:9095\"\n             ],\n         \
     \    \"client-key-path\": \"/certs/kafka-client.key\",\n             \"client-cert-path\"\

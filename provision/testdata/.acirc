@@ -1,2 +1,3 @@
+export AZ_VIRTUAL_NETWORK="ul_akstest"
 export AZ_CAPIC_SUBNET_ID="/subscriptions/ed1aefee-3242-413c-899e-fb8bfe0fdee2/resourceGroups/CAPIC_aks1_ul_akstest_westus/providers/Microsoft.Network/virtualNetworks/ul_akstest/subnets/subnet-43.0.1.0_24"
 export AZ_CAPIC_REGION="westus"

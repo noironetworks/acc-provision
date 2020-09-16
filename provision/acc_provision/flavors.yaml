@@ -846,11 +846,14 @@ flavors:
     default_version: 5.0
     overlay: True
     config:
+      net_config:
+        max_csr_tunnels: 0
+        csr_list: ""
       cloud:
         provider: azure
       kube_config:
         no_priority_class: True
-        system_namespace: kube-system
+        system_namespace: aci-containers-system
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: False
@@ -875,6 +878,11 @@ flavors:
             filter: match-all
             provided: ["inet-ext"]
             consumed: ["ul-nodes"]
+          - name: allow-LB
+            underlay: True
+            filter: match-tcp
+            provided: ["ul-nodes"]
+            consumed: ["inet-ext"]
           - name: allow-kube
             underlay: False
             filter: match-all
@@ -888,6 +896,10 @@ flavors:
             - name: match-all
               entries:
                 - name: ent1
+            - name: match-tcp
+              entries:
+                - name: ent1
+                  prot: tcp
     status: Experimental
     hidden: False
     order: 19
@@ -896,6 +908,9 @@ flavors:
     default_version: 5.0
     overlay: True
     config:
+      net_config:
+        max_csr_tunnels: 0
+        csr_list: ""
       cloud:
         provider: aws
       kube_config:
