@@ -21,9 +21,23 @@ spec:
           properties:
             flowSamplingPolicy:
               properties:
-                activeFlowTimeOut: null
-                dstAddr: null
-                dstPort: null
-                idleFlowTimeOut: null
-                type: null
+                activeFlowTimeOut:
+                  maximum: 3600
+                  minimum: 0
+                  type: integer
+                destIp:
+                  type: string
+                destPort:
+                  maximum: 65535
+                  minimum: 0
+                  type: integer
+                idleFlowTimeOut:
+                  maximum: 600
+                  minimum: 0
+                  type: integer
+                type:
+                  enum:
+                  - netflow
+                  - ipfix
+                  type: string
   version: v1alpha

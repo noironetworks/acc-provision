@@ -267,11 +267,25 @@ spec:
           properties:
             flowSamplingPolicy:
               properties:
-                dstAddr:
-                dstPort:
+                destIp:
+                  type: string
+                destPort:
+                  type: integer
+                  minimum: 0
+                  maximum: 65535
                 type:
+                  type: string
+                  enum:
+                    - netflow
+                    - ipfix
                 activeFlowTimeOut:
+                  type: integer
+                  minimum: 0
+                  maximum: 3600
                 idleFlowTimeOut:
+                  type: integer
+                  minimum: 0
+                  maximum: 600
 ---
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1beta1
