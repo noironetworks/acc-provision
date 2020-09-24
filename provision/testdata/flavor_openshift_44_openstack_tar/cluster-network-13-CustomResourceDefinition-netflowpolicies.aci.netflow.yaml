@@ -22,18 +22,18 @@ spec:
             flowSamplingPolicy:
               properties:
                 activeFlowTimeOut:
-                  maximum: 36001
-                  minimum: 1
+                  maximum: 3600
+                  minimum: 0
                   type: integer
-                dstIp:
+                destIp:
                   type: string
-                dstPort:
+                destPort:
                   maximum: 65535
                   minimum: 0
                   type: integer
                 idleFlowTimeOut:
-                  maximum: 6001
-                  minimum: 1
+                  maximum: 600
+                  minimum: 0
                   type: integer
                 type:
                   enum:
