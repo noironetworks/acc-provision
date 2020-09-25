@@ -309,7 +309,7 @@ class Apic(object):
         self.clean_tagged_resources(system_id, tenant)
 
     def get_apic_version(self):
-        path = "/api/node/class/firmwareCtrlrRunning.json?&"
+        path = "/api/node/class/firmwareCtrlrRunning.json"
         version = 1.0
         try:
             data = self.get_path(path)
