@@ -236,6 +236,8 @@ flavors:
         host_agent_cni_conf_path: /etc/kubernetes
         generate_installer_files: False
         generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
       aci_config:
         kube_default_provide_kube_api: True
         items:
@@ -251,15 +253,37 @@ flavors:
           - name: openshift-monitoring
             range:
               -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [9001, 9001]
+              -
                 [9091, 9091]
               -
                 [9094, 9094]
               -
                 [9095, 9095]
               -
-                [3000, 3000]
+                [9099, 9101]
               -
-                [8080, 8080]
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [60000, 60000]
             etherT: ip
             prot: tcp
             stateful: "no"
