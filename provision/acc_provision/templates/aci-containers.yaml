@@ -782,7 +782,11 @@ metadata:
     network-plugin: aci-containers
 spec:
   updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
     type: RollingUpdate
+{% endif %}
   selector:
     matchLabels:
       name: aci-containers-host
@@ -992,7 +996,11 @@ metadata:
     network-plugin: aci-containers
 spec:
   updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
     type: RollingUpdate
+{% endif %}
   selector:
     matchLabels:
       name: aci-containers-openvswitch
