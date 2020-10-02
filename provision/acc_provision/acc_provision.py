@@ -249,6 +249,9 @@ def config_default():
         "drop_log_config": {
             "enable": True
         },
+        "provision": {
+            "upgrade_cluster": False,
+        },
     }
     return default_config
 
@@ -1372,6 +1375,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--skip-kafka-certs', action='store_true', default=False,
         help='skip kafka certificate generation')
+    parser.add_argument(
+        '--upgrade', action='store_true', default=False,
+        help='generate kubernetes deployment file for cluster upgrade')
 
     # If the input has no arguments, show help output and exit
     if show_help:
@@ -1427,6 +1433,7 @@ def provision(args, apic_file, no_random):
     output_file = args.output
     output_tar = args.output_tar
     operator_cr_output_file = args.aci_operator_cr
+    upgrade_cluster = args.upgrade
 
     prov_apic = None
     if args.apic:
@@ -1470,6 +1477,10 @@ def provision(args, apic_file, no_random):
             "skip-kafka-certs": args.skip_kafka_certs,
         },
     }
+
+    if upgrade_cluster:
+        output_tar = "/dev/null"
+        config["provision"]["upgrade_cluster"] = True
 
     # infra_vlan is not part of command line input, but we do
     # pass it as a command line arg in unit tests to pass in
