@@ -20,11 +20,9 @@ spec:
         spec:
           properties:
             dscpmark:
-              properties:
-                dscp_marking:
-                  maximum: 56
-                  minimum: 0
-                  type: integer
+              maximum: 56
+              minimum: 0
+              type: integer
             egress:
               properties:
                 policing_burst:
