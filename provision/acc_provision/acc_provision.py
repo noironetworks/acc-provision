@@ -1181,14 +1181,15 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         info("Apply infrastructure YAML using:")
         info("  %s apply -f %s" %
              (config["kube_config"]["kubectl"], applyname))
-        info("Delete stale objects from older deployments using:")
-        info("  %s -n %s delete %s -l "
-             " 'aci-containers-config-version,"
-             "aci-containers-config-version notin (%s)'" %
-             (config["kube_config"]["kubectl"],
-              config["kube_config"]["system_namespace"],
-              ",".join(kube_objects),
-              str(config["registry"]["configuration_version"])))
+        if not config["provision"]["upgrade_cluster"]:
+            info("Delete stale objects from older deployments using:")
+            info("  %s -n %s delete %s -l "
+                 " 'aci-containers-config-version,"
+                 "aci-containers-config-version notin (%s)'" %
+                 (config["kube_config"]["kubectl"],
+                  config["kube_config"]["system_namespace"],
+                  ",".join(kube_objects),
+                  str(config["registry"]["configuration_version"])))
     return config
 
 
