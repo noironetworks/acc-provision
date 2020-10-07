@@ -35,6 +35,10 @@ spec:
                   maximum: 600
                   minimum: 0
                   type: integer
+                samplingRate:
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
                 type:
                   enum:
                   - netflow
