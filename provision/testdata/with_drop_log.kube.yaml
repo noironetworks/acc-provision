@@ -1,0 +1,1045 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: acicontainersoperators.aci.ctrl
+spec:
+  group: aci.ctrl
+  names:
+    kind: AciContainersOperator
+    listKind: AciContainersOperatorList
+    plural: acicontainersoperators
+    singular: acicontainersoperator
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+  annotations:
+    openshift.io/node-selector: ''
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatglobalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatGlobalInfo
+    listKind: SnatGlobalInfoList
+    plural: snatglobalinfos
+    singular: snatglobalinfo
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatlocalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatLocalInfo
+    listKind: SnatLocalInfoList
+    plural: snatlocalinfos
+    singular: snatlocalinfo
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: snatpolicies.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatPolicy
+    listKind: SnatPolicyList
+    plural: snatpolicies
+    singular: snatpolicy
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            selector:
+              properties:
+                labels:
+                  type: object
+                  properties:
+                    additionalProperties:
+                      type: string
+                namespace:
+                  type: string
+              type: object
+            snatIp:
+              type: array
+            destIp:
+              type: array
+          type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: nodeinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: NodeInfo
+    listKind: NodeInfoList
+    plural: nodeinfos
+    singular: nodeinfo
+  scope: Namespaced
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: rdconfigs.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: RdConfig
+    listKind: RdConfigList
+    plural: rdconfigs
+    singular: rdconfig
+  scope: Namespaced
+  version: v1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: aciistiooperators.aci.istio
+spec:
+  group: aci.istio
+  names:
+    kind: AciIstioOperator
+    listKind: AciIstioOperatorList
+    plural: aciistiooperators
+    singular: aciistiooperator
+  scope: Namespaced
+  version: v1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-operator-config
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "flavor": "kubernetes-1.15",
+        "config": "CmFwaVZlcnNpb246IHYxCmtpbmQ6IE5hbWVzcGFjZQptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVycy1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogIGFubm90YXRpb25zOgogICAgb3BlbnNoaWZ0LmlvL25vZGUtc2VsZWN0b3I6ICcnCi0tLQphcGlWZXJzaW9uOiBhcGlleHRlbnNpb25zLms4cy5pby92MWJldGExCmtpbmQ6IEN1c3RvbVJlc291cmNlRGVmaW5pdGlvbgptZXRhZGF0YToKICBuYW1lOiBzbmF0Z2xvYmFsaW5mb3MuYWNpLnNuYXQKc3BlYzoKICBncm91cDogYWNpLnNuYXQKICBuYW1lczoKICAgIGtpbmQ6IFNuYXRHbG9iYWxJbmZvCiAgICBsaXN0S2luZDogU25hdEdsb2JhbEluZm9MaXN0CiAgICBwbHVyYWw6IHNuYXRnbG9iYWxpbmZvcwogICAgc2luZ3VsYXI6IHNuYXRnbG9iYWxpbmZvCiAgc2NvcGU6IE5hbWVzcGFjZWQKICB2ZXJzaW9uOiB2MQotLS0KYXBpVmVyc2lvbjogYXBpZXh0ZW5zaW9ucy5rOHMuaW8vdjFiZXRhMQpraW5kOiBDdXN0b21SZXNvdXJjZURlZmluaXRpb24KbWV0YWRhdGE6CiAgbmFtZTogc25hdGxvY2FsaW5mb3MuYWNpLnNuYXQKc3BlYzoKICBncm91cDogYWNpLnNuYXQKICBuYW1lczoKICAgIGtpbmQ6IFNuYXRMb2NhbEluZm8KICAgIGxpc3RLaW5kOiBTbmF0TG9jYWxJbmZvTGlzdAogICAgcGx1cmFsOiBzbmF0bG9jYWxpbmZvcwogICAgc2luZ3VsYXI6IHNuYXRsb2NhbGluZm8KICBzY29wZTogTmFtZXNwYWNlZAogIHZlcnNpb246IHYxCi0tLQphcGlWZXJzaW9uOiBhcGlleHRlbnNpb25zLms4cy5pby92MWJldGExCmtpbmQ6IEN1c3RvbVJlc291cmNlRGVmaW5pdGlvbgptZXRhZGF0YToKICBuYW1lOiBzbmF0cG9saWNpZXMuYWNpLnNuYXQKc3BlYzoKICBncm91cDogYWNpLnNuYXQKICBuYW1lczoKICAgIGtpbmQ6IFNuYXRQb2xpY3kKICAgIGxpc3RLaW5kOiBTbmF0UG9saWN5TGlzdAogICAgcGx1cmFsOiBzbmF0cG9saWNpZXMKICAgIHNpbmd1bGFyOiBzbmF0cG9saWN5CiAgc2NvcGU6IENsdXN0ZXIKICBzdWJyZXNvdXJjZXM6CiAgICBzdGF0dXM6IHt9CiAgdmFsaWRhdGlvbjoKICAgIG9wZW5BUElWM1NjaGVtYToKICAgICAgcHJvcGVydGllczoKICAgICAgICBhcGlWZXJzaW9uOgogICAgICAgICAgZGVzY3JpcHRpb246ICdBUElWZXJzaW9uIGRlZmluZXMgdGhlIHZlcnNpb25lZCBzY2hlbWEgb2YgdGhpcyByZXByZXNlbnRhdGlvbgogICAgICAgICAgICBvZiBhbiBvYmplY3QuIFNlcnZlcnMgc2hvdWxkIGNvbnZlcnQgcmVjb2duaXplZCBzY2hlbWFzIHRvIHRoZSBsYXRlc3QKICAgICAgICAgICAgaW50ZXJuYWwgdmFsdWUsIGFuZCBtYXkgcmVqZWN0IHVucmVjb2duaXplZCB2YWx1ZXMuIE1vcmUgaW5mbzogaHR0cHM6Ly9naXQuazhzLmlvL2NvbW11bml0eS9jb250cmlidXRvcnMvZGV2ZWwvYXBpLWNvbnZlbnRpb25zLm1kI3Jlc291cmNlcycKICAgICAgICAgIHR5cGU6IHN0cmluZwogICAgICAgIGtpbmQ6CiAgICAgICAgICBkZXNjcmlwdGlvbjogJ0tpbmQgaXMgYSBzdHJpbmcgdmFsdWUgcmVwcmVzZW50aW5nIHRoZSBSRVNUIHJlc291cmNlIHRoaXMKICAgICAgICAgICAgb2JqZWN0IHJlcHJlc2VudHMuIFNlcnZlcnMgbWF5IGluZmVyIHRoaXMgZnJvbSB0aGUgZW5kcG9pbnQgdGhlIGNsaWVudAogICAgICAgICAgICBzdWJtaXRzIHJlcXVlc3RzIHRvLiBDYW5ub3QgYmUgdXBkYXRlZC4gSW4gQ2FtZWxDYXNlLiBNb3JlIGluZm86IGh0dHBzOi8vZ2l0Lms4cy5pby9jb21tdW5pdHkvY29udHJpYnV0b3JzL2RldmVsL2FwaS1jb252ZW50aW9ucy5tZCN0eXBlcy1raW5kcycKICAgICAgICAgIHR5cGU6IHN0cmluZwogICAgICAgIG1ldGFkYXRhOgogICAgICAgICAgdHlwZTogb2JqZWN0CiAgICAgICAgc3BlYzoKICAgICAgICAgIHByb3BlcnRpZXM6CiAgICAgICAgICAgIHNlbGVjdG9yOgogICAgICAgICAgICAgIHByb3BlcnRpZXM6CiAgICAgICAgICAgICAgICBsYWJlbHM6CiAgICAgICAgICAgICAgICAgIHR5cGU6IG9iamVjdAogICAgICAgICAgICAgICAgICBwcm9wZXJ0aWVzOgogICAgICAgICAgICAgICAgICAgIGFkZGl0aW9uYWxQcm9wZXJ0aWVzOgogICAgICAgICAgICAgICAgICAgICAgdHlwZTogc3RyaW5nCiAgICAgICAgICAgICAgICBuYW1lc3BhY2U6CiAgICAgICAgICAgICAgICAgIHR5cGU6IHN0cmluZwogICAgICAgICAgICAgIHR5cGU6IG9iamVjdAogICAgICAgICAgICBzbmF0SXA6CiAgICAgICAgICAgICAgdHlwZTogYXJyYXkKICAgICAgICAgICAgZGVzdElwOgogICAgICAgICAgICAgIHR5cGU6IGFycmF5CiAgICAgICAgICB0eXBlOiBvYmplY3QKICB2ZXJzaW9uOiB2MQogIHZlcnNpb25zOgogIC0gbmFtZTogdjEKICAgIHNlcnZlZDogdHJ1ZQogICAgc3RvcmFnZTogdHJ1ZQotLS0KYXBpVmVyc2lvbjogYXBpZXh0ZW5zaW9ucy5rOHMuaW8vdjFiZXRhMQpraW5kOiBDdXN0b21SZXNvdXJjZURlZmluaXRpb24KbWV0YWRhdGE6CiAgbmFtZTogbm9kZWluZm9zLmFjaS5zbmF0CnNwZWM6CiAgZ3JvdXA6IGFjaS5zbmF0CiAgbmFtZXM6CiAgICBraW5kOiBOb2RlSW5mbwogICAgbGlzdEtpbmQ6IE5vZGVJbmZvTGlzdAogICAgcGx1cmFsOiBub2RlaW5mb3MKICAgIHNpbmd1bGFyOiBub2RlaW5mbwogIHNjb3BlOiBOYW1lc3BhY2VkCiAgdmVyc2lvbjogdjEKICB2ZXJzaW9uczoKICAtIG5hbWU6IHYxCiAgICBzZXJ2ZWQ6IHRydWUKICAgIHN0b3JhZ2U6IHRydWUKLS0tCmFwaVZlcnNpb246IGFwaWV4dGVuc2lvbnMuazhzLmlvL3YxYmV0YTEKa2luZDogQ3VzdG9tUmVzb3VyY2VEZWZpbml0aW9uCm1ldGFkYXRhOgogIG5hbWU6IHJkY29uZmlncy5hY2kuc25hdApzcGVjOgogIGdyb3VwOiBhY2kuc25hdAogIG5hbWVzOgogICAga2luZDogUmRDb25maWcKICAgIGxpc3RLaW5kOiBSZENvbmZpZ0xpc3QKICAgIHBsdXJhbDogcmRjb25maWdzCiAgICBzaW5ndWxhcjogcmRjb25maWcKICBzY29wZTogTmFtZXNwYWNlZAogIHZlcnNpb246IHYxCi0tLQphcGlWZXJzaW9uOiBhcGlleHRlbnNpb25zLms4cy5pby92MWJldGExCmtpbmQ6IEN1c3RvbVJlc291cmNlRGVmaW5pdGlvbgptZXRhZGF0YToKICBuYW1lOiBhY2lpc3Rpb29wZXJhdG9ycy5hY2kuaXN0aW8Kc3BlYzoKICBncm91cDogYWNpLmlzdGlvCiAgbmFtZXM6CiAgICBraW5kOiBBY2lJc3Rpb09wZXJhdG9yCiAgICBsaXN0S2luZDogQWNpSXN0aW9PcGVyYXRvckxpc3QKICAgIHBsdXJhbDogYWNpaXN0aW9vcGVyYXRvcnMKICAgIHNpbmd1bGFyOiBhY2lpc3Rpb29wZXJhdG9yCiAgc2NvcGU6IE5hbWVzcGFjZWQKICB2ZXJzaW9uOiB2MQotLS0KYXBpVmVyc2lvbjogdjEKa2luZDogQ29uZmlnTWFwCm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbmZpZwogIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCmRhdGE6CiAgY29udHJvbGxlci1jb25maWc6IHwtCiAgICB7CiAgICAgICAgImxvZy1sZXZlbCI6ICJpbmZvIiwKICAgICAgICAiYXBpYy1ob3N0cyI6IFsKICAgICAgICAgICAgIjEwLjMwLjEyMC4xMDAiCiAgICAgICAgXSwKICAgICAgICAiYXBpYy11c2VybmFtZSI6ICJrdWJlIiwKICAgICAgICAiYXBpYy1wcml2YXRlLWtleS1wYXRoIjogIi91c3IvbG9jYWwvZXRjL2FjaS1jZXJ0L3VzZXIua2V5IiwKICAgICAgICAiYXBpYy11c2UtaW5zdC10YWciOiB0cnVlLAogICAgICAgICJhY2ktcHJlZml4IjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLXR5cGUiOiAiS3ViZXJuZXRlcyIsCiAgICAgICAgImFjaS12bW0tZG9tYWluIjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLWNvbnRyb2xsZXIiOiAia3ViZSIsCiAgICAgICAgImFjaS1wb2xpY3ktdGVuYW50IjogImt1YmUiLAogICAgICAgICJyZXF1aXJlLW5ldHBvbC1hbm5vdCI6IGZhbHNlLAogICAgICAgICJpbnN0YWxsLWlzdGlvIjogdHJ1ZSwKICAgICAgICAiaXN0aW8tcHJvZmlsZSI6ICJkZW1vIiwKICAgICAgICAiYWNpLXBvZGJkLWRuIjogInVuaS90bi1rdWJlL0JELWt1YmUtcG9kLWJkIiwKICAgICAgICAiYWNpLW5vZGViZC1kbiI6ICJ1bmkvdG4ta3ViZS9CRC1rdWJlLW5vZGUtYmQiLAogICAgICAgICJhY2ktc2VydmljZS1waHlzLWRvbSI6ICJrdWJlLXBkb20iLAogICAgICAgICJhY2ktc2VydmljZS1lbmNhcCI6ICJ2bGFuLTQwMDMiLAogICAgICAgICJhY2ktc2VydmljZS1tb25pdG9yLWludGVydmFsIjogNSwKICAgICAgICAiYWNpLXBici10cmFja2luZy1ub24tc25hdCI6IGZhbHNlLAogICAgICAgICJhY2ktdnJmLXRlbmFudCI6ICJjb21tb24iLAogICAgICAgICJhY2ktdnJmLWRuIjogInVuaS90bi1jb21tb24vY3R4LWt1YmUiLAogICAgICAgICJhY2ktbDNvdXQiOiAibDNvdXQiLAogICAgICAgICJhY2ktZXh0LW5ldHdvcmtzIjogWwogICAgICAgICAgICAiZGVmYXVsdCIKICAgICAgICBdLAogICAgICAgICJhY2ktdnJmIjogImt1YmUiLAogICAgICAgICJkZWZhdWx0LWVuZHBvaW50LWdyb3VwIjogewogICAgICAgICAgICAicG9saWN5LXNwYWNlIjogImt1YmUiLAogICAgICAgICAgICAibmFtZSI6ICJrdWJlcm5ldGVzfGt1YmUtZGVmYXVsdCIKICAgICAgICB9LAogICAgICAgICJtYXgtbm9kZXMtc3ZjLWdyYXBoIjogMzIsCiAgICAgICAgIm5hbWVzcGFjZS1kZWZhdWx0LWVuZHBvaW50LWdyb3VwIjogewogICAgICAgICAgICAiaXN0aW8tb3BlcmF0b3IiOiB7CiAgICAgICAgICAgICAgICAicG9saWN5LXNwYWNlIjogImt1YmUiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAia3ViZXJuZXRlc3xrdWJlLWlzdGlvIgogICAgICAgICAgICB9LAogICAgICAgICAgICAiaXN0aW8tc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJrdWJlIiwKICAgICAgICAgICAgICAgICJuYW1lIjogImt1YmVybmV0ZXN8a3ViZS1pc3RpbyIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImt1YmUtc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJrdWJlIiwKICAgICAgICAgICAgICAgICJuYW1lIjogImt1YmVybmV0ZXN8a3ViZS1zeXN0ZW0iCiAgICAgICAgICAgIH0gICAgICAgIH0sCiAgICAgICAgInNlcnZpY2UtaXAtcG9vbCI6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImVuZCI6ICIxMC4zLjAuMjU0IiwKICAgICAgICAgICAgICAgICJzdGFydCI6ICIxMC4zLjAuMiIKICAgICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgInNuYXQtY29udHJhY3Qtc2NvcGUiOiAiZ2xvYmFsIiwKICAgICAgICAic3RhdGljLXNlcnZpY2UtaXAtcG9vbCI6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImVuZCI6ICIxMC40LjAuMjU0IiwKICAgICAgICAgICAgICAgICJzdGFydCI6ICIxMC40LjAuMiIKICAgICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgInBvZC1pcC1wb29sIjogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAiZW5kIjogIjEwLjIuMjU1LjI1NCIsCiAgICAgICAgICAgICAgICAic3RhcnQiOiAiMTAuMi4wLjIiCiAgICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJwb2Qtc3VibmV0LWNodW5rLXNpemUiOiAzMiwKICAgICAgICAibm9kZS1zZXJ2aWNlLWlwLXBvb2wiOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJlbmQiOiAiMTAuNS4wLjI1NCIsCiAgICAgICAgICAgICAgICAic3RhcnQiOiAiMTAuNS4wLjIiCiAgICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJub2RlLXNlcnZpY2Utc3VibmV0cyI6IFsKICAgICAgICAgICAgIjEwLjUuMC4xLzI0IgogICAgICAgIF0KICAgIH0KICBob3N0LWFnZW50LWNvbmZpZzogfC0KICAgIHsKICAgICAgICAiYXBwLXByb2ZpbGUiOiAia3ViZXJuZXRlcyIsCiAgICAgICAgImVwLXJlZ2lzdHJ5IjogbnVsbCwKICAgICAgICAib3BmbGV4LW1vZGUiOiBudWxsLAogICAgICAgICJsb2ctbGV2ZWwiOiAiaW5mbyIsCiAgICAgICAgImFjaS1zbmF0LW5hbWVzcGFjZSI6ICJhY2ktY29udGFpbmVycy1zeXN0ZW0iLAogICAgICAgICJhY2ktdm1tLXR5cGUiOiAiS3ViZXJuZXRlcyIsCiAgICAgICAgImFjaS12bW0tZG9tYWluIjogImt1YmUiLAogICAgICAgICJhY2ktdm1tLWNvbnRyb2xsZXIiOiAia3ViZSIsCiAgICAgICAgImFjaS1wcmVmaXgiOiAia3ViZSIsCiAgICAgICAgImFjaS12cmYiOiAia3ViZSIsCiAgICAgICAgImFjaS12cmYtdGVuYW50IjogImNvbW1vbiIsCiAgICAgICAgInNlcnZpY2UtdmxhbiI6IDQwMDMsCiAgICAgICAgImt1YmVhcGktdmxhbiI6IDQwMDEsCiAgICAgICAgInBvZC1zdWJuZXQiOiAiMTAuMi4wLjEvMTYiLAogICAgICAgICJub2RlLXN1Ym5ldCI6ICIxMC4xLjAuMS8xNiIsCiAgICAgICAgImVuY2FwLXR5cGUiOiAidnhsYW4iLAogICAgICAgICJhY2ktaW5mcmEtdmxhbiI6IDQwOTMsCiAgICAgICAgImNuaS1uZXRjb25maWciOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJnYXRld2F5IjogIjEwLjIuMC4xIiwKICAgICAgICAgICAgICAgICJyb3V0ZXMiOiBbCiAgICAgICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICAgICAiZHN0IjogIjAuMC4wLjAvMCIsCiAgICAgICAgICAgICAgICAgICAgICAgICJndyI6ICIxMC4yLjAuMSIKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICAgInN1Ym5ldCI6ICIxMC4yLjAuMC8xNiIKICAgICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgImRlZmF1bHQtZW5kcG9pbnQtZ3JvdXAiOiB7CiAgICAgICAgICAgICJwb2xpY3ktc3BhY2UiOiAia3ViZSIsCiAgICAgICAgICAgICJuYW1lIjogImt1YmVybmV0ZXN8a3ViZS1kZWZhdWx0IgogICAgICAgIH0sCiAgICAgICAgIm5hbWVzcGFjZS1kZWZhdWx0LWVuZHBvaW50LWdyb3VwIjogewogICAgICAgICAgICAiaXN0aW8tb3BlcmF0b3IiOiB7CiAgICAgICAgICAgICAgICAicG9saWN5LXNwYWNlIjogImt1YmUiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAia3ViZXJuZXRlc3xrdWJlLWlzdGlvIgogICAgICAgICAgICB9LAogICAgICAgICAgICAiaXN0aW8tc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJrdWJlIiwKICAgICAgICAgICAgICAgICJuYW1lIjogImt1YmVybmV0ZXN8a3ViZS1pc3RpbyIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImt1YmUtc3lzdGVtIjogewogICAgICAgICAgICAgICAgInBvbGljeS1zcGFjZSI6ICJrdWJlIiwKICAgICAgICAgICAgICAgICJuYW1lIjogImt1YmVybmV0ZXN8a3ViZS1zeXN0ZW0iCiAgICAgICAgICAgIH0gICAgICAgIH0sCiAgICAgICAgImVuYWJsZS1kcm9wLWxvZyI6IHRydWUKICAgIH0KICBvcGZsZXgtYWdlbnQtY29uZmlnOiB8LQogICAgewogICAgICAgICJsb2ciOiB7CiAgICAgICAgICAgICJsZXZlbCI6ICJpbmZvIgogICAgICAgIH0sCiAgICAgICAgIm9wZmxleCI6IHsKICAgICAgICB9CiAgICB9Ci0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogc25hdC1vcGVyYXRvci1jb25maWcKICBuYW1lc3BhY2U6IGFjaS1jb250YWluZXJzLXN5c3RlbQogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKZGF0YToKICAgICJzdGFydCI6ICI1MDAwIgogICAgImVuZCI6ICI2NTAwMCIKICAgICJwb3J0cy1wZXItbm9kZSI6ICIzMDAwIgotLS0KYXBpVmVyc2lvbjogdjEKa2luZDogU2VjcmV0Cm1ldGFkYXRhOgogIG5hbWU6IGFjaS11c2VyLWNlcnQKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKZGF0YToKICB1c2VyLmtleTogTFMwdExTMUNSVWRKVGlCUVVrbFdRVlJGSUV0RldTMHRMUzB0Q2sxSlNVTmtaMGxDUVVSQlRrSm5hM0ZvYTJsSE9YY3dRa0ZSUlVaQlFWTkRRVzFCZDJkblNtTkJaMFZCUVc5SFFrRk9jaXRCSzJkUFMySkJWbFp5U25NS1lqTXJXbGRpWTI1V1dHOHZaMlIxZUVsVWEzWnRNRGxyWldsR1EyNHJWWEF2VTBka2NYWTJRV2dyYW14S1prWTNkWFlyUm1kRFNuUkRlRVE0TjNGWmR3b3djVFZFWTBkV1RFbGpaa1kwV2xWaU9VSTRja3BYUzBKSk5uZEtabmgwVFdaR2RWVk9XVEkwWTJkM1VYQktjWEpOVlhGQlJIb3ZUVmNyZDNKYVpXaHpDbE51Um5ONVpYZFlVak00T0dWU04wVkxha1JYWldka1NubFFZMWhCWjAxQ1FVRkZRMmRaUWpsQldHSXhXbVpDUTBKVmVFSXJWV2RGVkVkTk55czBXRGtLYWtoaWVVVXdRbXg0Ykd0bWFuSnNkMlIyYlZNNVRUYzNLekphTm1STFFXZFFNek5VVWswdlVIZEZUVTlaTjFKdVpFSnZLMWcyZUVSelZtUmpWRXBKZVFvMVZuYzRlRlZhYkhJcllYVkZUMnh6TWxwdVduZ3hNV1UxZW1nM2MxVXpUbW8xU3pNMVFsZFNPVWRVV0VvMlVFMWtjRlEwT1d4Q09XSnNiRTFxUkhKTUNqY3JOV0pEYzJSMU5qTlBPRXRoVGpsWlVVcENRVkJIVFdKd1NIQkdjM1JETVdOWFIzQlNVWGd6YVhkR0sxcE1XVUZ5UVZWaVEwdGlWMUZtWW1sYVZIQUtRMU00UkdkUGJYbFZOM1ZMVkZKTGFVTXJNbEpaVkZNemNISk1WalUzUjNabVprWjRTbXBVZDBkNWEwTlJVVVJ2UjBKM1pqVnBUM041ZFUxUlRubzNTd3BTYVhKaVJEQktOMUkyV1dWUmEwcGFLM0JEWlV0M2VTdE9lVWx4ZUdnd1RFSkViVUo1YlZOTGRsZ3dWMFZMUTJsMFQyZHdhVE15UmxkQ2IzRklhbVl6Q2sxUlp5OUJhMEpNUWt4U2NXVktkblJ6VDI4emJVdFBOR0VyZURKbE4zbFNWVXRyTVVOdlMzcEdUa0pJTUc1VlpWaEhibEIzYVZST1lpdGlNV1ptVTBZS04zWkpTbUpJWkcxTFozVktlVEJzVlU1Qk4waGFOemRZTDJsS1VrRnJRV3B1WW1WTVMxcDZiRFJyYVZBM00zQnBVR1o0VEcwek4yWlFha29yZVVSdk5BcGFjSGRWZFZwU0swTkRXR3hJU0haUFpXWndPVTFXY2xkak5XVnFZME12UjJGRE5rMVhXWGxOYW5WWFRTdDRRWEJxWTNWMlFXdEZRWHBaSzNBeE5EQkRDbmgzY0hJNU5XeHBibTUyVjJORE4wNDNNRGhCU2tacGJUTXZSbFV4TUVkRWJ6YzNlVWxQU1RWb0t6VXpOMHBpV1dSdE5UVTFhRTlsU0M5TGFsTmxhMmdLUlVZMFRXMTRVbEJ0YVhRNU9YYzlQUW90TFMwdExVVk9SQ0JRVWtsV1FWUkZJRXRGV1MwdExTMHRDZz09CiAgdXNlci5jcnQ6IExTMHRMUzFDUlVkSlRpQkRSVkpVU1VaSlEwRlVSUzB0TFMwdENrMUpTVUkyUkVORFFWWkZRMEZuVUc5TlFUQkhRMU54UjFOSllqTkVVVVZDUWxGVlFVMUVkM2hEZWtGS1FtZE9Wa0pCV1ZSQmJGWlVUVkpaZDBaQldVUUtWbEZSUzBSQk1VUmhXRTVxWW5sQ1ZHVllUakJhVnpGNlRWSlZkMFYzV1VSV1VWRkVSRUY0Vm1NeVZubEpSekZvWW0xU2JGcFlRWGRJYUdOT1RWUmpkd3BPVkVVeVRXcEZlVTlVVFhkWGFHTk9UV3BqZDA1VVJUQk5ha1Y1VDFSTmQxZHFRVGhOVVhOM1ExRlpSRlpSVVVkRmQwcFdWWHBGVjAxQ1VVZEJNVlZGQ2tObmQwNVJNbXg2V1RJNFoxVXpiSHBrUjFaMFkzcEZWazFDVFVkQk1WVkZRWGQzVFZaWVRteGphVUowV1ZjMWExcFhWbmROU1VkbVRVRXdSME5UY1VjS1UwbGlNMFJSUlVKQlVWVkJRVFJIVGtGRVEwSnBVVXRDWjFGRVlTOW5VRzlFYVcxM1JsWmhlV0pIT1M5dFZtMHpTakZXTmxBMFNHSnpVMFUxVERWMFVBcGFTRzlvVVhBdmJFdG1NR2h1WVhJclowbG1ielZUV0hobE4zSXZhRmxCYVdKUmMxRXZUelp0VFU1TGRWRXpRbXhUZVVoSWVHVkhWa2N2VVdaTGVWWnBDbWRUVDNORFdEaGlWRWg0WW14RVYwNTFTRWxOUlV0VFlYRjZSa3RuUVRndmVrWjJjMHN5V0c5aVJYQjRZazF1YzBZd1pDOVFTR3RsZUVOdmR6RnViMGdLVTJOcU0wWjNTVVJCVVVGQ1RVRXdSME5UY1VkVFNXSXpSRkZGUWtKUlZVRkJORWRDUVVoWUsydE1WR1UyVEVOQlFtVjNiVU5VZGsxemFuVnpTR1J3V2dwcmFUQXhLMjVSTjB0b2JrVlNZa0p0TDNSYU5YTmpXa1UwWTNSSmNXTm9NMjU1TVVWSlZFaE9kRmxYUzBKT05FTmtWVXRqYW5aRVZ6Sm9NblpyU0dWbkNuSjBXV0pXSzBGaFJYTnhNRzAwZGtkR09VVnRkblF4WTNBNVdUUXhTWGxOUWxwWmNYYzRZeTlXTVVGMGJWSlJZMUpVV1ZGQk9FZ3pUMFpFWTJoNVFqSUtNRXBJVTBSdVFtOVROMlptVTJKQ2VBb3RMUzB0TFVWT1JDQkRSVkpVU1VaSlEwRlVSUzB0TFMwdENnPT0KLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlcnZpY2VBY2NvdW50Cm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbnRyb2xsZXIKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlcnZpY2VBY2NvdW50Cm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLWhvc3QtYWdlbnQKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogIG5hbWU6IGFjaS1jb250YWluZXJzOmNvbnRyb2xsZXIKcnVsZXM6Ci0gYXBpR3JvdXBzOgogIC0gIiIKICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbmFtZXNwYWNlcwogIC0gcG9kcwogIC0gZW5kcG9pbnRzCiAgLSBzZXJ2aWNlcwogIC0gZXZlbnRzCiAgLSByZXBsaWNhdGlvbmNvbnRyb2xsZXJzCiAgLSBzZXJ2aWNlYWNjb3VudHMKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKICAtIHBhdGNoCiAgLSBjcmVhdGUKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtICIiCiAgcmVzb3VyY2VzOgogIC0gY29uZmlnbWFwcwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAogIC0gY3JlYXRlCiAgLSB1cGRhdGUKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtICJyYmFjLmF1dGhvcml6YXRpb24uazhzLmlvIgogIHJlc291cmNlczoKICAtIGNsdXN0ZXJyb2xlcwogIC0gY2x1c3RlcnJvbGViaW5kaW5ncwogIHZlcmJzOgogIC0gJyonCi0gYXBpR3JvdXBzOgogIC0gImFwaWV4dGVuc2lvbnMuazhzLmlvIgogIHJlc291cmNlczoKICAtIGN1c3RvbXJlc291cmNlZGVmaW5pdGlvbnMKICB2ZXJiczoKICAtICcqJwotIGFwaUdyb3VwczoKICAtICJpbnN0YWxsLmlzdGlvLmlvIgogIHJlc291cmNlczoKICAtIGlzdGlvY29udHJvbHBsYW5lcwogIC0gaXN0aW9vcGVyYXRvcnMKICB2ZXJiczoKICAtICcqJwotIGFwaUdyb3VwczoKICAtICJhY2kuaXN0aW8iCiAgcmVzb3VyY2VzOgogIC0gYWNpaXN0aW9vcGVyYXRvcnMKICAtIGFjaWlzdGlvb3BlcmF0b3IKICB2ZXJiczoKICAtICcqJwotIGFwaUdyb3VwczoKICAtICJuZXR3b3JraW5nLms4cy5pbyIKICByZXNvdXJjZXM6CiAgLSBuZXR3b3JrcG9saWNpZXMKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKLSBhcGlHcm91cHM6CiAgLSAiYXBwcyIKICByZXNvdXJjZXM6CiAgLSBkZXBsb3ltZW50cwogIC0gcmVwbGljYXNldHMKICAtIGRhZW1vbnNldHMKICAtIHN0YXRlZnVsc2V0cwogIHZlcmJzOgogIC0gJyonCi0gYXBpR3JvdXBzOgogIC0gIiIKICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gc2VydmljZXMvc3RhdHVzCiAgdmVyYnM6CiAgLSB1cGRhdGUKLSBhcGlHcm91cHM6CiAgLSAibW9uaXRvcmluZy5jb3Jlb3MuY29tIgogIHJlc291cmNlczoKICAtIHNlcnZpY2Vtb25pdG9ycwogIHZlcmJzOgogIC0gZ2V0CiAgLSBjcmVhdGUKLSBhcGlHcm91cHM6CiAgLSAiYWNpLnNuYXQiCiAgcmVzb3VyY2VzOgogIC0gc25hdHBvbGljaWVzL2ZpbmFsaXplcnMKICAtIHNuYXRwb2xpY2llcy9zdGF0dXMKICAtIG5vZGVpbmZvcwogIHZlcmJzOgogIC0gdXBkYXRlCiAgLSBjcmVhdGUKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKICAtIGRlbGV0ZQotIGFwaUdyb3VwczoKICAtICJhY2kuc25hdCIKICByZXNvdXJjZXM6CiAgLSBzbmF0Z2xvYmFsaW5mb3MKICAtIHNuYXRwb2xpY2llcwogIC0gbm9kZWluZm9zCiAgLSByZGNvbmZpZ3MKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKICAtIGNyZWF0ZQogIC0gdXBkYXRlCiAgLSBkZWxldGUKLSBhcGlHcm91cHM6CiAgLSBhcHBzLm9wZW5zaGlmdC5pbwogIHJlc291cmNlczoKICAtIGRlcGxveW1lbnRjb25maWdzCiAgdmVyYnM6CiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0Ci0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlCm1ldGFkYXRhOgogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICBuYW1lOiBhY2ktY29udGFpbmVyczpob3N0LWFnZW50CnJ1bGVzOgotIGFwaUdyb3VwczoKICAtICIiCiAgcmVzb3VyY2VzOgogIC0gbm9kZXMKICAtIG5hbWVzcGFjZXMKICAtIHBvZHMKICAtIGVuZHBvaW50cwogIC0gc2VydmljZXMKICAtIHJlcGxpY2F0aW9uY29udHJvbGxlcnMKICB2ZXJiczoKICAtIGxpc3QKICAtIHdhdGNoCiAgLSBnZXQKICAtIHVwZGF0ZQotIGFwaUdyb3VwczoKICAtICIiCiAgcmVzb3VyY2VzOgogIC0gZXZlbnRzCiAgdmVyYnM6CiAgLSBjcmVhdGUKICAtIHBhdGNoCi0gYXBpR3JvdXBzOgogIC0gIm5ldHdvcmtpbmcuazhzLmlvIgogIHJlc291cmNlczoKICAtIG5ldHdvcmtwb2xpY2llcwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAotIGFwaUdyb3VwczoKICAtICJhcHBzIgogIHJlc291cmNlczoKICAtIGRlcGxveW1lbnRzCiAgLSByZXBsaWNhc2V0cwogIHZlcmJzOgogIC0gbGlzdAogIC0gd2F0Y2gKICAtIGdldAotIGFwaUdyb3VwczoKICAtICJhY2kuc25hdCIKICByZXNvdXJjZXM6CiAgLSBzbmF0cG9saWNpZXMKICAtIHNuYXRnbG9iYWxpbmZvcwogIC0gcmRjb25maWdzCiAgdmVyYnM6CiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0Ci0gYXBpR3JvdXBzOgogIC0gImFjaS5zbmF0IgogIHJlc291cmNlczoKICAtIG5vZGVpbmZvcwogIC0gc25hdGxvY2FsaW5mb3MKICB2ZXJiczoKICAtIGNyZWF0ZQogIC0gdXBkYXRlCiAgLSBsaXN0CiAgLSB3YXRjaAogIC0gZ2V0Ci0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVyczpjb250cm9sbGVyCiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKcm9sZVJlZjoKICBhcGlHcm91cDogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pbwogIGtpbmQ6IENsdXN0ZXJSb2xlCiAgbmFtZTogYWNpLWNvbnRhaW5lcnM6Y29udHJvbGxlcgpzdWJqZWN0czoKLSBraW5kOiBTZXJ2aWNlQWNjb3VudAogIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbnRyb2xsZXIKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVyczpob3N0LWFnZW50CiAgbGFiZWxzOgogICAgYWNpLWNvbnRhaW5lcnMtY29uZmlnLXZlcnNpb246ICJkdW1teSIKcm9sZVJlZjoKICBhcGlHcm91cDogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pbwogIGtpbmQ6IENsdXN0ZXJSb2xlCiAgbmFtZTogYWNpLWNvbnRhaW5lcnM6aG9zdC1hZ2VudApzdWJqZWN0czoKLSBraW5kOiBTZXJ2aWNlQWNjb3VudAogIG5hbWU6IGFjaS1jb250YWluZXJzLWhvc3QtYWdlbnQKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERhZW1vblNldAptZXRhZGF0YToKICBuYW1lOiBhY2ktY29udGFpbmVycy1ob3N0CiAgbmFtZXNwYWNlOiBrdWJlLXN5c3RlbQogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKc3BlYzoKICB1cGRhdGVTdHJhdGVneToKICAgIHR5cGU6IFJvbGxpbmdVcGRhdGUKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1ob3N0CiAgICAgIG5ldHdvcmstcGx1Z2luOiBhY2ktY29udGFpbmVycwogIHRlbXBsYXRlOgogICAgbWV0YWRhdGE6CiAgICAgIGxhYmVsczoKICAgICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1ob3N0CiAgICAgICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCiAgICAgIGFubm90YXRpb25zOgogICAgICAgIHNjaGVkdWxlci5hbHBoYS5rdWJlcm5ldGVzLmlvL2NyaXRpY2FsLXBvZDogJycKICAgIHNwZWM6CiAgICAgIGhvc3ROZXR3b3JrOiB0cnVlCiAgICAgIGhvc3RQSUQ6IHRydWUKICAgICAgaG9zdElQQzogdHJ1ZQogICAgICBzZXJ2aWNlQWNjb3VudE5hbWU6IGFjaS1jb250YWluZXJzLWhvc3QtYWdlbnQKICAgICAgdG9sZXJhdGlvbnM6CiAgICAgICAgLSBvcGVyYXRvcjogRXhpc3RzCiAgICAgIHByaW9yaXR5Q2xhc3NOYW1lOiBzeXN0ZW0tY2x1c3Rlci1jcml0aWNhbAogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdAogICAgICAgICAgaW1hZ2U6IG5vaXJvL2FjaS1jb250YWluZXJzLWhvc3Q6NS4wLjIuMi4wNWJmMWI4CiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IEFsd2F5cwogICAgICAgICAgc2VjdXJpdHlDb250ZXh0OgogICAgICAgICAgICBjYXBhYmlsaXRpZXM6CiAgICAgICAgICAgICAgYWRkOgogICAgICAgICAgICAgICAgLSBTWVNfQURNSU4KICAgICAgICAgICAgICAgIC0gTkVUX0FETUlOCiAgICAgICAgICAgICAgICAtIFNZU19QVFJBQ0UKICAgICAgICAgIGVudjoKICAgICAgICAgICAgLSBuYW1lOiBLVUJFUk5FVEVTX05PREVfTkFNRQogICAgICAgICAgICAgIHZhbHVlRnJvbToKICAgICAgICAgICAgICAgIGZpZWxkUmVmOgogICAgICAgICAgICAgICAgICBmaWVsZFBhdGg6IHNwZWMubm9kZU5hbWUKICAgICAgICAgICAgLSBuYW1lOiBURU5BTlQKICAgICAgICAgICAgICB2YWx1ZTogImt1YmUiCiAgICAgICAgICAgIC0gbmFtZTogTk9ERV9FUEcKICAgICAgICAgICAgICB2YWx1ZTogImt1YmVybmV0ZXN8a3ViZS1ub2RlcyIKICAgICAgICAgIHZvbHVtZU1vdW50czoKICAgICAgICAgICAgLSBuYW1lOiBjbmktYmluCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvbW50L2NuaS1iaW4KICAgICAgICAgICAgLSBuYW1lOiBjbmktY29uZgogICAgICAgICAgICAgIG1vdW50UGF0aDogL21udC9jbmktY29uZgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgICAgICAgIC0gbmFtZTogb3BmbGV4LWhvc3Rjb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9vcGZsZXgtYWdlbnQtb3ZzL2Jhc2UtY29uZi5kCiAgICAgICAgICAgIC0gbmFtZTogaG9zdC1jb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9hY2ktY29udGFpbmVycy8KICAgICAgICAgIGxpdmVuZXNzUHJvYmU6CiAgICAgICAgICAgIGh0dHBHZXQ6CiAgICAgICAgICAgICAgcGF0aDogL3N0YXR1cwogICAgICAgICAgICAgIHBvcnQ6IDgwOTAKICAgICAgICAtIG5hbWU6IG9wZmxleC1hZ2VudAogICAgICAgICAgZW52OgogICAgICAgICAgICAtIG5hbWU6IFJFQk9PVF9XSVRIX09WUwogICAgICAgICAgICAgIHZhbHVlOiAidHJ1ZSIKICAgICAgICAgIGltYWdlOiBub2lyby9vcGZsZXg6NS4wLjIuMi4wNWJmMWI4CiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IEFsd2F5cwogICAgICAgICAgc2VjdXJpdHlDb250ZXh0OgogICAgICAgICAgICBjYXBhYmlsaXRpZXM6CiAgICAgICAgICAgICAgYWRkOgogICAgICAgICAgICAgICAgLSBORVRfQURNSU4KICAgICAgICAgIHZvbHVtZU1vdW50czoKICAgICAgICAgICAgLSBuYW1lOiBob3N0dmFyCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL3ZhcgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC9ydW4KICAgICAgICAgICAgLSBuYW1lOiBob3N0cnVuCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL3J1bgogICAgICAgICAgICAtIG5hbWU6IG9wZmxleC1ob3N0Y29uZmlnLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC9ldGMvb3BmbGV4LWFnZW50LW92cy9iYXNlLWNvbmYuZAogICAgICAgICAgICAtIG5hbWU6IG9wZmxleC1jb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9vcGZsZXgtYWdlbnQtb3ZzL2NvbmYuZAogICAgICAgIC0gbmFtZTogbWNhc3QtZGFlbW9uCiAgICAgICAgICBpbWFnZTogbm9pcm8vb3BmbGV4OjUuMC4yLjIuMDViZjFiOAogICAgICAgICAgY29tbWFuZDogWyIvYmluL3NoIl0KICAgICAgICAgIGFyZ3M6IFsiL3Vzci9sb2NhbC9iaW4vbGF1bmNoLW1jYXN0ZGFlbW9uLnNoIl0KICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogQWx3YXlzCiAgICAgICAgICB2b2x1bWVNb3VudHM6CiAgICAgICAgICAgIC0gbmFtZTogaG9zdHZhcgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC92YXIKICAgICAgICAgICAgLSBuYW1lOiBob3N0cnVuCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvcnVuCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC9ydW4KICAgICAgcmVzdGFydFBvbGljeTogQWx3YXlzCiAgICAgIHZvbHVtZXM6CiAgICAgICAgLSBuYW1lOiBjbmktYmluCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL29wdAogICAgICAgIC0gbmFtZTogY25pLWNvbmYKICAgICAgICAgIGhvc3RQYXRoOgogICAgICAgICAgICBwYXRoOiAvZXRjCiAgICAgICAgLSBuYW1lOiBob3N0dmFyCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL3ZhcgogICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC9ydW4KICAgICAgICAtIG5hbWU6IGhvc3QtY29uZmlnLXZvbHVtZQogICAgICAgICAgY29uZmlnTWFwOgogICAgICAgICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1jb25maWcKICAgICAgICAgICAgaXRlbXM6CiAgICAgICAgICAgICAgLSBrZXk6IGhvc3QtYWdlbnQtY29uZmlnCiAgICAgICAgICAgICAgICBwYXRoOiBob3N0LWFnZW50LmNvbmYKICAgICAgICAtIG5hbWU6IG9wZmxleC1ob3N0Y29uZmlnLXZvbHVtZQogICAgICAgICAgZW1wdHlEaXI6CiAgICAgICAgICAgIG1lZGl1bTogTWVtb3J5CiAgICAgICAgLSBuYW1lOiBvcGZsZXgtY29uZmlnLXZvbHVtZQogICAgICAgICAgY29uZmlnTWFwOgogICAgICAgICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1jb25maWcKICAgICAgICAgICAgaXRlbXM6CiAgICAgICAgICAgICAgLSBrZXk6IG9wZmxleC1hZ2VudC1jb25maWcKICAgICAgICAgICAgICAgIHBhdGg6IGxvY2FsLmNvbmYKLS0tCmFwaVZlcnNpb246IGFwcHMvdjEKa2luZDogRGFlbW9uU2V0Cm1ldGFkYXRhOgogIG5hbWU6IGFjaS1jb250YWluZXJzLW9wZW52c3dpdGNoCiAgbmFtZXNwYWNlOiBrdWJlLXN5c3RlbQogIGxhYmVsczoKICAgIGFjaS1jb250YWluZXJzLWNvbmZpZy12ZXJzaW9uOiAiZHVtbXkiCiAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKc3BlYzoKICB1cGRhdGVTdHJhdGVneToKICAgIHR5cGU6IFJvbGxpbmdVcGRhdGUKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1vcGVudnN3aXRjaAogICAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICB0ZW1wbGF0ZToKICAgIG1ldGFkYXRhOgogICAgICBsYWJlbHM6CiAgICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtb3BlbnZzd2l0Y2gKICAgICAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICAgICAgYW5ub3RhdGlvbnM6CiAgICAgICAgc2NoZWR1bGVyLmFscGhhLmt1YmVybmV0ZXMuaW8vY3JpdGljYWwtcG9kOiAnJwogICAgc3BlYzoKICAgICAgaG9zdE5ldHdvcms6IHRydWUKICAgICAgaG9zdFBJRDogdHJ1ZQogICAgICBob3N0SVBDOiB0cnVlCiAgICAgIHNlcnZpY2VBY2NvdW50TmFtZTogYWNpLWNvbnRhaW5lcnMtaG9zdC1hZ2VudAogICAgICB0b2xlcmF0aW9uczoKICAgICAgICAtIG9wZXJhdG9yOiBFeGlzdHMKICAgICAgcHJpb3JpdHlDbGFzc05hbWU6IHN5c3RlbS1jbHVzdGVyLWNyaXRpY2FsCiAgICAgIGNvbnRhaW5lcnM6CiAgICAgICAgLSBuYW1lOiBhY2ktY29udGFpbmVycy1vcGVudnN3aXRjaAogICAgICAgICAgaW1hZ2U6IG5vaXJvL29wZW52c3dpdGNoOjUuMC4yLjIuMDViZjFiOAogICAgICAgICAgaW1hZ2VQdWxsUG9saWN5OiBBbHdheXMKICAgICAgICAgIHJlc291cmNlczoKICAgICAgICAgICAgbGltaXRzOgogICAgICAgICAgICAgIG1lbW9yeTogIjFHaSIKICAgICAgICAgIHNlY3VyaXR5Q29udGV4dDoKICAgICAgICAgICAgY2FwYWJpbGl0aWVzOgogICAgICAgICAgICAgIGFkZDoKICAgICAgICAgICAgICAgIC0gTkVUX0FETUlOCiAgICAgICAgICAgICAgICAtIFNZU19NT0RVTEUKICAgICAgICAgICAgICAgIC0gU1lTX05JQ0UKICAgICAgICAgICAgICAgIC0gSVBDX0xPQ0sKICAgICAgICAgIGVudjoKICAgICAgICAgICAgLSBuYW1lOiBPVlNfUlVORElSCiAgICAgICAgICAgICAgdmFsdWU6IC91c3IvbG9jYWwvdmFyL3J1bi9vcGVudnN3aXRjaAogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IGhvc3R2YXIKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvdmFyCiAgICAgICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgICAgIG1vdW50UGF0aDogL3J1bgogICAgICAgICAgICAtIG5hbWU6IGhvc3RydW4KICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvcnVuCiAgICAgICAgICAgIC0gbmFtZTogaG9zdGV0YwogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Vzci9sb2NhbC9ldGMKICAgICAgICAgICAgLSBuYW1lOiBob3N0bW9kdWxlcwogICAgICAgICAgICAgIG1vdW50UGF0aDogL2xpYi9tb2R1bGVzCiAgICAgICAgICBsaXZlbmVzc1Byb2JlOgogICAgICAgICAgICBleGVjOgogICAgICAgICAgICAgIGNvbW1hbmQ6CiAgICAgICAgICAgICAgICAtIC91c3IvbG9jYWwvYmluL2xpdmVuZXNzLW92cy5zaAogICAgICByZXN0YXJ0UG9saWN5OiBBbHdheXMKICAgICAgdm9sdW1lczoKICAgICAgICAtIG5hbWU6IGhvc3RldGMKICAgICAgICAgIGhvc3RQYXRoOgogICAgICAgICAgICBwYXRoOiAvZXRjCiAgICAgICAgLSBuYW1lOiBob3N0dmFyCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL3ZhcgogICAgICAgIC0gbmFtZTogaG9zdHJ1bgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC9ydW4KICAgICAgICAtIG5hbWU6IGhvc3Rtb2R1bGVzCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL2xpYi9tb2R1bGVzCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERlcGxveW1lbnQKbWV0YWRhdGE6CiAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KICBsYWJlbHM6CiAgICBhY2ktY29udGFpbmVycy1jb25maWctdmVyc2lvbjogImR1bW15IgogICAgbmV0d29yay1wbHVnaW46IGFjaS1jb250YWluZXJzCiAgICBuYW1lOiBhY2ktY29udGFpbmVycy1jb250cm9sbGVyCnNwZWM6CiAgcmVwbGljYXM6IDEKICBzdHJhdGVneToKICAgIHR5cGU6IFJlY3JlYXRlCiAgc2VsZWN0b3I6CiAgICBtYXRjaExhYmVsczoKICAgICAgbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogICAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICB0ZW1wbGF0ZToKICAgIG1ldGFkYXRhOgogICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1jb250cm9sbGVyCiAgICAgIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KICAgICAgbGFiZWxzOgogICAgICAgIG5hbWU6IGFjaS1jb250YWluZXJzLWNvbnRyb2xsZXIKICAgICAgICBuZXR3b3JrLXBsdWdpbjogYWNpLWNvbnRhaW5lcnMKICAgICAgYW5ub3RhdGlvbnM6CiAgICAgICAgc2NoZWR1bGVyLmFscGhhLmt1YmVybmV0ZXMuaW8vY3JpdGljYWwtcG9kOiAnJwogICAgc3BlYzoKICAgICAgaG9zdE5ldHdvcms6IHRydWUKICAgICAgc2VydmljZUFjY291bnROYW1lOiBhY2ktY29udGFpbmVycy1jb250cm9sbGVyCiAgICAgIHRvbGVyYXRpb25zOgogICAgICAgIC0gb3BlcmF0b3I6IEV4aXN0cwogICAgICAgICAgZWZmZWN0OiBOb1NjaGVkdWxlCiAgICAgIHByaW9yaXR5Q2xhc3NOYW1lOiBzeXN0ZW0tbm9kZS1jcml0aWNhbAogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogYWNpLWNvbnRhaW5lcnMtY29udHJvbGxlcgogICAgICAgICAgaW1hZ2U6IG5vaXJvL2FjaS1jb250YWluZXJzLWNvbnRyb2xsZXI6NS4wLjIuMi4wNWJmMWI4CiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IEFsd2F5cwogICAgICAgICAgZW52OgogICAgICAgICAgICAtIG5hbWU6IFdBVENIX05BTUVTUEFDRQogICAgICAgICAgICAgIHZhbHVlOiAiIgogICAgICAgICAgICAtIG5hbWU6IEFDSV9TTkFUX05BTUVTUEFDRQogICAgICAgICAgICAgIHZhbHVlOiAiYWNpLWNvbnRhaW5lcnMtc3lzdGVtIgogICAgICAgICAgICAtIG5hbWU6IEFDSV9TTkFHTE9CQUxJTkZPX05BTUUKICAgICAgICAgICAgICB2YWx1ZTogInNuYXRnbG9iYWxpbmZvIgogICAgICAgICAgICAtIG5hbWU6IEFDSV9SRENPTkZJR19OQU1FCiAgICAgICAgICAgICAgdmFsdWU6ICJyb3V0aW5nZG9tYWluLWNvbmZpZyIKICAgICAgICAgICAgLSBuYW1lOiBTWVNURU1fTkFNRVNQQUNFCiAgICAgICAgICAgICAgdmFsdWU6ICJrdWJlLXN5c3RlbSIKICAgICAgICAgIHZvbHVtZU1vdW50czoKICAgICAgICAgICAgLSBuYW1lOiBjb250cm9sbGVyLWNvbmZpZy12b2x1bWUKICAgICAgICAgICAgICBtb3VudFBhdGg6IC91c3IvbG9jYWwvZXRjL2FjaS1jb250YWluZXJzLwogICAgICAgICAgICAtIG5hbWU6IGFjaS11c2VyLWNlcnQtdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvdXNyL2xvY2FsL2V0Yy9hY2ktY2VydC8KICAgICAgICAgIGxpdmVuZXNzUHJvYmU6CiAgICAgICAgICAgIGh0dHBHZXQ6CiAgICAgICAgICAgICAgcGF0aDogL3N0YXR1cwogICAgICAgICAgICAgIHBvcnQ6IDgwOTEKICAgICAgdm9sdW1lczoKICAgICAgICAtIG5hbWU6IGFjaS11c2VyLWNlcnQtdm9sdW1lCiAgICAgICAgICBzZWNyZXQ6CiAgICAgICAgICAgIHNlY3JldE5hbWU6IGFjaS11c2VyLWNlcnQKICAgICAgICAtIG5hbWU6IGNvbnRyb2xsZXItY29uZmlnLXZvbHVtZQogICAgICAgICAgY29uZmlnTWFwOgogICAgICAgICAgICBuYW1lOiBhY2ktY29udGFpbmVycy1jb25maWcKICAgICAgICAgICAgaXRlbXM6CiAgICAgICAgICAgICAgLSBrZXk6IGNvbnRyb2xsZXItY29uZmlnCiAgICAgICAgICAgICAgICBwYXRoOiBjb250cm9sbGVyLmNvbmYK"
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-containers-config
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+  controller-config: |-
+    {
+        "log-level": "info",
+        "apic-hosts": [
+            "10.30.120.100"
+        ],
+        "apic-username": "kube",
+        "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        "apic-use-inst-tag": true,
+        "aci-prefix": "kube",
+        "aci-vmm-type": "Kubernetes",
+        "aci-vmm-domain": "kube",
+        "aci-vmm-controller": "kube",
+        "aci-policy-tenant": "kube",
+        "require-netpol-annot": false,
+        "install-istio": true,
+        "istio-profile": "demo",
+        "aci-podbd-dn": "uni/tn-kube/BD-kube-pod-bd",
+        "aci-nodebd-dn": "uni/tn-kube/BD-kube-node-bd",
+        "aci-service-phys-dom": "kube-pdom",
+        "aci-service-encap": "vlan-4003",
+        "aci-service-monitor-interval": 5,
+        "aci-pbr-tracking-non-snat": false,
+        "aci-vrf-tenant": "common",
+        "aci-vrf-dn": "uni/tn-common/ctx-kube",
+        "aci-l3out": "l3out",
+        "aci-ext-networks": [
+            "default"
+        ],
+        "aci-vrf": "kube",
+        "default-endpoint-group": {
+            "policy-space": "kube",
+            "name": "kubernetes|kube-default"
+        },
+        "max-nodes-svc-graph": 32,
+        "namespace-default-endpoint-group": {
+            "istio-operator": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "istio-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            }        },
+        "service-ip-pool": [
+            {
+                "end": "10.3.0.254",
+                "start": "10.3.0.2"
+            }
+        ],
+        "snat-contract-scope": "global",
+        "static-service-ip-pool": [
+            {
+                "end": "10.4.0.254",
+                "start": "10.4.0.2"
+            }
+        ],
+        "pod-ip-pool": [
+            {
+                "end": "10.2.255.254",
+                "start": "10.2.0.2"
+            }
+        ],
+        "pod-subnet-chunk-size": 32,
+        "node-service-ip-pool": [
+            {
+                "end": "10.5.0.254",
+                "start": "10.5.0.2"
+            }
+        ],
+        "node-service-subnets": [
+            "10.5.0.1/24"
+        ]
+    }
+  host-agent-config: |-
+    {
+        "app-profile": "kubernetes",
+        "ep-registry": null,
+        "opflex-mode": null,
+        "log-level": "info",
+        "aci-snat-namespace": "aci-containers-system",
+        "aci-vmm-type": "Kubernetes",
+        "aci-vmm-domain": "kube",
+        "aci-vmm-controller": "kube",
+        "aci-prefix": "kube",
+        "aci-vrf": "kube",
+        "aci-vrf-tenant": "common",
+        "service-vlan": 4003,
+        "kubeapi-vlan": 4001,
+        "pod-subnet": "10.2.0.1/16",
+        "node-subnet": "10.1.0.1/16",
+        "encap-type": "vxlan",
+        "aci-infra-vlan": 4093,
+        "cni-netconfig": [
+            {
+                "gateway": "10.2.0.1",
+                "routes": [
+                    {
+                        "dst": "0.0.0.0/0",
+                        "gw": "10.2.0.1"
+                    }
+                ],
+                "subnet": "10.2.0.0/16"
+            }
+        ],
+        "default-endpoint-group": {
+            "policy-space": "kube",
+            "name": "kubernetes|kube-default"
+        },
+        "namespace-default-endpoint-group": {
+            "istio-operator": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "istio-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-istio"
+            },
+            "kube-system": {
+                "policy-space": "kube",
+                "name": "kubernetes|kube-system"
+            }        },
+        "enable-drop-log": true
+    }
+  opflex-agent-config: |-
+    {
+        "log": {
+            "level": "info"
+        },
+        "opflex": {
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snat-operator-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+    "start": "5000"
+    "end": "65000"
+    "ports-per-node": "3000"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aci-user-cert
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+data:
+  user.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUNkZ0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQW1Bd2dnSmNBZ0VBQW9HQkFOcitBK2dPS2JBVlZySnMKYjMrWldiY25WWG8vZ2R1eElUa3ZtMDlrZWlGQ24rVXAvU0dkcXY2QWgramxKZkY3dXYrRmdDSnRDeEQ4N3FZdwowcTVEY0dWTEljZkY0WlViOUI4ckpXS0JJNndKZnh0TWZGdVVOWTI0Y2d3UXBKcXJNVXFBRHovTVcrd3JaZWhzClNuRnN5ZXdYUjM4OGVSN0VLakRXZWdkSnlQY1hBZ01CQUFFQ2dZQjlBWGIxWmZCQ0JVeEIrVWdFVEdNNys0WDkKakhieUUwQmx4bGtmanJsd2R2bVM5TTc3KzJaNmRLQWdQMzNUUk0vUHdFTU9ZN1JuZEJvK1g2eERzVmRjVEpJeQo1Vnc4eFVabHIrYXVFT2xzMlpuWngxMWU1emg3c1UzTmo1SzM1QldSOUdUWEo2UE1kcFQ0OWxCOWJsbE1qRHJMCjcrNWJDc2R1NjNPOEthTjlZUUpCQVBHTWJwSHBGc3RDMWNXR3BSUXgzaXdGK1pMWUFyQVViQ0tiV1FmYmlaVHAKQ1M4RGdPbXlVN3VLVFJLaUMrMlJZVFMzcHJMVjU3R3ZmZkZ4SmpUd0d5a0NRUURvR0J3ZjVpT3N5dU1RTno3SwpSaXJiRDBKN1I2WWVRa0paK3BDZUt3eStOeUlxeGgwTEJEbUJ5bVNLdlgwV0VLQ2l0T2dwaTMyRldCb3FIamYzCk1RZy9Ba0JMQkxScWVKdnRzT28zbUtPNGEreDJlN3lSVUtrMUNvS3pGTkJIMG5VZVhHblB3aVROYitiMWZmU0YKN3ZJSmJIZG1LZ3VKeTBsVU5BN0haNzdYL2lKUkFrQWpuYmVMS1p6bDRraVA3M3BpUGZ4TG0zN2ZQakoreURvNApacHdVdVpSK0NDWGxISHZPZWZwOU1WcldjNWVqY0MvR2FDNk1XWXlNanVXTSt4QXBqY3V2QWtFQXpZK3AxNDBDCnh3cHI5NWxpbm52V2NDN043MDhBSkZpbTMvRlUxMEdEbzc3eUlPSTVoKzUzN0piWWRtNTU1aE9lSC9LalNla2gKRUY0TW14UlBtaXQ5OXc9PQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg==
+  user.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUI2RENDQVZFQ0FnUG9NQTBHQ1NxR1NJYjNEUUVCQlFVQU1Ed3hDekFKQmdOVkJBWVRBbFZUTVJZd0ZBWUQKVlFRS0RBMURhWE5qYnlCVGVYTjBaVzF6TVJVd0V3WURWUVFEREF4VmMyVnlJRzFoYm1SbFpYQXdIaGNOTVRjdwpOVEUyTWpFeU9UTXdXaGNOTWpjd05URTBNakV5T1RNd1dqQThNUXN3Q1FZRFZRUUdFd0pWVXpFV01CUUdBMVVFCkNnd05RMmx6WTI4Z1UzbHpkR1Z0Y3pFVk1CTUdBMVVFQXd3TVZYTmxjaUJ0WVc1a1pXVndNSUdmTUEwR0NTcUcKU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEYS9nUG9EaW13RlZheWJHOS9tVm0zSjFWNlA0SGJzU0U1TDV0UApaSG9oUXAvbEtmMGhuYXIrZ0lmbzVTWHhlN3IvaFlBaWJRc1EvTzZtTU5LdVEzQmxTeUhIeGVHVkcvUWZLeVZpCmdTT3NDWDhiVEh4YmxEV051SElNRUtTYXF6RktnQTgvekZ2c0syWG9iRXB4Yk1uc0YwZC9QSGtleENvdzFub0gKU2NqM0Z3SURBUUFCTUEwR0NTcUdTSWIzRFFFQkJRVUFBNEdCQUhYK2tMVGU2TENBQmV3bUNUdk1zanVzSGRwWgpraTAxK25RN0tobkVSYkJtL3RaNXNjWkU0Y3RJcWNoM255MUVJVEhOdFlXS0JONENkVUtjanZEVzJoMnZrSGVnCnJ0WWJWK0FhRXNxMG00dkdGOUVtdnQxY3A5WTQxSXlNQlpZcXc4Yy9WMUF0bVJRY1JUWVFBOEgzT0ZEY2h5QjIKMEpIU0RuQm9TN2ZmU2JCeAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-controller
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-host-agent
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+  name: aci-containers:controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - namespaces
+  - pods
+  - endpoints
+  - services
+  - events
+  - replicationcontrollers
+  - serviceaccounts
+  verbs:
+  - list
+  - watch
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+- apiGroups:
+  - "rbac.authorization.k8s.io"
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - "install.istio.io"
+  resources:
+  - istiocontrolplanes
+  - istiooperators
+  verbs:
+  - '*'
+- apiGroups:
+  - "aci.istio"
+  resources:
+  - aciistiooperators
+  - aciistiooperator
+  verbs:
+  - '*'
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - services/status
+  verbs:
+  - update
+- apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  - nodeinfos
+  verbs:
+  - update
+  - create
+  - list
+  - watch
+  - get
+  - delete
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatglobalinfos
+  - snatpolicies
+  - nodeinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+  name: aci-containers:host-agent
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - namespaces
+  - pods
+  - endpoints
+  - services
+  - replicationcontrollers
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatpolicies
+  - snatglobalinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - nodeinfos
+  - snatlocalinfos
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers:controller
+  labels:
+    aci-containers-config-version: "dummy"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers:controller
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-controller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers:host-agent
+  labels:
+    aci-containers-config-version: "dummy"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers:host-agent
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-host-agent
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aci-containers-host
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: aci-containers-host
+      network-plugin: aci-containers
+  template:
+    metadata:
+      labels:
+        name: aci-containers-host
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: aci-containers-host-agent
+      tolerations:
+        - operator: Exists
+      priorityClassName: system-cluster-critical
+      containers:
+        - name: aci-containers-host
+          image: noiro/aci-containers-host:5.0.2.2.05bf1b8
+          imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+                - SYS_PTRACE
+          env:
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: TENANT
+              value: "kube"
+            - name: NODE_EPG
+              value: "kubernetes|kube-nodes"
+          volumeMounts:
+            - name: cni-bin
+              mountPath: /mnt/cni-bin
+            - name: cni-conf
+              mountPath: /mnt/cni-conf
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: host-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8090
+        - name: opflex-agent
+          env:
+            - name: REBOOT_WITH_OVS
+              value: "true"
+          image: noiro/opflex:5.0.2.2.05bf1b8
+          imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: opflex-config-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+        - name: mcast-daemon
+          image: noiro/opflex:5.0.2.2.05bf1b8
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-mcastdaemon.sh"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+      restartPolicy: Always
+      volumes:
+        - name: cni-bin
+          hostPath:
+            path: /opt
+        - name: cni-conf
+          hostPath:
+            path: /etc
+        - name: hostvar
+          hostPath:
+            path: /var
+        - name: hostrun
+          hostPath:
+            path: /run
+        - name: host-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: host-agent-config
+                path: host-agent.conf
+        - name: opflex-hostconfig-volume
+          emptyDir:
+            medium: Memory
+        - name: opflex-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: opflex-agent-config
+                path: local.conf
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aci-containers-openvswitch
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: aci-containers-openvswitch
+      network-plugin: aci-containers
+  template:
+    metadata:
+      labels:
+        name: aci-containers-openvswitch
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: aci-containers-host-agent
+      tolerations:
+        - operator: Exists
+      priorityClassName: system-cluster-critical
+      containers:
+        - name: aci-containers-openvswitch
+          image: noiro/openvswitch:5.0.2.2.05bf1b8
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "1Gi"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+                - SYS_NICE
+                - IPC_LOCK
+          env:
+            - name: OVS_RUNDIR
+              value: /usr/local/var/run/openvswitch
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: hostetc
+              mountPath: /usr/local/etc
+            - name: hostmodules
+              mountPath: /lib/modules
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/liveness-ovs.sh
+      restartPolicy: Always
+      volumes:
+        - name: hostetc
+          hostPath:
+            path: /etc
+        - name: hostvar
+          hostPath:
+            path: /var
+        - name: hostrun
+          hostPath:
+            path: /run
+        - name: hostmodules
+          hostPath:
+            path: /lib/modules
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aci-containers-controller
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+    name: aci-containers-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: aci-containers-controller
+      network-plugin: aci-containers
+  template:
+    metadata:
+      name: aci-containers-controller
+      namespace: kube-system
+      labels:
+        name: aci-containers-controller
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      hostNetwork: true
+      serviceAccountName: aci-containers-controller
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+      priorityClassName: system-node-critical
+      containers:
+        - name: aci-containers-controller
+          image: noiro/aci-containers-controller:5.0.2.2.05bf1b8
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: ACI_SNAT_NAMESPACE
+              value: "aci-containers-system"
+            - name: ACI_SNAGLOBALINFO_NAME
+              value: "snatglobalinfo"
+            - name: ACI_RDCONFIG_NAME
+              value: "routingdomain-config"
+            - name: SYSTEM_NAMESPACE
+              value: "kube-system"
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8091
+      volumes:
+        - name: aci-user-cert-volume
+          secret:
+            secretName: aci-user-cert
+        - name: controller-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: controller-config
+                path: controller.conf
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-operator
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+  name: aci-containers-operator
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - namespaces
+  - configmaps
+  - secrets
+  - pods
+  - services
+  - serviceaccounts
+  - serviceaccounts/token
+  - endpoints
+  - events
+  verbs:
+  - '*'
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - acicontainersoperators
+  - acicontainersoperators/status
+  - acicontainersoperators/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.snat
+  resources:
+  - snatpolicies
+  - snatglobalinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - aci.snat
+  resources:
+  - nodeinfos
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+- apiGroups:
+  - config.openshift.io
+  - operator.openshift.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers-operator
+  labels:
+    aci-containers-config-version: "dummy"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers-operator
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-operator
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aci-containers-operator
+  namespace: kube-system
+  labels:
+    aci-containers-config-version: "dummy"
+    name: aci-containers-operator
+    network-plugin: aci-containers
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: aci-containers-operator
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: aci-containers-operator
+      namespace: kube-system
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        name: aci-containers-operator
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - image: noiro/aci-containers-operator:5.0.2.2.05bf1b8
+        imagePullPolicy: Always
+        name: aci-containers-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: aci-operator-config
+          mountPath: /usr/local/etc/aci-containers/
+        env:
+        - name: SYSTEM_NAMESPACE
+          value: "kube-system"
+        - name: ACC_PROVISION_FLAVOR
+          value: "kubernetes-1.15"
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: aci-containers-operator
+      serviceAccountName: aci-containers-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - name: aci-operator-config
+        configMap:
+          name: aci-operator-config
+          items:
+            - key: spec
+              path: aci-operator.conf

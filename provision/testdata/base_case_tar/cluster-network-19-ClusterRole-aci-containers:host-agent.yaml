@@ -19,14 +19,6 @@ rules:
   - list
   - watch
   - get
-  - update
-- apiGroups:
-  - ''
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
 - apiGroups:
   - networking.k8s.io
   resources:

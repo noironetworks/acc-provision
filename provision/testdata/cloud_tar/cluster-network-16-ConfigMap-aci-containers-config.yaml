@@ -63,7 +63,7 @@ data:
     istio-system\": {\n            \"policy-space\": \"kuber\",\n        \"name\"\
     : \"aci-containers-default\"\n        },\n        \"kube-system\": {\n       \
     \     \"policy-space\": \"kuber\",\n        \"name\": \"aci-containers-default\"\
-    \n        }        },\n    \"enable-drop-log\": true\n}"
+    \n        }        },\n    \"enable-drop-log\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n    }\n}"
 kind: ConfigMap
