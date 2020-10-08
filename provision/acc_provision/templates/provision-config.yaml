@@ -75,4 +75,4 @@ registry:
   # install_profile: "default"   # override if needed, default is "demo"
 
 #drop_log_config:
-  # enable: False         # default is True
+  # enable: True         # default is False

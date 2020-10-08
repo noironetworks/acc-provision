@@ -23,6 +23,7 @@ network:
     service_vlan: "4003"
     infra_vlan: "4093"
     service_monitor_interval: "5" 
+    droplog_enable: "false"
 services:
   kube-controller:
     cluster_cidr: "10.2.0.1/16"

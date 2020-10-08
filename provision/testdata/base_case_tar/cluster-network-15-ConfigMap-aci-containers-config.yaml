@@ -47,7 +47,7 @@ data:
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-istio\"\
     \n        },\n        \"kube-system\": {\n            \"policy-space\": \"kube\"\
     ,\n            \"name\": \"kubernetes|kube-system\"\n        }        },\n   \
-    \ \"enable-drop-log\": true\n}"
+    \ \"enable-drop-log\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n    }\n}"
 kind: ConfigMap
