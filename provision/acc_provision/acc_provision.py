@@ -167,15 +167,6 @@ def config_default():
             "client_cert": False,
             "client_ssl": True,
             "use_inst_tag": True,
-            "netflow_exporter": {
-                "enable": False,
-                "name": None,
-                "ver": "v5",
-                "dstPort": None,
-                "dstAddr": None,
-                "srcAddr": None,
-                "activeFlowTimeOut": None,
-            },
             "kube_default_provide_kube_api": False,
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
@@ -686,19 +677,6 @@ def is_valid_image_pull_policy(xval):
     raise(Exception("Must be one of the values in this List: ", validPullPolicies))
 
 
-def is_valid_netflow_version(xval):
-    if xval is None:
-        # Not a required field - default will be set to demo
-        return True
-    validVersions = ['v5', 'v9']
-    try:
-        if xval in validVersions:
-            return True
-    except ValueError:
-        pass
-    raise(Exception("Must be one of the versions in this List: ", validVersions))
-
-
 def is_valid_contract_scope(xval):
     if xval is None:
         # Not a required field - default will be set to demo
@@ -801,15 +779,6 @@ def config_validate(flavor_opts, config):
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
                 get(("net_config", "kubeapi_vlan")), required)
-        if (config["aci_config"]["netflow_exporter"]["enable"]):
-            checks["aci_config/netflow_exporter/dstAddr"] = (
-                get(("aci_config", "netflow_exporter", "dstAddr")), required)
-            checks["aci_config/netflow_exporter/dstPort"] = (
-                get(("aci_config", "netflow_exporter", "dstPort")), required)
-            checks["aci_config/netflow_exporter/name"] = (
-                get(("aci_config", "netflow_exporter", "name")), required)
-            checks["aci_config/netflow_exporter/ver"] = (
-                get(("aci_config", "netflow_exporter", "ver")), is_valid_netflow_version)
 
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False:
@@ -1513,8 +1482,6 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     deep_merge(config, user_config)
-    if "netflow_exporter" in config["aci_config"]:
-        config["aci_config"]["netflow_exporter"]["enable"] = True
 
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)

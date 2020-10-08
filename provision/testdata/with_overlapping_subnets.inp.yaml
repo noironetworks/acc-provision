@@ -25,10 +25,6 @@ aci_config:
   custom_epgs:
     - group1
     - group2
-  netflow_exporter:
-    name: test-exporter
-    dstAddr: 10.30.120.111
-    dstPort: 2055
 
 net_config:
   node_subnet: 10.1.0.1/16
