@@ -27,6 +27,7 @@ aci_config:
       name: myvmware
       portgroup: kube-test
       vlan_pool: vlan-pool-test
+      installer_provisioned_lb_ip: 192.168.18.201
 
 net_config:
   node_subnet: 10.1.0.1/16
