@@ -162,6 +162,7 @@ def config_default():
                 "nested_inside": {
                     "portgroup": None,
                     "elag_name": None,
+                    "duplicate_file_router_default_svc": False,
                 },
             },
             "client_cert": False,
@@ -809,6 +810,11 @@ def config_validate(flavor_opts, config):
              lower_in({"vmware"}))
         checks["aci_config/vmm_domain/nested_inside/name"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
+             required)
+
+    if get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+        checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
+            (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
 
     if get(("provision", "prov_apic")) is not None:
