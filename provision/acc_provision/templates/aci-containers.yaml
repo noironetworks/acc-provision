@@ -301,6 +301,9 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
         {% if config.flavor == "cloud" %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
