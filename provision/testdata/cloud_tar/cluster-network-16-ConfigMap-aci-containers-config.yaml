@@ -1,13 +1,13 @@
 apiVersion: v1
 data:
-  controller-config: "{\n    \"log-level\": \"info\",\n    \"apic-hosts\": [\n   \
-    \     \"localhost:50000\"\n    ],\n    \"apic-username\": \"clusterjj\",\n   \
-    \ \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\",\n    \"apic-use-inst-tag\"\
-    : true,\n    \"aci-prefix\": \"clusterjj\",\n    \"aci-vmm-type\": \"Kubernetes\"\
-    ,\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"aci-vmm-controller\": \"clusterjj\"\
-    ,\n    \"aci-policy-tenant\": \"kuber\",\n    \"require-netpol-annot\": false,\n\
-    \    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
-    ,\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
+  controller-config: "{\n    \"flavor\": cloud,\n    \"log-level\": \"info\",\n  \
+    \  \"apic-hosts\": [\n        \"localhost:50000\"\n    ],\n    \"apic-username\"\
+    : \"clusterjj\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
+    ,\n    \"apic-use-inst-tag\": true,\n    \"aci-prefix\": \"clusterjj\",\n    \"\
+    aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"\
+    aci-vmm-controller\": \"clusterjj\",\n    \"aci-policy-tenant\": \"kuber\",\n\
+    \    \"require-netpol-annot\": false,\n    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\"\
+    : \"clusterjj-pdom\",\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"kuber\"\
     ,\n    \"aci-vrf-dn\": \"uni/tn-kuber/ctx-ULjj\",\n    \"aci-l3out\": null,\n\
     \    \"aci-ext-networks\": null,\n    \"aci-vrf\": \"clusterjj_overlay\",\n  \
@@ -43,8 +43,8 @@ data:
     ,\n             \"subnet\": \"acct-[kuber]/region-[us-east-2]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]/cidr-[14.3.0.0/16]/subnet-[14.3.0.0/16]\"\
     ,\n             \"vrf\": \"acct-[kuber]/region-[us-east-2]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]\"\
     \n         }\n     }\n}"
-  host-agent-config: "{\n    \"app-profile\": \"aci-containers-clusterjj\",\n    \"\
-    ep-registry\": \"k8s\",\n    \"opflex-mode\": \"overlay\",\n    \"log-level\"\
+  host-agent-config: "{\n    \"flavor\": cloud,\n    \"app-profile\": \"aci-containers-clusterjj\"\
+    ,\n    \"ep-registry\": \"k8s\",\n    \"opflex-mode\": \"overlay\",\n    \"log-level\"\
     : \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\
     : \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"aci-vmm-controller\"\
     : \"clusterjj\",\n    \"aci-prefix\": \"clusterjj\",\n    \"aci-vrf\": \"clusterjj_overlay\"\
