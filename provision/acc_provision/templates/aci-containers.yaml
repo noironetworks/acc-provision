@@ -219,7 +219,7 @@ metadata:
 data:
   controller-config: |-
     {
-        "flavor": {{ config.flavor }},
+        "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         {% if config.aci_config.apic_refreshtime %}
@@ -292,7 +292,7 @@ data:
     }
   host-agent-config: |-
     {
-        "flavor": {{ config.flavor }},
+        "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
