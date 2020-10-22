@@ -1579,7 +1579,7 @@ def provision(args, apic_file, no_random):
         gen = globals()[gen]
     gen(config, output_file, output_tar, operator_cr_output_file)
 
-    if (config['flavor'] == "openshift-4.4-esx" and prov_apic is not None):
+    if (config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
         apic = get_apic(config)
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
