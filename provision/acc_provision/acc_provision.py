@@ -910,6 +910,8 @@ def config_validate_preexisting(config, prov_apic):
 def generate_sample(filep, flavor):
     if flavor == "cloud":
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
+    elif flavor == "aks":
+        data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:

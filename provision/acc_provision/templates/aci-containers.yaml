@@ -322,7 +322,7 @@ data:
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         {% if config.aci_config.capic %}
-        "max-csr-tunnels": 2,
+        "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
         {% endif %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
@@ -475,7 +475,7 @@ data:
         {% if not config.aci_config.capic %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
         {% else %}
-        "csr-list": "10.10.0.68,10.10.0.4",
+        "csr-list": {{ config.net_config.csr_list|json|indent(width=8) }},
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
         "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
         "apic": {

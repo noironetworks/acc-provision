@@ -123,6 +123,12 @@ class CloudProvision(object):
             underlay_posts.append(self.configurator.kube_user)
             underlay_posts.append(self.configurator.kube_cert)
 
+        # query cloudGatewayRouterP
+        if "transit_subnet" in self.config["net_config"]:
+            router_p = self.getRouterP()
+            assert router_p, "Need hub for transit, none found"
+            self.config["oper"]["routerP"] = router_p
+
         # update zone information as necessary
         self.setupZoneInfo()
         # if underlay ccp doesn't exist, create one
@@ -187,12 +193,19 @@ class CloudProvision(object):
             n_subnet = self.config["net_config"]["node_subnet"]
             node_subnetID = self.getSubnetID(n_subnet)
             region = self.config["aci_config"]["vrf"]["region"]
-            infoStr = 'export AZ_CAPIC_SUBNET_ID="{}"\nexport AZ_CAPIC_REGION="{}"'.format(node_subnetID, region)
-            print(infoStr)
+            vnet_name = self.config["aci_config"]["vrf"]["name"]
+            infoStr = 'export AZ_VIRTUAL_NETWORK="{}"\nexport AZ_CAPIC_SUBNET_ID="{}"\nexport AZ_CAPIC_REGION="{}"'.format(vnet_name, node_subnetID, region)
             rcfile.write(infoStr)
+            displayStr = 'AZ_VIRTUAL_NETWORK="{}"\nAZ_CAPIC_SUBNET_ID="{}"\nAZ_CAPIC_REGION="{}"'.format(vnet_name, node_subnetID, region)
+            print(displayStr)
 
     def cfg_init(self):
         self.config["oper"] = {"vrf_encap_id": 1}
+        node_snet = self.config["net_config"]["node_subnet"]
+        if self.args.flavor == "cloud":
+            self.config["private_subnets"] = [node_snet]
+        else:
+            self.config["private_subnets"] = []
 
     def cfg_validate(self):
         required = []
@@ -224,11 +237,31 @@ class CloudProvision(object):
         return c
 
     def adjust_cidrs(self):
-        adj_list = ["machine_cidr", "bootstrap_subnet", "node_subnet"]
+        adj_list = ["machine_cidr", "bootstrap_subnet", "node_subnet", "transit_subnet"]
         for nwKey in adj_list:
             if nwKey in self.config["net_config"]:
                 adjNw = gwToSubnet(self.config["net_config"][nwKey])
                 self.config["net_config"][nwKey] = adjNw
+        if self.config["net_config"]["max_csr_tunnels"] == 0:
+            return
+        if "transit_subnet" not in self.config["net_config"]:
+            # allocate a subnet from cidr
+            m_cidr = self.config["net_config"]["machine_cidr"]
+            b_addr = ipaddress.ip_network(m_cidr).broadcast_address
+            tgw_net = ipaddress.ip_network(b_addr).supernet(new_prefix=28)
+            self.config["net_config"]["transit_subnet"] = tgw_net.exploded
+            if self.args.debug:
+                print("Using {} as transit_subnet".format(tgw_net))
+
+    def getRouterP(self):
+        query = '/api/node/class/cloudGatewayRouterP.json?query-target=self&rsp-prop-include=naming-only'
+        resp = self.apic.get(path=query)
+        resJson = json.loads(resp.content)
+        print(resJson)
+        if len(resJson["imdata"]) == 0:
+            return None
+        routerDn = resJson["imdata"][0]["cloudGatewayRouterP"]["attributes"]["dn"]
+        return routerDn
 
     def getSubnetID(self, subnet):
         tn_name = self.config["aci_config"]["cluster_tenant"]
@@ -342,7 +375,8 @@ class CloudProvision(object):
         cidr = self.config["net_config"]["machine_cidr"]
         b_subnet = self.config["net_config"]["bootstrap_subnet"]
         n_subnet = self.config["net_config"]["node_subnet"]
-        return self.configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet], "no")
+        t_subnet = self.config["net_config"]["transit_subnet"]
+        return self.configurator.cloudCidr(ccp_name, cidr, [b_subnet, n_subnet, t_subnet], "no")
 
     def setupCapicContractsInline(self):
         # setup filters
@@ -457,11 +491,12 @@ class CloudProvision(object):
             {'Name': 'tag:orchestrator', 'Values': [tag]}
         ]
         resp = ec2_c.describe_nat_gateways(Filters=filters)
+        print(resp)
         if "NatGateways" in resp:
-            if len(resp["NatGateways"]) > 0:
-                gw_state = resp['NatGateways'][0]['State']
+            for ngw in resp["NatGateways"]:
+                gw_state = ngw['State']
                 if gw_state not in ["deleted", "deleting"]:
-                    return resp["NatGateways"][0]["NatGatewayId"]
+                    return ngw["NatGatewayId"]
         return None
 
     def provision_natgw(self, subnet, tag):
@@ -559,11 +594,31 @@ class CloudProvision(object):
         tag = self.getTag()
         gwId = self.lookup_natgw(tag)
         if gwId is None:
+            self.remove_rt(tag)
             return
         region = self.config["aci_config"]["vrf"]["region"]
         ec2_c = boto3.client('ec2', region_name=region)
         ec2_c.delete_nat_gateway(NatGatewayId=gwId)
         self.wait_for_natgw(gwId, 'deleted')
+        self.remove_rt(tag)
+
+    def remove_rt(self, tag):
+        region = self.config["aci_config"]["vrf"]["region"]
+        ec2_c = boto3.client('ec2', region_name=region)
+        ec2_r = boto3.resource('ec2', region_name=region)
+        filters = [
+            {'Name': 'tag:orchestrator', 'Values': [tag]}
+        ]
+        resp = ec2_c.describe_route_tables(Filters=filters)
+        for rt in resp['RouteTables']:
+            for entry in rt['Associations']:
+                ra_id = entry['RouteTableAssociationId']
+                ra = ec2_r.RouteTableAssociation(ra_id)
+                ra.delete()
+
+            rt_id = rt['RouteTableId']
+            r_table = ec2_r.RouteTable(rt_id)
+            r_table.delete()
 
     def remove_rt_association(self, subnet):
         region = self.config["aci_config"]["vrf"]["region"]
