@@ -29,10 +29,6 @@ net_config:
   node_svc_subnet: 10.5.0.1/24  
   opflex_server_port: 19999 
   interface_mtu: 1450          # min = 1280 for ipv6, max = 8900 for VXLAN
-  #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
-                                # default is 5, set to 0 to disable, max: 65535
-  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
-                                # be effective with non-snat services
 
 #
 # Configuration for container registry
