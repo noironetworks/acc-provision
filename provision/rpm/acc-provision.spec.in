@@ -6,13 +6,12 @@ License:	ASL 2.0
 URL:		http://github.com/noironetworks/aci-containers/provision
 Source:		acc_provision-%{version}.tar.gz
 BuildArch:	x86_64
-BuildRequires:	python2-devel
-BuildRequires:	python2-setuptools
-Requires:	pyOpenSSL >= 0.13
-Requires:	PyYAML >= 3.10
-Requires:	python-requests >= 2.2
-Requires:	python-jinja2 >= 2.7
-Requires:       python-ipaddr
+BuildRequires:	python3-devel
+BuildRequires:	python3-setuptools
+Requires:	python3-pyOpenSSL >= 0.13
+Requires:	python3-pyyaml >= 3.10
+Requires:	python3-requests >= 2.2
+Requires:	python3-jinja2 >= 2.7
 Requires:       python-boto3
 
 %description
@@ -25,10 +24,10 @@ Tools to provision and support ACI fabric DC workloads
 rm -f requirements.txt
 
 %build
-%{__python2} setup.py build
+%{__python3} setup.py build
 
 %install
-%{__python2} setup.py install -O1 --install-data / --skip-build --root %{buildroot}
+%{__python3} setup.py install -O1 --install-data / --skip-build --root %{buildroot}
 install -p -D -m 755 bin/acikubectl %{buildroot}/%{_bindir}/acikubectl
 mkdir -p %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci
 cat > %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml <<-EOF
@@ -40,9 +39,9 @@ chmod 0755 %{buildroot}/var/lib/aci-containers/kubectl/plugins/aci/plugin.yaml
 
 %files
 %doc README.md
-%{python2_sitelib}/acc_provision
-%{python2_sitelib}/acc_provision-%%{version}*.egg-info
-%{python2_sitelib}/gitversion
+%{python3_sitelib}/acc_provision
+%{python3_sitelib}/acc_provision-%%{version}*.egg-info
+%{python3_sitelib}/gitversion
 %{_bindir}/acc-provision
 %{_bindir}/acc-retrieve-cert
 %{_bindir}/acikubectl

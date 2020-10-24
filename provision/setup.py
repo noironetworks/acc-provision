@@ -24,9 +24,8 @@ setup(
     install_requires=[
           'requests',
           'pyyaml',
-          'jinja2<3.0.0',
+          'jinja2',
           'pyopenssl',
-          'ipaddr',
           'MarkupSafe<2.0',
           'boto3',
     ],
