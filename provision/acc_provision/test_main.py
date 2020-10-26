@@ -522,22 +522,22 @@ def test_with_drop_log():
 
 
 @in_testdir
-def test_flavor_RKE_1_1_5_rc0_base():
+def test_flavor_RKE_1_2_3_base():
     run_provision(
-        "flavor_RKE_1_1_5_rc0.inp.yaml",
-        "flavor_RKE_1_1_5_rc0.rke.yaml",
+        "flavor_RKE_1_2_3.inp.yaml",
+        "flavor_RKE_1_2_3.rke.yaml",
         None,
         None,
-        "flavor_RKE_1_1_5_rc0.apic.txt",
-        overrides={"flavor": "RKE-1.1.5-rc0"}
+        "flavor_RKE_1_2_3.apic.txt",
+        overrides={"flavor": "RKE-1.2.3"}
     )
     run_provision(
-        "flavor_RKE_1_1_5_rc0.inp2.yaml",
-        "flavor_RKE_1_1_5_rc0.rke2.yaml",
+        "flavor_RKE_1_2_3.inp2.yaml",
+        "flavor_RKE_1_2_3.rke2.yaml",
         None,
         None,
-        "flavor_RKE_1_1_5_rc0.apic2.txt",
-        overrides={"flavor": "RKE-1.1.5-rc0"}
+        "flavor_RKE_1_2_3.apic2.txt",
+        overrides={"flavor": "RKE-1.2.3"}
     )
 
 
