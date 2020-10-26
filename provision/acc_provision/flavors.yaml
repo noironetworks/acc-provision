@@ -1161,12 +1161,26 @@ flavors:
     status: Experimental
     hidden: False
     order: 21
-  RKE-1.1.5-rc0:
-    desc: Rancher Kubernetes Engine min version 1.1.5-rc0
+  RKE-1.2.3:
+    desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 5.0
     options:
       template_generator: generate_rancher_yaml
     config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
       aci_config:
         items:
           - name: metrics-kubelet

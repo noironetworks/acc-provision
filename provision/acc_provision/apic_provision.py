@@ -5073,8 +5073,8 @@ class ApicKubeConfig(object):
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
-            elif flavor == "RKE-1.1.5-rc0":
-                rke_flavor_specific_handling(data, items)
+            elif flavor == "RKE-1.2.3":
+                rke_flavor_specific_handling(aci_prefix, data, items, self.config["rke_config"])
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
 
@@ -5737,7 +5737,7 @@ def dockerucp_flavor_specific_handling(data, ports):
             data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
 
 
-def rke_flavor_specific_handling(data, ports):
+def rke_flavor_specific_handling(aci_prefix, data, ports, rke_config):
 
     if ports is None or len(ports) == 0:
         err("Error in getting ports for flavor")
@@ -5790,6 +5790,221 @@ def rke_flavor_specific_handling(data, ports):
                 ]
             )
             data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+
+    if rke_config is not None:
+        for ctrct in rke_config["contracts"]:
+            contract_name = aci_prefix + ctrct["name"]
+            contract = collections.OrderedDict(
+                [
+                    (
+                        "vzBrCP",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [("name", contract_name)]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "vzSubj",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "name",
+                                                                            contract_name + "-subj",
+                                                                        ),
+                                                                        (
+                                                                            "consMatchT",
+                                                                            "AtleastOne",
+                                                                        ),
+                                                                        (
+                                                                            "provMatchT",
+                                                                            "AtleastOne",
+                                                                        ),
+                                                                    ]
+                                                                ),
+                                                            ),
+                                                            (
+                                                                "children",
+                                                                [
+                                                                    collections.OrderedDict(
+                                                                        [
+                                                                            (
+                                                                                "vzRsSubjFiltAtt",
+                                                                                collections.OrderedDict(
+                                                                                    [
+                                                                                        (
+                                                                                            "attributes",
+                                                                                            collections.OrderedDict(
+                                                                                                [
+                                                                                                    (
+                                                                                                        "tnVzFilterName",
+                                                                                                        aci_prefix + ctrct["filter"],
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                        )
+                                                                                    ]
+                                                                                ),
+                                                                            )
+                                                                        ]
+                                                                    )
+                                                                ],
+                                                            ),
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        )
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'].append(contract)
+            provide_rke_contract = collections.OrderedDict(
+                [
+                    (
+                        "fvRsProv",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tnVzBrCPName",
+                                                contract_name,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            consume_rke_contract = collections.OrderedDict(
+                [
+                    (
+                        "fvRsCons",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tnVzBrCPName",
+                                                contract_name,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            for provider in ctrct['provided']:
+                for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+                    if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == provider:
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provide_rke_contract)
+                        break
+            for consumer in ctrct['consumed']:
+                for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+                    if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == consumer:
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consume_rke_contract)
+                        break
+
+        for i, filter in enumerate(rke_config["filters"]):
+            filt_entry = collections.OrderedDict(
+                [
+                    (
+                        "vzFilter",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                aci_prefix + filter["name"],
+                                            )
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    []
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+        for port in rke_config["filters"][i]["items"]:
+            filt_child = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                port["name"],
+                                            ),
+                                            (
+                                                "etherT",
+                                                port["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                port["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port["range"][0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port["range"][1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(port["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            filt_entry['vzFilter']['children'].append(filt_child)
+            data['fvTenant']['children'].append(filt_entry)
 
 
 if __name__ == "__main__":
