@@ -27,6 +27,5 @@ setup(
           'jinja2',
           'pyopenssl',
           'MarkupSafe<2.0',
-          'boto3',
     ],
 )
