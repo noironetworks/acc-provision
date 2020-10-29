@@ -243,6 +243,54 @@ spec:
                   minimum: 0
                   maximum: 56
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: netflowpolicies.aci.netflow
+spec:
+  group: aci.netflow
+  version: v1alpha
+  names:
+    kind: NetflowPolicy
+    listKind: NetflowPolicyList
+    plural: netflowpolicies
+    singular: netflowpolicy
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        spec:
+          properties:
+            flowSamplingPolicy:
+              properties:
+                destIp:
+                  type: string
+                destPort:
+                  type: integer
+                  minimum: 0
+                  maximum: 65535
+                type:
+                  type: string
+                  enum:
+                    - netflow
+                    - ipfix
+                activeFlowTimeOut:
+                  type: integer
+                  minimum: 0
+                  maximum: 3600
+                idleFlowTimeOut:
+                  type: integer
+                  minimum: 0
+                  maximum: 600
+                samplingRate:
+                  type: integer
+                  minimum: 0
+                  maximum: 1000
+---
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -270,8 +318,12 @@ metadata:
 data:
   controller-config: |-
     {
+        "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        {% if config.aci_config.capic %}
+        "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
+        {% endif %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
@@ -345,6 +397,7 @@ data:
     }
   host-agent-config: |-
     {
+        "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
@@ -353,6 +406,9 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
         {% if config.aci_config.capic %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
@@ -419,7 +475,9 @@ data:
         {% if not config.aci_config.capic %}
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
         {% else %}
+        "csr-list": {{ config.net_config.csr_list|json|indent(width=8) }},
         "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
+        "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
         "apic": {
             "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
             "apic-username": {{config.aci_config.sync_login.username|json}},
@@ -541,18 +599,18 @@ rules:
   - create
   - update
   - delete
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
 {% if config.istio_config.install_istio %}
 - apiGroups:
   - "rbac.authorization.k8s.io"
   resources:
   - clusterroles
   - clusterrolebindings
-  verbs:
-  - '*'
-- apiGroups:
-  - "apiextensions.k8s.io"
-  resources:
-  - customresourcedefinitions
   verbs:
   - '*'
 - apiGroups:
@@ -669,6 +727,15 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - "aci.netflow"
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
   - apps.openshift.io
   resources:
   - deploymentconfigs
@@ -720,6 +787,14 @@ rules:
   - create
   - patch
 {% endif %}
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - list
+  - watch
+  - get
 {% if config.kube_config.use_aci_anywhere_crd %}
 - apiGroups:
   - "aci.aw"
@@ -772,6 +847,15 @@ rules:
   - update
   - delete
   - patch
+- apiGroups:
+  - "aci.netflow"
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
 - apiGroups:
   - "aci.snat"
   resources:
@@ -880,7 +964,11 @@ metadata:
     network-plugin: aci-containers
 spec:
   updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
     type: RollingUpdate
+{% endif %}
   selector:
     matchLabels:
       name: aci-containers-host
@@ -892,6 +980,8 @@ spec:
         network-plugin: aci-containers
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9612"
     spec:
       hostNetwork: true
       hostPID: true
@@ -1090,7 +1180,11 @@ metadata:
     network-plugin: aci-containers
 spec:
   updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
     type: RollingUpdate
+{% endif %}
   selector:
     matchLabels:
       name: aci-containers-openvswitch
@@ -1254,6 +1348,22 @@ spec:
             httpGet:
               path: /status
               port: 8091
+      {% if config.aci_config.capic %}
+      initContainers:
+        - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          name: stateinit
+          command:
+            - gbpserver
+            - -init
+            - -config-path
+            - /usr/local/etc/aci-containers/gbp-server.conf
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+      {% endif %}
       volumes:
         {% if config.aci_config.capic %}
         - name: kafka-certs

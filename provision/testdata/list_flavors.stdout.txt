@@ -1,7 +1,8 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.5-openstack:	Red Hat OpenShift Container Platform 4.5 on OpenStack
+INFO: openshift-4.5-esx:	Red Hat OpenShift Container Platform 4.5 on ESX
 INFO: openshift-4.4-openstack:	Red Hat OpenShift Container Platform 4.4 on OpenStack
-INFO: openshift-4.4-esx:	Openshift 4.4 ESX
-INFO: openshift-4.3:	Red Hat OpenShift Container Platform 4.3
+INFO: openshift-4.4-esx:	Red Hat OpenShift Container Platform 4.4 on ESX
 INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
 INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0
 INFO: kubernetes-1.18:	Kubernetes 1.18
@@ -10,4 +11,4 @@ INFO: kubernetes-1.16:	Kubernetes 1.16
 INFO: k8s-localhost:	Kubernetes localhost [Experimental]
 INFO: aks:	Azure Kubernetes Service [Experimental]
 INFO: cloud:	Openshift IPI/AWS [Experimental]
-INFO: RKE-1.1.5-rc0:	Rancher Kubernetes Engine min version 1.1.5-rc0
+INFO: RKE-1.2.3:	Rancher Kubernetes Engine min version 1.2.3

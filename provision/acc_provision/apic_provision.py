@@ -309,7 +309,7 @@ class Apic(object):
         self.clean_tagged_resources(system_id, tenant)
 
     def get_apic_version(self):
-        path = "/api/node/class/firmwareCtrlrRunning.json?&"
+        path = "/api/node/class/firmwareCtrlrRunning.json"
         version = 1.0
         try:
             data = self.get_path(path)
@@ -460,10 +460,11 @@ class ApicKubeConfig(object):
         update(data, self.vdom_pool())
         update(data, self.mcast_pool())
         update(data, self.phys_dom())
-        update(data, self.kube_dom())
+        update(data, self.kube_dom(apic_version))
         update(data, self.nested_dom())
         update(data, self.associate_aep())
         update(data, self.opflex_cert())
+        self.apic_version = apic_version
         if apic_version >= 5.0:
             update(data, self.cluster_info())
 
@@ -476,9 +477,6 @@ class ApicKubeConfig(object):
 
         update(data, self.kube_user())
         update(data, self.kube_cert())
-        if self.config["aci_config"]["netflow_exporter"]["enable"]:
-            update(data, self.netflow_exporter())
-            update(data, self.netflow_cont())
         return data
 
     def annotateApicObjects(self, data, pre_existing_tenant=False, ann=aciContainersOwnerAnnotation):
@@ -783,92 +781,6 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def netflow_exporter(self):
-        exp_name = self.config["aci_config"]["netflow_exporter"]["name"]
-        version = self.config["aci_config"]["netflow_exporter"]["ver"]
-        dstAddr = self.config["aci_config"]["netflow_exporter"]["dstAddr"]
-        dstPort = self.config["aci_config"]["netflow_exporter"]["dstPort"]
-        srcAddr = self.config["aci_config"]["netflow_exporter"]["srcAddr"]
-
-        path = "api/mo/uni/infra/vmmexporterpol-%s.json" % exp_name
-        data = collections.OrderedDict(
-            [
-                (
-                    "netflowVmmExporterPol",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                        ("name", exp_name),
-                                        ("ver", version),
-                                        ("dstAddr", dstAddr),
-                                        ("dstPort", dstPort),
-                                        ("srcAddr", srcAddr),
-                                    ]
-                                ),
-                            ),
-                        ]
-                    ),
-                )
-            ]
-        )
-        self.annotateApicObjects(data)
-        return path, data
-
-    def netflow_cont(self):
-        exp_name = self.config["aci_config"]["netflow_exporter"]["name"]
-        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        activeFlowTimeOut = self.config["aci_config"]["netflow_exporter"]["activeFlowTimeOut"]
-
-        path = "api/node/mo/uni/vmmp-Kubernetes/dom-%s/vswitchpolcont.json" % vmm_name
-        data = collections.OrderedDict(
-            [
-                (
-                    "vmmVSwitchPolicyCont",
-                    collections.OrderedDict(
-                        [
-                            (
-                                "attributes",
-                                collections.OrderedDict(
-                                    [
-                                    ]
-                                ),
-                            ),
-                            (
-                                "children",
-                                [
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "vmmRsVswitchExporterPol",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    ("activeFlowTimeOut", activeFlowTimeOut),
-                                                                    ("tDn", "/uni/infra/vmmexporterpol-%s" % exp_name),
-                                                                ]
-                                                            ),
-                                                        )
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                ]
-                            ),
-                        ]
-                    ),
-                )
-            ]
-        )
-        self.annotateApicObjects(data)
-        return path, data
-
     def phys_dom(self):
         phys_name = self.config["aci_config"]["physical_domain"]["domain"]
         pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
@@ -925,7 +837,7 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def kube_dom(self):
+    def kube_dom(self, apic_version):
         vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
         encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
@@ -933,6 +845,7 @@ class ApicKubeConfig(object):
         mpool_name = self.config["aci_config"]["vmm_domain"]["mcast_pool"]
         vpool_name = self.config["aci_config"]["vmm_domain"]["vlan_pool"]
         kube_controller = self.config["kube_config"]["controller"]
+        cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
 
         mode = "k8s"
         scope = "kubernetes"
@@ -942,6 +855,8 @@ class ApicKubeConfig(object):
         elif vmm_type == "CloudFoundry":
             mode = "cf"
             scope = "cloudfoundry"
+        elif apic_version >= 5.1 and cluster_provider == "Rancher":
+            mode = "rancher"
 
         path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_name)
         data = collections.OrderedDict(
@@ -1168,9 +1083,12 @@ class ApicKubeConfig(object):
         return path, aci_obj("vzFilter", [('name', name), ('_children', children)])
 
     def capic_epg(self, name, vrf_name):
+        provider = self.config["cloud"]["provider"]
         children = []
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
         self.add_configured_contracts(name, children)
+        if name == "ul-nodes" and provider == "azure":
+            return aci_obj("cloudSvcEPg", [('name', name), ('deploymentType', "CloudNativeManaged"), ('type', "Azure-AksCluster"), ('accessType', "public&private"), ('_children', children)])
         return aci_obj("cloudEPg", [('name', name), ('_children', children)])
 
     def capic_cloudApp(self, ap_name):
@@ -1228,12 +1146,19 @@ class ApicKubeConfig(object):
                 children.append(aci_obj("fvRsProv", [('tnVzBrCPName', c_name)]))
 
     def capic_underlay_epg(self, name, ipsel):
+        provider = self.config["cloud"]["provider"]
         vrf_name = self.config["aci_config"]["vrf"]["name"]
         match = "IP==\'{}\'".format(ipsel)
         children = []
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
-        children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        if name == "ul-nodes" and provider == "azure":
+            children.append(aci_obj("cloudSvcEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        else:
+            children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
         self.add_configured_contracts(name, children)
+
+        if name == "ul-nodes" and provider == "azure":
+            return aci_obj("cloudSvcEPg", [('name', name), ('deploymentType', "CloudNativeManaged"), ('type', "Azure-AksCluster"), ('accessType', "PublicAndPrivate"), ('_children', children)])
 
         epg = aci_obj(
             "cloudEPg",
@@ -1249,11 +1174,15 @@ class ApicKubeConfig(object):
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
         children.append(aci_obj("cloudExtEPSelector", [('name', "sel1"), ("subnet", subnet)]))
         self.add_configured_contracts(name, children)
+        attr = [('name', name)]
+        if subnet == "0.0.0.0/0":
+            attr = attr + [('routeReachability', 'internet')]
+
+        attr = attr + [('_children', children)]
 
         epg = aci_obj(
             "cloudExtEPg",
-            [('name', name),
-             ('_children', children)],
+            attr,
         )
 
         return epg
@@ -1454,6 +1383,19 @@ class ApicKubeConfig(object):
         rsToRegion = self.capic_rsToRegion()
         _, cidr = self.cloudCidr(ccp_name, underlay_cidr, subnets, "yes")
         child_list = [rsToRegion, rsToCtx, cidr]
+        if "transit_subnet" in self.config["net_config"]:
+            assert "routerP" in self.config["oper"]
+            # add transit subnet
+            t_net = self.config["net_config"]["transit_subnet"]
+            region = self.config["aci_config"]["vrf"]["region"]
+            zone = self.config["cloud"]["zone"]
+            z_attach = self.zoneAttach(region, zone)
+            t_subnet = aci_obj("cloudSubnet", [('ip', t_net), ('usage', 'gateway'), ('scope', "public,shared"), ('_children', [z_attach]), ])
+            cidr["cloudCidr"]["children"].append(t_subnet)
+            # attach routerP
+            rp = self.config["oper"]["routerP"]
+            rsToTouterP = aci_obj("cloudRsCtxProfileToGatewayRouterP", [('tDn', rp), ])
+            child_list.append(rsToTouterP)
 
         for child in child_list:
             data["cloudCtxProfile"]["children"].append(child)
@@ -1556,12 +1498,16 @@ class ApicKubeConfig(object):
         )
 
         for subnet in subnets:
-            cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
+            if subnet:
+                cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
         return path, cidrMo
 
     def cloudSubnet(self, cidr):
         region = self.config["aci_config"]["vrf"]["region"]
         zone = self.config["cloud"]["zone"]
+        props = [("ip", cidr)]
+        if cidr in self.config["private_subnets"]:
+            props.append(("routingType", "unmanaged"))
         subnetMo = collections.OrderedDict(
             [
                 (
@@ -1571,9 +1517,7 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [
-                                        ("ip", cidr),
-                                    ]
+                                    props,
                                 ),
                             ),
                             (
@@ -5135,6 +5079,8 @@ class ApicKubeConfig(object):
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items)
+            elif flavor == "RKE-1.2.3":
+                rke_flavor_specific_handling(aci_prefix, data, items, self.config["rke_config"])
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
 
@@ -5795,6 +5741,276 @@ def dockerucp_flavor_specific_handling(data, ports):
                 ]
             )
             data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+
+
+def rke_flavor_specific_handling(aci_prefix, data, ports, rke_config):
+
+    if ports is None or len(ports) == 0:
+        err("Error in getting ports for flavor")
+    else:
+        for port in ports:
+            extra_port = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                port["name"],
+                                            ),
+                                            (
+                                                "etherT",
+                                                port["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                port["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port["range"][0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port["range"][1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(port["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+
+    if rke_config is not None:
+        for ctrct in rke_config["contracts"]:
+            contract_name = aci_prefix + ctrct["name"]
+            contract = collections.OrderedDict(
+                [
+                    (
+                        "vzBrCP",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [("name", contract_name)]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "vzSubj",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "name",
+                                                                            contract_name + "-subj",
+                                                                        ),
+                                                                        (
+                                                                            "consMatchT",
+                                                                            "AtleastOne",
+                                                                        ),
+                                                                        (
+                                                                            "provMatchT",
+                                                                            "AtleastOne",
+                                                                        ),
+                                                                    ]
+                                                                ),
+                                                            ),
+                                                            (
+                                                                "children",
+                                                                [
+                                                                    collections.OrderedDict(
+                                                                        [
+                                                                            (
+                                                                                "vzRsSubjFiltAtt",
+                                                                                collections.OrderedDict(
+                                                                                    [
+                                                                                        (
+                                                                                            "attributes",
+                                                                                            collections.OrderedDict(
+                                                                                                [
+                                                                                                    (
+                                                                                                        "tnVzFilterName",
+                                                                                                        aci_prefix + ctrct["filter"],
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                        )
+                                                                                    ]
+                                                                                ),
+                                                                            )
+                                                                        ]
+                                                                    )
+                                                                ],
+                                                            ),
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        )
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data['fvTenant']['children'].append(contract)
+            provide_rke_contract = collections.OrderedDict(
+                [
+                    (
+                        "fvRsProv",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tnVzBrCPName",
+                                                contract_name,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            consume_rke_contract = collections.OrderedDict(
+                [
+                    (
+                        "fvRsCons",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tnVzBrCPName",
+                                                contract_name,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            for provider in ctrct['provided']:
+                for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+                    if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == provider:
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provide_rke_contract)
+                        break
+            for consumer in ctrct['consumed']:
+                for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+                    if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == consumer:
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consume_rke_contract)
+                        break
+
+        for i, filter in enumerate(rke_config["filters"]):
+            filt_entry = collections.OrderedDict(
+                [
+                    (
+                        "vzFilter",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                aci_prefix + filter["name"],
+                                            )
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    []
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+        for port in rke_config["filters"][i]["items"]:
+            filt_child = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                port["name"],
+                                            ),
+                                            (
+                                                "etherT",
+                                                port["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                port["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port["range"][0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port["range"][1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(port["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            filt_entry['vzFilter']['children'].append(filt_child)
+            data['fvTenant']['children'].append(filt_entry)
 
 
 if __name__ == "__main__":

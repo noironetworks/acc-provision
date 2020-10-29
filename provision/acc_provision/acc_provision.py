@@ -6,7 +6,6 @@ import argparse
 import base64
 import copy
 import functools
-import ipaddr
 import ipaddress
 import requests
 import json
@@ -162,20 +161,12 @@ def config_default():
                 "nested_inside": {
                     "portgroup": None,
                     "elag_name": None,
+                    "duplicate_file_router_default_svc": False,
                 },
             },
             "client_cert": False,
             "client_ssl": True,
             "use_inst_tag": True,
-            "netflow_exporter": {
-                "enable": False,
-                "name": None,
-                "ver": "v5",
-                "dstPort": None,
-                "dstAddr": None,
-                "srcAddr": None,
-                "activeFlowTimeOut": None,
-            },
             "kube_default_provide_kube_api": False,
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
@@ -249,7 +240,10 @@ def config_default():
             "opflexagent_log_level": "info",
         },
         "drop_log_config": {
-            "enable": True
+            "enable": False
+        },
+        "provision": {
+            "upgrade_cluster": False,
         },
     }
     return default_config
@@ -685,19 +679,6 @@ def is_valid_image_pull_policy(xval):
     raise(Exception("Must be one of the values in this List: ", validPullPolicies))
 
 
-def is_valid_netflow_version(xval):
-    if xval is None:
-        # Not a required field - default will be set to demo
-        return True
-    validVersions = ['v5', 'v9']
-    try:
-        if xval in validVersions:
-            return True
-    except ValueError:
-        pass
-    raise(Exception("Must be one of the versions in this List: ", validVersions))
-
-
 def is_valid_contract_scope(xval):
     if xval is None:
         # Not a required field - default will be set to demo
@@ -800,15 +781,6 @@ def config_validate(flavor_opts, config):
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
                 get(("net_config", "kubeapi_vlan")), required)
-        if (config["aci_config"]["netflow_exporter"]["enable"]):
-            checks["aci_config/netflow_exporter/dstAddr"] = (
-                get(("aci_config", "netflow_exporter", "dstAddr")), required)
-            checks["aci_config/netflow_exporter/dstPort"] = (
-                get(("aci_config", "netflow_exporter", "dstPort")), required)
-            checks["aci_config/netflow_exporter/name"] = (
-                get(("aci_config", "netflow_exporter", "name")), required)
-            checks["aci_config/netflow_exporter/ver"] = (
-                get(("aci_config", "netflow_exporter", "ver")), is_valid_netflow_version)
 
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False:
@@ -839,6 +811,11 @@ def config_validate(flavor_opts, config):
              lower_in({"vmware"}))
         checks["aci_config/vmm_domain/nested_inside/name"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
+             required)
+
+    if get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+        checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
+            (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
 
     if get(("provision", "prov_apic")) is not None:
@@ -934,6 +911,8 @@ def config_validate_preexisting(config, prov_apic):
 def generate_sample(filep, flavor):
     if flavor == "cloud":
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
+    elif flavor == "aks":
+        data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
@@ -1180,14 +1159,15 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         info("Apply infrastructure YAML using:")
         info("  %s apply -f %s" %
              (config["kube_config"]["kubectl"], applyname))
-        info("Delete stale objects from older deployments using:")
-        info("  %s -n %s delete %s -l "
-             " 'aci-containers-config-version,"
-             "aci-containers-config-version notin (%s)'" %
-             (config["kube_config"]["kubectl"],
-              config["kube_config"]["system_namespace"],
-              ",".join(kube_objects),
-              str(config["registry"]["configuration_version"])))
+        if not config["provision"]["upgrade_cluster"]:
+            info("Delete stale objects from older deployments using:")
+            info("  %s -n %s delete %s -l "
+                 " 'aci-containers-config-version,"
+                 "aci-containers-config-version notin (%s)'" %
+                 (config["kube_config"]["kubectl"],
+                  config["kube_config"]["system_namespace"],
+                  ",".join(kube_objects),
+                  str(config["registry"]["configuration_version"])))
     return config
 
 
@@ -1374,6 +1354,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--skip-kafka-certs', action='store_true', default=False,
         help='skip kafka certificate generation')
+    parser.add_argument(
+        '--upgrade', action='store_true', default=False,
+        help='generate kubernetes deployment file for cluster upgrade')
 
     # If the input has no arguments, show help output and exit
     if show_help:
@@ -1417,7 +1400,13 @@ def check_overlapping_subnets(config):
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
-        net1, net2 = ipaddr.IPNetwork(sub1), ipaddr.IPNetwork(sub2)
+        # Checking if sub1 and sub2 are IPv4 or IPv6
+        rtr1, _ = sub1.split("/")
+        ip1 = ipaddress.ip_address(rtr1)
+        if ip1.version == 4:
+            net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
+        else:
+            net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
         out = net1.overlaps(net2)
         if out:
             return False
@@ -1429,6 +1418,7 @@ def provision(args, apic_file, no_random):
     output_file = args.output
     output_tar = args.output_tar
     operator_cr_output_file = args.aci_operator_cr
+    upgrade_cluster = args.upgrade
 
     prov_apic = None
     if args.apic:
@@ -1473,6 +1463,10 @@ def provision(args, apic_file, no_random):
         },
     }
 
+    if upgrade_cluster:
+        output_tar = "/dev/null"
+        config["provision"]["upgrade_cluster"] = True
+
     # infra_vlan is not part of command line input, but we do
     # pass it as a command line arg in unit tests to pass in
     # configuration which would otherwise be discovered from
@@ -1503,8 +1497,6 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     deep_merge(config, user_config)
-    if "netflow_exporter" in config["aci_config"]:
-        config["aci_config"]["netflow_exporter"]["enable"] = True
 
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
@@ -1596,7 +1588,7 @@ def provision(args, apic_file, no_random):
         gen = globals()[gen]
     gen(config, output_file, output_tar, operator_cr_output_file)
 
-    if (config['flavor'] == "openshift-4.4-esx" and prov_apic is not None):
+    if (config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
         apic = get_apic(config)
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool

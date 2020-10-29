@@ -17,6 +17,12 @@ aci_config:
     # type: vmware              # Specify the VMM vendor (supported: vmware)
     # name: myvmware            # Specify the name of the VMM domain
 
+    # Mandatory field for Openshift on ESX flavor
+    # Loadbalancer IP used to create duplicate service file for
+    # router-default service in Openshift on ESX case. This has to be
+    # the same LB IP used during installation
+    # installer_provisioned_lb_ip: 192.168.18.201
+
   # The following resources must already exist on the APIC.
   # They are used, but not created, by the provisioning tool.
   aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
@@ -80,4 +86,4 @@ istio_config:
   # install_profile: "default"   # override if needed, default is "demo"
 
 #drop_log_config:
-  # enable: False         # default is True
+  # enable: True         # default is False

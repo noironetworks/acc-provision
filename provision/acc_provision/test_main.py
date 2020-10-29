@@ -45,6 +45,18 @@ def test_base_case_simple():
 
 
 @in_testdir
+def test_base_case_upgrade():
+    run_provision(
+        "base_case.inp.yaml",
+        "base_case_upgrade.kube.yaml",
+        None,
+        None,
+        None,
+        overrides={"upgrade": True}
+    )
+
+
+@in_testdir
 def test_base_case_snat():
     run_provision(
         "base_case_snat.inp.yaml",
@@ -254,6 +266,30 @@ def test_flavor_openshift_44_openstack():
         None,
         "flavor_openshift_44_openstack.apic.txt",
         overrides={"flavor": "openshift-4.4-openstack"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_45_openstack():
+    run_provision(
+        "flavor_openshift_45_openstack.inp.yaml",
+        "flavor_openshift_45_openstack.kube.yaml",
+        "flavor_openshift_45_openstack_tar",
+        None,
+        "flavor_openshift_45_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.5-openstack"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_45_esx():
+    run_provision(
+        "flavor_openshift_45_esx.inp.yaml",
+        "flavor_openshift_45_esx.kube.yaml",
+        "flavor_openshift_45_esx_tar",
+        None,
+        "flavor_openshift_45_esx.apic.txt",
+        overrides={"flavor": "openshift-4.5-esx"}
     )
 
 
@@ -475,10 +511,10 @@ def test_preexisting_tenant():
 
 
 @in_testdir
-def test_with_no_drop_log():
+def test_with_drop_log():
     run_provision(
-        "with_no_drop_log.inp.yaml",
-        "with_no_drop_log.kube.yaml",
+        "with_drop_log.inp.yaml",
+        "with_drop_log.kube.yaml",
         None,
         None,
         "base_case.apic.txt"
@@ -486,22 +522,22 @@ def test_with_no_drop_log():
 
 
 @in_testdir
-def test_flavor_RKE_1_1_5_rc0_base():
+def test_flavor_RKE_1_2_3_base():
     run_provision(
-        "flavor_RKE_1_1_5_rc0.inp.yaml",
-        "flavor_RKE_1_1_5_rc0.rke.yaml",
+        "flavor_RKE_1_2_3.inp.yaml",
+        "flavor_RKE_1_2_3.rke.yaml",
         None,
         None,
-        "flavor_RKE_1_1_5_rc0.apic.txt",
-        overrides={"flavor": "RKE-1.1.5-rc0"}
+        "flavor_RKE_1_2_3.apic.txt",
+        overrides={"flavor": "RKE-1.2.3"}
     )
     run_provision(
-        "flavor_RKE_1_1_5_rc0.inp2.yaml",
-        "flavor_RKE_1_1_5_rc0.rke2.yaml",
+        "flavor_RKE_1_2_3.inp2.yaml",
+        "flavor_RKE_1_2_3.rke2.yaml",
         None,
         None,
-        "flavor_RKE_1_1_5_rc0.apic2.txt",
-        overrides={"flavor": "RKE-1.1.5-rc0"}
+        "flavor_RKE_1_2_3.apic2.txt",
+        overrides={"flavor": "RKE-1.2.3"}
     )
 
 
@@ -654,6 +690,7 @@ def get_args(**overrides):
         "release": False,
         "test_data_out": None,
         "skip_kafka_certs": True,
+        "upgrade": False,
         # infra_vlan is not part of command line input, but we do
         # pass it as a command line arg in unit tests to pass in
         # configuration which would otherwise be discovered from
