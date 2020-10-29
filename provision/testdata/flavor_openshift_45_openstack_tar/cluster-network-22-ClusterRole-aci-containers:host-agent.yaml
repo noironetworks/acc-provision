@@ -4,7 +4,7 @@ metadata:
   labels:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers:host-agent
 rules:
 - apiGroups:
   - ''
@@ -12,36 +12,21 @@ rules:
   - nodes
   - namespaces
   - pods
-  - pods/exec
   - endpoints
   - services
-  - events
   - replicationcontrollers
   verbs:
   - list
   - watch
   - get
-  - patch
-  - create
-  - update
-  - delete
-- apiGroups:
-  - ''
-  resources:
-  - configmaps
-  verbs:
-  - list
-  - watch
-  - get
-  - create
-  - update
-  - delete
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  - '*'
+  - list
+  - watch
+  - get
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -51,74 +36,24 @@ rules:
   - watch
   - get
 - apiGroups:
-  - aci.aw
-  resources:
-  - epgs
-  - contracts
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  - gbpsstates
-  - gbpsstates/status
-  verbs:
-  - '*'
-- apiGroups:
   - apps
   resources:
   - deployments
   - replicasets
-  - daemonsets
-  - statefulsets
   verbs:
-  - '*'
-- apiGroups:
-  - ''
-  resources:
-  - pods
-  - pods/exec
-  - nodes
-  - services/status
-  verbs:
-  - '*'
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - aci.snat
-  resources:
-  - snatpolicies/finalizers
-  - snatpolicies/status
-  - nodeinfos
-  verbs:
-  - update
-  - create
   - list
   - watch
   - get
-  - delete
 - apiGroups:
   - aci.snat
   resources:
-  - snatglobalinfos
   - snatpolicies
-  - nodeinfos
+  - snatglobalinfos
   - rdconfigs
   verbs:
   - list
   - watch
   - get
-  - create
-  - update
-  - delete
 - apiGroups:
   - aci.qos
   resources:
@@ -132,6 +67,15 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - aci.metrics
+  resources:
+  - metricspolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
   - aci.netflow
   resources:
   - netflowpolicies
@@ -141,12 +85,21 @@ rules:
   - get
   - update
 - apiGroups:
-  - apps.openshift.io
+  - aci.snat
   resources:
-  - deploymentconfigs
+  - nodeinfos
+  - snatlocalinfos
   verbs:
+  - create
+  - update
   - list
   - watch
+  - get
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  verbs:
   - get
 - apiGroups:
   - discovery.k8s.io

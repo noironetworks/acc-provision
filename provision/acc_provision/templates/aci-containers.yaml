@@ -246,6 +246,41 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  name: metricspolicies.aci.metrics
+spec:
+  group: aci.metrics
+  version: v1alpha
+  names:
+    kind: MetricsPolicy
+    listKind: MetricsPolicyList
+    plural: metricspolicies
+    singular: metricspolicy
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        spec:
+          properties:
+            MetricsPolicy:
+              properties:
+                promServerIp:
+                  type: string
+                kafkaBrokerIp:
+                  type: array
+                  items:
+                    type: string
+                scrapeInterval:
+                  type: integer
+                  minimum: 5
+                  maximum: 3600
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
   name: netflowpolicies.aci.netflow
 spec:
   group: aci.netflow
@@ -727,6 +762,15 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - "aci.metrics"
+  resources:
+  - metricspolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
   - "aci.netflow"
   resources:
   - netflowpolicies
@@ -847,6 +891,15 @@ rules:
   - update
   - delete
   - patch
+- apiGroups:
+  - "aci.metrics"
+  resources:
+  - metricspolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
 - apiGroups:
   - "aci.netflow"
   resources:
