@@ -6,10 +6,10 @@ set -e -x
 BUILD_DIR=${BUILD_DIR:-`pwd`/debbuild}
 mkdir -p $BUILD_DIR
 rm -rf $BUILD_DIR/*
-NAME=`python setup.py --name`
-VERSION=`python setup.py --version`
+NAME=`python3 setup.py --name`
+VERSION=`python3 setup.py --version`
 REVISION=${REVISION:-1}
-python setup.py sdist --dist-dir $BUILD_DIR
+python3 setup.py sdist --dist-dir $BUILD_DIR
 SOURCE_FILE=${NAME}-${VERSION}.tar.gz
 tar -C $BUILD_DIR -xf $BUILD_DIR/$SOURCE_FILE
 SOURCE_DIR=$BUILD_DIR/${NAME}-${VERSION}
