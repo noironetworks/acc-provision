@@ -33,6 +33,8 @@ spec:
           value: aci-containers-nodes
         - name: OPFLEX_MODE
           value: overlay
+        - name: MULTUS
+          value: 'True'
         image: noirolabs/aci-containers-host:ci_test
         imagePullPolicy: Always
         livenessProbe:
@@ -61,6 +63,8 @@ spec:
           name: opflex-hostconfig-volume
         - mountPath: /usr/local/etc/aci-containers/
           name: host-config-volume
+        - mountPath: /mnt/multus-cni-conf
+          name: multus-cni-conf
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
@@ -161,5 +165,8 @@ spec:
           name: aci-containers-config
         name: opflex-config-volume
       - name: opflex-server-config-volume
+      - hostPath:
+          path: /var/run/multus/
+        name: multus-cni-conf
   updateStrategy:
     type: RollingUpdate
