@@ -2,7 +2,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-o file] [-z file] [-r file] [-a] [-d] [-u name]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
-                        [--upgrade]
+                        [--upgrade] [--disable-multus disable_multus]
 
 Provision an ACI/Kubernetes installation
 
@@ -35,3 +35,5 @@ optional arguments:
   --skip-kafka-certs    skip kafka certificate generation
   --upgrade             generate kubernetes deployment file for cluster
                         upgrade
+  --disable-multus disable_multus
+                        true/false to disable/enable multus in cluster
