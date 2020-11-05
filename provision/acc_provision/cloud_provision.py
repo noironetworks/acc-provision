@@ -247,7 +247,7 @@ class CloudProvision(object):
         if "transit_subnet" not in self.config["net_config"]:
             # allocate a subnet from cidr
             m_cidr = self.config["net_config"]["machine_cidr"]
-            b_addr = ipaddress.ip_network(m_cidr).broadcast_address
+            b_addr = ipaddress.ip_network(unicode(m_cidr)).broadcast_address
             tgw_net = ipaddress.ip_network(b_addr).supernet(new_prefix=28)
             self.config["net_config"]["transit_subnet"] = tgw_net.exploded
             if self.args.debug:

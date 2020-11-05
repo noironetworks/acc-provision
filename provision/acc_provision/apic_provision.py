@@ -1506,8 +1506,6 @@ class ApicKubeConfig(object):
         region = self.config["aci_config"]["vrf"]["region"]
         zone = self.config["cloud"]["zone"]
         props = [("ip", cidr)]
-        if cidr in self.config["private_subnets"]:
-            props.append(("routingType", "unmanaged"))
         subnetMo = collections.OrderedDict(
             [
                 (
