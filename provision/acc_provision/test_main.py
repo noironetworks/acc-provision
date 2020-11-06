@@ -691,6 +691,7 @@ def get_args(**overrides):
         "test_data_out": None,
         "skip_kafka_certs": True,
         "upgrade": False,
+        "disable_multus": 'true',
         # infra_vlan is not part of command line input, but we do
         # pass it as a command line arg in unit tests to pass in
         # configuration which would otherwise be discovered from

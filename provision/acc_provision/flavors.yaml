@@ -209,6 +209,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     options: *anchor1
     status: null
     hidden: false
@@ -337,6 +339,8 @@ flavors:
             duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     status: null
     hidden: false
     order: 1
@@ -460,6 +464,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     options: *anchor1
     status: null
     hidden: false
@@ -588,6 +594,8 @@ flavors:
             duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     status: null
     hidden: false
     order: 3
@@ -686,6 +694,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     status: null
     hidden: true
     order: 4
@@ -784,6 +794,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: True
     status: null
     hidden: true
     order: 5
@@ -827,6 +839,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: False
     status: null
     hidden: false
     order: 6
@@ -869,6 +883,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: False
     status: null
     hidden: true
     order: 7
@@ -911,6 +927,8 @@ flavors:
           type: OpenShift
       istio_config:
         install_istio: False
+      multus:
+        disable: False
     status: null
     hidden: true
     order: 8
@@ -1209,6 +1227,8 @@ flavors:
           injected_cluster_provider: Rancher
       istio_config:
         install_istio: False
+      multus:
+        disable: False
     hidden: False
     status: null
     order: 22

@@ -31,6 +31,8 @@ spec:
           value: kube
         - name: NODE_EPG
           value: kubernetes|kube-nodes
+        - name: MULTUS
+          value: 'True'
         image: noiro/aci-containers-host:5.1.1.0.r57
         imagePullPolicy: Always
         livenessProbe:
@@ -60,6 +62,8 @@ spec:
           name: opflex-hostconfig-volume
         - mountPath: /usr/local/etc/aci-containers/
           name: host-config-volume
+        - mountPath: /mnt/multus-cni-conf
+          name: multus-cni-conf
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
@@ -146,5 +150,8 @@ spec:
             path: local.conf
           name: aci-containers-config
         name: opflex-config-volume
+      - hostPath:
+          path: /var/run/multus/
+        name: multus-cni-conf
   updateStrategy:
     type: RollingUpdate
