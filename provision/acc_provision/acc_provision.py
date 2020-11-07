@@ -243,6 +243,9 @@ def config_default():
         "provision": {
             "upgrade_cluster": False,
         },
+        "multus": {
+            "disable": True,
+        }
     }
     return default_config
 
@@ -1023,7 +1026,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
     gen_inst_files = config["kube_config"]["generate_installer_files"]
     gen_cnet_file = config["kube_config"]["generate_cnet_file"]
     gen_apic_file = config["kube_config"]["generate_apic_file"]
-    if gen_inst_files or gen_cnet_file:
+    if (config['multus']['disable'] is True) and (gen_inst_files or gen_cnet_file):
         cnetfile_name = 'cluster-network-03-config.yaml'
         extra_files.append(cnetfile_name)
 
@@ -1355,7 +1358,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--upgrade', action='store_true', default=False,
         help='generate kubernetes deployment file for cluster upgrade')
-
+    parser.add_argument(
+        '--disable-multus', default='true', metavar='disable_multus',
+        help='true/false to disable/enable multus in cluster')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -1514,6 +1519,9 @@ def provision(args, apic_file, no_random):
 
     deep_merge(config, config_default())
 
+    if (args.disable_multus == 'false'):
+        config['multus']['disable'] = False
+
     if config["registry"]["version"] in VERSIONS:
         deep_merge(config,
                    {"registry": VERSIONS[config["registry"]["version"]]})
@@ -1590,7 +1598,6 @@ def provision(args, apic_file, no_random):
         apic = get_apic(config)
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
-
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 
@@ -1626,6 +1633,10 @@ def main(args=None, apic_file=None, no_random=False):
 
     if args.flavor is not None and args.flavor not in FLAVORS:
         err("Invalid configuration flavor: " + args.flavor)
+        sys.exit(1)
+
+    if args.disable_multus is not None and (args.disable_multus != 'true' and args.disable_multus != 'false'):
+        err("Invalid configuration for disable_multus:" + args.disable_multus + " <Valid values: true/false>")
         sys.exit(1)
 
     success = True

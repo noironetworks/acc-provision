@@ -31,6 +31,8 @@ spec:
           value: kube
         - name: NODE_EPG
           value: kubernetes|kube-nodes
+        - name: MULTUS
+          value: 'True'
         image: noiro/aci-containers-host:5.1.1.0.1ae238a
         imagePullPolicy: Always
         livenessProbe:
@@ -64,6 +66,8 @@ spec:
           mountPropagation: HostToContainer
           name: host-run-netns
           readOnly: true
+        - mountPath: /mnt/multus-cni-conf
+          name: multus-cni-conf
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
@@ -153,5 +157,8 @@ spec:
       - hostPath:
           path: /run/netns
         name: host-run-netns
+      - hostPath:
+          path: /var/run/multus/
+        name: multus-cni-conf
   updateStrategy:
     type: RollingUpdate
