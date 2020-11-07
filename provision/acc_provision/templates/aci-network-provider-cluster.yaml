@@ -6,7 +6,7 @@ network:
     apic_refresh_time: "{{ config.aci_config.apic_refreshtime }}"
     {% endif %}
     {% if config.aci_config.apic_hosts|length > 1 %}
-    apic_hosts: [{% for apic_host in config.aci_config.apic_hosts %} {% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(apic_host) }}{% else %}{{ "\\\"%s\\\"\""|format(apic_host) }}{% endif %}{% endfor %}]
+    apic_hosts: [{%- for apic_host in config.aci_config.apic_hosts %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(apic_host) }}{% else %}{{ "\\\"%s\\\"\""|format(apic_host) }}{% endif %}{% endfor -%}]
     {% else %}
     apic_hosts: [{% for apic_host in config.aci_config.apic_hosts %}{{ "\"\\\"%s\\\"\""|format(apic_host) }}{% endfor %}]
     {% endif %}
@@ -23,7 +23,7 @@ network:
     l3out: "{{ config.aci_config.l3out.name }}"
     node_subnet: "{{ config.net_config.node_subnet }}"
     {% if config.aci_config.l3out.external_networks|length > 1 %}
-    l3out_external_networks: [{% for ext_net in config.aci_config.l3out.external_networks %} {% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor %}]
+    l3out_external_networks: [{%- for ext_net in config.aci_config.l3out.external_networks %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor -%}]
     {% else %}
     l3out_external_networks: [{% for ext_net in config.aci_config.l3out.external_networks %}{{ "\"\\\"%s\\\"\""|format(ext_net) }}{% endfor %}]
     {% endif %}
