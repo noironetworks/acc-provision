@@ -6,8 +6,8 @@ versions:
     snat_operator_version: 4.2.1.1.r1
     opflex_agent_version: 1.9r80
     openvswitch_version: 1.7r24
-    opflex_server_version: 5.0.2.2.05bf1b8
-    gbp_version: 5.0.2.2.05bf1b8
+    opflex_server_version: 5.0.2.3.05bf1b8
+    gbp_version: 5.0.2.3.05bf1b8
   4.1:
     aci_containers_controller_version: 4.1.1.5.r19
     aci_containers_host_version: 4.1.1.5.r19
@@ -15,8 +15,8 @@ versions:
     cnideploy_version: 4.1.1.5.r19
     openvswitch_version: 4.1.1.5.r16
     opflex_agent_version: 4.1.1.5.r21
-    opflex_server_version: 5.0.2.2.05bf1b8
-    gbp_version: 5.0.2.2.05bf1b8
+    opflex_server_version: 5.0.2.3.05bf1b8
+    gbp_version: 5.0.2.3.05bf1b8
   4.2:
     aci_containers_controller_version: 4.2.2.2.r32
     aci_containers_host_version: 4.2.2.2.r32
@@ -24,14 +24,14 @@ versions:
     cnideploy_version: 4.2.2.2.r32
     openvswitch_version: 4.2.2.2.r26
     opflex_agent_version: 4.2.2.2.r32
-    opflex_server_version: 5.0.2.2.05bf1b8
-    gbp_version: 5.0.2.2.05bf1b8
+    opflex_server_version: 5.0.2.3.05bf1b8
+    gbp_version: 5.0.2.3.05bf1b8
   5.0:
-    aci_containers_controller_version: 5.0.2.2.05bf1b8
-    aci_containers_host_version: 5.0.2.2.05bf1b8
-    aci_containers_operator_version: 5.0.2.2.05bf1b8
-    cnideploy_version: 5.0.2.2.05bf1b8
-    openvswitch_version: 5.0.2.2.05bf1b8
-    opflex_agent_version: 5.0.2.2.05bf1b8
-    opflex_server_version: 5.0.2.2.05bf1b8
-    gbp_version: 5.0.2.2.05bf1b8
+    aci_containers_controller_version: 5.0.2.3.05bf1b8
+    aci_containers_host_version: 5.0.2.3.05bf1b8
+    aci_containers_operator_version: 5.0.2.3.05bf1b8
+    cnideploy_version: 5.0.2.3.05bf1b8
+    openvswitch_version: 5.0.2.3.05bf1b8
+    opflex_agent_version: 5.0.2.3.05bf1b8
+    opflex_server_version: 5.0.2.3.05bf1b8
+    gbp_version: 5.0.2.3.05bf1b8
