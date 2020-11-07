@@ -35,7 +35,7 @@ spec:
           value: snatglobalinfo
         - name: ACI_RDCONFIG_NAME
           value: routingdomain-config
-        image: noiro/aci-containers-controller:5.1.1.0.r57
+        image: noiro/aci-containers-controller:5.2.1.0.0ef4718
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
