@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function, unicode_literals
 
@@ -38,7 +38,7 @@ else:
 # This black magic forces pyyaml to load YAML strings as unicode rather
 # than byte strings in Python 2, thus ensuring that the type of strings
 # is consistent across versions.  From
-# https://stackoverflow.com/a/2967461/3857947.
+# https://stackoverflow.com/a/2967461/3857947. Revisit for Python 3.
 def construct_yaml_str(self, node):
     return self.construct_scalar(node)
 
