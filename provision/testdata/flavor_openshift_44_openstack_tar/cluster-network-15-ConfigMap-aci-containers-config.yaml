@@ -5,10 +5,10 @@ data:
     apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
     ,\n    \"apic-use-inst-tag\": true,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\"\
     : \"OpenShift\",\n    \"aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\"\
-    : \"kube\",\n    \"aci-policy-tenant\": \"kube\",\n    \"require-netpol-annot\"\
-    : false,\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\",\n    \"aci-nodebd-dn\"\
-    : \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\": \"kube-pdom\"\
-    ,\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
+    : \"kube\",\n    \"aci-policy-tenant\": \"kube\",\n    \"app-profile\": \"kubernetes\"\
+    ,\n    \"require-netpol-annot\": false,\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\"\
+    ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\"\
+    : \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
     ,\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-l3out\": \"l3out\"\
     ,\n    \"aci-ext-networks\": [\n        \"default\"\n    ],\n    \"aci-vrf\":\

@@ -335,6 +335,7 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "require-netpol-annot": {{config.kube_config.use_netpol_annotation|json}},
         {% if config.aci_config.capic %}
         "lb-type": "None",
