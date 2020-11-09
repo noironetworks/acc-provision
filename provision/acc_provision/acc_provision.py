@@ -887,8 +887,7 @@ def config_validate_preexisting(config, prov_apic):
                 # input config
                 result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
                 if not result:
-                    warn("L3out %s/%s not configured in the correct VRF %s/%s" %
-                         (vrf_tenant, l3out_name, vrf_tenant, vrf_name))
+                    info("L3out and Kubernetes EPGs are configured in different VRFs")
 
             # Following code is to detect a legacy cluster
             # kube_ap = apic.get_ap(config["aci_config"]["system_id"])
