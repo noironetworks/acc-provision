@@ -6,9 +6,9 @@ data:
     /usr/local/etc/aci-cert/user.key\",\n    \"apic-use-inst-tag\": true,\n    \"\
     aci-prefix\": \"clusterjj\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\
     : \"clusterjj\",\n    \"aci-vmm-controller\": \"clusterjj\",\n    \"aci-policy-tenant\"\
-    : \"csrtest\",\n    \"app-profile\": \"aci-containers-clusterjj\",\n    \"require-netpol-annot\"\
-    : false,\n    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
-    ,\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
+    : \"csrtest\",\n    \"aci-app-profile\": \"aci-containers-clusterjj\",\n    \"\
+    require-netpol-annot\": false,\n    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\"\
+    : \"clusterjj-pdom\",\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"csrtest\"\
     ,\n    \"aci-vrf-dn\": \"uni/tn-csrtest/ctx-ULjj\",\n    \"aci-l3out\": null,\n\
     \    \"aci-ext-networks\": null,\n    \"aci-vrf\": \"clusterjj_overlay\",\n  \
