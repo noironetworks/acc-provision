@@ -29,6 +29,12 @@ openshiftOpenstackFlavorOptions : &anchor1
 
 flavors:
   # Upstream Kubernetes
+  kubernetes-1.19:
+    desc: Kubernetes 1.19
+    default_version: 5.2
+    status: null
+    hidden: false
+    order: 9
   kubernetes-1.18:
     desc: Kubernetes 1.18
     default_version: 5.2
@@ -45,7 +51,7 @@ flavors:
     desc: Kubernetes 1.16
     default_version: 5.2
     status: null
-    hidden: false
+    hidden: true
     order: 12
   kubernetes-1.15:
     desc: Kubernetes 1.15
