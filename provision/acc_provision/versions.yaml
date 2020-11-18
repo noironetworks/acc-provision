@@ -49,7 +49,7 @@ versions:
     aci_containers_host_version: 5.2.1.0.0ef4718
     aci_containers_operator_version: 5.2.1.0.0ef4718
     cnideploy_version: 5.2.1.0.0ef4718
-    openvswitch_version: 5.2.1.0.0ef4718
-    opflex_agent_version: 5.2.1.0.0ef4718
-    opflex_server_version: 5.2.1.0.0ef4718
-    gbp_version: 5.2.1.0.0ef4718
+    openvswitch_version: 5.2.1.0.5681a9b
+    opflex_agent_version: 5.2.1.0.d2739da
+    opflex_server_version: 5.2.1.0.d2739da
+    gbp_version: 5.2.1.0.8ac1bd4
