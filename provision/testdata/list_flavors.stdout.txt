@@ -8,7 +8,6 @@ INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0
 INFO: kubernetes-1.19:	Kubernetes 1.19
 INFO: kubernetes-1.18:	Kubernetes 1.18
 INFO: kubernetes-1.17:	Kubernetes 1.17
-INFO: kubernetes-1.16:	Kubernetes 1.16
 INFO: k8s-localhost:	Kubernetes localhost [Experimental]
 INFO: aks:	Azure Kubernetes Service [Experimental]
 INFO: cloud:	Openshift IPI/AWS [Experimental]
