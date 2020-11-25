@@ -31,6 +31,11 @@ spec:
                   maximum: 65535
                   minimum: 0
                   type: integer
+                flowType:
+                  enum:
+                  - netflow
+                  - ipfix
+                  type: string
                 idleFlowTimeOut:
                   maximum: 600
                   minimum: 0
@@ -39,9 +44,11 @@ spec:
                   maximum: 1000
                   minimum: 0
                   type: integer
-                type:
-                  enum:
-                  - netflow
-                  - ipfix
-                  type: string
+              type: object
+          type: object
+      type: object
   version: v1alpha
+  versions:
+  - name: v1alpha
+    served: true
+    storage: true
