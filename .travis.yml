@@ -1,9 +1,9 @@
-matrix:
-  include:
-    - language: python
-      python: 3.6
-      install:
-        - pip install flake8
-        - python provision/setup.py install
-      script:
-        - make -C provision test
+dist: bionic
+os: linux
+language: python
+python: 3.6
+install:
+  - pip install flake8
+  - python provision/setup.py install
+script:
+  - make -C provision test
