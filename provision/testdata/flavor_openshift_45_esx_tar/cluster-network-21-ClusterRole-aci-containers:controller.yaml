@@ -12,7 +12,6 @@ rules:
   - nodes
   - namespaces
   - pods
-  - pods/exec
   - endpoints
   - services
   - events
@@ -51,23 +50,6 @@ rules:
   - watch
   - get
 - apiGroups:
-  - aci.aw
-  resources:
-  - epgs
-  - contracts
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  - gbpsstates
-  - gbpsstates/status
-  verbs:
-  - '*'
-- apiGroups:
   - apps
   resources:
   - deployments
@@ -79,12 +61,10 @@ rules:
 - apiGroups:
   - ''
   resources:
-  - pods
-  - pods/exec
   - nodes
   - services/status
   verbs:
-  - '*'
+  - update
 - apiGroups:
   - monitoring.coreos.com
   resources:
@@ -140,6 +120,12 @@ rules:
   - watch
   - get
   - update
+- apiGroups:
+  - aci.aw
+  resources:
+  - podifs
+  verbs:
+  - '*'
 - apiGroups:
   - apps.openshift.io
   resources:

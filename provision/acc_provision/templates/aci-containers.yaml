@@ -299,6 +299,19 @@ spec:
     served: true
     storage: true
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: podifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: PodIF
+    listKind: PodIFList
+    plural: podifs
+  scope: Namespaced
+  version: v1
+---
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -745,6 +758,12 @@ rules:
   - get
   - update
 - apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  verbs:
+  - '*'
+- apiGroups:
   - apps.openshift.io
   resources:
   - deploymentconfigs
@@ -865,6 +884,12 @@ rules:
   - watch
   - get
   - update
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  verbs:
+  - '*'
 - apiGroups:
   - "aci.snat"
   resources:

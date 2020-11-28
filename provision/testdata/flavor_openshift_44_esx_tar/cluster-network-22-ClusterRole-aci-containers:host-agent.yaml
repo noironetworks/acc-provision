@@ -76,6 +76,12 @@ rules:
   - get
   - update
 - apiGroups:
+  - aci.aw
+  resources:
+  - podifs
+  verbs:
+  - '*'
+- apiGroups:
   - aci.snat
   resources:
   - nodeinfos
@@ -85,6 +91,12 @@ rules:
   - update
   - list
   - watch
+  - get
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  verbs:
   - get
 - apiGroups:
   - discovery.k8s.io
