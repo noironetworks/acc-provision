@@ -62,7 +62,6 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
-  - podifs
   - gbpsstates
   - gbpsstates/status
   verbs:

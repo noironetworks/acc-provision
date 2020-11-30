@@ -28,6 +28,13 @@ rules:
   - watch
   - get
 - apiGroups:
+  - aci.aw
+  resources:
+  - podifs
+  - podifs/status
+  verbs:
+  - '*'
+- apiGroups:
   - networking.k8s.io
   resources:
   - networkpolicies
@@ -75,12 +82,6 @@ rules:
   - watch
   - get
   - update
-- apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  verbs:
-  - '*'
 - apiGroups:
   - aci.snat
   resources:

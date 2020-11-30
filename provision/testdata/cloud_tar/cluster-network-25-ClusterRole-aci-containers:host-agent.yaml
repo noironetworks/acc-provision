@@ -83,12 +83,6 @@ rules:
   - get
   - update
 - apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  verbs:
-  - '*'
-- apiGroups:
   - aci.snat
   resources:
   - nodeinfos
