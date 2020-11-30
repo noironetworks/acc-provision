@@ -975,14 +975,12 @@ flavors:
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: True
         skip_replicationcontroller_resource_hostagent: False
-        skip_default_endpoint_group: True
         all_access_controller_clusterrole: True
         no_hostagent_networking_clusterrole: False
         no_hostagent_deployment_clusterrole: True
         run_opflex_server_container: True
         run_gbp_container: True
         use_opflex_server_volume: True
-        use_kubeconfig_volume: True
     status: Experimental
     hidden: False
     order: 19
@@ -1003,15 +1001,12 @@ flavors:
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: False
         skip_replicationcontroller_resource_hostagent: False
-        skip_default_endpoint_group: True
         all_access_controller_clusterrole: True
         no_hostagent_networking_clusterrole: False
         no_hostagent_deployment_clusterrole: False
         run_opflex_server_container: True
         run_gbp_container: True
-        exclude_snat_container: True
         use_opflex_server_volume: True
-        use_kubeconfig_volume: True
         use_cnideploy_initcontainer: True
         generate_cnet_file: True
         ep_registry: k8s
@@ -1066,15 +1061,12 @@ flavors:
         pod_exec_resources_controller: True
         skip_namespace_resource_hostagent: False
         skip_replicationcontroller_resource_hostagent: False
-        skip_default_endpoint_group: True
         all_access_controller_clusterrole: True
         no_hostagent_networking_clusterrole: False
         no_hostagent_deployment_clusterrole: False
         run_opflex_server_container: True
         run_gbp_container: True
-        exclude_snat_container: True
         use_opflex_server_volume: True
-        use_kubeconfig_volume: True
         use_cnideploy_initcontainer: True
         host_agent_cni_bin_path: /var/lib
         host_agent_cni_conf_path: /etc/kubernetes
