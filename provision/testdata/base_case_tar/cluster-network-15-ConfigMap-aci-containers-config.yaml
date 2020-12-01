@@ -3,13 +3,13 @@ data:
   controller-config: "{\n    \"flavor\": \"kubernetes-1.15\",\n    \"log-level\":\
     \ \"info\",\n    \"apic-hosts\": [\n        \"10.30.120.100\"\n    ],\n    \"\
     apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
-    ,\n    \"apic-use-inst-tag\": true,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\"\
-    : \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\"\
-    : \"kube\",\n    \"aci-policy-tenant\": \"kube\",\n    \"aci-app-profile\": \"\
-    kubernetes\",\n    \"require-netpol-annot\": false,\n    \"install-istio\": true,\n\
-    \    \"istio-profile\": \"demo\",\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\"\
-    ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\"\
-    : \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
+    ,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"\
+    aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-policy-tenant\"\
+    : \"kube\",\n    \"aci-app-profile\": \"kubernetes\",\n    \"require-netpol-annot\"\
+    : false,\n    \"install-istio\": true,\n    \"istio-profile\": \"demo\",\n   \
+    \ \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\",\n    \"aci-nodebd-dn\": \"\
+    uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\": \"kube-pdom\",\n\
+    \    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
     ,\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-l3out\": \"l3out\"\
     ,\n    \"aci-ext-networks\": [\n        \"default\"\n    ],\n    \"aci-vrf\":\
