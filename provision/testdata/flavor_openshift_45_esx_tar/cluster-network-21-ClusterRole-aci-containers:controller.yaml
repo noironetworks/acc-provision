@@ -136,3 +136,12 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.erspan
+  resources:
+  - erspanpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
