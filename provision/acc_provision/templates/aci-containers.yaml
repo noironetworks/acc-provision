@@ -299,6 +299,69 @@ spec:
     served: true
     storage: true
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: erspanpolicies.aci.erspan
+spec:
+  group: aci.erspan
+  version: v1alpha
+  names:
+    kind: ErspanPolicy
+    listKind: ErspanPolicyList
+    plural: erspanpolicies
+    singular: erspanpolicy
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+    # openAPIV3Schema is the schema for validating custom objects.
+      type: object
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        spec:
+          type: object
+          properties:
+            podSelector:
+              type: object
+              description: 'Selection of Pods'
+              properties:
+                matchLabels:
+                  type: object
+                  description:
+            source:
+              type: object
+              properties:
+                admin_state:
+                  type: string
+                  enum:
+                    - start
+                    - stop
+                direction:
+                  type: string
+                  enum:
+                    - in
+                    - out
+                    - both
+                tag:
+                  type: string
+            destination:
+              type: object
+              properties:
+                destIp:
+                  type: string
+                  minimum: 0
+                flowId:
+                  type: integer
+                  minimum: 1
+                  maximum: 1023
+  versions:
+  - name: v1alpha
+    served: true
+    storage: true
+---
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -738,6 +801,15 @@ rules:
   - "aci.netflow"
   resources:
   - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
+  - "aci.erspan"
+  resources:
+  - erspanpolicies
   verbs:
   - list
   - watch
