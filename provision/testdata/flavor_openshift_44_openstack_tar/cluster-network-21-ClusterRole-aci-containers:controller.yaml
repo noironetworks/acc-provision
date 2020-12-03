@@ -121,6 +121,15 @@ rules:
   - get
   - update
 - apiGroups:
+  - aci.erspan
+  resources:
+  - erspanpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
   - apps.openshift.io
   resources:
   - deploymentconfigs
