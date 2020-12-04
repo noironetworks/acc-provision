@@ -62,7 +62,6 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
-  - podifs
   - gbpsstates
   - gbpsstates/status
   verbs:
@@ -149,6 +148,12 @@ rules:
   - watch
   - get
   - update
+- apiGroups:
+  - aci.aw
+  resources:
+  - podifs
+  verbs:
+  - '*'
 - apiGroups:
   - apps.openshift.io
   resources:
