@@ -13,6 +13,9 @@ test:
 	flake8 --builtins="unicode" --ignore E501,E731,E741,W504 acc_provision
 	python3 -m pytest acc_provision
 
+coverage:
+	python3-coverage run --source=acc_provision -m pytest acc_provision
+
 stop-on-err:
 	python3 -m pytest -x acc_provision
 
