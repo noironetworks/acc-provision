@@ -157,7 +157,6 @@ data:
         "aci-vmm-domain": "kube",
         "aci-vmm-controller": "kube",
         "aci-policy-tenant": "kube",
-        "require-netpol-annot": false,
         "aci-podbd-dn": "uni/tn-kube/BD-aci-containers-kube-pod-bd",
         "aci-nodebd-dn": "uni/tn-kube/BD-aci-containers-kube-node-bd",
         "aci-service-phys-dom": "kube-pdom",

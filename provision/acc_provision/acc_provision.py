@@ -191,7 +191,6 @@ def config_default():
             "use_apps_apigroup": "apps",
             "host_agent_openshift_resource": False,
             "use_netpol_apigroup": "networking.k8s.io",
-            "use_netpol_annotation": False,
             "use_cluster_role": True,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
