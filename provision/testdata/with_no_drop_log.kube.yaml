@@ -283,7 +283,6 @@ data:
         "aci-vmm-domain": "kube",
         "aci-vmm-controller": "kube",
         "aci-policy-tenant": "kube",
-        "require-netpol-annot": false,
         "install-istio": true,
         "istio-profile": "demo",
         "aci-podbd-dn": "uni/tn-kube/BD-kube-pod-bd",
