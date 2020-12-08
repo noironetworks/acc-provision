@@ -534,6 +534,9 @@ data:
           {% if not config.aci_config.client_ssl %}
             "ssl": { "mode": "disabled" }
           {% endif %}
+          {% if config.kube_config.run_gbp_container %}
+            "statistics" : { "mode" : "off" }
+          {% endif %}
         }
     }
   {% if config.kube_config.run_gbp_container %}
