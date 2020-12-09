@@ -50,7 +50,7 @@ data:
     ,\n            \"name\": \"kubernetes|kube-system\"\n        }        },\n   \
     \ \"enable-drop-log\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
-    \   \"opflex\": {\n    }\n}"
+    \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" }\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:

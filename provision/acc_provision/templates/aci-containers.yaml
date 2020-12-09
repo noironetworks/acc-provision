@@ -531,11 +531,12 @@ data:
             "level": {{config.logging.opflexagent_log_level|json}}
         },
         "opflex": {
+            "notif" : { "enabled" : "false" }
           {% if not config.aci_config.client_ssl %}
-            "ssl": { "mode": "disabled" }
+            ,"ssl": { "mode": "disabled" }
           {% endif %}
           {% if config.kube_config.run_gbp_container %}
-            "statistics" : { "mode" : "off" }
+            ,"statistics" : { "mode" : "off" }
           {% endif %}
         }
     }
