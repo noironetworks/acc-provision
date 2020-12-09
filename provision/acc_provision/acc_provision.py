@@ -741,8 +741,6 @@ def config_validate(flavor_opts, config):
             # Network Config
             "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                       required),
-            "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                       required),
         }
     else:
         checks = {
@@ -763,6 +761,8 @@ def config_validate(flavor_opts, config):
             extra_checks = {}
     else:
         extra_checks = {
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
             "aci_config/aep": (get(("aci_config", "aep")), required),
             "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
                                       required),
@@ -926,7 +926,7 @@ def config_validate_preexisting(config, prov_apic):
 
 
 def generate_sample(filep, flavor):
-    if flavor == "cloud":
+    if flavor in ["cloud", "eks"]:
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
     elif flavor == "aks":
         data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
@@ -1593,7 +1593,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
 
-    if flavor == "cloud" or flavor == "aks":
+    if flavor in ["cloud", "aks", "eks"]:
         if prov_apic is None:
             return True
         print("Configuring cAPIC")

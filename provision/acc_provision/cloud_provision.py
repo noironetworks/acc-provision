@@ -131,12 +131,13 @@ class CloudProvision(object):
 
         # update zone information as necessary
         self.setupZoneInfo()
+        self.setupSubnetInfo()
         # if underlay ccp doesn't exist, create one
         u_ccp = self.getUnderlayCCP()
         if not u_ccp or self.args.delete:
             if not self.args.delete:
                 print("Creating underlay\n")
-            underlay_posts += [self.configurator.capic_underlay_vrf, self.configurator.capic_underlay_ccp, self.underlayCloudApp]
+            underlay_posts += [self.configurator.capic_underlay_vrf, self.capic_underlay_ccp, self.underlayCloudApp]
         else:
             # if existing vpc, cidr and subnet should be created as well
             underlay_posts += [self.underlayCloudApp]
@@ -170,10 +171,15 @@ class CloudProvision(object):
         gen(self.config, output_file, output_tar, operator_cr_output_file)
         if self.args.flavor == "aks":
             self.print_aks_setup()
+        elif self.args.flavor == "eks":
+            self.print_eks_setup()
         else:
             self.print_openshift_setup()
         self.apic.save()
         return True
+
+    def capic_underlay_ccp(self):
+        return self.configurator.capic_underlay_ccp(self.cloud_subnets)
 
     def print_openshift_setup(self):
         m_cidr = self.config["net_config"]["machine_cidr"]
@@ -183,7 +189,7 @@ class CloudProvision(object):
         region = self.config["aci_config"]["vrf"]["region"]
         boot_subnetID = self.getSubnetID(b_subnet)
         node_subnetID = self.getSubnetID(n_subnet)
-        self.setupNatGw(boot_subnetID, node_subnetID)
+        self.setupNatGw(boot_subnetID, [node_subnetID])
         print("\nOpenshift Info")
         print("----------------")
         print("networking:\n  clusterNetwork:\n  - cidr: {}\n    hostPrefix: 23\n  machineCIDR: {}\n  networkType: CiscoACI\n  serviceNetwork:\n  - 172.30.0.0/16\nplatform:\n  aws:\n    region: {}\n    subnets:\n    - {}\n    - {}".format(p_subnet, m_cidr, region, boot_subnetID, node_subnetID))
@@ -199,6 +205,22 @@ class CloudProvision(object):
             displayStr = 'AZ_VIRTUAL_NETWORK="{}"\nAZ_CAPIC_SUBNET_ID="{}"\nAZ_CAPIC_REGION="{}"'.format(vnet_name, node_subnetID, region)
             print(displayStr)
 
+    def print_eks_setup(self):
+        def get_eks_subnets(sk):
+            res = []
+            for sinfo in self.config["net_config"]["subnets"][sk]:
+                subnetID = self.getSubnetID(sinfo["cidr"])
+                res.append(subnetID)
+            return res
+
+        pub_snets = get_eks_subnets("public")
+        pvt_snets = get_eks_subnets("private")
+        self.setupNatGw(pub_snets[0], pvt_snets)
+        with open(".acirc", "w") as rcfile:
+            infoStr = "|public subnets|: {}\n|private subnets|: {}\n".format(pub_snets, pvt_snets)
+            rcfile.write(infoStr)
+            print(infoStr)
+
     def cfg_init(self):
         self.config["oper"] = {"vrf_encap_id": 1}
         node_snet = self.config["net_config"]["node_subnet"]
@@ -207,9 +229,42 @@ class CloudProvision(object):
         else:
             self.config["private_subnets"] = []
 
+    def setupSubnetInfo(self):
+        # each cloud subnet has a cidr and a zone
+        self.cloud_subnets = []
+        self.ul_epg_info = {}
+        if self.args.flavor == "eks":
+            netKeys = ["public", "private"]
+            for k in netKeys:
+                snets = self.config["net_config"]["subnets"][k]
+                self.cloud_subnets += snets
+                epg_name = "ul_" + k
+                sel = []
+                for s in snets:
+                    sel.append(s["cidr"])
+                self.ul_epg_info[epg_name] = sel
+        if self.args.flavor == "aks":
+            snet = {"cidr": self.config["net_config"]["node_subnet"],
+                    "zone": self.config["cloud"]["zone"]}
+            self.cloud_subnets.append(snet)
+        if self.args.flavor == "cloud":
+            n_snet = {"cidr": self.config["net_config"]["node_subnet"],
+                      "zone": self.config["cloud"]["zone"]}
+            self.cloud_subnets.append(n_snet)
+            b_snet = {"cidr": self.config["net_config"]["bootstrap_subnet"],
+                      "zone": self.config["cloud"]["zone"]}
+            self.cloud_subnets.append(b_snet)
+
     def cfg_validate(self):
         required = []
-        if self.args.flavor == "cloud":
+        if self.args.flavor == "eks":
+            required = [
+                "net_config/machine_cidr",
+                "net_config/subnets/public",
+                "net_config/subnets/private",
+                "cloud/provider"
+            ]
+        elif self.args.flavor == "cloud":
             required = [
                 "net_config/machine_cidr",
                 "net_config/bootstrap_subnet",
@@ -284,10 +339,20 @@ class CloudProvision(object):
 
         appName = self.configurator.vmm_scoped_name("ul_ap")
         path, data = self.configurator.capic_cloudApp(appName)
-        node_epg_obj = self.configurator.capic_underlay_epg("ul-nodes", self.config["net_config"]["node_subnet"])
-        data["cloudApp"]["children"].append(node_epg_obj)
-        inet_epg_obj = self.configurator.capic_ext_epg("inet-ext", "0.0.0.0/0")
-        data["cloudApp"]["children"].append(inet_epg_obj)
+
+        if self.args.flavor == "aks":
+            node_epg_obj = self.configurator.capic_underlay_epg("ul-nodes", [self.config["net_config"]["node_subnet"]])
+            data["cloudApp"]["children"].append(node_epg_obj)
+            inet_epg_obj = self.configurator.capic_ext_epg("inet-ext", "0.0.0.0/0")
+            data["cloudApp"]["children"].append(inet_epg_obj)
+        elif self.args.flavor == "eks":
+            # add a cloud epg based on subnets
+            for name, sel in self.ul_epg_info.items():
+                node_epg_obj = self.configurator.capic_underlay_epg(name, sel)
+                data["cloudApp"]["children"].append(node_epg_obj)
+            # add an external epg
+            inet_epg_obj = self.configurator.capic_ext_epg("inet-ext", "0.0.0.0/0")
+            data["cloudApp"]["children"].append(inet_epg_obj)
         return path, data
 
     def getOverlayDn(self):
@@ -523,7 +588,7 @@ class CloudProvision(object):
         resp = ec2_c.create_nat_gateway(SubnetId=subnet, AllocationId=eip, TagSpecifications=tagSpec)
         return resp['NatGateway']['NatGatewayId']
 
-    def provision_natgw_route(self, subnet, gwId, tag):
+    def provision_natgw_route(self, subnets, gwId, tag):
         region = self.config["aci_config"]["vrf"]["region"]
         ec2_c = boto3.client('ec2', region_name=region)
         filters = [
@@ -536,7 +601,7 @@ class CloudProvision(object):
                     print("Existing RouteTable found")
                 return
 
-        vpc_id = self.getVpcId(subnet)
+        vpc_id = self.getVpcId(subnets[0])
         ec2_r = boto3.resource('ec2', region_name=region)
         r_tags = [{"Key": "orchestrator", "Value": tag}]
         vpc = ec2_r.Vpc(id=vpc_id)
@@ -544,8 +609,9 @@ class CloudProvision(object):
         route_table.create_tags(Tags=r_tags)
         route_table.create_route(DestinationCidrBlock='0.0.0.0/0',
                                  GatewayId=gwId)
-        self.remove_rt_association(subnet)
-        route_table.associate_with_subnet(SubnetId=subnet)
+        for subnet in subnets:
+            self.remove_rt_association(subnet)
+            route_table.associate_with_subnet(SubnetId=subnet)
 
     def getVpcId(self, subnet):
         region = self.config["aci_config"]["vrf"]["region"]
@@ -575,7 +641,7 @@ class CloudProvision(object):
         annStr = "acc-provision-{}-{}".format(tn_name, vmm_name)
         return annStr
 
-    def setupNatGw(self, pubSubnet, pvtSubnet):
+    def setupNatGw(self, pubSubnet, pvtSubnets):
         if "skip-nat-gw" in self.config["cloud"]:
             if self.config["cloud"]["skip-nat-gw"]:
                 print("Skipping NAT Gateway setup")
@@ -584,7 +650,7 @@ class CloudProvision(object):
         natGw = self.provision_natgw(pubSubnet, tag)
         available = self.wait_for_natgw(natGw, 'available', timeout=120)
         assert available
-        self.provision_natgw_route(pvtSubnet, natGw, tag)
+        self.provision_natgw_route(pvtSubnets, natGw, tag)
 
     def cleanup_natgw(self):
         if "skip-nat-gw" in self.config["cloud"]:

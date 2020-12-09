@@ -1154,6 +1154,10 @@ spec:
             - name: MULTUS
               value: 'True'
             {% endif %}
+            {% if config.flavor == "eks" %}
+            - name: SKIP_DOCKER_CHECK
+              value: "true"
+            {% endif %}
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
