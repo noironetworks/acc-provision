@@ -1087,7 +1087,6 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-containers.yaml')
         outname = operator_output
-        applyname = operator_output
         tar_path = operator_tar
 
         # If no output containers(-o) deployment file is provided, print to stdout.
@@ -1174,7 +1173,6 @@ def generate_cf_yaml(config, output, operator_output=None, operator_cr_output=No
 
     if output and output != "/dev/null":
         outname = output
-        applyname = output
         if output == "-":
             outname = "<stdout>"
             applyname = "<filename>"
@@ -1387,7 +1385,7 @@ def get_versions(versions_url):
 
 
 def check_overlapping_subnets(config):
-    """check if subnets are overlapping."""
+    """Check if subnets are overlapping."""
     subnet_info = {
         "pod_subnet": config["net_config"]["pod_subnet"],
         "node_subnet": config["net_config"]["node_subnet"],

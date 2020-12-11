@@ -1,5 +1,4 @@
 from subprocess import Popen, PIPE
-import os
 import os.path as path
 
 def call_git_rev_parse():
@@ -55,6 +54,6 @@ def get_git_version():
 		write_release_version(version)
 
 	if version_formatted is None:
-        	version_formatted = "Release info not in the current build."
+			version_formatted = "Release info not in the current build."
 	
 	return version_formatted
