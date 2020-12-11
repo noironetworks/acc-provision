@@ -1044,7 +1044,7 @@ spec:
             - name: NODE_EPG
               value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
             {% endif %}
-            {% if ( (config.multus.disable) and (config.kube_config.generate_installer_files or config.kube_config.generate_cnet_file) ) %}
+            {% if config.multus.disable != True %}
             - name: MULTUS
               value: 'True'
             {% endif %}
@@ -1069,7 +1069,7 @@ spec:
               readOnly: true
               mountPropagation: HostToContainer
             {% endif %}
-            {% if ( (config.multus.disable) and (config.kube_config.generate_installer_files or config.kube_config.generate_cnet_file) ) %}
+            {% if config.multus.disable != True %}
             - name: multus-cni-conf
               mountPath: /mnt/multus-cni-conf
             {% endif %}
@@ -1177,7 +1177,7 @@ spec:
           hostPath:
             path: /run/netns
         {% endif %}
-        {% if ( (config.multus.disable) and (config.kube_config.generate_installer_files or config.kube_config.generate_cnet_file) ) %}
+        {% if config.multus.disable != True %}
         - name: multus-cni-conf
           hostPath:
             path: /var/run/multus/
