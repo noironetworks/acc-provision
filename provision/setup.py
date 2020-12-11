@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import os, sys 
+import os, sys
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 from gitversion.gitversion import get_git_version

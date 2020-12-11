@@ -317,18 +317,6 @@ def test_flavor_dockerucp_30():
     )
 
 
-'''@in_testdir
-def test_flavor_cloudfoundry_10():
-    run_provision(
-        "flavor_cf_10.inp.yaml",
-        "flavor_cf_10.cf.yaml",
-        None,
-        None,
-        "flavor_cf_10.apic.txt",
-        overrides={"flavor": "cloudfoundry-1.0"}
-    )'''
-
-
 @in_testdir
 def test_flavor_localhost():
     run_provision(
@@ -572,24 +560,6 @@ def test_devnull_errors():
             assert tmperr.read() == stderr.read()
 
 
-'''@in_testdir
-def test_flavor_cf_devnull_errors():
-    with tempfile.NamedTemporaryFile("w+") as tmperr:
-        sys.stderr = tmperr
-        try:
-            args = get_args(flavor="cloudfoundry-1.0")
-            print(acc_provision.main(args, no_random=True))
-        except SystemExit:
-            # expected to exit with errors
-            pass
-        finally:
-            tmperr.flush()
-            sys.stderr = sys.__stderr__
-            tmperr.seek(0)
-        with open("flavor_cf_devnull.stderr.txt", "r") as stderr:
-            assert tmperr.read() == stderr.read()'''
-
-
 @in_testdir
 def test_helpmsg():
     with tempfile.NamedTemporaryFile("w") as tmpout:
@@ -768,11 +738,6 @@ def test_normalize_cidr():
     assert ipv4 == '10.8.0.0/16'
     ipv6 = acc_provision.normalize_cidr('2001:db8::8a2e:370:0001/16')
     assert ipv6 == '2001::/16'
-
-
-'''@in_testdir
-def test_certificate_generation_cloud_foundry():
-    create_certificate("flavor_cf_10.inp.yaml", "user.crt", output='temp.yaml', flavor="cloudfoundry-1.0")'''
 
 
 def create_certificate(input_file, cert_file, **overrides):
