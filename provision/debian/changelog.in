@@ -1,5 +1,11 @@
-acc-provision (@VERSION@-@REVISION@) xenial; urgency=low
+acc-provision (@VERSION@-@REVISION@) bionic; urgency=low
 
-  * [Placeholder]
+  * Update for bionic and python3
+
+ -- Tom Flynn <tom.flynn@gmail.com>  Mon, 14 Dec 2020 12:00:00 +0000
+
+acc-provision (1.0.0-1) xenial; urgency=low
+
+  * Initial version
 
  -- Mandeep Dhami <dhami@noironetworks.com>  Tue, 01 Aug 2017 12:00:00 +0000
