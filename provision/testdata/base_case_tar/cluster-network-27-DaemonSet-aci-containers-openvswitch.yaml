@@ -23,7 +23,7 @@ spec:
       - env:
         - name: OVS_RUNDIR
           value: /usr/local/var/run/openvswitch
-        image: noiro/openvswitch:5.2.1.0.5681a9b
+        image: noiro/openvswitch:5.1.3.0.6f00d68
         imagePullPolicy: Always
         livenessProbe:
           exec:
