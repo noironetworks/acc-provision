@@ -89,6 +89,8 @@ spec:
         name: opflex-server
         ports:
         - containerPort: 19999
+        - containerPort: 9632
+          name: metrics
         securityContext:
           capabilities:
             add:
