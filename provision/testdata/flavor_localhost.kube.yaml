@@ -1283,7 +1283,7 @@ spec:
         network-plugin: aci-containers
     spec:
       containers:
-      - image: noirolabs/aci-containers-operator:5.1.1.1.1ae238a
+      - image: noirolabs/aci-containers-operator:5.1.1.2.1ae238a
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
