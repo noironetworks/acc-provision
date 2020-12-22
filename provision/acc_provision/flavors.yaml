@@ -972,21 +972,37 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 9
-  k8s-localhost:
-    desc: Kubernetes localhost
+  k8s-overlay:
+    desc: Kubernetes basic overlay
     default_version: 5.2
+    overlay: True
     config:
+      aci_config:
+        use_legacy_kube_naming_convention: True
       kube_config:
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
-        skip_namespace_resource_hostagent: True
+        skip_namespace_resource_hostagent: False
         skip_replicationcontroller_resource_hostagent: False
         all_access_controller_clusterrole: True
         no_hostagent_networking_clusterrole: False
-        no_hostagent_deployment_clusterrole: True
+        no_hostagent_deployment_clusterrole: False
         run_opflex_server_container: True
         run_gbp_container: True
         use_opflex_server_volume: True
+        opflex_mode: overlay
+        system_namespace: kube-system
+        use_cnideploy_initcontainer: True
+        use_privileged_containers: True
+        use_host_netns_volume: True
+        use_openshift_run_level: False
+        ep_registry: k8s
+      istio_config:
+        install_istio: False
+      drop_log_config:
+        enable: true
+      snat_operator:
+        snat_namespace: kube-system
     status: Experimental
     hidden: False
     order: 20

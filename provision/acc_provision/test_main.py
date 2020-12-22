@@ -325,7 +325,7 @@ def test_flavor_localhost():
         None,
         None,
         None,
-        overrides={"flavor": "k8s-localhost"}
+        overrides={"flavor": "k8s-overlay"}
     )
 
 
@@ -683,7 +683,15 @@ def copy_file(expectedyaml, output, debug, generated):
 def compare_yaml(expectedyaml, output, debug, generated, cleanupFunc):
     if expectedyaml is not None:
         with open(expectedyaml, "r") as expected:
-            assert output.read() == expected.read(), cleanupFunc()
+            outputtxt = output.read()
+            expectedtxt = expected.read()
+            if outputtxt != expectedtxt:
+                expectedfile = open("expected.txt", "w")
+                expectedfile.write(expectedtxt)
+                outputfile = open("output.txt", "w")
+                outputfile.write(outputtxt)
+
+            assert outputtxt == expectedtxt, cleanupFunc()
 
 
 def compare_tar(expected, output, debug, generated, cleanupFunc):

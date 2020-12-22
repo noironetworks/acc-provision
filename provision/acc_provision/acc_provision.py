@@ -584,6 +584,12 @@ def config_adjust(args, config, prov_apic, no_random):
         for ns in ns_list:
             adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
+    if config["flavor"] == "k8s-overlay":
+        ns_list = ["kube-system"]
+        adj_config["kube_config"]["namespace_default_endpoint_group"].clear()
+        for ns in ns_list:
+            adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
+
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_type"):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
@@ -716,32 +722,45 @@ def config_validate(flavor_opts, config):
         if x else Raise(Exception("Invalid name"))
     get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
 
-    checks = {
-        # ACI config
-        "aci_config/system_id": (get(("aci_config", "system_id")),
-                                 lambda x: required(x) and isname(x, 32)),
-        "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
-                                        is_valid_refreshtime),
-        "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
-        "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
-        "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
-                                  required),
-        # Istio config
-        "istio_config/install_profile": (get(("istio_config", "install_profile")),
-                                         is_valid_istio_install_profile),
-        "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
-                                          is_valid_image_pull_policy),
-        # Network Config
-        "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
-                                  required),
-        "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                   required),
-    }
-
-    if isOverlay(config["flavor"]):
-        extra_checks = {
-            "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
+    if not isOverlay(config["flavor"]) or config["aci_config"]["capic"]:
+        checks = {
+            # ACI config
+            "aci_config/system_id": (get(("aci_config", "system_id")),
+                                     lambda x: required(x) and isname(x, 32)),
+            "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
+                                            is_valid_refreshtime),
+            "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
+            "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
+            "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
+                                      required),
+            # Istio config
+            "istio_config/install_profile": (get(("istio_config", "install_profile")),
+                                             is_valid_istio_install_profile),
+            "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
+                                              is_valid_image_pull_policy),
+            # Network Config
+            "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
+                                      required),
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
         }
+    else:
+        checks = {
+            "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
+                                              is_valid_image_pull_policy),
+            # Network Config
+            "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
+                                      required),
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
+        }
+    if isOverlay(config["flavor"]):
+        if (config["aci_config"]["capic"]):
+            extra_checks = {
+                "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
+            }
+        else:
+            extra_checks = {}
     else:
         extra_checks = {
             "aci_config/aep": (get(("aci_config", "aep")), required),
@@ -1112,18 +1131,20 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         # Generate and convert containers deployment to base64 and add
         # as configMap entry to the operator deployment.
         config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
-        oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
-        cmap_temp = ''.join(oper_cmap_template.stream(config=config))
+        if config["flavor"] != "k8s-overlay":
+            oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
+            cmap_temp = ''.join(oper_cmap_template.stream(config=config))
 
-        op_template = get_jinja_template('aci-operators.yaml')
-        output_from_parsed_template = op_template.render(config=config)
+            op_template = get_jinja_template('aci-operators.yaml')
+            output_from_parsed_template = op_template.render(config=config)
 
-        # Generate acioperator CRD from template and add it to top
-        op_crd_template = get_jinja_template('aci-operators-crd.yaml')
-        op_crd_output = op_crd_template.render(config=config)
-
-        new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
-        new_deployment_file = '---'.join(new_parsed_yaml)
+            # Generate acioperator CRD from template and add it to top
+            op_crd_template = get_jinja_template('aci-operators-crd.yaml')
+            op_crd_output = op_crd_template.render(config=config)
+            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            new_deployment_file = '---'.join(new_parsed_yaml)
+        else:
+            new_deployment_file = temp
 
         if operator_output != sys.stdout:
             with open(operator_output, "w") as fh:
@@ -1131,28 +1152,30 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         else:
             op_template.stream(config=config).dump(operator_output)
 
-        # The next few files are to generate tar file with each
-        # containers and operator yaml in separate file. This is needed
-        # by OpenShift >= 4.3. If tar_path is provided(-z), we save the tar
-        # with that filename, else we use the provided containers
-        # deployment filepath. If neither is provided, we don't generate
-        # the tar.
-        if tar_path == "-":
-            tar_path = "/dev/null"
-        else:
-            deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
-            generate_operator_tar(tar_path, deployment_docs, config)
-
-        op_cr_template = get_jinja_template('aci-operators-cr.yaml')
-        if operator_cr_output and operator_cr_output != "/dev/null":
-            if operator_cr_output == "-":
-                operator_cr_output = "/dev/null"
+        if config["flavor"] != "k8s-overlay":
+            # The next few files are to generate tar file with each
+            # containers and operator yaml in separate file. This is needed
+            # by OpenShift >= 4.3. If tar_path is provided(-z), we save the tar
+            # with that filename, else we use the provided containers
+            # deployment filepath. If neither is provided, we don't generate
+            # the tar.
+            if tar_path == "-":
+                tar_path = "/dev/null"
             else:
-                info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
-        op_cr_template.stream(config=config).dump(operator_cr_output)
+                deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
+                generate_operator_tar(tar_path, deployment_docs, config)
+
+            op_cr_template = get_jinja_template('aci-operators-cr.yaml')
+            if operator_cr_output and operator_cr_output != "/dev/null":
+                if operator_cr_output == "-":
+                    operator_cr_output = "/dev/null"
+                else:
+                    info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
+            op_cr_template.stream(config=config).dump(operator_cr_output)
 
         info("Writing kubernetes infrastructure YAML to %s" % outname)
-        info("Writing ACI CNI operator tar to %s" % tar_path)
+        if config["flavor"] != "k8s-overlay":
+            info("Writing ACI CNI operator tar to %s" % tar_path)
         info("Apply infrastructure YAML using:")
         info("  %s apply -f %s" %
              (config["kube_config"]["kubectl"], applyname))
@@ -1588,6 +1611,9 @@ def provision(args, apic_file, no_random):
     if not callable(gen):
         gen = globals()[gen]
     gen(config, output_file, output_tar, operator_cr_output_file)
+
+    if flavor == "k8s-overlay":
+        return True
 
     if (config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
         apic = get_apic(config)

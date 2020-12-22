@@ -390,10 +390,13 @@ data:
     {
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
+        {% if config.flavor != "k8s-overlay" %}
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        {% endif %}
         {% if config.aci_config.capic %}
         "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
         {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
@@ -405,6 +408,7 @@ data:
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         "aci-app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        {% endif %}
         {% if config.aci_config.capic %}
         "lb-type": "None",
         {% endif %}
@@ -412,19 +416,23 @@ data:
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
         {% endif %}
-        {% if not config.aci_config.capic %}
+        {% if not config.aci_config.capic and config.flavor != "k8s-overlay" %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
         "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
         {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
         "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
         "aci-service-monitor-interval": {{ config.net_config.service_monitor_interval|json }},
         "aci-pbr-tracking-non-snat": {{ config.net_config.pbr_tracking_non_snat|json }},
+        {% endif %}
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        {% if config.flavor != "k8s-overlay" %}
         "aci-vrf-dn": {{ config.aci_config.vrf.dn|json }},
         "aci-l3out": {{config.aci_config.l3out.name|json}},
         "aci-ext-networks": {{ config.aci_config.l3out.external_networks|json|indent(width=8) }},
-        {% if config.aci_config.capic %}
+        {% endif %}
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
         {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
@@ -437,7 +445,9 @@ data:
             "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
         {% endif %}
         },
+        {% if config.flavor != "k8s-overlay" %}
         "max-nodes-svc-graph": {{ config.kube_config.max_nodes_svc_graph|json }},
+        {% endif %}
         "namespace-default-endpoint-group": {
             {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
             "{{ns}}": {
@@ -479,16 +489,18 @@ data:
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
-        {% if config.aci_config.capic %}
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "aci-vrf": {{config.aci_config.overlay_vrf|json}},
         {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         {% endif %}
         "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        {% if config.flavor != "k8s-overlay" %}
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
         "pod-subnet": {{ config.net_config.pod_subnet|json }},
         "node-subnet": {{ config.net_config.node_subnet|json }},
+        {% endif %}
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
         {% if config.net_config.interface_mtu %}
@@ -584,6 +596,7 @@ data:
     "start": "{{config.kube_config.snat_operator.port_range.start}}"
     "end": "{{config.kube_config.snat_operator.port_range.end}}"
     "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
+{% if config.flavor != "k8s-overlay" %}
 ---
 apiVersion: v1
 kind: Secret
@@ -595,6 +608,7 @@ metadata:
 data:
   user.key: {{config.aci_config.sync_login.key_data|base64enc}}
   user.crt: {{config.aci_config.sync_login.cert_data|base64enc}}
+{% endif %}
 {% if config.aci_config.capic %}
 ---
 apiVersion: v1
@@ -822,6 +836,7 @@ rules:
   - podifs
   verbs:
   - '*'
+{% if config.flavor != "k8s-overlay" %}
 - apiGroups:
   - apps.openshift.io
   resources:
@@ -830,6 +845,7 @@ rules:
   - list
   - watch
   - get
+{% endif %}
 - apiGroups:
   - discovery.k8s.io
   resources:
@@ -1121,8 +1137,13 @@ spec:
             - name: TENANT
               value: {{config.kube_config.default_endpoint_group.tenant|json}}
             {% if config.kube_config.run_gbp_container %}
+            {% if config.aci_config.capic %}
             - name: NODE_EPG
               value: {{config.aci_config.nodes_epg|json}}
+            {% else %}
+            - name: NODE_EPG
+              value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
+            {% endif %}
             - name: OPFLEX_MODE
               value: overlay
             {% else %}
@@ -1442,8 +1463,10 @@ spec:
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
+            {% if config.flavor != "k8s-overlay" %}
             - name: aci-user-cert-volume
               mountPath: /usr/local/etc/aci-cert/
+            {% endif %}
           livenessProbe:
             httpGet:
               path: /status
@@ -1470,9 +1493,11 @@ spec:
           secret:
             secretName: kafka-client-certificates
         {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
         - name: aci-user-cert-volume
           secret:
             secretName: aci-user-cert
+        {% endif %}
         - name: controller-config-volume
           configMap:
             name: aci-containers-config
