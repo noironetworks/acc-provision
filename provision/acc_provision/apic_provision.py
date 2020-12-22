@@ -5070,9 +5070,13 @@ class ApicKubeConfig(object):
                 openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, default_provide_api,
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
-                dockerucp_flavor_specific_handling(data, items)
+                dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
             elif flavor == "RKE-1.2.3":
-                rke_flavor_specific_handling(aci_prefix, data, items, self.config["rke_config"])
+                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+
+        # Adding prometheus opflex-agent contract for all flavors
+        add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)
+
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
 
@@ -5254,6 +5258,221 @@ class ApicKubeConfig(object):
                                        is_all_filter, is_node_contract,
                                        dns_contract] + gorouter_contracts)])
         return path, data
+
+
+def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix):
+
+    consumer_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsCons",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "%sprometheus-opflex-agent" % contract_prefix
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+    for epg in ["%sdefault" % epg_prefix, "%ssystem" % epg_prefix]:
+        for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+            if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                break
+
+    provider_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsProv",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "%sprometheus-opflex-agent" % contract_prefix,
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+    for epg in ["%snodes" % epg_prefix]:
+        for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+            if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provider_contract)
+                break
+
+    filters = collections.OrderedDict(
+        [
+            (
+                "vzFilter",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "name",
+                                        "%sprometheus-opflex-agent-filter" % filter_prefix,
+                                    )
+                                ]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "vzEntry",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "attributes",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "name",
+                                                                    "prometheus-opflex-agent",
+                                                                ),
+                                                                (
+                                                                    "etherT",
+                                                                    "ip",
+                                                                ),
+                                                                (
+                                                                    "prot",
+                                                                    "tcp",
+                                                                ),
+                                                                (
+                                                                    "dFromPort",
+                                                                    "9612",
+                                                                ),
+                                                                (
+                                                                    "dToPort",
+                                                                    "9612",
+                                                                ),
+                                                                (
+                                                                    "stateful",
+                                                                    "no",
+                                                                ),
+                                                                (
+                                                                    "tcpRules",
+                                                                    "",
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    )
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                )
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    data['fvTenant']['children'].append(filters)
+
+    contract = collections.OrderedDict(
+        [
+            (
+                "vzBrCP",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [("name", "%sprometheus-opflex-agent" % contract_prefix)]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "vzSubj",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "attributes",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "name",
+                                                                    "prometheus-opflex-agent-subj",
+                                                                ),
+                                                                (
+                                                                    "consMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                                (
+                                                                    "provMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ),
+                                                    (
+                                                        "children",
+                                                        [
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "vzRsSubjFiltAtt",
+                                                                        collections.OrderedDict(
+                                                                            [
+                                                                                (
+                                                                                    "attributes",
+                                                                                    collections.OrderedDict(
+                                                                                        [
+                                                                                            (
+                                                                                                "tnVzFilterName",
+                                                                                                "%sprometheus-opflex-agent-filter" % filter_prefix,
+                                                                                            )
+                                                                                        ]
+                                                                                    ),
+                                                                                )
+                                                                            ]
+                                                                        ),
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ],
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                )
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    data['fvTenant']['children'].append(contract)
 
 
 def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix, default_provide_api,
@@ -5680,114 +5899,128 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                 break
 
 
-def dockerucp_flavor_specific_handling(data, ports):
+def dockerucp_flavor_specific_handling(data, ports, api_filter_prefix):
 
     if ports is None or len(ports) == 0:
         err("Error in getting ports for flavor")
     else:
-        for port in ports:
-            extra_port = collections.OrderedDict(
-                [
-                    (
-                        "vzEntry",
-                        collections.OrderedDict(
-                            [
-                                (
-                                    "attributes",
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "name",
-                                                port["name"],
+        tenant_children = data['fvTenant']['children']
+        api_filter_name = "%sapi-filter" % api_filter_prefix
+        for child in tenant_children:
+            if 'vzFilter' in child.keys() and child['vzFilter']['attributes']['name'] == api_filter_name:
+                filter_entries = []
+                for port in ports:
+                    extra_port = collections.OrderedDict(
+                        [
+                            (
+                                "vzEntry",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "name",
+                                                        port["name"],
+                                                    ),
+                                                    (
+                                                        "etherT",
+                                                        port["etherT"],
+                                                    ),
+                                                    (
+                                                        "prot",
+                                                        port["prot"],
+                                                    ),
+                                                    (
+                                                        "dFromPort",
+                                                        str(port["range"][0]),
+                                                    ),
+                                                    (
+                                                        "dToPort",
+                                                        str(port["range"][1]),
+                                                    ),
+                                                    (
+                                                        "stateful",
+                                                        str(port["stateful"]),
+                                                    ),
+                                                    (
+                                                        "tcpRules",
+                                                        "",
+                                                    ),
+                                                ]
                                             ),
-                                            (
-                                                "etherT",
-                                                port["etherT"],
-                                            ),
-                                            (
-                                                "prot",
-                                                port["prot"],
-                                            ),
-                                            (
-                                                "dFromPort",
-                                                str(port["range"][0]),
-                                            ),
-                                            (
-                                                "dToPort",
-                                                str(port["range"][1]),
-                                            ),
-                                            (
-                                                "stateful",
-                                                str(port["stateful"]),
-                                            ),
-                                            (
-                                                "tcpRules",
-                                                "",
-                                            ),
-                                        ]
-                                    ),
-                                )
-                            ]
-                        ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
                     )
-                ]
-            )
-            data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+                    filter_entries.append(extra_port)
+                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                break
 
 
-def rke_flavor_specific_handling(aci_prefix, data, ports, rke_config):
+def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke_config):
 
     if ports is None or len(ports) == 0:
         err("Error in getting ports for flavor")
     else:
-        for port in ports:
-            extra_port = collections.OrderedDict(
-                [
-                    (
-                        "vzEntry",
-                        collections.OrderedDict(
-                            [
-                                (
-                                    "attributes",
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "name",
-                                                port["name"],
+        tenant_children = data['fvTenant']['children']
+        api_filter_name = "%sapi-filter" % api_filter_prefix
+        for child in tenant_children:
+            if 'vzFilter' in child.keys() and child['vzFilter']['attributes']['name'] == api_filter_name:
+                filter_entries = []
+                for port in ports:
+                    extra_port = collections.OrderedDict(
+                        [
+                            (
+                                "vzEntry",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "name",
+                                                        port["name"],
+                                                    ),
+                                                    (
+                                                        "etherT",
+                                                        port["etherT"],
+                                                    ),
+                                                    (
+                                                        "prot",
+                                                        port["prot"],
+                                                    ),
+                                                    (
+                                                        "dFromPort",
+                                                        str(port["range"][0]),
+                                                    ),
+                                                    (
+                                                        "dToPort",
+                                                        str(port["range"][1]),
+                                                    ),
+                                                    (
+                                                        "stateful",
+                                                        str(port["stateful"]),
+                                                    ),
+                                                    (
+                                                        "tcpRules",
+                                                        "",
+                                                    ),
+                                                ]
                                             ),
-                                            (
-                                                "etherT",
-                                                port["etherT"],
-                                            ),
-                                            (
-                                                "prot",
-                                                port["prot"],
-                                            ),
-                                            (
-                                                "dFromPort",
-                                                str(port["range"][0]),
-                                            ),
-                                            (
-                                                "dToPort",
-                                                str(port["range"][1]),
-                                            ),
-                                            (
-                                                "stateful",
-                                                str(port["stateful"]),
-                                            ),
-                                            (
-                                                "tcpRules",
-                                                "",
-                                            ),
-                                        ]
-                                    ),
-                                )
-                            ]
-                        ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
                     )
-                ]
-            )
-            data['fvTenant']['children'][7]['vzFilter']['children'].append(extra_port)
+                    filter_entries.append(extra_port)
+                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                break
 
     if rke_config is not None:
         for ctrct in rke_config["contracts"]:
