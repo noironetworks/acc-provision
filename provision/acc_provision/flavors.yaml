@@ -972,6 +972,59 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 9
+  RKE-1.2.3:
+    desc: Rancher Kubernetes Engine min version 1.2.3
+    default_version: 5.2
+    options:
+      template_generator: generate_rancher_yaml
+    config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
+      aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        vmm_domain:
+          type: Kubernetes
+          injected_cluster_type: RKE
+          injected_cluster_provider: Rancher
+      istio_config:
+        install_istio: False
+      multus:
+        disable: False
+    hidden: False
+    status: null
+    order: 20
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 5.2
@@ -1005,7 +1058,7 @@ flavors:
         snat_namespace: kube-system
     status: Experimental
     hidden: False
-    order: 20
+    order: 21
   aks:
     desc: Azure Kubernetes Service
     default_version: 5.2
@@ -1064,7 +1117,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: False
-    order: 21
+    order: 22
   cloud:
     desc: Openshift IPI/AWS
     default_version: 5.2
@@ -1192,7 +1245,7 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 22
+    order: 23
   eks:
     desc: Elastic Kubernetes Service (aws)
     default_version: 5.2
@@ -1206,7 +1259,6 @@ flavors:
         provider: aws
       kube_config:
         no_priority_class: True
-        use_openshift_run_level: True
         system_namespace: aci-containers-system
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
@@ -1319,57 +1371,4 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 23
-  RKE-1.2.3:
-    desc: Rancher Kubernetes Engine min version 1.2.3
-    default_version: 5.2
-    options:
-      template_generator: generate_rancher_yaml
-    config:
-      rke_config:
-        contracts:
-          - name: prometheus-monitoring
-            provided: ["aci-containers-system"]
-            consumed: ["aci-containers-istio"]
-            filter: "access-prometheus"
-        filters:
-          - name: access-prometheus
-            items:
-              - name: http
-                range: [8080, 8080]
-                etherT: ip
-                prot: tcp
-                stateful: "no"
-      aci_config:
-        items:
-          - name: metrics-kubelet
-            range: [10250, 10250]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: monitoring-node
-            range: [9796, 9796]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: monitoring-ingress
-            range: [10254, 10254]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: rancher-ui
-            range: [443, 443]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-        vmm_domain:
-          type: Kubernetes
-          injected_cluster_type: RKE
-          injected_cluster_provider: Rancher
-      istio_config:
-        install_istio: False
-      multus:
-        disable: False
-    hidden: False
-    status: null
     order: 24
