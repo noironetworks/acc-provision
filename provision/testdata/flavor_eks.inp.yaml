@@ -1,0 +1,78 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: ekstest2
+  #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  apic_hosts:                   # List of cAPIC hosts to connect for APIC API
+  - localhost:50002
+  tenant:
+    name: csrtest
+  vrf:                          # This VRF used to create all csrtestnetes EPs
+    name: ULinteg
+    tenant: csrtest
+    region: us-west-1                    # REQUIRED -- your aws region
+  #custom_epgs:                 # List of additional endpoint-group names
+  #  - epg-a            # to configure for use with annotations
+  #  - custom_group2
+
+#
+# Networks used by ACI containers
+#
+net_config:
+  machine_cidr: 42.0.0.0/16
+  subnets:
+    public:
+        - cidr: 42.0.0.0/24
+          zone: us-west-1a
+        - cidr: 42.0.1.0/24
+          zone: us-west-1b
+    private:
+        - cidr: 42.0.2.0/24
+          zone: us-west-1a
+        - cidr: 42.0.3.0/24
+          zone: us-west-1b
+  pod_subnet: 14.3.0.1/16       # Subnet to use for Kubernetes
+                                #   Pods/CloudFoundry containers
+  extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
+  extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
+  node_svc_subnet: 10.5.0.1/24  
+  opflex_server_port: 19999 
+  #interface_mtu: 1400
+
+#
+# Configuration for container registry
+# Update if a custom container registry has been setup
+#
+registry:
+  image_prefix: noirolabs
+  aci_containers_controller_version: jefferson-test
+  aci_containers_host_version: master-test
+  aci_containers_operator_version: jefferson-test
+  cnideploy_version: jefferson-test
+  openvswitch_version: jefferson-test
+  opflex_agent_version: jefferson-test
+  opflex_server_version: jefferson-test
+  gbp_version: jefferson-test
+
+  
+  # image_pull_secret: secret_name      # (if needed)
+
+kube_config:
+  run_snat_container: false
+  run_gbp_container: true
+  ep_registry: k8s
+  opflex_mode: overlay
+  # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
+  # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
+
+istio_config:
+  install_istio: False          # default is True
+
+cloud:
+  provider: aws
+  zone: us-west-1a
+  skip-nat-gw: True
+
+logging:
+  opflexagent_log_level: debug

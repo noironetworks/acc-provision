@@ -972,6 +972,59 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 9
+  RKE-1.2.3:
+    desc: Rancher Kubernetes Engine min version 1.2.3
+    default_version: 5.2
+    options:
+      template_generator: generate_rancher_yaml
+    config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
+      aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        vmm_domain:
+          type: Kubernetes
+          injected_cluster_type: RKE
+          injected_cluster_provider: Rancher
+      istio_config:
+        install_istio: False
+      multus:
+        disable: False
+    hidden: False
+    status: null
+    order: 20
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 5.2
@@ -1005,7 +1058,7 @@ flavors:
         snat_namespace: kube-system
     status: Experimental
     hidden: False
-    order: 20
+    order: 21
   aks:
     desc: Azure Kubernetes Service
     default_version: 5.2
@@ -1064,7 +1117,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: False
-    order: 21
+    order: 22
   cloud:
     desc: Openshift IPI/AWS
     default_version: 5.2
@@ -1192,57 +1245,130 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 22
-  RKE-1.2.3:
-    desc: Rancher Kubernetes Engine min version 1.2.3
-    default_version: 5.2
-    options:
-      template_generator: generate_rancher_yaml
-    config:
-      rke_config:
-        contracts:
-          - name: prometheus-monitoring
-            provided: ["aci-containers-system"]
-            consumed: ["aci-containers-istio"]
-            filter: "access-prometheus"
-        filters:
-          - name: access-prometheus
-            items:
-              - name: http
-                range: [8080, 8080]
-                etherT: ip
-                prot: tcp
-                stateful: "no"
-      aci_config:
-        items:
-          - name: metrics-kubelet
-            range: [10250, 10250]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: monitoring-node
-            range: [9796, 9796]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: monitoring-ingress
-            range: [10254, 10254]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-          - name: rancher-ui
-            range: [443, 443]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-        vmm_domain:
-          type: Kubernetes
-          injected_cluster_type: RKE
-          injected_cluster_provider: Rancher
-      istio_config:
-        install_istio: False
-      multus:
-        disable: False
-    hidden: False
-    status: null
     order: 23
+  eks:
+    desc: Elastic Kubernetes Service (aws)
+    default_version: 5.2
+    overlay: True
+    config:
+      net_config:
+        max_csr_tunnels: 0
+        csr_list: ""
+        node_subnet: "172.0.0.1/24"
+      cloud:
+        provider: aws
+      kube_config:
+        no_priority_class: True
+        system_namespace: aci-containers-system
+        use_aci_anywhere_crd: True
+        pod_exec_resources_controller: True
+        skip_namespace_resource_hostagent: False
+        skip_replicationcontroller_resource_hostagent: False
+        all_access_controller_clusterrole: True
+        no_hostagent_networking_clusterrole: False
+        no_hostagent_deployment_clusterrole: False
+        run_opflex_server_container: True
+        run_gbp_container: True
+        use_opflex_server_volume: True
+        use_cnideploy_initcontainer: True
+        generate_cnet_file: True
+        opflex_mode: overlay
+      aci_config:
+        contracts:
+          - name: allow-all-out
+            underlay: True
+            filter: match-all
+            provided: ["inet-ext"]
+            consumed: ["ul-private", "ul-public"]
+          - name: allow-all-in
+            underlay: True
+            filter: match-all
+            consumed: ["inet-ext"]
+            provided: ["ul-private", "ul-public"]
+          - name: allow-cidr
+            underlay: True
+            filter: match-oshift
+            provided: ["ul-private"]
+            consumed: ["cidr-ext"]
+          - name: allow-kube
+            underlay: False
+            filter: match-all
+            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
+          - name: allow-inet-out
+            filter: match-all
+            provided: ["aci-containers-inet-out"]
+            consumed: ["aci-containers-default"]
+        filters:
+            - name: match-all
+              entries:
+                - name: ent1
+            - name: match-boot
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [22, 22]
+                - name: ent2
+                  prot: tcp
+                  range: [19531, 19531]
+            - name: match-kube-api
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [80, 80]
+                - name: ent2
+                  prot: tcp
+                  range: [443, 443]
+                - name: ent3
+                  prot: tcp
+                  range: [6443, 6443]
+            - name: match-oshift
+              entries:
+                - name: ent1
+                  prot: tcp
+                  range: [22, 22]
+                - name: ent2
+                  prot: tcp
+                  range: [2379, 2380]
+                - name: ent3
+                  prot: tcp
+                  range: [6443, 6443]
+                - name: ent4
+                  prot: tcp
+                  range: [6641, 6642]
+                - name: ent5
+                  prot: tcp
+                  range: [9000, 9999]
+                - name: ent6
+                  prot: tcp
+                  range: [10250, 10250]
+                - name: ent7
+                  prot: tcp
+                  range: [10257, 10257]
+                - name: ent8
+                  prot: tcp
+                  range: [10259, 10259]
+                - name: ent9
+                  prot: tcp
+                  range: [22623, 22623]
+                - name: ent10
+                  prot: tcp
+                  range: [30000, 32767]
+                - name: ent11
+                  prot: udp
+                  range: [4789, 4789]
+                - name: ent12
+                  prot: udp
+                  range: [6081, 6081]
+                - name: ent13
+                  prot: udp
+                  range: [9000, 9999]
+                - name: ent14
+                  prot: udp
+                  range: [30000, 32767]
+                - name: ent15
+                  prot: icmp
+            
+    status: Experimental
+    hidden: False
+    order: 24

@@ -1148,13 +1148,18 @@ class ApicKubeConfig(object):
     def capic_underlay_epg(self, name, ipsel):
         provider = self.config["cloud"]["provider"]
         vrf_name = self.config["aci_config"]["vrf"]["name"]
-        match = "IP==\'{}\'".format(ipsel)
         children = []
         children.append(aci_obj("cloudRsCloudEPgCtx", [('tnFvCtxName', vrf_name)]))
-        if name == "ul-nodes" and provider == "azure":
-            children.append(aci_obj("cloudSvcEPSelector", [('name', "sel1"), ("matchExpression", match)]))
-        else:
-            children.append(aci_obj("cloudEPSelector", [('name', "sel1"), ("matchExpression", match)]))
+        count = 0
+        for sel in ipsel:
+            match = "IP==\'{}\'".format(sel)
+            count = count + 1
+            sel_id = "sel{}".format(count)
+            if name == "ul-nodes" and provider == "azure":
+                children.append(aci_obj("cloudSvcEPSelector", [('name', sel_id), ("matchExpression", match)]))
+            else:
+                children.append(aci_obj("cloudEPSelector", [('name', sel_id), ("matchExpression", match)]))
+
         self.add_configured_contracts(name, children)
 
         if name == "ul-nodes" and provider == "azure":
@@ -1191,9 +1196,9 @@ class ApicKubeConfig(object):
         appName = self.vmm_scoped_name("ul_ap")
         path, data = self.capic_cloudApp(appName)
 
-        boot_epg_obj = self.capic_underlay_epg("ul-boot", self.config["net_config"]["bootstrap_subnet"])
+        boot_epg_obj = self.capic_underlay_epg("ul-boot", [self.config["net_config"]["bootstrap_subnet"]])
         data["cloudApp"]["children"].append(boot_epg_obj)
-        node_epg_obj = self.capic_underlay_epg("ul-nodes", self.config["net_config"]["node_subnet"])
+        node_epg_obj = self.capic_underlay_epg("ul-nodes", [self.config["net_config"]["node_subnet"]])
         data["cloudApp"]["children"].append(node_epg_obj)
 
         cidr_epg_obj = self.capic_ext_epg("cidr-ext", self.config["net_config"]["machine_cidr"])
@@ -1320,15 +1325,8 @@ class ApicKubeConfig(object):
         )
         return rsToRegion
 
-    def capic_underlay_ccp(self):
+    def capic_underlay_ccp(self, subnets):
         underlay_cidr = self.config["net_config"]["machine_cidr"]
-        snetKeys = ["bootstrap_subnet", "node_subnet"]
-        subnets = []
-        for sk in snetKeys:
-            if sk in self.config["net_config"]:
-                snet = self.config["net_config"][sk]
-                subnets.append(snet)
-
         tn_name = self.config["aci_config"]["cluster_tenant"]
         underlay_vrf_name = self.config["aci_config"]["vrf"]["name"]
         ccp_name = underlay_vrf_name + "_ccp"
@@ -1460,7 +1458,10 @@ class ApicKubeConfig(object):
         underlay_ref = self.capic_underlay_p(underlay_ccp_dn)
         pod_subnet = self.config["net_config"]["pod_subnet"]
         cidr = pod_subnet.replace(".1/", ".0/")
-        _, cidrMo = self.cloudCidr(vmm_name, cidr, [cidr], "yes")
+        snets = []
+        snet_info = {"cidr": cidr, "zone": self.config["cloud"]["zone"]}
+        snets.append(snet_info)
+        _, cidrMo = self.cloudCidr(vmm_name, cidr, snets, "yes")
 
         child_list = [rsToRegion, underlay_ref, rsToCtx, cidrMo]
 
@@ -1498,13 +1499,13 @@ class ApicKubeConfig(object):
         )
 
         for subnet in subnets:
-            if subnet:
-                cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
+            cidrMo["cloudCidr"]["children"].append(self.cloudSubnet(subnet))
         return path, cidrMo
 
-    def cloudSubnet(self, cidr):
+    def cloudSubnet(self, snet_info):
         region = self.config["aci_config"]["vrf"]["region"]
-        zone = self.config["cloud"]["zone"]
+        zone = snet_info["zone"]
+        cidr = snet_info["cidr"]
         props = [("ip", cidr)]
         subnetMo = collections.OrderedDict(
             [
