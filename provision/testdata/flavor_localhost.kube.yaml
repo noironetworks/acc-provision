@@ -732,15 +732,6 @@ rules:
   - delete
   - patch
 - apiGroups:
-  - "aci.netflow"
-  resources:
-  - netflowpolicies
-  verbs:
-  - list
-  - watch
-  - get
-  - update
-- apiGroups:
   - "aci.snat"
   resources:
   - nodeinfos
