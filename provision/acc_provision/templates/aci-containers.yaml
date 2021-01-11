@@ -1201,6 +1201,8 @@ spec:
           ports:
             - containerPort: {{
               config.net_config.opflex_server_port|json }}
+            - name: metrics
+              containerPort: 9632
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
