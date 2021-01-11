@@ -329,6 +329,14 @@ None
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -400,6 +408,14 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -475,6 +491,14 @@ None
                                             "attributes": {
                                                 "encap": "vlan-4001",
                                                 "tDn": "uni/phys-kube-pdom",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -602,6 +626,14 @@ None
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -657,6 +689,14 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1126,6 +1166,60 @@ None
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
                                                 "tnVzFilterName": "istio-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "prometheus-opflex-agent-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "prometheus-opflex-agent",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9612",
+                                    "dToPort": "9612",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "prometheus-opflex-agent",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "prometheus-opflex-agent-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "prometheus-opflex-agent-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
