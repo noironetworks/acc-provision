@@ -23,10 +23,12 @@ spec:
             properties:
               destination:
                 properties:
-                  destIp:
+                  destIP:
+                    description: Destination IP of the ERSPAN packet.
                     minimum: 0
                     type: string
-                  flowId:
+                  flowID:
+                    description: Unique flow ID of the ERSPAN packet.
                     maximum: 1023
                     minimum: 1
                     type: integer
@@ -44,12 +46,14 @@ spec:
                 type: object
               source:
                 properties:
-                  admin_state:
+                  adminState:
+                    description: Administrative state.
                     enum:
                     - start
                     - stop
                     type: string
                   direction:
+                    description: Direction of the packets to monitor.
                     enum:
                     - in
                     - out
