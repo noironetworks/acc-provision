@@ -2732,7 +2732,9 @@ class ApicKubeConfig(object):
         kube_vrf = self.config["aci_config"]["vrf"]["name"]
         kube_l3out = self.config["aci_config"]["l3out"]["name"]
         node_subnet = self.config["net_config"]["node_subnet"]
+        node_subnet_scope = ",".join([str(x) for x in self.config["net_config"]["node_subnet_scope"]])
         pod_subnet = self.config["net_config"]["pod_subnet"]
+        pod_subnet_scope = ",".join([str(x) for x in self.config["net_config"]["pod_subnet_scope"]]) 
         kade = self.config["kube_config"].get("allow_kube_api_default_epg") or \
             self.config["kube_config"].get("allow_pods_kube_api_access")
         eade = self.config["kube_config"].get("allow_pods_external_access")
@@ -2918,13 +2920,17 @@ class ApicKubeConfig(object):
             [
                 (
                     "attributes",
-                    collections.OrderedDict([("ip", node_subnet), ("scope", "public")]),
+                    collections.OrderedDict([("ip", node_subnet), ("scope", node_subnet_scope)]),
                 )
             ]
         )
 
         pod_subnet_obj = collections.OrderedDict(
-            [("attributes", collections.OrderedDict([("ip", pod_subnet)]))]
+            [
+                (
+                    "attributes", collections.OrderedDict([("ip", pod_subnet), ("scope", pod_subnet_scope)]),
+                )
+            ]
         )
         if eade is True:
             pod_subnet_obj["attributes"]["scope"] = "public"

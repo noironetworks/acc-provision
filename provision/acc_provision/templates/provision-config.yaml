@@ -47,7 +47,12 @@ aci_config:
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
+  node_subnet_scope:            # Valid option are private, shared and public. Public and Private can't be configured at the same time. 
+    - public                    # Default is public
+    - shared  
   pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes
+  pod_subnet_scope:             # Valid option are private, shared and public. Public and Private can't be configured at the same time. 
+    - private                   # Default is private
                                 #   Pods/CloudFoundry containers
   #vip_subnet: 10.3.0.1/16      # Subnet to use for virtual IPs
                                 #   (CloudFoundry only)
@@ -76,8 +81,8 @@ registry:
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
 
-#istio_config:
-  # install_istio: False         # default is True
+istio_config:
+  install_istio: True         # default is True
   # install_profile: "default"   # override if needed, default is "demo"
 
 #drop_log_config:
