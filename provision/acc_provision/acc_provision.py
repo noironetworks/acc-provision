@@ -72,7 +72,6 @@ with open(FLAVORS_PATH, 'r') as stream:
     except yaml.YAMLError as exc:
         print(exc)
     DEFAULT_FLAVOR_OPTIONS = doc['kubeFlavorOptions']
-    CfFlavorOptions = doc['cfFlavorOptions']
     FLAVORS = doc['flavors']
 
 
@@ -98,17 +97,6 @@ def yaml_quote(s):
 
 def yaml_indent(s, **kwargs):
     return yaml.dump(s, **kwargs)
-
-
-def yaml_list_dict(l):
-    out = "\n"
-    for d in l:
-        keys = sorted(d.keys())
-        prefix = "  - "
-        for k in keys:
-            out += "%s%s: %s\n" % (prefix, k, d[k])
-            prefix = "    "
-    return out
 
 
 class SafeDict(dict):
@@ -494,40 +482,6 @@ def config_adjust(args, config, prov_apic, no_random):
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
         },
-        "cf_config": {
-            "node_subnet_cidr": "%s/%s" % cidr_split(node_subnet)[3:],
-            "default_endpoint_group": {
-                "tenant": tenant,
-                "app_profile": "cloudfoundry",
-                "group": "cf-app-default",
-            },
-            "node_epg": "cf-node",
-            "app_ip_pool": [
-                {
-                    "start": cidr_split(pod_subnet)[0],
-                    "end": cidr_split(pod_subnet)[1],
-                }
-            ],
-            "app_subnet": "%s/%s" % cidr_split(pod_subnet)[2::2],
-            "dynamic_ext_ip_pool": [
-                {
-                    "start": cidr_split(extern_dynamic)[0],
-                    "end": cidr_split(extern_dynamic)[1],
-                },
-            ],
-            "static_ext_ip_pool": static_service_ip_pool,
-            "node_service_ip_pool": [
-                {
-                    "start": cidr_split(node_svc_subnet)[0],
-                    "end": cidr_split(node_svc_subnet)[1],
-                },
-            ],
-            "node_service_gw_subnets": [
-                node_svc_subnet,
-            ],
-            "api_port": 9900,
-            "key_value_port": 9902,
-        },
         "registry": {
             "configuration_version": token,
         }
@@ -554,23 +508,6 @@ def config_adjust(args, config, prov_apic, no_random):
 
     if config["net_config"].get("service_monitor_interval"):
         adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
-
-    if config["net_config"].get("vip_subnet"):
-        vip_subnet = cidr_split(config["net_config"]["vip_subnet"])
-        adj_config["cf_config"]["app_vip_pool"] = [
-            {
-                "start": vip_subnet[0],
-                "end": vip_subnet[1],
-            }
-        ]
-        adj_config["cf_config"]["app_vip_subnet"] = [
-            "%s/%s" % vip_subnet[2::2]]
-
-    adj_config["cf_config"]["node_network"] = (
-        "%s|%s|%s" % (
-            tenant,
-            adj_config['cf_config']['default_endpoint_group']['app_profile'],
-            adj_config['cf_config']['node_epg']))
 
     ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
 
@@ -845,20 +782,6 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "apic_login", "password")), required),
         })
 
-    if flavor_opts.get('vip_pool_required', False):
-        checks["net_config/vip_subnet"] = (
-            get(("net_config", "vip_subnet")), required)
-
-    iso_seg_check = (
-        lambda x: True
-        if all(('name' in iso and 'subnet' in iso) for iso in x)
-        else Raise(
-            Exception("'name' and 'subnet' required for "
-                      "each isolation segment")))
-    iso_seg = get(("aci_config", "isolation_segments"))
-    if iso_seg:
-        checks["aci_config/isolation_segments"] = (iso_seg, iso_seg_check)
-
     checks = deep_merge(checks, extra_checks)
     ret = True
     for k in sorted(checks.keys()):
@@ -1008,11 +931,9 @@ def get_jinja_template(file):
         keep_trailing_newline=True
     )
     env.filters['base64enc'] = lambda s: base64.b64encode(s).decode("ascii")
-    env.filters['cf_secret'] = lambda s: yaml.safe_dump(s.decode("ascii"), default_style='|')
     env.filters['json'] = json_indent
     env.filters['yaml'] = yaml_indent
     env.filters['yaml_quote'] = yaml_quote
-    env.filters['yaml_list_dict'] = yaml_list_dict
     env.filters['list_unicode_strings'] = list_unicode_strings
     template = env.get_template(file)
     return template
@@ -1189,58 +1110,6 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                   ",".join(kube_objects),
                   str(config["registry"]["configuration_version"])))
     return config
-
-
-def generate_cf_yaml(config, output, operator_output=None, operator_cr_output=None):
-    template = get_jinja_template('aci-cf-containers.yaml')
-
-    if output and output != "/dev/null":
-        outname = output
-        if output == "-":
-            outname = "<stdout>"
-            applyname = "<filename>"
-            output = sys.stdout
-        else:
-            applyname = os.path.basename(output)
-
-        info("Writing deployment vars for ACI add-ons to %s" % outname)
-        template.stream(config=config).dump(output)
-        pg = ("%s/%s" %
-              (config['aci_config']['vmm_domain']['nested_inside']['name'],
-               config['cf_config']['node_network']))
-        node_subnet = config["net_config"]["node_subnet"]
-        node_subnet_cidr = "%s/%s" % cidr_split(node_subnet)[3:]
-        node_subnet_gw = cidr_split(node_subnet)[2]
-        info("Steps to deploy ACI add-ons:")
-        # TODO Merge steps 1 & 2 into a single cloud-config update
-        info("1. Manually update your cloud config to use vCenter Portgroup " +
-             "'" + pg + "' in 'cloud_properties' of subnet " +
-             node_subnet_cidr + " in the network named " +
-             "'default'. E.g." + '''
-
-networks:
-- name: default
-  type: manual
-  subnets:
-  - range: %s
-    gateway: %s
-    [...]
-    cloud_properties:
-      name: %s
-''' % (node_subnet_cidr, node_subnet_gw, pg))
-        info("2. Update cloud config using:")
-        info("  bosh update-cloud-config <your current cloud config file> " +
-             "-o <aci-containers-release>/manifest-generation/" +
-             "cloud_config_ops.yml -l %s" % applyname)
-        info("3. Deploy ACI add-ons using:")
-        info("  bosh deploy <your current arguments> -o " +
-             "<aci-containers-release>/manifest-generation/" +
-             "cf_ops.yml -l %s" % applyname)
-
-    return config
-
-
-CfFlavorOptions['template_generator'] = generate_cf_yaml
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
