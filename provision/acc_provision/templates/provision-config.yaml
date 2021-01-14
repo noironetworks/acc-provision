@@ -12,7 +12,6 @@ aci_config:
       start: 225.20.1.1
       end: 225.20.255.255
     nested_inside:              # Include if nested inside a VMM;
-                                #   required for CloudFoundry
                                 #   supported for Kubernetes
     # type: vmware              # Specify the VMM vendor (supported: vmware)
     # name: myvmware            # Specify the name of the VMM domain
@@ -36,21 +35,14 @@ aci_config:
   #custom_epgs:                 # List of additional endpoint-group names
   #  - custom_group1            # to configure for use with annotations
   #  - custom_group2
-  #isolation_segments:          # List of names of isolation segments
-  #  - name: iso-seg-1          # and the subnets to use (CloudFoundry only)
-  #    subnet: 10.11.0.1/24
-  #  - name: iso-seg-2
-  #    subnet: 10.11.1.1/24
+
 
 #
 # Networks used by ACI containers
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
-  pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes
-                                #   Pods/CloudFoundry containers
-  #vip_subnet: 10.3.0.1/16      # Subnet to use for virtual IPs
-                                #   (CloudFoundry only)
+  pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes Pods
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
   node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph

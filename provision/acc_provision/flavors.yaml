@@ -4,8 +4,6 @@
 #       file. Default: generate_kube_yaml.
 # - version_fields: List of config options that must be specified for
 #       the specific version of deployment. Default: VERSION_FIELDS.
-# - vip_pool_required: Whether virtual IP pool needs to be specified.
-#       Default: False.
 # - apic: Dict that is used for configuring ApicKubeConfig
 #       Known sub-options:
 #       - use_kubeapi_vlan: Whether kubeapi_vlan should be used. Default: True.
@@ -15,13 +13,6 @@
 #             to nested_inside domain. Default: False.
 kubeFlavorOptions: {}
 
-cfFlavorOptions: &anchor
-  apic:
-    use_kubeapi_vlan: false
-    tenant_generator: cloudfoundry_tn
-    associate_aep_to_nested_inside_domain: true
-  version_fields: []
-  vip_pool_required: true
 
 openshiftOpenstackFlavorOptions : &anchor1
   apic:
