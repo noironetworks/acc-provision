@@ -1022,7 +1022,15 @@ flavors:
     overlay: True
     config:
       aci_config:
+        system_id: kube
         use_legacy_kube_naming_convention: True
+        vrf:
+          name: defaultVrf
+          tenant: kube
+        overlay_vrf: defaultVrf
+        apic_hosts: ["127.0.0.1"]
+        vmm_domain:
+          domain: kubernetes
       kube_config:
         use_aci_anywhere_crd: True
         pod_exec_resources_controller: True
@@ -1041,12 +1049,14 @@ flavors:
         use_host_netns_volume: True
         use_openshift_run_level: False
         ep_registry: k8s
+        snat_operator:
+          snat_namespace: kube-system
+      net_config:
+        opflex_server_port: 8009
       istio_config:
         install_istio: False
       drop_log_config:
         enable: true
-      snat_operator:
-        snat_namespace: kube-system
     status: Experimental
     hidden: False
     order: 21

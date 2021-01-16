@@ -1,13 +1,4 @@
 
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: aci-containers-system
-  labels:
-    aci-containers-config-version: "dummy"
-  annotations:
-    openshift.io/node-selector: ''
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -360,6 +351,10 @@ data:
     {
         "flavor": "k8s-overlay",
         "log-level": "debug",
+        "apic-hosts": [
+            "127.0.0.1"
+        ],
+        "lb-type": "None",
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "default-endpoint-group": {
@@ -408,15 +403,15 @@ data:
         "ep-registry": "k8s",
         "opflex-mode": "overlay",
         "log-level": "debug",
-        "aci-snat-namespace": "aci-containers-system",
-        "aci-vmm-type": "Kubernetes",
-        "aci-vmm-domain": "kube",
-        "aci-vmm-controller": "kube",
+        "aci-snat-namespace": "kube-system",
         "aci-prefix": "kube",
         "aci-vrf": "defaultVrf",
         "aci-vrf-tenant": "kube",
+        "pod-subnet": "10.2.56.1/21",
+        "node-subnet": "1.100.202.1/24",
         "encap-type": "vxlan",
         "aci-infra-vlan": null,
+        "interface-mtu": 1400,
         "cni-netconfig": [
             {
                 "gateway": "10.2.56.1",
@@ -454,7 +449,7 @@ data:
    {
         "aci-policy-tenant": "kube",
         "aci-vrf": "defaultVrf",
-        "aci-vmm-domain": "kube",
+        "aci-vmm-domain": "kubernetes",
         "pod-subnet": "10.2.56.1/21"
    }
 ---
@@ -462,7 +457,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: snat-operator-config
-  namespace: aci-containers-system
+  namespace: kube-system
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
@@ -1089,10 +1084,8 @@ spec:
           image: noirolabs/aci-containers-controller:latest
           imagePullPolicy: Always
           env:
-            - name: WATCH_NAMESPACE
-              value: ""
             - name: ACI_SNAT_NAMESPACE
-              value: "aci-containers-system"
+              value: "kube-system"
             - name: ACI_SNAGLOBALINFO_NAME
               value: "snatglobalinfo"
             - name: ACI_RDCONFIG_NAME

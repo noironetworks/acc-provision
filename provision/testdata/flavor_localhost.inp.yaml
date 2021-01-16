@@ -1,12 +1,7 @@
 #
 # Configuration for ACI overlay
 #
-aci_config:
-  system_id: kube                       # Every opflex cluster on the same fabric must have a distict ID
-  vrf:                                  # VRF used to create all subnets used by this Kubernetes cluster
-    name: defaultVrf          # This should exist, the provisioning tool does not create it
-    tenant: kube        # This can be tenant for this cluster (system-id) or common
-  overlay_vrf: defaultVrf
+
 #
 # Networks used by Kubernetes
 #
@@ -16,10 +11,7 @@ net_config:
   extern_dynamic: 10.3.56.1/21       # Subnet to use for dynamically allocated external services
   extern_static: 10.4.56.1/21        # Subnet to use for statically allocated external services
   node_svc_subnet: 10.5.56.1/21          # Subnet to use for service graph
-  kubeapi_vlan: 202                    # The VLAN used by the internal physdom for nodes
-  service_vlan: 1022                    # The VLAN used for external LoadBalancer services
-  infra_vlan: 4093
-  opflex_server_port: 8009
+  interface_mtu: 1400
 
 #
 #
