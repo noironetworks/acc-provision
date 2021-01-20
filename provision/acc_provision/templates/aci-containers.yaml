@@ -1,4 +1,5 @@
 
+{% if config.flavor != "k8s-overlay" %}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -14,6 +15,7 @@ metadata:
   annotations:
     openshift.io/node-selector: ''
 ---
+{% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 apiVersion: scheduling.k8s.io/v1beta1
 kind: PriorityClass
@@ -394,9 +396,7 @@ data:
     {
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
-        {% if config.flavor != "k8s-overlay" %}
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
-        {% endif %}
         {% if config.aci_config.capic %}
         "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
         {% endif %}
@@ -412,7 +412,7 @@ data:
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% endif %}
-        {% if config.aci_config.capic %}
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
         {% if config.istio_config.install_istio %}
@@ -485,9 +485,11 @@ data:
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         "log-level": {{config.logging.hostagent_log_level|json}},
         "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
+        {% if config.flavor != "k8s-overlay" %}
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% endif %}
         {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
@@ -501,9 +503,9 @@ data:
         {% if config.flavor != "k8s-overlay" %}
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        {% endif %}
         "pod-subnet": {{ config.net_config.pod_subnet|json }},
         "node-subnet": {{ config.net_config.node_subnet|json }},
-        {% endif %}
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
         {% if config.net_config.interface_mtu %}
@@ -591,7 +593,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: snat-operator-config
+  {% if config.flavor != "k8s-overlay" %}
   namespace: aci-containers-system
+  {% else %}
+  namespace: {{ config.kube_config.system_namespace }}
+  {% endif %}
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
@@ -1446,8 +1452,10 @@ spec:
           image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           env:
+            {% if config.flavor != "k8s-overlay" %}
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
+            {% endif %}
             - name: ACI_SNAT_NAMESPACE
               value: "{{ config.kube_config.snat_operator.snat_namespace }}"
             - name: ACI_SNAGLOBALINFO_NAME
