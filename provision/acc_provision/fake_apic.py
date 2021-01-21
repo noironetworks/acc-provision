@@ -61,7 +61,7 @@ def start_fake_apic(port, gets, deletes):
     httpd.socket = ssl.wrap_socket(httpd.socket,
                                    server_side=True,
                                    certfile='localhost.pem',
-                                   ssl_version=ssl.PROTOCOL_TLSv1)
+                                   ssl_version=ssl.PROTOCOL_TLS)
     thread = threading.Thread(target=httpd.serve_forever)
     thread.daemon = True
     thread.start()
