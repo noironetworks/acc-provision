@@ -55,4 +55,3 @@ class NDProvision(object):
 
         os.system('rm -rf ' + wdir)
         return readDict["server.key"], readDict["server.crt"], readDict["cacert.crt"]
-
