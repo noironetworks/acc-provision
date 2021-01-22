@@ -8,6 +8,7 @@ if __package__ is None or __package__ == '':
 else:
     from . import nd_kafka_cert
 
+
 class NDProvision(object):
     def __init__(self, config, user_args):
         self.config = config
@@ -54,3 +55,4 @@ class NDProvision(object):
 
         os.system('rm -rf ' + wdir)
         return readDict["server.key"], readDict["server.crt"], readDict["cacert.crt"]
+

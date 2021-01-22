@@ -15,6 +15,7 @@ import requests
 import json
 import shutil
 import base64
+import stat
 
 KEY_PEM = 'temp.key.pem'
 CSR_PEM = 'temp.csr.pem'
@@ -44,6 +45,7 @@ session = requests.Session()
 retry = requests.packages.urllib3.util.retry.Retry(total=3, read=3, connect=3, backoff_factor=0.3, status_forcelist=(500, 502, 503))
 session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
 
+
 def set_logger(logdir, logfile):
     '''create logger'''
     if not os.path.isdir(logdir):
@@ -70,6 +72,7 @@ def set_logger(logdir, logfile):
     logger.setLevel(logging.DEBUG)
     return logger
 
+
 def run(cmd):
     '''run the given command'''
     shell = True if type(cmd) is str else False
@@ -79,6 +82,7 @@ def run(cmd):
     if proc.returncode != 0:
         logger.error(out)
     return proc.returncode, out
+
 
 def cleanup(keep_final=True):
     '''Cleanup temporary files'''
@@ -95,6 +99,7 @@ def cleanup(keep_final=True):
             pass
     logger.info('Removed files: %s', ' '.join(removed_files))
 
+
 def sanitize_key(src_file):
     '''Sanitize key according to how ND wants it'''
     lines = []
@@ -106,6 +111,7 @@ def sanitize_key(src_file):
             lines.append(line)
         outfile.write('\\n'.join(lines))
     shutil.move(TMP_PEM, src_file)
+
 
 def sanitize_csr(src_file):
     '''Sanitize csr file according to how ND wants it'''
@@ -128,6 +134,7 @@ def sanitize_csr(src_file):
         outfile.write(csr)
     shutil.move(TMP_PEM, src_file)
     return base64_csr_msg
+
 
 def generate_pair(nodeip, jwttoken, passphrase, cn):
     '''Generates a cert-key pair'''
@@ -179,6 +186,7 @@ def generate_pair(nodeip, jwttoken, passphrase, cn):
     # Cert generation and cert/key match success
     return True
 
+
 def pair_match(crt, key, cert_format):
     '''Checks if cert-key match eachother'''
     _, crt_out = run('openssl x509 -inform ' + cert_format + '  -noout -modulus -in ' + crt + ' | openssl md5')
@@ -189,6 +197,7 @@ def pair_match(crt, key, cert_format):
     else:
         logger.error('[%s, %s] - Mismatch' % (crt, key))
         return False
+
 
 # Note: Currently csr and signature are locally generated so that we dont
 # give private key to ND
@@ -210,6 +219,7 @@ def get_csr_and_signature_from_nd(nodeip, jwttoken, passphrase, cn):
         logger.error('csr request failed %s' % response.status_code)
         return False, ''
     logger.info('csr request succeded')
+
 
 def make_certreq(nodeip, hmac, csr):
     '''Request ND to give ca and certificate'''
@@ -234,6 +244,7 @@ def make_certreq(nodeip, hmac, csr):
 
     return True
 
+
 def get_jwttoken(nodeip, username, password):
     '''Retrieves jwttoken'''
     url = 'https://%s/login.json' % nodeip
@@ -252,6 +263,7 @@ def get_jwttoken(nodeip, username, password):
     logger.info('Retrieved jwttoken [%s]' % jwttoken)
     return True, jwttoken
 
+
 def get_passphrase(nodeip, jwttoken):
     '''Retrieves passphrase'''
     url = 'https://%s/api/config/passphrase/.json' % nodeip
@@ -268,6 +280,7 @@ def get_passphrase(nodeip, jwttoken):
     passphrase = str(json_out['response'][1]['currCertReqPassphrase'])
     logger.info('Retrieved passphrase [%s]' % passphrase)
     return True, passphrase
+
 
 def generate(workdir, nodeip, cn, user, password):
     '''Generate key, certificate and ca'''
