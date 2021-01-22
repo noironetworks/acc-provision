@@ -234,8 +234,14 @@ def make_certreq(nodeip, hmac, csr):
         return False
     logger.info('ca request succeded')
     json_out = json.loads(response.text.replace('\n', '\\n'))
-    ca = str(json_out['response'][1]['ca']).strip()
-    certificate = str(json_out['response'][1]['certificate']).strip()
+
+    # ND sends base64 encoded certificates. Decode and use them.
+    base64_ca_bytes = base64.b64decode(json_out['response'][1]['ca'])
+    ca = base64_ca_bytes.decode('ascii').strip()
+
+    base64_crt_bytes = base64.b64decode(json_out['response'][1]['certificate'])
+    certificate = base64_crt_bytes.decode('ascii').strip()
+
     logger.info('Retrieved ca, crt\n [ca]\n%s\n [crt]\n%s' % (ca, certificate))
     with open(FINAL_CA, 'w') as f:
         f.write(ca)
