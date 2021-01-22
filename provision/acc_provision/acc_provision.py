@@ -30,9 +30,11 @@ from os.path import exists
 if __package__ is None or __package__ == '':
     from apic_provision import Apic, ApicKubeConfig
     from cloud_provision import CloudProvision
+    from nd_provision import NDProvision
 else:
     from .apic_provision import Apic, ApicKubeConfig
     from .cloud_provision import CloudProvision
+    from .nd_provision import NDProvision
 
 
 # This black magic forces pyyaml to load YAML strings as unicode rather
@@ -1566,6 +1568,9 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    nd_prov = NDProvision(config, args)
+    nd_prov.Run()
 
     if flavor == "cloud" or flavor == "aks":
         if prov_apic is None:

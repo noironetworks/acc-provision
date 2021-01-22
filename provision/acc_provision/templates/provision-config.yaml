@@ -82,3 +82,12 @@ registry:
 
 #drop_log_config:
   # enable: True         # default is False
+
+# Configuration for nexus dashboard
+#nd_config:
+  # nd_hosts:
+    # - <host-x>
+    # - <host-y>
+  # nd_login:
+    # username: <user-name>
+    # password: <password>

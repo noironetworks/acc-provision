@@ -64,3 +64,12 @@ istio_config:
 
 #drop_log_config:
   #enable: False        #default is True
+
+# Configuration for nexus dashboard
+#nd_config:
+  # nd_hosts:
+    # - <host-x>
+    # - <host-y>
+  # nd_login:
+    # username: <user-name>
+    # password: <password>
