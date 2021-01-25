@@ -27,19 +27,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: GBP_SERVER_CONF
-          value: /usr/local/etc/aci-containers/gbp-server.conf
-        image: noirolabs/gbp-server:ci_test
-        imagePullPolicy: Always
-        name: aci-gbpserver
-        volumeMounts:
-        - mountPath: /usr/local/etc/aci-containers/
-          name: controller-config-volume
-        - mountPath: /certs
-          name: kafka-certs
-        - mountPath: /usr/local/etc/aci-cert/
-          name: aci-user-cert-volume
-      - env:
         - name: WATCH_NAMESPACE
           value: ''
         - name: ACI_SNAT_NAMESPACE
@@ -48,7 +35,7 @@ spec:
           value: snatglobalinfo
         - name: ACI_RDCONFIG_NAME
           value: routingdomain-config
-        image: noirolabs/aci-containers-controller:ci_test
+        image: noiro/aci-containers-controller:5.1.1.0.r57
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -60,29 +47,18 @@ spec:
           name: controller-config-volume
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
+        - mountPath: /certs
+          name: nd-kafka-certs
       hostNetwork: true
-      initContainers:
-      - command:
-        - gbpserver
-        - -init
-        - -config-path
-        - /usr/local/etc/aci-containers/gbp-server.conf
-        image: noirolabs/gbp-server-batch:ci_test
-        imagePullPolicy: Always
-        name: stateinit
-        volumeMounts:
-        - mountPath: /usr/local/etc/aci-containers/
-          name: controller-config-volume
-        - mountPath: /usr/local/etc/aci-cert/
-          name: aci-user-cert-volume
+      priorityClassName: acicni-priority
       serviceAccountName: aci-containers-controller
       tolerations:
       - effect: NoSchedule
         operator: Exists
       volumes:
-      - name: kafka-certs
+      - name: nd-kafka-certs
         secret:
-          secretName: kafka-client-certificates
+          secretName: nd-kafka-client-certificates
       - name: aci-user-cert-volume
         secret:
           secretName: aci-user-cert
@@ -90,7 +66,5 @@ spec:
           items:
           - key: controller-config
             path: controller.conf
-          - key: gbp-server-config
-            path: gbp-server.conf
           name: aci-containers-config
         name: controller-config-volume

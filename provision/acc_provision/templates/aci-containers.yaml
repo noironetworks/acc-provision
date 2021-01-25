@@ -429,6 +429,11 @@ data:
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true
         {% endif %}
+        "nd_kafka": {
+            "client-key-path": "/certs/kafka-client.key",
+            "client-cert-path": "/certs/kafka-client.crt",
+            "ca-cert-path": "/certs/ca.crt",
+        },
     }
   host-agent-config: |-
     {
@@ -571,6 +576,18 @@ data:
   kafka-client.crt: {{config.aci_config.kafka.cert|base64enc}}
   kafka-client.key: {{config.aci_config.kafka.key|base64enc}}
 {% endif %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nd-kafka-client-certificates
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+data:
+  ca.crt: {{config.nd_config.kafka.cacert|base64enc}}
+  kafka-client.crt: {{config.nd_config.kafka.cert|base64enc}}
+  kafka-client.key: {{config.nd_config.kafka.key|base64enc}}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -1397,6 +1414,8 @@ spec:
               mountPath: /usr/local/etc/aci-containers/
             - name: aci-user-cert-volume
               mountPath: /usr/local/etc/aci-cert/
+            - name: nd-kafka-certs
+              mountPath: /certs
           livenessProbe:
             httpGet:
               path: /status
@@ -1423,6 +1442,9 @@ spec:
           secret:
             secretName: kafka-client-certificates
         {% endif %}
+        - name: nd-kafka-certs
+          secret:
+            secretName: nd-kafka-client-certificates
         - name: aci-user-cert-volume
           secret:
             secretName: aci-user-cert

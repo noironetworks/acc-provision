@@ -1353,7 +1353,10 @@ def parse_args(show_help):
         help='capture apic responses for test replay. E.g. ../testdata/apic_xx.json')
     parser.add_argument(
         '--skip-kafka-certs', action='store_true', default=False,
-        help='skip kafka certificate generation')
+        help='skip capic kafka certificate generation')
+    parser.add_argument(
+        '--skip-nd-kafka-certs', action='store_true', default=False,
+        help='skip nexus dashboard kafka certificate generation')
     parser.add_argument(
         '--upgrade', action='store_true', default=False,
         help='generate kubernetes deployment file for cluster upgrade')
@@ -1460,6 +1463,7 @@ def provision(args, apic_file, no_random):
             "debug_apic": args.debug,
             "save_to": args.test_data_out,
             "skip-kafka-certs": args.skip_kafka_certs,
+            "skip-nd-kafka-certs": args.skip_nd_kafka_certs,
         },
     }
 

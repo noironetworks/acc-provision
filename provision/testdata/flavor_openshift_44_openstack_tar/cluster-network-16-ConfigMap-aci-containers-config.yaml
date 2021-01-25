@@ -40,7 +40,9 @@ data:
     \n        }\n    ],\n    \"pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\"\
     : [\n        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"\
     10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\
-    \n    ]\n}"
+    \n    ]\n    \"nd_kafka\": {\n        \"client-key-path\": \"/certs/kafka-client.key\"\
+    ,\n        \"client-cert-path\": \"/certs/kafka-client.crt\",\n        \"ca-cert-path\"\
+    : \"/certs/ca.crt\",\n    },\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-4.4-openstack\",\n    \"app-profile\"\
     : \"kubernetes\",\n    \"ep-registry\": null,\n    \"opflex-mode\": null,\n  \
     \  \"log-level\": \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\"\

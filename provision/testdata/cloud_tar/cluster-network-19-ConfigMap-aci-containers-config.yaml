@@ -29,7 +29,9 @@ data:
     pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\": [\n        {\n   \
     \         \"end\": \"10.5.0.254\",\n            \"start\": \"10.5.0.2\"\n    \
     \    }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n   \
-    \ ]\n}"
+    \ ]\n    \"nd_kafka\": {\n        \"client-key-path\": \"/certs/kafka-client.key\"\
+    ,\n        \"client-cert-path\": \"/certs/kafka-client.crt\",\n        \"ca-cert-path\"\
+    : \"/certs/ca.crt\",\n    },\n}"
   gbp-server-config: "{\n     \"aci-policy-tenant\": \"csrtest\",\n     \"aci-vrf\"\
     : \"clusterjj_overlay\",\n     \"aci-vmm-domain\": \"clusterjj\",\n     \"csr-list\"\
     : \"\",\n     \"pod-subnet\": \"14.3.0.1/16\",\n     \"vrf-encap-id\": 2785281,\n\

@@ -18,19 +18,22 @@ class NDProvision(object):
         self.addKafkaConfig()
 
     def addKafkaConfig(self):
-        # Note: skip-kafka-certs is used to skip kafka cert generation
-        # for both overlay CAPIC and nexus dashboard.
-        if self.config["provision"]["skip-kafka-certs"]:
-            return "none", "none", "none"
-        if "nd_config" not in self.config:
-            return "none", "none", "none"
         cKey, cCert, caCert = self.getKafkaCerts(self.config)
+        # We want to generate the ND certs always even if ND config
+        # isnt present in input file. This is so that the secrets already
+        # get created with the appropriate volumeMounts. Whenever ND updates
+        # CRD with cert info, the secrets should just be updated with new
+        # base64 encoded information.
+        if "nd_config" not in self.config:
+            self.config["nd_config"] = {}
         self.config["nd_config"]["kafka"] = {}
         self.config["nd_config"]["kafka"]["key"] = cKey.encode()
         self.config["nd_config"]["kafka"]["cert"] = cCert.encode()
         self.config["nd_config"]["kafka"]["cacert"] = caCert.encode()
 
     def getKafkaCerts(self, config):
+        if self.config["provision"]["skip-nd-kafka-certs"]:
+            return "none", "none", "none"
         wdir = tempfile.mkdtemp()
         nd_host = self.config["nd_config"]["nd_hosts"][0]
         user = self.config["nd_config"]["nd_login"]["username"]

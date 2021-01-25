@@ -2,7 +2,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-o file] [-z file] [-r file] [-a] [-d] [-u name]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
-                        [--upgrade]
+                        [--skip-nd-kafka-certs] [--upgrade]
 
 Provision an ACI/Kubernetes installation
 
@@ -32,6 +32,8 @@ optional arguments:
                         set a configuration version token. Default is UUID.
   --test-data-out file  capture apic responses for test replay. E.g.
                         ../testdata/apic_xx.json
-  --skip-kafka-certs    skip kafka certificate generation
+  --skip-kafka-certs    skip capic kafka certificate generation
+  --skip-nd-kafka-certs
+                        skip nexus dashboard kafka certificate generation
   --upgrade             generate kubernetes deployment file for cluster
                         upgrade

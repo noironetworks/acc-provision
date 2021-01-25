@@ -47,6 +47,8 @@ spec:
           name: controller-config-volume
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
+        - mountPath: /certs
+          name: nd-kafka-certs
       hostNetwork: true
       priorityClassName: acicni-priority
       serviceAccountName: aci-containers-controller
@@ -54,6 +56,9 @@ spec:
       - effect: NoSchedule
         operator: Exists
       volumes:
+      - name: nd-kafka-certs
+        secret:
+          secretName: nd-kafka-client-certificates
       - name: aci-user-cert-volume
         secret:
           secretName: aci-user-cert
