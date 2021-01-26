@@ -5,3 +5,5 @@
 /dist/
 /.pytest_cache/
 RELEASE-VERSION
+*.crt
+*.key
