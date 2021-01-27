@@ -1965,7 +1965,7 @@ class ApicKubeConfig(object):
                 collections.OrderedDict(
                     [
                         (
-                            "vmmRsUsrAggrLagPolAtt",
+                            "vmmRsUsrCustomAggrLagPolAtt",
                             collections.OrderedDict(
                                 [
                                     (

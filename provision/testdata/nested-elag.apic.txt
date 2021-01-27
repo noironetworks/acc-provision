@@ -182,7 +182,7 @@
                 }
             },
             {
-                "vmmRsUsrAggrLagPolAtt": {
+                "vmmRsUsrCustomAggrLagPolAtt": {
                     "attributes": {
                         "status": "",
                         "tDn": "uni/vmmp-VMware/dom-myvmware/vswitchpolcont/enlacplagp-my-elag",
