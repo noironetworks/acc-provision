@@ -1,0 +1,298 @@
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: acc-provision-operator
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: Role
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: acc-provision-operator-leader-election-role
+  namespace: {{ config.kube_config.system_namespace }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: acc-provision-operator-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - pods
+  - pods/exec
+  - pods/log
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aci.accprov
+  resources:
+  - accprovisions
+  - accprovisions/status
+  - accprovisions/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - acicontainersoperators
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: acc-provision-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: acc-provision-operator-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: RoleBinding
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+  name: acc-provision-operator-leader-election-rolebinding
+  namespace: {{ config.kube_config.system_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: acc-provision-operator-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: acc-provision-operator
+  namespace: {{ config.kube_config.system_namespace }}
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+  name: acc-provision-operator-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: acc-provision-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: acc-provision-operator
+  namespace: {{ config.kube_config.system_namespace }}
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+  name: acc-provision-operator-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: acc-provision-operator-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: acc-provision-operator
+  namespace: {{ config.kube_config.system_namespace }}
+---
+apiVersion: {{ config.kube_config.use_service_api }}
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: acc-provision-operator-controller-manager-metrics-service
+  namespace: {{ config.kube_config.system_namespace }}
+spec:
+  ports:
+  - name: https
+    port: 8443
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: {{ config.kube_config.use_apps_api }}
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+    name: acc-provision-operator-controller-manager
+  name: acc-provision-operator-controller-manager
+  namespace: {{ config.kube_config.system_namespace }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      name: acc-provision-operator-controller-manager
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: acc-provision-operator-controller-manager
+      namespace: {{ config.kube_config.system_namespace }}
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        name: acc-provision-operator-controller-manager
+        control-plane: controller-manager
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=10
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: kube-rbac-proxy
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        ports:
+        - containerPort: 8443
+          name: https
+      - args:
+        - --metrics-addr=127.0.0.1:8080
+        - --enable-leader-election
+        - --leader-election-id=acc-provision-operator
+        env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ACI_CERT_PATH
+          value: /usr/local/etc/aci-cert/
+        - name: ACC_PROVISION_FLAVOR
+          value: "{{ config.flavor }}"
+        - name: SYSTEM_ID
+          value: {{ config.aci_config.system_id }}
+        - name: APIC
+          value: {{ config.aci_config.apic_hosts[0] }}
+        image: {{ config.registry.image_prefix }}/acc-provision-operator:{{ config.registry.acc_provision_operator_version }}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: manager
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/local/etc/aci-cert/
+          name: aci-user-cert-volume
+      hostNetwork: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: acc-provision-operator
+      serviceAccountName: acc-provision-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+        - name: aci-user-cert-volume
+          secret:
+            defaultMode: 420
+            secretName: aci-user-cert
+---
+apiVersion: aci.accprov/v1alpha1
+kind: AccProvision
+metadata:
+  name: accprovision-sample
+  namespace: aci-containers-system
+spec:
+  acc_provision_input:
+    deployment_operator: true

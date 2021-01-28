@@ -48,6 +48,7 @@ versions:
     aci_containers_controller_version: 5.2.1.0.0ef4718
     aci_containers_host_version: 5.2.1.0.0ef4718
     aci_containers_operator_version: 5.2.1.0.0ef4718
+    acc_provision_operator_version: judith
     cnideploy_version: 5.2.1.0.0ef4718
     openvswitch_version: 5.2.1.0.5681a9b
     opflex_agent_version: 5.2.1.0.d2739da

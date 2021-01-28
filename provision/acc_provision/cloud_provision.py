@@ -5,7 +5,7 @@ import json
 import os
 import os.path
 import sys
-import boto3
+#import boto3
 import time
 
 import tempfile

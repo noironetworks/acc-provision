@@ -51,6 +51,7 @@ VERSION_FIELDS = [
     "opflex_agent_version",
     "aci_containers_controller_version",
     "aci_containers_operator_version",
+    "acc_provision_operator_version",
     "openvswitch_version",
 ]
 
@@ -176,6 +177,7 @@ def config_default():
             "controller": "1.1.1.1",
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
             "use_apps_api": "apps/v1",
+            "use_service_api": "v1",
             "use_apps_apigroup": "apps",
             "host_agent_openshift_resource": False,
             "use_netpol_apigroup": "networking.k8s.io",
@@ -1060,6 +1062,13 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             op_crd_template = get_jinja_template('aci-operators-crd.yaml')
             op_crd_output = op_crd_template.render(config=config)
             new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+
+            accprovoper_template = get_jinja_template('acc-provision-operators.yaml')
+            output_from_accprov_parsed_template = accprovoper_template.render(config=config)
+            accprovop_crd_template = get_jinja_template('acc-provision-operators-crd.yaml')
+            accprovop_crd_output = accprovop_crd_template.render(config=config)
+            new_parsed_yaml = [accprovop_crd_output] + new_parsed_yaml
+            new_parsed_yaml += [output_from_accprov_parsed_template]
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
