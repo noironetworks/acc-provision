@@ -51,6 +51,7 @@ VERSION_FIELDS = [
     "opflex_agent_version",
     "aci_containers_controller_version",
     "aci_containers_operator_version",
+    "acc_provision_operator_version",
     "openvswitch_version",
 ]
 
@@ -1063,6 +1064,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             op_crd_template = get_jinja_template('aci-operators-crd.yaml')
             op_crd_output = op_crd_template.render(config=config)
             new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+
+            import pdb; pdb.set_trace()
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
