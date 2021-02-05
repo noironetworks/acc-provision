@@ -29,60 +29,66 @@ openshiftOpenstackFlavorOptions : &anchor1
 
 flavors:
   # Upstream Kubernetes
+  kubernetes-1.20:
+    desc: Kubernetes 1.20
+    default_version: 5.1
+    status: null
+    hidden: false
+    order: 11
   kubernetes-1.19:
     desc: Kubernetes 1.19
     default_version: 5.1
     status: null
     hidden: false
-    order: 11
+    order: 12
   kubernetes-1.18:
     desc: Kubernetes 1.18
     default_version: 5.1
     status: null
     hidden: false
-    order: 12
+    order: 13
   kubernetes-1.17:
     desc: Kubernetes 1.17
     default_version: 5.1
     status: null
-    hidden: false
-    order: 13
+    hidden: true
+    order: 14
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 5.1
     status: null
     hidden: true
-    order: 14
+    order: 15
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 5.1
     status: null
     hidden: true
-    order: 15
+    order: 16
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 5.1
     status: null
     hidden: true
-    order: 16
+    order: 17
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 5.1
     status: null
     hidden: true
-    order: 17
+    order: 18
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 5.1
     status: null
     hidden: true
-    order: 18
+    order: 19
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 19
+    order: 20
     config:
       kube_config:
         no_priority_class: True
@@ -91,7 +97,7 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 20
+    order: 21
     config:
       kube_config:
         no_priority_class: True
@@ -1115,7 +1121,7 @@ flavors:
         use_opflex_server_volume: True
     status: Experimental
     hidden: False
-    order: 21
+    order: 22
   aks:
     desc: Azure Kubernetes Service
     default_version: 5.1
@@ -1174,7 +1180,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: False
-    order: 22
+    order: 23
   cloud:
     desc: Openshift IPI/AWS
     default_version: 5.1
@@ -1302,7 +1308,7 @@ flavors:
             
     status: Experimental
     hidden: False
-    order: 23
+    order: 24
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 5.1
@@ -1355,4 +1361,4 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 24
+    order: 25
