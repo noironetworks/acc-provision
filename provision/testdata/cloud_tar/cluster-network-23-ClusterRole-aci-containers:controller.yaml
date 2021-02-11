@@ -53,15 +53,6 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
-  - epgs
-  - contracts
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - aci.aw
-  resources:
   - gbpsstates
   - gbpsstates/status
   verbs:
