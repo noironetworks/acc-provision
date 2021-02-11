@@ -26,18 +26,27 @@ flavors:
     status: null
     hidden: false
     order: 11
+    config:
+      kube_config:
+        allow_kube_api_default_epg: True
   kubernetes-1.19:
     desc: Kubernetes 1.19
     default_version: 5.2
     status: null
     hidden: false
     order: 12
+    config:
+      kube_config:
+        allow_kube_api_default_epg: True
   kubernetes-1.18:
     desc: Kubernetes 1.18
     default_version: 5.2
     status: null
     hidden: false
     order: 13
+    config:
+      kube_config:
+        allow_kube_api_default_epg: True
   kubernetes-1.17:
     desc: Kubernetes 1.17
     default_version: 5.2
@@ -1116,6 +1125,9 @@ flavors:
                 etherT: ip
                 prot: tcp
                 stateful: "no"
+      kube_config:
+        allow_kube_api_default_epg: True
+        allow_pods_external_access: True
       aci_config:
         items:
           - name: metrics-kubelet
@@ -1184,6 +1196,8 @@ flavors:
         ep_registry: k8s
         snat_operator:
           snat_namespace: kube-system
+        allow_kube_api_default_epg: True
+        allow_pods_external_access: True
       net_config:
         opflex_server_port: 8009
       istio_config:

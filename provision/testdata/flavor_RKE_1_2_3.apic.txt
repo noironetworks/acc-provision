@@ -355,6 +355,22 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "rke-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "aci-containers-rke-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -660,6 +676,7 @@ None
                             "fvSubnet": {
                                 "attributes": {
                                     "ip": "10.2.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -668,6 +685,14 @@ None
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "rke",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "l3out",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
