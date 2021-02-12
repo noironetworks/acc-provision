@@ -211,11 +211,8 @@ class Apic(object):
         return self.get_path(path)
 
     def get_vmmdom_vlanpool_tDn(self, vmmdom):
-        path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children" % (vmmdom)
-        tDn = self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
-        return tDn
-        # vpath = "/api/node/mo/%s.json" % (tDn)
-        # vlan_pool_name = self.get_path(vpath)["attributes"]["name"]
+        path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children&target-subtree-class=infraRsVlanNs" % (vmmdom)
+        return self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
 
     def check_l3out_vrf(self, tenant, name, vrf_name, vrf_dn):
         path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
