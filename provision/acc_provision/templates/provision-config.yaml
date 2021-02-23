@@ -73,7 +73,7 @@ registry:
   # install_profile: "default"   # override if needed, default is "demo"
 
 #drop_log_config:
-  # enable: True         # default is False
+  # enable: False         # default is True
 
 #multus:
   # disable: False       # default is True

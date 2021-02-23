@@ -224,7 +224,7 @@ def config_default():
             "opflexagent_log_level": "info",
         },
         "drop_log_config": {
-            "enable": False
+            "enable": True,
         },
         "provision": {
             "upgrade_cluster": False,
