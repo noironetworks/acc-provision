@@ -92,6 +92,7 @@ rules:
   - list
   - watch
   - get
+  - delete
 - apiGroups:
   - config.openshift.io
   resources:
