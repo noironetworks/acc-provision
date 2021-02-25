@@ -199,7 +199,6 @@ def config_default():
                 "contract_scope": "global",
             },
             "max_nodes_svc_graph": 32,
-            "ep_registry": None,
             "opflex_mode": None,
             "host_agent_cni_bin_path": "/opt",
             "host_agent_cni_conf_path": "/etc",
@@ -324,7 +323,6 @@ def config_adjust(args, config, prov_apic, no_random):
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
-    ep_registry = config["kube_config"]["ep_registry"]
     opflex_mode = config["kube_config"]["opflex_mode"]
     istio_profile = config["istio_config"]["install_profile"]
     istio_namespace = config["istio_config"]["istio_ns"]
@@ -478,7 +476,6 @@ def config_adjust(args, config, prov_apic, no_random):
             "node_service_gw_subnets": [
                 node_svc_subnet,
             ],
-            "ep_registry": ep_registry,
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
         },
