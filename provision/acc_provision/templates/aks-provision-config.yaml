@@ -48,7 +48,6 @@ net_config:
 kube_config:
   run_snat_container: false
   run_gbp_container: true
-  ep_registry: k8s
   opflex_mode: overlay
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"

@@ -1193,7 +1193,6 @@ flavors:
         use_privileged_containers: True
         use_host_netns_volume: True
         use_openshift_run_level: False
-        ep_registry: k8s
         snat_operator:
           snat_namespace: kube-system
         allow_kube_api_default_epg: True
@@ -1232,7 +1231,6 @@ flavors:
         use_opflex_server_volume: True
         use_cnideploy_initcontainer: True
         generate_cnet_file: True
-        ep_registry: k8s
         opflex_mode: overlay
       aci_config:
         contracts:
