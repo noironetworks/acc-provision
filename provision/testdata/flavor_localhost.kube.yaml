@@ -1,5 +1,5 @@
 
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: epgs.aci.aw
@@ -9,10 +9,41 @@ spec:
     kind: Epg
     listKind: EpgList
     plural: epgs
+    singular: epg
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: Epg describes a group of network endpoints
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EpgSpec is the spec for an epg
+            properties:
+              consumed-contracts:
+                items:
+                  type: string
+                type: array
+              name:
+                type: string
+              provided-contracts:
+                items:
+                  type: string
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: contracts.aci.aw
@@ -22,10 +53,48 @@ spec:
     kind: Contract
     listKind: ContractList
     plural: contracts
+    singular: contract
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: Contract describe a policy between two endpoint groups
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ContractSpec is the spec for a Contract resource
+            properties:
+              allow-list:
+                items:
+                  description: WLRules are implicit allow
+                  properties:
+                    ports:
+                      properties:
+                        end:
+                          type: integer
+                        start:
+                          type: integer
+                      type: object
+                    protocol:
+                      type: string
+                  type: object
+                type: array
+              name:
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: gbpsstates.aci.aw
@@ -35,12 +104,40 @@ spec:
     kind: GBPSState
     listKind: GBPSStateList
     plural: gbpsstates
+    singular: gbpsstate
   scope: Namespaced
-  version: v1
-  subresources:
-    status: {}
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: GBPSState describes the internal state of the GBP server
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          status:
+            description: GBPSStatus is the operational state for a gbpserver
+            properties:
+              class-ids:
+                additionalProperties:
+                  type: integer
+                type: object
+              tunnel-ids:
+                additionalProperties:
+                  format: int64
+                  type: integer
+                type: object
+            type: object
+        required:
+        - status
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: podifs.aci.aw
@@ -50,10 +147,47 @@ spec:
     kind: PodIF
     listKind: PodIFList
     plural: podifs
+    singular: podif
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: PodIF describes a pod network interface
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          status:
+            description: PodIFStatus is the status of a PodIF
+            properties:
+              containerID:
+                type: string
+              epg:
+                type: string
+              ifname:
+                type: string
+              ipaddr:
+                type: string
+              macaddr:
+                type: string
+              podname:
+                type: string
+              podns:
+                type: string
+              vtep:
+                type: string
+            type: object
+        required:
+        - status
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: snatglobalinfos.aci.snat
@@ -65,9 +199,64 @@ spec:
     plural: snatglobalinfos
     singular: snatglobalinfo
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: SnatGlobalInfo is the Schema for the snatglobalinfos API
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              globalInfos:
+                additionalProperties:
+                  items:
+                    properties:
+                      macAddress:
+                        type: string
+                      portRanges:
+                        items:
+                          properties:
+                            end:
+                              maximum: 65535
+                              minimum: 1
+                              type: integer
+                            start:
+                              maximum: 65535
+                              minimum: 1
+                              type: integer
+                          type: object
+                        type: array
+                      snatIp:
+                        type: string
+                      snatIpUid:
+                        type: string
+                      snatPolicyName:
+                        type: string
+                    required:
+                    - macAddress
+                    - portRanges
+                    - snatIp
+                    - snatIpUid
+                    - snatPolicyName
+                    type: object
+                  type: array
+                type: object
+            required:
+            - globalInfos
+            type: object
+          status:
+            description: SnatGlobalInfoStatus defines the observed state of SnatGlobalInfo
+            type: object
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: snatlocalinfos.aci.snat
@@ -79,9 +268,61 @@ spec:
     plural: snatlocalinfos
     singular: snatlocalinfo
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SnatLocalInfoSpec defines the desired state of SnatLocalInfo
+            properties:
+              localInfos:
+                items:
+                  properties:
+                    podName:
+                      type: string
+                    podNamespace:
+                      type: string
+                    podUid:
+                      type: string
+                    snatPolicies:
+                      items:
+                        properties:
+                          destIp:
+                            items:
+                              type: string
+                            type: array
+                          name:
+                            type: string
+                          snatIp:
+                            type: string
+                        required:
+                        - destIp
+                        - name
+                        - snatIp
+                        type: object
+                      type: array
+                  required:
+                  - podName
+                  - podNamespace
+                  - podUid
+                  - snatPolicies
+                  type: object
+                type: array
+            required:
+            - localInfos
+            type: object
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: snatpolicies.aci.snat
@@ -93,47 +334,53 @@ spec:
     plural: snatpolicies
     singular: snatpolicy
   scope: Cluster
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          properties:
-            selector:
-              properties:
-                labels:
-                  type: object
-                  properties:
-                    additionalProperties:
-                      type: string
-                namespace:
-                  type: string
-              type: object
-            snatIp:
-              type: array
-            destIp:
-              type: array
-          type: object
-  version: v1
   versions:
   - name: v1
     served: true
     storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              selector:
+                type: object
+                properties:
+                  labels:
+                    type: object
+                    description: 'Selection of Pods'
+                    properties:
+                    additionalProperties:
+                      type: string
+                  namespace:
+                    type: string
+                type: object
+              snatIp:
+                type: array
+                items:
+                  type: string
+              destIp:
+                type: array
+                items:
+                  type: string
+            type: object
+          status:
+            type: object
+            properties:
+            additionalProperties:
+              type: string
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: nodeinfos.aci.snat
@@ -145,13 +392,34 @@ spec:
     plural: nodeinfos
     singular: nodeinfo
   scope: Namespaced
-  version: v1
   versions:
   - name: v1
     served: true
     storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              macaddress:
+                type: string
+              snatpolicynames:
+                additionalProperties:
+                  type: boolean
+                type: object
+            type: object
+          status:
+            description: NodeinfoStatus defines the observed state of Nodeinfo
+            type: object
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: rdconfigs.aci.snat
@@ -163,58 +431,90 @@ spec:
     plural: rdconfigs
     singular: rdconfig
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              discoveredsubnets:
+                items:
+                  type: string
+                type: array
+              usersubnets:
+                items:
+                  type: string
+                type: array
+            required:
+            - usersubnets
+            type: object
+          status:
+            description: NodeinfoStatus defines the observed state of Nodeinfo
+            type: object
+        type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: qospolicies.aci.qos
 spec:
   group: aci.qos
-  version: v1
   names:
     kind: QosPolicy
     listKind: QosPolicyList
     plural: qospolicies
     singular: qospolicy
   scope: Namespaced
-  validation:
-    openAPIV3Schema:
-      properties:
-        apiVersion:
-          type: string
-        kind:
-          type: string
-        spec:
-          properties:
-            podSelector:
-              description: 'Selection of Pods'
-              properties:
-                matchLabels:
-                  type: object
-                  description:
-            ingress:
-              properties:
-                policing_rate:
-                  type: integer
-                  minimum: 0
-                policing_burst:
-                  type: integer
-                  minimum: 0
-            egress:
-              properties:
-                policing_rate:
-                  type: integer
-                  minimum: 0
-                policing_burst:
-                  type: integer
-                  minimum: 0
-            dscpmark:
-              properties:
-                dscp_marking:
-                  type: integer
-                  minimum: 0
-                  maximum: 56
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            type: object
+            properties:
+              podSelector:
+                description: 'Selection of Pods'
+                type: object
+                properties:
+                  matchLabels:
+                    type: object
+                    description:
+              ingress:
+                type: object
+                properties:
+                  policing_rate:
+                    type: integer
+                    minimum: 0
+                  policing_burst:
+                    type: integer
+                    minimum: 0
+              egress:
+                type: object
+                properties:
+                  policing_rate:
+                    type: integer
+                    minimum: 0
+                  policing_burst:
+                    type: integer
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -740,6 +1040,7 @@ rules:
   - list
   - watch
   - get
+  - delete
 - apiGroups:
   - discovery.k8s.io
   resources:

@@ -1,4 +1,3 @@
-apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: snatlocalinfos.aci.snat
@@ -10,4 +9,56 @@ spec:
     plural: snatlocalinfos
     singular: snatlocalinfo
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SnatLocalInfoSpec defines the desired state of SnatLocalInfo
+            properties:
+              localInfos:
+                items:
+                  properties:
+                    podName:
+                      type: string
+                    podNamespace:
+                      type: string
+                    podUid:
+                      type: string
+                    snatPolicies:
+                      items:
+                        properties:
+                          destIp:
+                            items:
+                              type: string
+                            type: array
+                          name:
+                            type: string
+                          snatIp:
+                            type: string
+                        required:
+                        - destIp
+                        - name
+                        - snatIp
+                        type: object
+                      type: array
+                  required:
+                  - podName
+                  - podNamespace
+                  - podUid
+                  - snatPolicies
+                  type: object
+                type: array
+            required:
+            - localInfos
+            type: object
+        type: object
+    served: true
+    storage: true
