@@ -619,12 +619,14 @@ spec:
                 properties:
                   adminState:
                     description: Administrative state.
+                    default: start
                     type: string
                     enum:
                       - start
                       - stop
                   direction:
                     description: Direction of the packets to monitor.
+                    default: both
                     type: string
                     enum:
                       - in
@@ -639,6 +641,7 @@ spec:
                     minimum: 0
                   flowID:
                     description: Unique flow ID of the ERSPAN packet.
+                    default: 1
                     type: integer
                     minimum: 1
                     maximum: 1023
