@@ -24,25 +24,30 @@ spec:
               flowSamplingPolicy:
                 properties:
                   activeFlowTimeOut:
+                    default: 60
                     maximum: 3600
                     minimum: 0
                     type: integer
                   destIp:
                     type: string
                   destPort:
+                    default: 2055
                     maximum: 65535
                     minimum: 0
                     type: integer
                   flowType:
+                    default: netflow
                     enum:
                     - netflow
                     - ipfix
                     type: string
                   idleFlowTimeOut:
+                    default: 15
                     maximum: 600
                     minimum: 0
                     type: integer
                   samplingRate:
+                    default: 0
                     maximum: 1000
                     minimum: 0
                     type: integer
