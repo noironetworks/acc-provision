@@ -28,6 +28,7 @@ spec:
                     minimum: 0
                     type: string
                   flowID:
+                    default: 1
                     description: Unique flow ID of the ERSPAN packet.
                     maximum: 1023
                     minimum: 1
@@ -47,12 +48,14 @@ spec:
               source:
                 properties:
                   adminState:
+                    default: start
                     description: Administrative state.
                     enum:
                     - start
                     - stop
                     type: string
                   direction:
+                    default: both
                     description: Direction of the packets to monitor.
                     enum:
                     - in
