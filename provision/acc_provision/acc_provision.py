@@ -300,7 +300,7 @@ def cidr_split(cidr):
     else:
         n = ipaddress.IPv6Network(cidr, strict=False)
     first, last = n[2], n[-2]
-    return str(first), str(last), str(n[1]), str(n.network_address), mask
+    return str(first), str(last), str(n[1]), str(n.network_address), mask, str(ip)
 
 
 def normalize_cidr(cidr):
@@ -409,7 +409,7 @@ def config_adjust(args, config, prov_apic, no_random):
             "infra_vlan": infra_vlan,
             "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
             "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
-            "node_network_gateway": cidr_split(node_subnet)[2],
+            "node_network_gateway": cidr_split(node_subnet)[5],
             "pod_network": normalize_cidr(pod_subnet),
             "node_network": normalize_cidr(node_subnet),
         },
@@ -450,7 +450,7 @@ def config_adjust(args, config, prov_apic, no_random):
             ],
             "pod_network": [
                 {
-                    "subnet": "%s/%s" % cidr_split(pod_subnet)[3:],
+                    "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
                     "gateway": cidr_split(pod_subnet)[2],
                     "routes": [
                         {
