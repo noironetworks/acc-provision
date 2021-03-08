@@ -102,20 +102,6 @@ spec:
           name: opflex-server-config-volume
         - mountPath: /usr/local/var
           name: hostvar
-      - args:
-        - /usr/local/bin/launch-mcastdaemon.sh
-        command:
-        - /bin/sh
-        image: noirolabs/opflex:ci_test
-        imagePullPolicy: Always
-        name: mcast-daemon
-        volumeMounts:
-        - mountPath: /usr/local/var
-          name: hostvar
-        - mountPath: /run
-          name: hostrun
-        - mountPath: /usr/local/run
-          name: hostrun
       hostIPC: true
       hostNetwork: true
       hostPID: true

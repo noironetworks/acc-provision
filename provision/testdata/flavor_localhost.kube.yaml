@@ -1220,20 +1220,6 @@ spec:
               mountPath: /usr/local/etc/opflex-server
             - name: hostvar
               mountPath: /usr/local/var
-        - name: mcast-daemon
-          image: noirolabs/opflex:latest
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-mcastdaemon.sh"]
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
       restartPolicy: Always
       volumes:
         - name: cni-bin
