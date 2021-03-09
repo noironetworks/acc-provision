@@ -1581,6 +1581,7 @@ spec:
             - name: hostvar
               mountPath: /usr/local/var
         {% endif %}
+        {% if config.kube_config.opflex_mode != "overlay" %}
         - name: mcast-daemon
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           command: ["/bin/sh"]
@@ -1597,6 +1598,7 @@ spec:
               mountPath: /run
             - name: hostrun
               mountPath: /usr/local/run
+        {% endif %}
       restartPolicy: Always
       volumes:
         - name: cni-bin
