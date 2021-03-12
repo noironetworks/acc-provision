@@ -1173,7 +1173,7 @@ flavors:
           name: defaultVrf
           tenant: kube
         overlay_vrf: defaultVrf
-        apic_hosts: ["127.0.0.1"]
+        apic_hosts: []
         vmm_domain:
           domain: kubernetes
       kube_config:
