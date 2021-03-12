@@ -656,9 +656,7 @@ data:
     {
         "flavor": "k8s-overlay",
         "log-level": "debug",
-        "apic-hosts": [
-            "127.0.0.1"
-        ],
+        "apic-hosts": [],
         "lb-type": "None",
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
