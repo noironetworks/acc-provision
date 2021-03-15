@@ -75,6 +75,14 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - aci.ctrl
+  resources:
+  - accprovisioninputs
+  - accprovisioninputs/status
+  - accprovisioninputs/finalizers
+  verbs:
+  - '*'
+- apiGroups:
   - aci.snat
   resources:
   - snatpolicies
@@ -177,11 +185,28 @@ spec:
         volumeMounts:
         - name: aci-operator-config
           mountPath: /usr/local/etc/aci-containers/
+        - name: acc-provision-config
+          mountPath: /usr/local/etc/acc-provision/
         env:
         - name: SYSTEM_NAMESPACE
           value: "{{ config.kube_config.system_namespace}}"
         - name: ACC_PROVISION_FLAVOR
           value: "{{ config.flavor }}"
+      - env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ACC_PROVISION_FLAVOR
+          value: "{{ config.flavor }}"
+        image: {{ config.registry.image_prefix }}/acc-provision-operator:{{ config.registry.acc_provision_operator_version }}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: acc-provision-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
@@ -200,3 +225,9 @@ spec:
           items:
             - key: spec
               path: aci-operator.conf
+      - name: acc-provision-config
+        configMap:
+          name: acc-provision-config
+          items:
+            - key: spec
+              path: acc-provision-operator.conf

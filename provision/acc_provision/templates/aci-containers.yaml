@@ -1490,7 +1490,7 @@ data:
     "start": "{{config.kube_config.snat_operator.port_range.start}}"
     "end": "{{config.kube_config.snat_operator.port_range.end}}"
     "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
-{% if config.flavor != "k8s-overlay" %}
+{% if config.flavor != "k8s-overlay" and config.aci_config.sync_login.key_data and config.aci_config.sync_login.cert_data %}
 ---
 apiVersion: v1
 kind: Secret
