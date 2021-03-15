@@ -1,2 +1,2 @@
-|public subnets|: [u'subnet-06cdb0b67bf86fcbf', u'subnet-0814cdfa1911664e7']
-|private subnets|: [u'subnet-093bf9479f50168f7', u'subnet-00a54d51ba268fe29']
+|public subnets|: ['subnet-06cdb0b67bf86fcbf', 'subnet-0814cdfa1911664e7']
+|private subnets|: ['subnet-093bf9479f50168f7', 'subnet-00a54d51ba268fe29']

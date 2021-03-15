@@ -5,8 +5,7 @@ metadata:
   name: aci-operator-config
   namespace: {{ config.kube_config.system_namespace }}
   labels:
-    aci-containers-config-version: "{{
-config.registry.configuration_version }}"
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
 data:
   spec: |-

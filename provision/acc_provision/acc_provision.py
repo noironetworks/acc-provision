@@ -1085,13 +1085,19 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
             cmap_temp = ''.join(oper_cmap_template.stream(config=config))
 
+            acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
+            acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
+
+            acc_provision_crd_template = get_jinja_template('acc-provision-crd.yaml')
+            acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
+
             op_template = get_jinja_template('aci-operators.yaml')
             output_from_parsed_template = op_template.render(config=config)
 
             # Generate acioperator CRD from template and add it to top
             op_crd_template = get_jinja_template('aci-operators-crd.yaml')
             op_crd_output = op_crd_template.render(config=config)
-            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
@@ -1277,6 +1283,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--disable-multus', default='true', metavar='disable_multus',
         help='true/false to disable/enable multus in cluster')
+    parser.add_argument(
+        '--operator-mode', default=False,
+        help=argparse.SUPPRESS, metavar='operator_mode')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -1360,6 +1369,8 @@ def provision(args, apic_file, no_random):
         output_tar = "/dev/null"
         operator_cr_output_file = "/dev/null"
         generate_cert_data = False
+    if args.operator_mode:
+        generate_cert_data = False
 
     # Print sample, if needed
     if args.sample:
@@ -1416,6 +1427,7 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     deep_merge(config, user_config)
+    config['user_config'] = copy.deepcopy(user_config)
 
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)

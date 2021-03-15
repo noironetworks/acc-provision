@@ -1,0 +1,134 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: accprovisioninputs.aci.ctrl
+spec:
+  group: aci.ctrl
+  names:
+    kind: AccProvisionInput
+    listKind: AccProvisionInputList
+    plural: accprovisioninputs
+    singular: accprovisioninput
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: accprovisioninput owns the lifecycle of ACI objects in the cluster
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AccProvisionInputSpec defines the desired spec for ACI Objects
+            properties:
+              acc_provision_input:
+                properties:
+                  aci_config:
+                    properties:
+                      client_ssl:
+                        type: boolean
+                      cluster_tenant:
+                        type: string
+                      sync_login:
+                        properties:
+                          certfile:
+                            type: string
+                          keyfile:
+                            type: string
+                        type: object
+                    type: object
+                  deployment_operator:
+                    type: boolean
+                  drop_log_config:
+                    properties:
+                      enable:
+                        type: boolean
+                    type: object
+                  istio_config:
+                    properties:
+                      install_istio:
+                        type: boolean
+                      install_profile:
+                        type: string
+                    type: object
+                  kube_config:
+                    properties:
+                      allow_kube_api_default_epg:
+                        type: boolean
+                      image_pull_policy:
+                        type: string
+                      ovs_memory_limit:
+                        type: string
+                      reboot_opflex_with_ovs:
+                        type: string
+                      use_external_service_ip_allocator:
+                        type: boolean
+                      use_openshift_security_context_constraints:
+                        type: boolean
+                      use_privileged_containers:
+                        type: boolean
+                    type: object
+                  logging:
+                    properties:
+                      controller_log_level:
+                        type: string
+                      hostagent_log_level:
+                        type: string
+                      opflexagent_log_level:
+                        type: string
+                    type: object
+                  multus:
+                    properties:
+                      disable:
+                        type: boolean
+                    type: object
+                  net_config:
+                    properties:
+                      interface_mtu:
+                        type: integer
+                      pbr_tracking_non_snat:
+                        type: boolean
+                      service_monitor_interval:
+                        type: integer
+                    type: object
+                  registry:
+                    properties:
+                      acc_provision_operator_version:
+                        type: string
+                      aci_containers_controller_version:
+                        type: string
+                      aci_containers_host_version:
+                        type: string
+                      cnideploy_version:
+                        type: string
+                      gbp_version:
+                        type: string
+                      image_prefix:
+                        type: string
+                      image_pull_secret:
+                        type: string
+                      openvswitch_version:
+                        type: string
+                      opflex_agent_version:
+                        type: string
+                    type: object
+                type: object
+            type: object
+          status:
+            description: AccProvisionInputStatus defines the successful completion
+              of AccProvisionInput
+            properties:
+              status:
+                type: boolean
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
