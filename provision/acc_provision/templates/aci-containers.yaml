@@ -1558,7 +1558,9 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         {% if config.kube_config.run_opflex_server_container %}
         - name: opflex-server
-          image: {{ config.registry.image_prefix }}/opflex-server:{{ config.registry.opflex_server_version }}
+          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-opflexserver.sh"]
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           securityContext:
             capabilities:

@@ -1197,7 +1197,9 @@ spec:
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
         - name: opflex-server
-          image: noirolabs/opflex-server:latest
+          image: noirolabs/opflex:latest
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-opflexserver.sh"]
           imagePullPolicy: Always
           securityContext:
             capabilities:
