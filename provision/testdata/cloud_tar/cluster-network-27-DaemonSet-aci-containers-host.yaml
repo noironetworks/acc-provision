@@ -84,7 +84,11 @@ spec:
           name: opflex-hostconfig-volume
         - mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
           name: opflex-config-volume
-      - image: noirolabs/opflex-server:ci_test
+      - args:
+        - /usr/local/bin/launch-opflexserver.sh
+        command:
+        - /bin/sh
+        image: noirolabs/opflex:ci_test
         imagePullPolicy: Always
         name: opflex-server
         ports:
