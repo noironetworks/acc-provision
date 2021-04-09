@@ -33,7 +33,7 @@ spec:
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
           value: openshift-4.6-openstack
-        image: noiro/aci-containers-operator:5.2.1.0.0ef4718
+        image: noiro/aci-containers-operator:5.2.2.0.0ef4718
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
