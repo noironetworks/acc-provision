@@ -21,9 +21,15 @@ spec:
             type: string
           spec:
             properties:
+              dscpmark:
+                default: 0
+                maximum: 63
+                minimum: 0
+                type: integer
               egress:
                 properties:
                   policing_burst:
+                    minimum: 0
                     type: integer
                   policing_rate:
                     minimum: 0
