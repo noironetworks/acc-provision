@@ -512,6 +512,12 @@ spec:
                     minimum: 0
                   policing_burst:
                     type: integer
+                    minimum: 0
+              dscpmark:
+                type: integer
+                default: 0
+                minimum: 0
+                maximum: 63
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
