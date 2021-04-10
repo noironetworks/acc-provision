@@ -741,12 +741,6 @@ def compare_yaml(expectedyaml, output, debug, generated, cleanupFunc):
         with open(expectedyaml, "r") as expected:
             outputtxt = output.read()
             expectedtxt = expected.read()
-            if outputtxt != expectedtxt:
-                expectedfile = open("expected.txt", "w")
-                expectedfile.write(expectedtxt)
-                outputfile = open("output.txt", "w")
-                outputfile.write(outputtxt)
-
             assert outputtxt == expectedtxt, cleanupFunc()
 
 
