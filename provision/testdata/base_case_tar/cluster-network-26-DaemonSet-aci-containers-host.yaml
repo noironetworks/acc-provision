@@ -59,6 +59,10 @@ spec:
           name: opflex-hostconfig-volume
         - mountPath: /usr/local/etc/aci-containers/
           name: host-config-volume
+        - mountPath: /run/netns
+          mountPropagation: HostToContainer
+          name: host-run-netns
+          readOnly: true
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
@@ -130,5 +134,8 @@ spec:
             path: local.conf
           name: aci-containers-config
         name: opflex-config-volume
+      - hostPath:
+          path: /run/netns
+        name: host-run-netns
   updateStrategy:
     type: RollingUpdate
