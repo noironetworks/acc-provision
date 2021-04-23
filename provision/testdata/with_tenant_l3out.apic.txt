@@ -334,6 +334,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }

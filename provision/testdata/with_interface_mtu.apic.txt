@@ -333,6 +333,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -630,6 +638,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
@@ -689,6 +705,14 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
