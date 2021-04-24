@@ -26,7 +26,7 @@ setup(
           'pyyaml',
           'jinja2',
           'pyopenssl',
-          'MarkupSafe<2.0',
+          'MarkupSafe',
           'boto3',
     ],
 )
