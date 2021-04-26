@@ -29,6 +29,7 @@ flavors:
     config:
       kube_config:
         allow_kube_api_default_epg: True
+        use_host_netns_volume: True
   # Upstream Kubernetes
   kubernetes-1.20:
     desc: Kubernetes 1.20
@@ -39,6 +40,7 @@ flavors:
     config:
       kube_config:
         allow_kube_api_default_epg: True
+        use_host_netns_volume: True
   kubernetes-1.19:
     desc: Kubernetes 1.19
     default_version: 5.2
