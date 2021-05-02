@@ -8,3 +8,6 @@ __pycache__
 *.pyc
 coverage.out
 cscope.*
+build
+*.DS_Store
+dist/
