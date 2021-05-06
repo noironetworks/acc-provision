@@ -1774,6 +1774,7 @@ class ApicKubeConfig(object):
         # payload{"fvRsDomAtt":{"attributes":{"resImedcy":"immediate","tDn":"uni/vmmp-VMware/dom-hypflex-vswitch","instrImedcy":"immediate","encap":"vlan-35","status":"created"},"children":[{"vmmSecP":{"attributes":{"status":"created"},"children":[]}}]}}
 
         system_id = self.config["aci_config"]["system_id"]
+        tn_name = self.config["aci_config"]["cluster_tenant"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         custom_epg_name = "%s_vlan_%d" % (system_id, kubeapi_vlan)
         nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
@@ -1781,7 +1782,7 @@ class ApicKubeConfig(object):
         vlan_encap = "vlan-%s" % (kubeapi_vlan)
 
         path = "/api/node/mo/uni/tn-%s/ap-aci-containers-%s/epg-aci-containers-nodes.json" % (
-            system_id,
+            tn_name,
             system_id
         )
 
