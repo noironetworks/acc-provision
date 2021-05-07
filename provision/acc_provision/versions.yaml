@@ -45,11 +45,11 @@ versions:
     opflex_server_version: 5.1.1.0.1ae238a
     gbp_version: 5.1.1.0.1ae238a
   5.2:
-    aci_containers_controller_version: 5.2.1.0.0ef4718
-    aci_containers_host_version: 5.2.1.0.0ef4718
-    aci_containers_operator_version: 5.2.1.0.0ef4718
-    cnideploy_version: 5.2.1.0.0ef4718
-    openvswitch_version: 5.2.1.0.5681a9b
-    opflex_agent_version: 5.2.1.0.d2739da
-    opflex_server_version: 5.2.1.0.d2739da
-    gbp_version: 5.2.1.0.8ac1bd4
+    aci_containers_controller_version: 5.2.1.0.a444194
+    aci_containers_host_version: 5.2.1.0.a444194
+    aci_containers_operator_version: 5.2.1.0.a444194
+    cnideploy_version: 5.2.1.0.a444194
+    openvswitch_version: 5.2.1.0.a444194
+    opflex_agent_version: 5.2.1.0.a444194
+    opflex_server_version: 5.2.1.0.a444194
+    gbp_version: 5.2.1.0.a444194
