@@ -664,6 +664,7 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "lb-type": "None",
+        "disable-periodic-snat-global-info-sync": true,
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "default-endpoint-group": {
