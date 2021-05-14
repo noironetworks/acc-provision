@@ -1,0 +1,56 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: droplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: Droplog
+    listKind: DroplogList
+    plural: droplogs
+    singular: droplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            properties:
+              disableDefaultDropLog:
+                default: false
+                description: Disables the default droplog enabled by acc-provision.
+                type: boolean
+              dropLogMode:
+                default: unfiltered
+                enum:
+                - unfiltered
+                - flow-based
+                type: string
+              dropLogPruning:
+                items:
+                  properties:
+                    destIP:
+                      type: string
+                    destMAC:
+                      type: string
+                    destPort:
+                      type: integer
+                    ipProto:
+                      type: string
+                    srcIP:
+                      type: string
+                    srcMAC:
+                      type: string
+                    srcPort:
+                      type: integer
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true

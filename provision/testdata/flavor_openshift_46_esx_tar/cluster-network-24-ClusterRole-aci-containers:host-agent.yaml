@@ -82,6 +82,17 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - aci.droplog
+  resources:
+  - droplogs
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+- apiGroups:
   - aci.snat
   resources:
   - nodeinfos
