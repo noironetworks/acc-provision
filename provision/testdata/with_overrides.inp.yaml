@@ -46,6 +46,7 @@ kube_config:
   use_privileged_containers: true
   use_openshift_security_context_constraints: true
   allow_kube_api_default_epg: true
+  disable_periodic_snat_global_info_sync: true
   image_pull_policy: IfNotPresent
   
 registry:
