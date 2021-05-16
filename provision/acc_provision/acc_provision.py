@@ -197,6 +197,7 @@ def config_default():
                 },
                 "snat_namespace": "aci-containers-system",
                 "contract_scope": "global",
+                "disable_periodic_snat_global_info_sync": False
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,

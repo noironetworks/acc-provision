@@ -760,6 +760,9 @@ data:
         {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
+        {% if config.kube_config.snat_operator.disable_periodic_snat_global_info_sync %}
+        "disable-periodic-snat-global-info-sync": {{ config.kube_config.snat_operator.disable_periodic_snat_global_info_sync|json }},
+        {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
