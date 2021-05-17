@@ -649,6 +649,105 @@ spec:
                     minimum: 1
                     maximum: 1023
 ---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: enabledroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: EnableDropLog
+    listKind: EnableDropLogList
+    plural: enabledroplogs
+    singular: enabledroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of EnableDropLog
+            type: object
+            properties:
+              disableDefaultDropLog:
+                description: Disables the default droplog enabled by acc-provision.
+                default: false
+                type: boolean
+              nodeSelector:
+                type: object
+                description: Drop logging is enabled on nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prunedroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: PruneDropLog
+    listKind: PruneDropLogList
+    plural: prunedroplogs
+    singular: prunedroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of PruneDropLog
+            type: object
+            properties:
+              nodeSelector:
+                type: object
+                description: Drop logging filters are applied to nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+              dropLogFilters:
+                type: object
+                properties:
+                  srcIP:
+                    type: string
+                  destIP:
+                    type: string
+                  srcMAC:
+                    type: string
+                  destMAC:
+                    type: string
+                  srcPort:
+                    type: integer
+                  destPort:
+                    type: integer
+                  ipProto:
+                    type: integer
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1038,6 +1137,15 @@ rules:
   - update
   - delete
   - patch
+- apiGroups:
+  - "aci.droplog"
+  resources:
+  - enabledroplogs
+  - prunedroplogs
+  verbs:
+  - list
+  - watch
+  - get
 - apiGroups:
   - "aci.snat"
   resources:
