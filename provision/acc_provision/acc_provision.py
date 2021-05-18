@@ -971,6 +971,10 @@ def generate_operator_tar(tar_path, cont_docs, config):
         extra_files.append(masterfile_name)
         extra_files.append(workerfile_name)
 
+    if config["flavor"] == "openshift-4.6-esx":
+        workerfile_name = '99-worker-kubelet-node-ip.yaml'
+        extra_files.append(workerfile_name)
+
     if gen_apic_file:
         apic_name = 'apic.json'
         extra_files.append(apic_name)
