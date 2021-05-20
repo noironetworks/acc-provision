@@ -1504,6 +1504,10 @@ spec:
             - name: MULTUS
               value: 'True'
             {% endif %}
+            {% if config.net_config.disable_wait_for_network %}
+            - name: DISABLE_WAIT_FOR_NETWORK
+              value: 'True'
+            {% endif %}
             {% if config.flavor == "eks" %}
             - name: SKIP_DOCKER_CHECK
               value: "true"

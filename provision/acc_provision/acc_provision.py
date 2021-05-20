@@ -171,6 +171,7 @@ def config_default():
             "pbr_tracking_non_snat": False,
             "interface_mtu": None,
             "second_kubeapi_portgroup": False,
+            "disable_wait_for_network": False,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -323,6 +324,7 @@ def config_adjust(args, config, prov_apic, no_random):
     extern_dynamic = config["net_config"]["extern_dynamic"]
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
+    disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
     encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
     opflex_mode = config["kube_config"]["opflex_mode"]
     istio_profile = config["istio_config"]["install_profile"]
@@ -413,6 +415,7 @@ def config_adjust(args, config, prov_apic, no_random):
             "node_network_gateway": cidr_split(node_subnet)[5],
             "pod_network": normalize_cidr(pod_subnet),
             "node_network": normalize_cidr(node_subnet),
+            "disble_wait_for_network": disable_wait_for_network,
         },
         "node_config": {
             "encap_type": encap_type,

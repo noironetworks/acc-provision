@@ -55,6 +55,10 @@ net_config:
                                 # default is 5, set to 0 to disable, max: 65535
   #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
                                 # be effective with non-snat services
+  #disable_wait_for_network: true  # Default is false, set to true if the ACI
+                                   # CNI should not wait for datapath to be
+                                   # ready before returning success for pod
+                                   # interface creation
 
 #
 # Configuration for container registry
