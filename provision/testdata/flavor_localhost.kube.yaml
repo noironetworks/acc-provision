@@ -1157,6 +1157,8 @@ spec:
               value: "kubernetes|kube-nodes"
             - name: OPFLEX_MODE
               value: overlay
+            - name: DURATION_WAIT_FOR_NETWORK
+              value: "210"
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin

@@ -33,6 +33,8 @@ spec:
           value: aci-containers-nodes
         - name: OPFLEX_MODE
           value: overlay
+        - name: DURATION_WAIT_FOR_NETWORK
+          value: '210'
         image: noirolabs/aci-containers-host:ci_test
         imagePullPolicy: Always
         livenessProbe:

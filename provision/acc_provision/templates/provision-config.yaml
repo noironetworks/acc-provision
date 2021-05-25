@@ -59,6 +59,11 @@ net_config:
                                    # CNI should not wait for datapath to be
                                    # ready before returning success for pod
                                    # interface creation
+ #duration_wait_for_network: 210  # Duration in seconds that ACI should wait
+                                  # for datapath to be ready.
+                                  # Default is 210 seconds.
+                                  # Only enabled if disable_wait_for_network
+                                  # is set to false.
 
 #
 # Configuration for container registry
