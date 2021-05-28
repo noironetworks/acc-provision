@@ -9,6 +9,7 @@ spec:
     listKind: QosPolicyList
     plural: qospolicies
     singular: qospolicy
+  preserveUnknownFields: false
   scope: Namespaced
   versions:
   - name: v1
