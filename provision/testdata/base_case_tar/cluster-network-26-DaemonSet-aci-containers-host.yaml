@@ -44,6 +44,7 @@ spec:
             - SYS_ADMIN
             - NET_ADMIN
             - SYS_PTRACE
+            - NET_RAW
         volumeMounts:
         - mountPath: /mnt/cni-bin
           name: cni-bin
