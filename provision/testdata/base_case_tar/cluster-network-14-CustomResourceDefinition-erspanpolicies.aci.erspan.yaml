@@ -9,6 +9,7 @@ spec:
     listKind: ErspanPolicyList
     plural: erspanpolicies
     singular: erspanpolicy
+  preserveUnknownFields: false
   scope: Cluster
   versions:
   - name: v1alpha
