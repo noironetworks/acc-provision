@@ -167,6 +167,16 @@ def test_with_overrides():
 
 
 @in_testdir
+def test_with_wait_for_timer():
+    run_provision(
+        "with_wait_for_network.inp.yaml",
+        "with_wait_for_network.kube.yaml",
+        None,
+        None,
+        "with_wait_for_network.apic.txt",
+    )
+
+@in_testdir
 def test_with_tenant_l3out():
     run_provision(
         "with_tenant_l3out.inp.yaml",

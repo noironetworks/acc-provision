@@ -172,6 +172,7 @@ def config_default():
             "interface_mtu": None,
             "second_kubeapi_portgroup": False,
             "disable_wait_for_network": False,
+            "duration_wait_for_network": 210,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -326,6 +327,7 @@ def config_adjust(args, config, prov_apic, no_random):
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
+    duration_wait_for_network = config["net_config"]["duration_wait_for_network"]
     encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
     ep_registry = config["kube_config"]["ep_registry"]
     opflex_mode = config["kube_config"]["opflex_mode"]
@@ -417,7 +419,8 @@ def config_adjust(args, config, prov_apic, no_random):
             "node_network_gateway": cidr_split(node_subnet)[5],
             "pod_network": normalize_cidr(pod_subnet),
             "node_network": normalize_cidr(node_subnet),
-            "disble_wait_for_network": disable_wait_for_network,
+            "disable_wait_for_network": disable_wait_for_network,
+            "duration_wait_for_network": duration_wait_for_network,
         },
         "node_config": {
             "encap_type": encap_type,
