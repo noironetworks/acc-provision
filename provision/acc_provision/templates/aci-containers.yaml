@@ -502,6 +502,7 @@ spec:
     plural: qospolicies
     singular: qospolicy
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
   - name: v1
     served: true
@@ -622,6 +623,7 @@ spec:
     plural: erspanpolicies
     singular: erspanpolicy
   scope: Cluster
+  preserveUnknownFields: false
   versions:
   - name: v1alpha
     served: true
