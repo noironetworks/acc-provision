@@ -1588,6 +1588,7 @@ spec:
                 - SYS_ADMIN
                 - NET_ADMIN
                 - SYS_PTRACE
+                - NET_RAW
           env:
             - name: KUBERNETES_NODE_NAME
               valueFrom:
