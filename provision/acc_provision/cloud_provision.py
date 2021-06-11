@@ -169,12 +169,16 @@ class CloudProvision(object):
         output_tar = self.args.output_tar
         operator_cr_output_file = self.args.aci_operator_cr
         gen(self.config, output_file, output_tar, operator_cr_output_file)
-        if self.args.flavor == "aks":
-            self.print_aks_setup()
-        elif self.args.flavor == "eks":
-            self.print_eks_setup()
-        else:
-            self.print_openshift_setup()
+        try:
+            if "test_run" not in vars(self.args):
+                if self.args.flavor == "aks":
+                    self.print_aks_setup()
+                elif self.args.flavor == "eks":
+                    self.print_eks_setup()
+                else:
+                    self.print_openshift_setup()
+        except TypeError:
+            pass
         self.apic.save()
         return True
 

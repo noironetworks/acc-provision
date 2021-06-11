@@ -839,6 +839,7 @@ def get_args(**overrides):
         # configuration which would otherwise be discovered from
         # the APIC
         "infra_vlan": None,
+        "test_run": True,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
