@@ -9,6 +9,7 @@ spec:
     listKind: NetflowPolicyList
     plural: netflowpolicies
     singular: netflowpolicy
+  preserveUnknownFields: false
   scope: Cluster
   versions:
   - name: v1alpha
@@ -51,6 +52,8 @@ spec:
                     maximum: 1000
                     minimum: 0
                     type: integer
+                required:
+                - destIp
                 type: object
             type: object
         type: object
