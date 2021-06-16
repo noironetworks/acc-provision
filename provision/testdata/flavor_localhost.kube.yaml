@@ -532,6 +532,7 @@ spec:
     plural: netflowpolicies
     singular: netflowpolicy
   scope: Cluster
+  preserveUnknownFields: false
   versions:
   - name: v1alpha
     served: true
@@ -579,6 +580,9 @@ spec:
                     minimum: 0
                     maximum: 1000
                     default: 0
+                required:
+                - destIp
+                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -643,13 +647,15 @@ spec:
                   destIP:
                     description: Destination IP of the ERSPAN packet.
                     type: string
-                    minimum: 0
                   flowID:
                     description: Unique flow ID of the ERSPAN packet.
                     default: 1
                     type: integer
                     minimum: 1
                     maximum: 1023
+                required:
+                - destIP
+                type: object
 ---
 apiVersion: v1
 kind: ConfigMap
