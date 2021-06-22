@@ -525,8 +525,8 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["devices"] = ""
         device_info = get_device_info()
         if  device_info != None:
-            adj_config["vendors"] = device_info
-            adj_config["devices"] = device_info
+            adj_config["vendors"] = device_info[0]
+            adj_config["devices"] = device_info[1]
 
 
     ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
@@ -555,15 +555,17 @@ def config_adjust(args, config, prov_apic, no_random):
 
 def get_device_info():
     try:
-        process = subprocess.Popen(['lspci', '-nn', 'grep', 'Virutual Function'],
+        process = subprocess.Popen(['lspci', '-nn', 'grep', 'Virtual Function'],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
+        #pdb.set_trace()
         output = stdout.splitlines()
         for out in output:
-            result = re.match("\[(\w*):(\w*)\]", out)
+            result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8") )
             if result:
-                return result.groups()
+                match = result.groups()
+                return match
 
     except Exception as e:
         print(e)
