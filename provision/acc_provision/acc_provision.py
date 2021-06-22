@@ -16,7 +16,6 @@ import re
 import string
 import sys
 import uuid
-import pdb
 import pkg_resources
 import pkgutil
 import tarfile
@@ -524,10 +523,9 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["vendors"] = ""
         adj_config["devices"] = ""
         device_info = get_device_info()
-        if  device_info != None:
+        if device_info is not None:
             adj_config["vendors"] = device_info[0]
             adj_config["devices"] = device_info[1]
-
 
     ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
 
@@ -553,22 +551,23 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
     return adj_config
 
+
 def get_device_info():
     try:
         process = subprocess.Popen(['lspci', '-nn', 'grep', 'Virtual Function'],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        #pdb.set_trace()
         output = stdout.splitlines()
         for out in output:
-            result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8") )
+            result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8"))
             if result:
                 match = result.groups()
                 return match
 
     except Exception as e:
         print(e)
+
 
 def is_valid_mtu(xval):
     if xval is None:
@@ -1533,7 +1532,6 @@ def provision(args, apic_file, no_random):
 
 
 def main(args=None, apic_file=None, no_random=False):
-    #pdb.set_trace()
     # apic_file and no_random are used by the test functions
     # len(sys.argv) == 1 when acc-provision is called w/o arguments
     if args is None:
