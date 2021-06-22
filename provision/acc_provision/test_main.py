@@ -1,3 +1,5 @@
+
+
 from __future__ import print_function, unicode_literals
 
 import collections
@@ -10,6 +12,7 @@ import sys
 import tempfile
 import tarfile
 import json
+import pdb
 
 
 from . import acc_provision
@@ -587,6 +590,16 @@ def test_with_no_drop_log():
         "base_case.apic.txt"
     )
 
+@in_testdir
+def test_sriov_config():
+    run_provision(
+        "with_sriov_config_input.yaml",
+        "with_sriov_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
 
 @in_testdir
 def test_flavor_RKE_1_2_3_base():
@@ -606,6 +619,7 @@ def test_flavor_RKE_1_2_3_base():
         "flavor_RKE_1_2_3.apic2.txt",
         overrides={"flavor": "RKE-1.2.3"}
     )
+
 
 
 @in_testdir
@@ -796,12 +810,14 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
 
         args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
-
+        #pdb.set_trace()
         copy_file(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
         copy_file(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
         copy_file(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
         copy_file(expectedtar, out_tar, args.debug, "/tmp/generated_operator.tar.gz")
 
+        #pdb.set_trace()
+        tempfile.gettempdirb()
         compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml", cleanupFunc)
         compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
         compare_yaml(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt", cleanupFunc)

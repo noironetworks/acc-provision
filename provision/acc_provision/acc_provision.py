@@ -16,11 +16,12 @@ import re
 import string
 import sys
 import uuid
-
+import pdb
 import pkg_resources
 import pkgutil
 import tarfile
 import yaml
+import subprocess
 from yaml import SafeLoader
 
 from itertools import combinations
@@ -234,6 +235,9 @@ def config_default():
         },
         "multus": {
             "disable": True,
+        },
+        "sriov_config": {
+            "enable": False
         }
     }
     return default_config
@@ -516,6 +520,15 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["net_config"].get("service_monitor_interval"):
         adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
 
+    if config["sriov_config"].get("enable") is True:
+        adj_config["vendors"] = ""
+        adj_config["devices"] = ""
+        device_info = get_device_info()
+        if  device_info != None:
+            adj_config["vendors"] = device_info
+            adj_config["devices"] = device_info
+
+
     ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
 
     # To add kube-system namespace to ACI system EPG
@@ -540,6 +553,20 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
     return adj_config
 
+def get_device_info():
+    try:
+        process = subprocess.Popen(['lspci', '-nn', 'grep', 'Virutual Function'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        output = stdout.splitlines()
+        for out in output:
+            result = re.match("\[(\w*):(\w*)\]", out)
+            if result:
+                return result.groups()
+
+    except Exception as e:
+        print(e)
 
 def is_valid_mtu(xval):
     if xval is None:
@@ -1504,6 +1531,7 @@ def provision(args, apic_file, no_random):
 
 
 def main(args=None, apic_file=None, no_random=False):
+    #pdb.set_trace()
     # apic_file and no_random are used by the test functions
     # len(sys.argv) == 1 when acc-provision is called w/o arguments
     if args is None:
