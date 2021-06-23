@@ -21,6 +21,7 @@ import pkg_resources
 import pkgutil
 import tarfile
 import yaml
+import subprocess
 from yaml import SafeLoader
 
 from itertools import combinations
@@ -232,6 +233,9 @@ def config_default():
         },
         "multus": {
             "disable": True,
+        },
+	"sriov_config": {
+            "enable": False
         }
     }
     return default_config
@@ -532,7 +536,33 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
+
+    if config["sriov_config"].get("enable") is True:
+        adj_config["vendors"] = ""
+        adj_config["devices"] = ""
+        device_info = get_device_info()
+        if device_info is not None:
+            adj_config["vendors"] = device_info[0]
+            adj_config["devices"] = device_info[1]
+
     return adj_config
+
+
+def get_device_info():
+    try:
+        process = subprocess.Popen('lspci -nn | grep "Virtual Function"',shell=False,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        output = stdout.splitlines()
+        for out in output:
+            result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8"))
+            if result:
+                match = result.groups()
+                return match
+
+    except Exception as e:
+        print(e)
 
 
 def is_valid_mtu(xval):
