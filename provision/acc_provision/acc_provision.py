@@ -21,7 +21,6 @@ import pkg_resources
 import pkgutil
 import tarfile
 import yaml
-import subprocess
 from yaml import SafeLoader
 
 from itertools import combinations
@@ -550,11 +549,8 @@ def config_adjust(args, config, prov_apic, no_random):
 
 def get_device_info():
     try:
-        process = subprocess.Popen('lspci -nn | grep "Virtual Function"',
-                                   shell=False,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        process = os.popen('lspci -nn | grep "Virtual Function"')
+        stdout = process.read()
         output = stdout.splitlines()
         for out in output:
             result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8"))
