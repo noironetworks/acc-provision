@@ -9,6 +9,7 @@ spec:
     listKind: ErspanPolicyList
     plural: erspanpolicies
     singular: erspanpolicy
+  preserveUnknownFields: false
   scope: Cluster
   versions:
   - name: v1alpha
@@ -25,7 +26,6 @@ spec:
                 properties:
                   destIP:
                     description: Destination IP of the ERSPAN packet.
-                    minimum: 0
                     type: string
                   flowID:
                     default: 1
@@ -33,6 +33,8 @@ spec:
                     maximum: 1023
                     minimum: 1
                     type: integer
+                required:
+                - destIP
                 type: object
               selector:
                 description: Selection of Pods

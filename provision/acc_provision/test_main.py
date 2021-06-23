@@ -167,6 +167,17 @@ def test_with_overrides():
 
 
 @in_testdir
+def test_with_wait_for_timer():
+    run_provision(
+        "with_wait_for_network.inp.yaml",
+        "with_wait_for_network.kube.yaml",
+        None,
+        None,
+        "with_wait_for_network.apic.txt",
+    )
+
+
+@in_testdir
 def test_with_tenant_l3out():
     run_provision(
         "with_tenant_l3out.inp.yaml",
@@ -745,7 +756,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.21",
+        "flavor": "kubernetes-1.22",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,

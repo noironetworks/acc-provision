@@ -59,6 +59,11 @@ net_config:
                                    # CNI should not wait for datapath to be
                                    # ready before returning success for pod
                                    # interface creation
+ #duration_wait_for_network: 210  # Duration in seconds that ACI should wait
+                                  # for datapath to be ready.
+                                  # Default is 210 seconds.
+                                  # Only enabled if disable_wait_for_network
+                                  # is set to false.
 
 #
 # Configuration for container registry
@@ -71,6 +76,7 @@ registry:
 #kube_config:
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
+  # ep_registry: "k8s"                  # default is null, set to "k8s" to enable ERSPAN feature
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
 #istio_config:

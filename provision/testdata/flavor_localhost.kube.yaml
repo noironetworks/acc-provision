@@ -471,6 +471,7 @@ spec:
     plural: qospolicies
     singular: qospolicy
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
   - name: v1
     served: true
@@ -531,6 +532,7 @@ spec:
     plural: netflowpolicies
     singular: netflowpolicy
   scope: Cluster
+  preserveUnknownFields: false
   versions:
   - name: v1alpha
     served: true
@@ -578,6 +580,9 @@ spec:
                     minimum: 0
                     maximum: 1000
                     default: 0
+                required:
+                - destIp
+                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -591,6 +596,7 @@ spec:
     plural: erspanpolicies
     singular: erspanpolicy
   scope: Cluster
+  preserveUnknownFields: false
   versions:
   - name: v1alpha
     served: true
@@ -641,13 +647,114 @@ spec:
                   destIP:
                     description: Destination IP of the ERSPAN packet.
                     type: string
-                    minimum: 0
                   flowID:
                     description: Unique flow ID of the ERSPAN packet.
                     default: 1
                     type: integer
                     minimum: 1
                     maximum: 1023
+                required:
+                - destIP
+                type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: enabledroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: EnableDropLog
+    listKind: EnableDropLogList
+    plural: enabledroplogs
+    singular: enabledroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of EnableDropLog
+            type: object
+            properties:
+              disableDefaultDropLog:
+                description: Disables the default droplog enabled by acc-provision.
+                default: false
+                type: boolean
+              nodeSelector:
+                type: object
+                description: Drop logging is enabled on nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prunedroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: PruneDropLog
+    listKind: PruneDropLogList
+    plural: prunedroplogs
+    singular: prunedroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of PruneDropLog
+            type: object
+            properties:
+              nodeSelector:
+                type: object
+                description: Drop logging filters are applied to nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+              dropLogFilters:
+                type: object
+                properties:
+                  srcIP:
+                    type: string
+                  destIP:
+                    type: string
+                  srcMAC:
+                    type: string
+                  destMAC:
+                    type: string
+                  srcPort:
+                    type: integer
+                  destPort:
+                    type: integer
+                  ipProto:
+                    type: integer
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -709,6 +816,7 @@ data:
     {
         "flavor": "k8s-overlay",
         "app-profile": "kubernetes",
+        "ep-registry": "k8s",
         "opflex-mode": "overlay",
         "log-level": "debug",
         "aci-snat-namespace": "kube-system",
@@ -1039,6 +1147,15 @@ rules:
   - delete
   - patch
 - apiGroups:
+  - "aci.droplog"
+  resources:
+  - enabledroplogs
+  - prunedroplogs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
   - "aci.snat"
   resources:
   - nodeinfos
@@ -1144,6 +1261,7 @@ spec:
                 - SYS_ADMIN
                 - NET_ADMIN
                 - SYS_PTRACE
+                - NET_RAW
           env:
             - name: KUBERNETES_NODE_NAME
               valueFrom:
@@ -1155,6 +1273,8 @@ spec:
               value: "kubernetes|kube-nodes"
             - name: OPFLEX_MODE
               value: overlay
+            - name: DURATION_WAIT_FOR_NETWORK
+              value: "210"
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
