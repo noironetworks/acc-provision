@@ -543,29 +543,22 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
 
     if config["sriov_config"].get("enable") is True:
-        adj_config["vendors"] = ""
-        adj_config["devices"] = ""
-        device_info = get_device_info()
-        if device_info is not None:
-            adj_config["vendors"] = device_info[0]
-            adj_config["devices"] = device_info[1]
+        if config["sriov_config"]["device_info"].get("devices") != None :
+            adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
+        else:
+            adj_config["devices"] = ""
+
+        if config["sriov_config"]["device_info"].get("isRdma") is True:
+            adj_config["isRdma"] = "true"
+        else:
+            adj_config["isRdma"] = "false"
+
+        adj_config["vendors"] = "15b3"
+        adj_config["drivers"] = "mlx5_core"
+        adj_config["resourcePrefix"] = "mellanox.com"
+        adj_config["resourceName"] = "cx5_sriov_switchdev"
 
     return adj_config
-
-
-def get_device_info():
-    try:
-        process = os.popen('lspci -nn | grep "Virtual Function"')
-        stdout = process.read()
-        output = stdout.splitlines()
-        for out in output:
-            result = re.search(r"\[(\w*):(\w*)\]", out.decode("utf-8"))
-            if result:
-                match = result.groups()
-                return match
-
-    except Exception as e:
-        print(e)
 
 
 def is_valid_mtu(xval):

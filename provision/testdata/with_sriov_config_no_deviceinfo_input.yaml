@@ -53,5 +53,5 @@ sriov_config:
   enable: True
   device_info:
       isRdma: False
-      devices: 1010 
+      devices: "" 
  

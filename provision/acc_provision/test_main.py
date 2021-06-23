@@ -611,6 +611,17 @@ def test_no_sriov_config():
 
 
 @in_testdir
+def test_sriov_config_with_no_deviceinfo():
+    run_provision(
+        "with_sriov_config_no_deviceinfo_input.yaml",
+        "with_sriov_config_no_deviceinfo_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_2_3_base():
     run_provision(
         "flavor_RKE_1_2_3.inp.yaml",

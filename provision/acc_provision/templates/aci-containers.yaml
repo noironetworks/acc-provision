@@ -2213,17 +2213,22 @@ metadata:
   namespace: kube-system
 data:
   config.json: |
-   {
+    {
         "resourceList": [
-         {
-            "resourceName": "mlnx_sriov_rdma",
-            "resourcePrefix": "mellanox.com",
-            "selectors": {
-              "vendors": [{{config.vendors|json}}],
-              "devices": [{{config.devices|json}}],
-              "drivers": ["mlx5_core"]
-            }
-          }
+                 {
+                   "resourceName": [{{config.resourceName|json}}],
+                   "resourcePrefix": [{{config.resourcePrefix|json}}],
+                   "isRdma": [{{config.isRdma|json}}],
+                   "selectors": {
+                      "vendors": [{{config.vendors|json}}],
+                      {% if config.devices == "" %}
+                      "devices": ["1014","101e"],
+                      {% else %}
+                      "devices": [{{config.devices|json}}],
+                      {% endif %}
+                      "drivers": [{{config.drivers|json}}]
+                   }
+                 }
         ]
-   }
+    }
 {% endif %}
