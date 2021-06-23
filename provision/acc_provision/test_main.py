@@ -576,6 +576,7 @@ def test_with_no_drop_log():
         "base_case.apic.txt"
     )
 
+
 @in_testdir
 def test_sriov_config():
     run_provision(
@@ -586,6 +587,7 @@ def test_sriov_config():
         "base_case.apic.txt"
     )
 
+
 @in_testdir
 def test_no_sriov_config():
     run_provision(
@@ -595,6 +597,7 @@ def test_no_sriov_config():
         None,
         "base_case.apic.txt"
     )
+
 
 @in_testdir
 def test_flavor_RKE_1_2_3_base():

@@ -234,7 +234,7 @@ def config_default():
         "multus": {
             "disable": True,
         },
-	"sriov_config": {
+        "sriov_config": {
             "enable": False
         }
     }
@@ -550,7 +550,8 @@ def config_adjust(args, config, prov_apic, no_random):
 
 def get_device_info():
     try:
-        process = subprocess.Popen('lspci -nn | grep "Virtual Function"',shell=False,
+        process = subprocess.Popen('lspci -nn | grep "Virtual Function"',
+                                   shell=False,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
