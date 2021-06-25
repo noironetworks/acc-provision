@@ -5,7 +5,7 @@ aci_config:
   system_id: mykube             # Every opflex cluster must have a distinct ID
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
   apic_hosts:                   # List of APIC hosts to connect for APIC API
-  - 10.1.1.101
+    - 10.1.1.101
   vmm_domain:                   # Kubernetes container domain configuration
     encap_type: vxlan           # Encap mode: vxlan or vlan
     mcast_range:                # Every opflex VMM must use a distinct range
@@ -42,7 +42,9 @@ aci_config:
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
-  pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes Pods
+  pod_subnet:                   # Subnet to use for Kubernetes Pods
+    - 10.2.0.1/24
+    - 10.2.1.1/24
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
   node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph

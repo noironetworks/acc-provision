@@ -1450,8 +1450,13 @@ class ApicKubeConfig(object):
 
         rsToRegion = self.capic_rsToRegion()
         underlay_ref = self.capic_underlay_p(underlay_ccp_dn)
-        pod_subnet = self.config["net_config"]["pod_subnet"]
-        cidr = pod_subnet.replace(".1/", ".0/")
+        pod_subnets = []
+        if not isinstance(self.config["net_config"]["pod_subnet"], list):
+            pod_subnets.append(self.config["net_config"]["pod_subnet"])
+        else:
+            for pod_subnet in self.config["net_config"]["pod_subnet"]:
+                pod_subnets.append(pod_subnet)
+        cidr = pod_subnets[0].replace(".1/", ".0/")
         snets = []
         snet_info = {"cidr": cidr, "zone": self.config["cloud"]["zone"]}
         snets.append(snet_info)
@@ -1566,8 +1571,13 @@ class ApicKubeConfig(object):
     def capic_subnet_dn_query(self):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
-        pod_gw = self.config["net_config"]["pod_subnet"]
-        pod_subnet = pod_gw.replace(".1/", ".0/")
+        pod_subnets = []
+        if not isinstance(self.config["net_config"]["pod_subnet"], list):
+            pod_subnets.append(self.config["net_config"]["pod_subnet"])
+        else:
+            for pod_subnet in self.config["net_config"]["pod_subnet"]:
+                pod_subnets.append(pod_subnet)
+        pod_subnet = pod_subnets[0].replace(".1/", ".0/")
         ctxProfDN = "uni/tn-%s/ctxprofile-%s" % (tn_name, vmm_name)
         subnetDN = "{}/cidr-[{}]/subnet-[{}]".format(ctxProfDN, pod_subnet, pod_subnet)
         filter = "eq(hcloudSubnet.delegateDn, \"{}\")".format(subnetDN)
@@ -2686,13 +2696,19 @@ class ApicKubeConfig(object):
         return path, data
 
     def isV6(self):
-        pod_cidr = self.config["net_config"]["pod_subnet"]
-        rtr, mask = pod_cidr.split("/")
-        ip = ipaddress.ip_address(rtr)
-        if ip.version == 4:
-            return False
+        pod_subnets = []
+        if not isinstance(self.config["net_config"]["pod_subnet"], list):
+            pod_subnets.append(self.config["net_config"]["pod_subnet"])
         else:
-            return True
+            for pod_subnet in self.config["net_config"]["pod_subnet"]:
+                pod_subnets.append(pod_subnet)
+        for pod_cidr in pod_subnets:
+            rtr, mask = pod_cidr.split("/")
+            ip = ipaddress.ip_address(rtr)
+            if ip.version == 4:
+                return False
+            else:
+                return True
 
     def editItems(self, config, old_naming):
         items = self.config["aci_config"]["items"]
@@ -2727,7 +2743,12 @@ class ApicKubeConfig(object):
         kube_vrf = self.config["aci_config"]["vrf"]["name"]
         kube_l3out = self.config["aci_config"]["l3out"]["name"]
         node_subnet = self.config["net_config"]["node_subnet"]
-        pod_subnet = self.config["net_config"]["pod_subnet"]
+        pod_subnets = []
+        if not isinstance(self.config["net_config"]["pod_subnet"], list):
+            pod_subnets.append(self.config["net_config"]["pod_subnet"])
+        else:
+            for pod_subnet in self.config["net_config"]["pod_subnet"]:
+                pod_subnets.append(pod_subnet)
         kade = self.config["kube_config"].get("allow_kube_api_default_epg") or \
             self.config["kube_config"].get("allow_pods_kube_api_access")
         eade = self.config["kube_config"].get("allow_pods_external_access")
@@ -2760,6 +2781,7 @@ class ApicKubeConfig(object):
 
         node_bd_name = "%snode-bd" % bd_prefix
         node_epg_name = "%snodes" % epg_prefix
+        pod_bd_name = "%spod-bd" % bd_prefix
 
         kube_default_children = [
             collections.OrderedDict(
@@ -2918,12 +2940,6 @@ class ApicKubeConfig(object):
             ]
         )
 
-        pod_subnet_obj = collections.OrderedDict(
-            [("attributes", collections.OrderedDict([("ip", pod_subnet)]))]
-        )
-        if eade is True:
-            pod_subnet_obj["attributes"]["scope"] = "public"
-
         if v6subnet:
             ipv6_nd_policy_rs = [
                 collections.OrderedDict(
@@ -2946,8 +2962,6 @@ class ApicKubeConfig(object):
             ]
             node_subnet_obj["attributes"]["ctrl"] = "nd"
             node_subnet_obj["children"] = ipv6_nd_policy_rs
-            pod_subnet_obj["attributes"]["ctrl"] = "nd"
-            pod_subnet_obj["children"] = ipv6_nd_policy_rs
 
         path = "/api/mo/uni/tn-%s.json" % tn_name
         data = collections.OrderedDict(
@@ -3689,14 +3703,6 @@ class ApicKubeConfig(object):
                                                         (
                                                             "children",
                                                             [
-                                                                collections.OrderedDict(
-                                                                    [
-                                                                        (
-                                                                            "fvSubnet",
-                                                                            pod_subnet_obj,
-                                                                        )
-                                                                    ]
-                                                                ),
                                                                 collections.OrderedDict(
                                                                     [
                                                                         (
@@ -4973,6 +4979,30 @@ class ApicKubeConfig(object):
                             epg_object = ap_child["fvAEPg"]["children"]
                             epg_object.append(kubeapi_dom_obj)
 
+        for i, child in enumerate(data["fvTenant"]["children"]):
+            if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == pod_bd_name:
+                bd_object = child["fvBD"]["children"]
+                for pod_subnet in pod_subnets:
+                    pod_subnet_obj = collections.OrderedDict(
+                        [("attributes", collections.OrderedDict([("ip", pod_subnet)]))]
+                    )
+                    if eade is True:
+                        pod_subnet_obj["attributes"]["scope"] = "public"
+                    if v6subnet:
+                        pod_subnet_obj["attributes"]["ctrl"] = "nd"
+                        pod_subnet_obj["children"] = ipv6_nd_policy_rs
+                    bd_object.append(
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "fvSubnet",
+                                    pod_subnet_obj
+                                )
+                            ]
+                        )
+
+                    )
+
         # If flavor requires not creating node subnet, remove it from
         # the data object
         if disable_node_subnet_creation:
@@ -4984,7 +5014,7 @@ class ApicKubeConfig(object):
                             bd_object.remove(bd_child)
 
         if eade is not True:
-            del data["fvTenant"]["children"][2]["fvBD"]["children"][2]
+            del data["fvTenant"]["children"][2]["fvBD"]["children"][1]
 
         if v6subnet is True:
             data["fvTenant"]["children"].append(

@@ -185,7 +185,7 @@ class CloudProvision(object):
         m_cidr = self.config["net_config"]["machine_cidr"]
         b_subnet = self.config["net_config"]["bootstrap_subnet"]
         n_subnet = self.config["net_config"]["node_subnet"]
-        p_subnet = self.config["net_config"]["pod_subnet"].replace(".1/", ".0/")
+        p_subnet = self.config["net_config"]["pod_subnet"][0].replace(".1/", ".0/")
         region = self.config["aci_config"]["vrf"]["region"]
         boot_subnetID = self.getSubnetID(b_subnet)
         node_subnetID = self.getSubnetID(n_subnet)
