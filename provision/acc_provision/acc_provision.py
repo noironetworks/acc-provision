@@ -542,21 +542,19 @@ def config_adjust(args, config, prov_apic, no_random):
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
 
-    if config["sriov_config"].get("enable") is True:
-        if config["sriov_config"]["device_info"].get("devices") != None :
-            adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
-        else:
-            adj_config["devices"] = ""
-
-        if config["sriov_config"]["device_info"].get("isRdma") is True:
-            adj_config["isRdma"] = "true"
-        else:
-            adj_config["isRdma"] = "false"
-
+    if config["sriov_config"].get("enable"):
         adj_config["vendors"] = "15b3"
         adj_config["drivers"] = "mlx5_core"
         adj_config["resourcePrefix"] = "mellanox.com"
         adj_config["resourceName"] = "cx5_sriov_switchdev"
+        adj_config["devices"] = ""
+        adj_config["isRdma"] = "false"
+
+        if 'device_info' in config["sriov_config"]:
+            if 'devices' in config["sriov_config"]["device_info"]:
+                adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
+            if config["sriov_config"]["device_info"].get("isRdma"):
+                adj_config["isRdma"] = "true"
 
     return adj_config
 

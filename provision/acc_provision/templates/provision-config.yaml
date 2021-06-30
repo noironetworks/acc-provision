@@ -90,7 +90,7 @@ registry:
   # disable: False       # default is True
 
 #sriov_config:
-  # enable: False       # default is False
+  # enable: True     # default is False
   # device_info:
-    # isRdma: False  # default is false
+    # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e" 

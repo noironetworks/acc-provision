@@ -2216,9 +2216,8 @@ data:
     {
         "resourceList": [
                  {
-                   "resourceName": [{{config.resourceName|json}}],
-                   "resourcePrefix": [{{config.resourcePrefix|json}}],
-                   "isRdma": [{{config.isRdma|json}}],
+                   "resourcePrefix": {{config.resourcePrefix|json}},
+                   "resourceName": {{config.resourceName|json}},
                    "selectors": {
                       "vendors": [{{config.vendors|json}}],
                       {% if config.devices == "" %}
@@ -2226,7 +2225,8 @@ data:
                       {% else %}
                       "devices": [{{config.devices|json}}],
                       {% endif %}
-                      "drivers": [{{config.drivers|json}}]
+                      "drivers": [{{config.drivers|json}}],
+                      "isRdma":  {{config.isRdma}}
                    }
                  }
         ]

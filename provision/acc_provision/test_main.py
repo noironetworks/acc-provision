@@ -291,6 +291,7 @@ def test_flavor_openshift_45_openstack():
         overrides={"flavor": "openshift-4.5-openstack"}
     )
 
+
 @in_testdir
 def test_flavor_openshift_47_openstack():
     run_provision(
@@ -301,6 +302,7 @@ def test_flavor_openshift_47_openstack():
         "flavor_openshift_47_openstack.apic.txt",
         overrides={"flavor": "openshift-4.7-openstack"}
     )
+
 
 @in_testdir
 def test_flavor_openshift_46_openstack():
@@ -621,7 +623,7 @@ def test_no_sriov_config():
 
 
 @in_testdir
-def test_sriov_config_with_no_deviceinfo():
+def test_sriov_with_no_deviceinfo():
     run_provision(
         "with_sriov_config_no_deviceinfo_input.yaml",
         "with_sriov_config_no_deviceinfo_kube.yaml",
