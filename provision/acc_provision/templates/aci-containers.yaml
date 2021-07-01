@@ -493,6 +493,436 @@ spec:
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  name: networkpolicies.aci.netpol
+spec:
+  group: aci.netpol
+  names:
+    kind: NetworkPolicy
+    listKind: NetworkPolicyList
+    plural: networkpolicies
+    singular: networkpolicy
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Network Policy describes traffic flow at IP address or port level
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              appliedTo:
+                properties:
+                  namespaceSelector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  podSelector:
+                    description: allow ingress from the same namespace
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+              egress:
+                description: Set of egress rules evaluated based on the order in which they are set.
+                items:
+                  properties:
+                    action:
+                      description: Action specifies the action to be applied on the rule.
+                      type: string
+                    enableLogging:
+                      description: EnableLogging is used to indicate if agent should generate logs default to false.
+                      type: boolean
+                    ports:
+                      description: Set of port and protocol allowed/denied by the rule. If this field is unset or empty, this rule matches all ports.
+                      items:
+                        description: NetworkPolicyPort describes the port and protocol to match in a rule.
+                        properties:
+                          endPort:
+                            description: EndPort defines the end of the port range, being the end included within the range. It can only be specified when a numerical `port` is specified.
+                            format: int32
+                            type: integer
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: The port on the given protocol. This can be either a numerical or named port on a Pod. If this field is not provided, this matches all port names and numbers.
+                            x-kubernetes-int-or-string: true
+                          protocol:
+                            default: TCP
+                            description: The protocol (TCP, UDP, or SCTP) which traffic must match. If not specified, this field defaults to TCP.
+                            type: string
+                        type: object
+                      type: array
+                    to:
+                      description: Rule is matched if traffic is intended for workloads selected by this field. If this field is empty or missing, this rule matches all destinations.
+                      items:
+                        properties:
+                          ipBlock:
+                            description: IPBlock describes the IPAddresses/IPBlocks that is matched in to/from. IPBlock cannot be set as part of the AppliedTo field. Cannot be set with any other selector.
+                            properties:
+                              cidr:
+                                description: CIDR is a string representing the IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64"
+                                type: string
+                              except:
+                                description: Except is a slice of CIDRs that should not be included within an IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64" Except values will be rejected if they are outside the CIDR range
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - cidr
+                            type: object
+                          namespaceSelector:
+                            description: Select all Pods from Namespaces matched by this selector, as workloads in To/From fields. If set with PodSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except PodSelector or ExternalEntitySelector.
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          podSelector:
+                            description: Select Pods from NetworkPolicy's Namespace as workloads in AppliedTo/To/From fields. If set with NamespaceSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except NamespaceSelector.
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        type: object
+                      type: array
+                    toFqDn:
+                      properties:
+                        matchNames:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - matchNames
+                      type: object
+                  required:
+                  - enableLogging
+                  - toFqDn
+                  type: object
+                type: array
+              ingress:
+                description: Set of ingress rules evaluated based on the order in which they are set.
+                items:
+                  properties:
+                    action:
+                      description: Action specifies the action to be applied on the rule.
+                      type: string
+                    enableLogging:
+                      description: EnableLogging is used to indicate if agent should generate logs when rules are matched. Should be default to false.
+                      type: boolean
+                    from:
+                      description: Rule is matched if traffic originates from workloads selected by this field. If this field is empty, this rule matches all sources.
+                      items:
+                        properties:
+                          ipBlock:
+                            description: IPBlock describes the IPAddresses/IPBlocks that is matched in to/from. IPBlock cannot be set as part of the AppliedTo field. Cannot be set with any other selector.
+                            properties:
+                              cidr:
+                                description: CIDR is a string representing the IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64"
+                                type: string
+                              except:
+                                description: Except is a slice of CIDRs that should not be included within an IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64" Except values will be rejected if they are outside the CIDR range
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - cidr
+                            type: object
+                          namespaceSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          podSelector:
+                            description: Select Pods from NetworkPolicy's Namespace as workloads in AppliedTo/To/From fields. If set with NamespaceSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except NamespaceSelector.
+                            properties:
+                              matchExpressions:
+                                description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        type: object
+                      type: array
+                    ports:
+                      description: Set of port and protocol allowed/denied by the rule. If this field is unset or empty, this rule matches all ports.
+                      items:
+                        description: NetworkPolicyPort describes the port and protocol to match in a rule.
+                        properties:
+                          endPort:
+                            description: EndPort defines the end of the port range, being the end included within the range. It can only be specified when a numerical `port` is specified.
+                            format: int32
+                            type: integer
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: The port on the given protocol. This can be either a numerical or named port on a Pod. If this field is not provided, this matches all port names and numbers.
+                            x-kubernetes-int-or-string: true
+                          protocol:
+                            default: TCP
+                            description: The protocol (TCP, UDP, or SCTP) which traffic must match. If not specified, this field defaults to TCP.
+                            type: string
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              policyTypes:
+                items:
+                  description: Policy Type string describes the NetworkPolicy type This type is beta-level in 1.8
+                  type: string
+                type: array
+              priority:
+                description: Priority specfies the order of the NetworkPolicy relative to other NetworkPolicies.
+                type: integer
+              type:
+                description: type of the policy.
+                type: string
+            required:
+            - type
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: dnsnetworkpolicies.aci.dnsnetpol
+spec:
+  group: aci.dnsnetpol
+  names:
+    kind: DnsNetworkPolicy
+    listKind: DnsNetworkPolicyList
+    plural: dnsnetworkpolicies
+    singular: dnsnetworkpolicy
+  scope: Namespaced
+  versions:
+  - name: v1beta
+    schema:
+      openAPIV3Schema:
+        description: dns network Policy
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              appliedTo:
+                properties:
+                  namespaceSelector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  podSelector:
+                    description: allow ingress from the same namespace
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+              egress:
+                description: Set of egress rules evaluated based on the order in which they are set.
+                properties:
+                  toFqdn:
+                    properties:
+                      matchNames:
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - matchNames
+                    type: object
+                required:
+                - toFqdn
+                type: object
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
   name: qospolicies.aci.qos
 spec:
   group: aci.qos
@@ -1320,6 +1750,28 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - "aci.netpol"
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - "aci.dnsnetpol"
+  resources:
+  - dnsnetworkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -1447,6 +1899,14 @@ rules:
   - discovery.k8s.io
   resources:
   - endpointslices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "aci.netpol"
+  resources:
+  - networkpolicies
   verbs:
   - get
   - list
