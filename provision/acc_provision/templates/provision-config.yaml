@@ -88,3 +88,9 @@ registry:
 
 #multus:
   # disable: False       # default is True
+
+#sriov_config:
+  # enable: True     # default is False
+  # device_info:
+    # isRdma: True   # default is false
+    # devices: ""    # default is "1014","101e" 
