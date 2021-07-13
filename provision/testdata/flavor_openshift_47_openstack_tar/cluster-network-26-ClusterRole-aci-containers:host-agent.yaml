@@ -36,13 +36,6 @@ rules:
   - watch
   - get
 - apiGroups:
-  - aci.aw
-  resources:
-  - podifs
-  - podifs/status
-  verbs:
-  - '*'
-- apiGroups:
   - networking.k8s.io
   resources:
   - networkpolicies
@@ -102,6 +95,12 @@ rules:
   - watch
   - get
   - delete
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  verbs:
+  - get
 - apiGroups:
   - discovery.k8s.io
   resources:

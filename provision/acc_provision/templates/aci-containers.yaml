@@ -163,7 +163,6 @@ spec:
             type: object
         type: object
 ---
-{% endif %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -214,6 +213,7 @@ spec:
         - status
         type: object
 ---
+{% endif %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1632,6 +1632,7 @@ rules:
 - apiGroups:
   - "aci.aw"
   resources:
+  - podifs
   - gbpsstates
   - gbpsstates/status
   verbs:
@@ -1726,12 +1727,6 @@ rules:
   - watch
   - get
   - update
-- apiGroups:
-  - "aci.aw"
-  resources:
-  - podifs
-  verbs:
-  - '*'
 {% if config.flavor != "k8s-overlay" %}
 - apiGroups:
   - apps.openshift.io
@@ -1816,6 +1811,7 @@ rules:
   - list
   - watch
   - get
+{% if config.kube_config.use_aci_anywhere_crd %}
 - apiGroups:
   - "aci.aw"
   resources:
@@ -1823,6 +1819,7 @@ rules:
   - podifs/status
   verbs:
   - "*"
+{% endif %}
 {% if not config.kube_config.no_hostagent_networking_clusterrole %}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
