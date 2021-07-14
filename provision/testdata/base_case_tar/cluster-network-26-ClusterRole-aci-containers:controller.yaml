@@ -16,6 +16,7 @@ rules:
   - services
   - events
   - replicationcontrollers
+  - serviceaccounts
   verbs:
   - list
   - watch
@@ -39,6 +40,27 @@ rules:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - install.istio.io
+  resources:
+  - istiocontrolplanes
+  - istiooperators
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.istio
+  resources:
+  - aciistiooperators
+  - aciistiooperator
   verbs:
   - '*'
 - apiGroups:
@@ -132,7 +154,6 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
-  - podifs
   - nodepodifs
   verbs:
   - '*'
