@@ -40,7 +40,6 @@ rules:
   resources:
   - podifs
   - podifs/status
-  - nodepodifs
   verbs:
   - '*'
 - apiGroups:
@@ -119,3 +118,9 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.aw
+  resources:
+  - nodepodifs
+  verbs:
+  - '*'

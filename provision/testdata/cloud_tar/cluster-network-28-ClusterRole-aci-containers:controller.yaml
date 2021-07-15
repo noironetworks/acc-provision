@@ -53,6 +53,7 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
+  - podifs
   - gbpsstates
   - gbpsstates/status
   verbs:
@@ -142,7 +143,6 @@ rules:
 - apiGroups:
   - aci.aw
   resources:
-  - podifs
   - nodepodifs
   verbs:
   - '*'
