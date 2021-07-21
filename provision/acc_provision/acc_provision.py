@@ -237,7 +237,10 @@ def config_default():
         },
         "sriov_config": {
             "enable": False,
-        }
+        },
+        "nodepodif_config": {
+            "enable": False,
+        },
     }
     return default_config
 

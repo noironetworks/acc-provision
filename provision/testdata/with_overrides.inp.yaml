@@ -58,3 +58,6 @@ logging:
   controller_log_level: debug
   hostagent_log_level: debug
   opflexagent_log_level: info
+
+nodepodif_config:
+  enable: true
