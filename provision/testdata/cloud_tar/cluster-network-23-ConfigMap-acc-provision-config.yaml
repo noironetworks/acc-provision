@@ -1,0 +1,28 @@
+apiVersion: v1
+data:
+  spec: "{\n    \"acc_provision_input\": {\n        \"aci_config\": {\n          \
+    \  \"system_id\": \"clusterjj\",\n            \"apic_hosts\": [\n            \
+    \    \"localhost:50000\"\n            ],\n            \"vrf\": {\n           \
+    \     \"name\": \"ULjj\",\n                \"tenant\": \"csrtest\"\n         \
+    \   },\n            \"l3out\": {\n                \"name\": null,\n          \
+    \      \"external_networks\": null\n            }\n        },\n        \"registry\"\
+    : {\n            \"image_prefix\": \"noirolabs\", \n            \"aci_containers_host_version\"\
+    : \"ci_test\", \n            \"opflex_agent_version\": \"ci_test\", \n       \
+    \     \"opflex_server_version\": \"ci_test\", \n            \"openvswitch_version\"\
+    : \"ci_test\", \n            \"gbp_version\": \"ci_test\", \n            \"aci_containers_controller_version\"\
+    : \"ci_test\"\n        },\n        \"kube_config\": {\n            \"run_snat_container\"\
+    : false, \n            \"run_gbp_container\": true, \n            \"ep_registry\"\
+    : \"k8s\", \n            \"opflex_mode\": \"overlay\"\n\n        },\n        \"\
+    istio_config\": {\n           \"install_istio\": false\n        },\n        \"\
+    net_config\": {\n            \"extern_static\": \"10.4.0.1/24\",\n           \
+    \ \"extern_dynamic\": \"10.3.0.1/24\",\n            \"node_svc_subnet\": \"10.5.0.1/24\"\
+    ,\n            \"node_subnet\": \"31.0.1.0/24\",\n            \"pod_subnet\":\
+    \ \"14.3.0.1/16\"\n        }\n    }\n }"
+immutable: true
+kind: ConfigMap
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
+  name: acc-provision-config
+  namespace: aci-containers-system
