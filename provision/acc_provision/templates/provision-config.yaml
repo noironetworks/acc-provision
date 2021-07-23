@@ -93,4 +93,7 @@ registry:
   # enable: True     # default is False
   # device_info:
     # isRdma: True   # default is false
-    # devices: ""    # default is "1014","101e" 
+    # devices: ""    # default is "1014","101e"
+
+#nodepodif_config:
+  # enable: True         # default is False    

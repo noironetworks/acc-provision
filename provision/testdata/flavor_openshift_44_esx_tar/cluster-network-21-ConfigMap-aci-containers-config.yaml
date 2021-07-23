@@ -74,7 +74,7 @@ data:
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
     : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
-    \   },\n    \"enable-drop-log\": true\n}"
+    \   },\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" }\n    }\n}"
 kind: ConfigMap

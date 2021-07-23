@@ -1471,12 +1471,17 @@ data:
             {% endif %}{% endfor %}
         },
         {% if config.drop_log_config.enable %}
-        "enable-drop-log": true
+        "enable-drop-log": true,
         {% else %}
-        "enable-drop-log": false
+        "enable-drop-log": false,
         {% endif %}
         {% if config.kube_config.enable_endpointslice %}
-        "enable_endpointslice": true
+        "enable_endpointslice": true,
+        {% endif %}
+        {% if config.nodepodif_config.enable %}
+        "enable-nodepodif": true
+        {% else %}
+        "enable-nodepodif": false
         {% endif %}
     }
   opflex-agent-config: |-
