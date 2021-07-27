@@ -1306,7 +1306,8 @@ data:
                 "policy-space": "kube",
                 "name": "kubernetes|kube-system"
             }        },
-        "enable-drop-log": true
+        "enable-drop-log": true,
+        "enable-nodepodif": false
     }
   opflex-agent-config: |-
     {
