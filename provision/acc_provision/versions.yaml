@@ -45,6 +45,7 @@ versions:
     opflex_server_version: 5.1.1.0.1ae238a
     gbp_version: 5.1.1.0.1ae238a
   5.2:
+    acc_provision_operator_version: 5.2.2.0.179471b
     aci_containers_controller_version: 5.2.2.0.0ef4718
     aci_containers_host_version: 5.2.2.0.0ef4718
     aci_containers_operator_version: 5.2.2.0.0ef4718

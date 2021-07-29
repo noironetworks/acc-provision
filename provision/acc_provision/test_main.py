@@ -45,6 +45,18 @@ def test_base_case_simple():
 
 
 @in_testdir
+def test_base_case_operator_mode():
+    run_provision(
+        "base_case.inp.yaml",
+        "base_case_operator_mode.kube.yaml",
+        None,
+        None,
+        None,
+        overrides={"operator_mode": True}
+    )
+
+
+@in_testdir
 def test_base_case_upgrade():
     run_provision(
         "base_case.inp.yaml",
@@ -786,6 +798,7 @@ def get_args(**overrides):
         "skip_kafka_certs": True,
         "upgrade": False,
         "disable_multus": 'true',
+        "operator_mode": False,
         # infra_vlan is not part of command line input, but we do
         # pass it as a command line arg in unit tests to pass in
         # configuration which would otherwise be discovered from

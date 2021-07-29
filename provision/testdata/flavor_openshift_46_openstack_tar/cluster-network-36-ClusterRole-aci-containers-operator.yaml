@@ -43,6 +43,13 @@ rules:
   - watch
   - get
 - apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
   - apps
   resources:
   - deployments
@@ -57,6 +64,14 @@ rules:
   - acicontainersoperators
   - acicontainersoperators/status
   - acicontainersoperators/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - accprovisioninputs
+  - accprovisioninputs/status
+  - accprovisioninputs/finalizers
   verbs:
   - '*'
 - apiGroups:

@@ -32,8 +32,8 @@ spec:
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
-          value: openshift-4.5-esx
-        image: noiro/aci-containers-operator:5.2.2.0.0ef4718
+          value: cloud
+        image: noirolabs/aci-containers-operator:5.2.2.0.0ef4718
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
@@ -42,6 +42,25 @@ spec:
         volumeMounts:
         - mountPath: /usr/local/etc/aci-containers/
           name: aci-operator-config
+        - mountPath: /usr/local/etc/acc-provision/
+          name: acc-provision-config
+      - env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ACC_PROVISION_FLAVOR
+          value: cloud
+        - name: ACC_PROVISION_INPUT_CR_NAME
+          value: accprovisioninput
+        image: noirolabs/acc-provision-operator:5.2.2.0.179471b
+        imagePullPolicy: Always
+        name: acc-provision-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
@@ -60,3 +79,9 @@ spec:
             path: aci-operator.conf
           name: aci-operator-config
         name: aci-operator-config
+      - configMap:
+          items:
+          - key: spec
+            path: acc-provision-operator.conf
+          name: acc-provision-config
+        name: acc-provision-config
