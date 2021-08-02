@@ -2143,6 +2143,7 @@ class ApicKubeConfig(object):
         )
         if self.use_kubeapi_vlan:
             kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+            kubeapi_vlan_mode = self.config["net_config"]["kubeapi_vlan_mode"]
             if self.config["aci_config"]["use_legacy_kube_naming_convention"]:
                 data["infraAttEntityP"]["children"].append(
                     collections.OrderedDict(
@@ -2181,6 +2182,10 @@ class ApicKubeConfig(object):
                                                                                     % (
                                                                                         kubeapi_vlan,
                                                                                     ),
+                                                                                ),
+                                                                                (
+                                                                                    "mode",
+                                                                                    kubeapi_vlan_mode
                                                                                 ),
                                                                             ]
                                                                         ),
@@ -2238,6 +2243,10 @@ class ApicKubeConfig(object):
                                                                                     % (
                                                                                         kubeapi_vlan,
                                                                                     ),
+                                                                                ),
+                                                                                (
+                                                                                    "mode",
+                                                                                    kubeapi_vlan_mode
                                                                                 ),
                                                                             ]
                                                                         ),

@@ -170,6 +170,7 @@
                                 "attributes": {
                                     "tDn": "uni/tn-kube/ap-kubernetes/epg-kube-nodes",
                                     "encap": "vlan-4001",
+                                    "mode": "regular",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
