@@ -173,6 +173,7 @@ def config_default():
             "second_kubeapi_portgroup": False,
             "disable_wait_for_network": False,
             "duration_wait_for_network": 210,
+            "kubeapi_vlan_mode": "regular",
         },
         "kube_config": {
             "controller": "1.1.1.1",
