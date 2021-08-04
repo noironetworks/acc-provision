@@ -3,6 +3,7 @@ INFO: openshift-4.7-openstack:	Red Hat OpenShift Container Platform 4.7 on OpenS
 INFO: openshift-4.6-openstack:	Red Hat OpenShift Container Platform 4.6 on OpenStack
 INFO: openshift-4.6-baremetal:	Red Hat OpenShift Container Platform 4.6 on Baremetal
 INFO: openshift-4.5-openstack:	Red Hat OpenShift Container Platform 4.5 on OpenStack
+INFO: openshift-4.7-esx:	Red Hat OpenShift Container Platform 4.7 on ESX
 INFO: openshift-4.6-esx:	Red Hat OpenShift Container Platform 4.6 on ESX
 INFO: openshift-4.5-esx:	Red Hat OpenShift Container Platform 4.5 on ESX
 INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
