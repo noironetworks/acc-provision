@@ -7,6 +7,7 @@ import re
 import requests
 import urllib3
 import ipaddress
+from distutils.version import StrictVersion
 
 debug_http = False
 if debug_http:
@@ -305,13 +306,23 @@ class Apic(object):
         # Finally clean any stray resources in common
         self.clean_tagged_resources(system_id, tenant)
 
+    def process_apic_version_string(self, raw):
+        # Given the APIC version for example 5.2(3e), convert it to 5.2.3 for comparison
+        split_string = raw.split('(')
+        major_version = split_string[0]
+        minor_string = split_string[1]
+        numeric_filter = filter(str.isdigit, minor_string)
+        minor_version = "".join(numeric_filter)
+        return (major_version + '.' + minor_version)
+
     def get_apic_version(self):
         path = "/api/node/class/firmwareCtrlrRunning.json"
-        version = 1.0
+        version = "1.0"
         try:
             data = self.get_path(path)
             versionStr = data['firmwareCtrlrRunning']['attributes']['version']
-            version = float(versionStr.split('(')[0])
+            version = self.process_apic_version_string(versionStr)
+            dbg("APIC version obtained: %s, processed version: %s" % (versionStr, version))
         except Exception as e:
             dbg("Unable to get APIC version object %s: %s" % (path, str(e)))
         return version
@@ -431,6 +442,10 @@ class ApicKubeConfig(object):
             print(path, file=outfilep)
             print(data, file=outfilep)
 
+    def is_newer_version(self, new, old):
+        # Expects string arg like "5.2.0"
+        return (StrictVersion(new) >= StrictVersion(old))
+
     def get_config(self, apic_version):
         def assert_attributes_is_first_key(data):
             """Check that attributes is the first key in the JSON."""
@@ -460,9 +475,9 @@ class ApicKubeConfig(object):
         update(data, self.kube_dom(apic_version))
         update(data, self.nested_dom())
         update(data, self.associate_aep())
-        update(data, self.opflex_cert())
+        update(data, self.opflex_cert(apic_version))
         self.apic_version = apic_version
-        if apic_version >= 5.0:
+        if self.is_newer_version(apic_version, "5.0"):
             update(data, self.cluster_info())
 
         update(data, self.l3out_tn())
@@ -849,7 +864,7 @@ class ApicKubeConfig(object):
         if vmm_type == "OpenShift":
             mode = "openshift"
             scope = "openshift"
-        elif apic_version >= 5.1 and cluster_provider == "Rancher":
+        elif self.is_newer_version(apic_version, "5.1") and cluster_provider == "Rancher":
             mode = "rancher"
 
         path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_name)
@@ -2314,11 +2329,19 @@ class ApicKubeConfig(object):
             self.annotateApicObjects(data)
             return path, data, rsvmm, rsphy, rsfun
 
-    def opflex_cert(self):
+    def opflex_cert(self, apic_version):
         client_cert = self.config["aci_config"]["client_cert"]
         client_ssl = self.config["aci_config"]["client_ssl"]
 
         path = "/api/mo/uni/infra.json"
+
+        if self.is_newer_version(apic_version, "5.2.3"):
+            authenticate_object = "leafOpflexpAuthenticateClients"
+            ssl_object = "leafOpflexpUseSsl"
+        else:
+            authenticate_object = "opflexpAuthenticateClients"
+            ssl_object = "opflexpUseSsl"
+
         data = collections.OrderedDict(
             [
                 (
@@ -2330,10 +2353,10 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         (
-                                            "opflexpAuthenticateClients",
+                                            "%s" % authenticate_object,
                                             yesno(client_cert),
                                         ),
-                                        ("opflexpUseSsl", yesno(client_ssl)),
+                                        ("%s" % ssl_object, yesno(client_ssl)),
                                     ]
                                 ),
                             )
