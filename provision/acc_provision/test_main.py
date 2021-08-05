@@ -45,6 +45,17 @@ def test_base_case_simple():
 
 
 @in_testdir
+def test_base_case_apic_5_2_3():
+    run_provision(
+        "base_case_apic_5_2_3.inp.yaml",
+        None,
+        None,
+        None,
+        "base_case_apic_5_2_3.apic.txt"
+    )
+
+
+@in_testdir
 def test_base_case_operator_mode():
     run_provision(
         "base_case.inp.yaml",

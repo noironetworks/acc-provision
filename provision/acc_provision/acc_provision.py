@@ -123,7 +123,7 @@ def config_default():
     # Default values for configuration
     default_config = {
         "aci_config": {
-            "apic_version": 1.0,
+            "apic_version": "1.0",
             "system_id": None,
             "tenant": {
                 "name": None,

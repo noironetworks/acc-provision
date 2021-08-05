@@ -1,17 +1,14 @@
 aci_config:
-  system_id: rke
-  use_legacy_kube_naming_convention: False
+  system_id: kube
+  use_legacy_kube_naming_convention: True
   apic_hosts:
     - 10.30.120.100
-    - 10.30.120.101
-    - 10.30.120.102
   apic_login:
     username: admin
     password: noir0123
-  apic_version: "5.1"
-  aep: rke-aep
+  aep: kube-aep
   vrf:
-    name: rke
+    name: kube
     tenant: common
   l3out:
     name: l3out
@@ -25,6 +22,10 @@ aci_config:
     mcast_range:
         start: 225.2.1.1
         end: 225.2.255.255
+  custom_epgs:
+    - group1
+    - group2
+  apic_version: '5.2.7'
 
 net_config:
   node_subnet: 10.1.0.1/16
@@ -35,6 +36,14 @@ net_config:
   kubeapi_vlan: 4001
   service_vlan: 4003
   infra_vlan: 4093
+
+kube_config:
+  controller: 1.1.1.1
+  use_cluster_role: true
+  use_ds_rolling_update: true
+
+registry:
+  image_prefix: noiro
 
 logging:
   controller_log_level: info
