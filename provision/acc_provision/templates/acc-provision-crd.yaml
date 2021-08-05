@@ -75,6 +75,8 @@ spec:
                         type: string
                       aci_containers_host_version:
                         type: string
+                      acc_provision_operator_version:
+                        type: string
                       cnideploy_version:
                         type: string
                       opflex_agent_version:
