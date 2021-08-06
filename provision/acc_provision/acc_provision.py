@@ -1096,15 +1096,12 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             op_crd_template = get_jinja_template('aci-operators-crd.yaml')
             op_crd_output = op_crd_template.render(config=config)
 
-            if not config["operator_mode"]:
-                acc_provision_crd_template = get_jinja_template('acc-provision-crd.yaml')
-                acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
-                acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
-                acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
-                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            acc_provision_crd_template = get_jinja_template('acc-provision-crd.yaml')
+            acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
+            acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
+            acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
+            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
 
-            else:
-                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
