@@ -494,6 +494,8 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
