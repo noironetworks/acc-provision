@@ -32,8 +32,6 @@ spec:
                     properties:
                       client_ssl:
                         type: boolean
-                      cluster_tenant:
-                        type: string
                       sync_login:
                         properties:
                           certfile:
