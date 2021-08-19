@@ -7,7 +7,6 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-immutable: true
 data:
   spec: |-
     {

@@ -19,7 +19,6 @@ data:
     \ \"extern_dynamic\": \"10.3.0.1/24\",\n            \"node_svc_subnet\": \"10.5.0.1/24\"\
     ,\n            \"node_subnet\": \"31.0.1.0/24\",\n            \"pod_subnet\":\
     \ \"14.3.0.1/16\"\n        }\n    }\n }"
-immutable: true
 kind: ConfigMap
 metadata:
   labels:

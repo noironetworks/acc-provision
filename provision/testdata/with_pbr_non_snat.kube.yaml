@@ -1336,7 +1336,6 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-immutable: true
 data:
   spec: |-
     {
