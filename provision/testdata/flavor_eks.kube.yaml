@@ -1240,8 +1240,6 @@ spec:
                   aci_config:
                     type: object
                     properties:
-                      cluster_tenant:
-                        type: string
                       sync_login:
                         type: object
                         properties:
@@ -1396,6 +1394,9 @@ data:
                 "apic_hosts": [
                     "localhost:50002"
                 ],
+                "tenant": {
+                    "name": "csrtest"
+                },
                 "vrf": {
                     "name": "ULinteg",
                     "tenant": "csrtest"
