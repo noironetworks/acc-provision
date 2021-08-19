@@ -1404,7 +1404,7 @@ data:
                 "l3out": {
                     "name": null,
                     "external_networks": null
-                }
+                },
             },
             "registry": {
                 "image_prefix": "noirolabs", 

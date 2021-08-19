@@ -1360,7 +1360,9 @@ data:
                     "external_networks": [
                         "l3out"
                     ]
-                }
+                },
+                "vmm_domain": {
+                 }
             },
             "registry": {
                 "image_prefix": "noiro"

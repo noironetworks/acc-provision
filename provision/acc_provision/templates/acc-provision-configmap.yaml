@@ -42,7 +42,18 @@ data:
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
-                }
+                },
+                {% if config.user_config.aci_config.vmm_domain %}
+                "vmm_domain": {
+                   {% if config.user_config.aci_config.vmm_domain.nested_inside %}
+                   "nested_inside": {
+                      {% if config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip %}
+                      "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
+                      {% endif %}
+                    }
+                    {% endif %}
+                 }
+                 {% endif %}
             },
             {% if config.user_config.registry %}
             "registry": {

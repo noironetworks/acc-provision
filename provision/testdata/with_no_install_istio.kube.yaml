@@ -1314,7 +1314,9 @@ data:
                     "external_networks": [
                         "default"
                     ]
-                }
+                },
+                "vmm_domain": {
+                 }
             },
             "registry": {
                 "image_prefix": "noiro"

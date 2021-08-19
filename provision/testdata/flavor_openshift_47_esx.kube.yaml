@@ -1324,7 +1324,12 @@ data:
                     "external_networks": [
                         "default"
                     ]
-                }
+                },
+                "vmm_domain": {
+                   "nested_inside": {
+                      "installer_provisioned_lb_ip": "192.168.18.201"
+                    }
+                 }
             },
             "registry": {
                 "image_prefix": "noiro"

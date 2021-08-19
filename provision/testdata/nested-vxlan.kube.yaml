@@ -1360,7 +1360,11 @@ data:
                     "external_networks": [
                         "default"
                     ]
-                }
+                },
+                "vmm_domain": {
+                   "nested_inside": {
+                    }
+                 }
             },
             "registry": {
                 "image_prefix": "noiro"

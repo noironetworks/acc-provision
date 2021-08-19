@@ -1357,7 +1357,9 @@ data:
                     "external_networks": [
                         "mykube_extepg"
                     ]
-                }
+                },
+                "vmm_domain": {
+                 }
             },
             "registry": {
                 "image_prefix": "noiro"
