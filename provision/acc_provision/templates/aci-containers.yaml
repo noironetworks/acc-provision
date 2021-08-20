@@ -1419,7 +1419,9 @@ data:
     {
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        {% if config.kube_config.use_aci_anywhere_crd %}
         "ep-registry": {{ config.kube_config.ep_registry|json }},
+        {% endif %}
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         "log-level": {{config.logging.hostagent_log_level|json}},
         "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
