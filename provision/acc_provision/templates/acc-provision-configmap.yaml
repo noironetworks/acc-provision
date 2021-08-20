@@ -38,6 +38,13 @@ data:
                 {% if config.user_config.aci_config.client_ssl %}
                 "client_ssl": {{ config.aci_config.client_ssl|json }},
                 {% endif %}
+                {% if ((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
+                "vmm_domain": {
+                  "nested_inside": {
+                    "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
+                  }
+                },
+                {% endif %}
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
