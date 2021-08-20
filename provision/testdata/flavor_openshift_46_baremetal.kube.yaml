@@ -1318,6 +1318,11 @@ data:
                     "certfile": "user.crt", 
                     "keyfile": "user.key"
                 },
+                "vmm_domain": {
+                  "nested_inside": {
+                    "installer_provisioned_lb_ip": "192.168.18.201"
+                  }
+                },
                 "l3out": {
                     "name": "l3out",
                     "external_networks": [
