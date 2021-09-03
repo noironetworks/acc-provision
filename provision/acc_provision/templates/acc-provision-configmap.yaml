@@ -130,6 +130,9 @@ data:
                 {% if config.user_config.net_config.interface_mtu %}
                 "interface_mtu": {{config.net_config.interface_mtu|json}},
                 {% endif %}
+                {% if config.user_config.interface_mtu_headroom %}
+                "interface-mtu-headroom": {{ config.user_config.interface_mtu_headroom|json }},
+                {% endif %}
                 {% if config.user_config.net_config.service_monitor_interval %}
                 "service_monitor_interval": {{config.net_config.service_monitor_interval|json}},
                 {% endif %}

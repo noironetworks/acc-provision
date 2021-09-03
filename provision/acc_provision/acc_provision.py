@@ -170,6 +170,7 @@ def config_default():
             "service_monitor_interval": 5,
             "pbr_tracking_non_snat": False,
             "interface_mtu": None,
+            "interface_mtu_headroom": None,
             "second_kubeapi_portgroup": False,
             "disable_wait_for_network": False,
             "duration_wait_for_network": 210,
@@ -576,6 +577,21 @@ def is_valid_mtu(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_headroom(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 50
+    try:
+        x = int(xval)
+        if x >= xmin:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer >= %d" % (xmin)))
+
+
 def is_valid_ipsla_interval(xval):
     if xval is None:
         # use default configured on this host
@@ -752,6 +768,8 @@ def config_validate(flavor_opts, config):
                                            required),
             "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
                                          is_valid_mtu),
+            "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
+                                                  is_valid_headroom),
             "net_config/service_monitor_interval": (get(("net_config", "service_monitor_interval")),
                                                     is_valid_ipsla_interval)
         }
