@@ -223,6 +223,17 @@ def test_with_interface_mtu():
 
 
 @in_testdir
+def test_with_interface_mtu_headroom():
+    run_provision(
+        "with_interface_mtu_headroom.inp.yaml",
+        "with_interface_mtu_headroom.kube.yaml",
+        None,
+        None,
+        "with_interface_mtu_headroom.apic.txt"
+    )
+
+
+@in_testdir
 def test_with_apic_refreshtime():
     run_provision(
         "with_refreshtime.inp.yaml",

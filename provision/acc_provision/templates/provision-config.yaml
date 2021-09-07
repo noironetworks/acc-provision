@@ -51,6 +51,9 @@ net_config:
   service_vlan: 4003            # The VLAN used by LoadBalancer services
   infra_vlan: 4093              # The VLAN used by ACI infra
   #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  #interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
+                                # Must be >= 50
+                                # Default value si set to 100
   #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
                                 # default is 5, set to 0 to disable, max: 65535
   #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
