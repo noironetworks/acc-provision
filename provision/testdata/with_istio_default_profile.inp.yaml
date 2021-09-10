@@ -42,6 +42,7 @@ kube_config:
   use_ds_rolling_update: true
 
 istio_config:
+  install_istio: true
   install_profile: default 
 
 registry:

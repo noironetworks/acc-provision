@@ -1379,6 +1379,7 @@ data:
  
             },
             "istio_config": {
+               "install_istio": true, 
                "install_profile": "default"
             },
             "logging": {

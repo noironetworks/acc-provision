@@ -48,6 +48,8 @@ spec:
           value: snatglobalinfo
         - name: ACI_RDCONFIG_NAME
           value: routingdomain-config
+        - name: SYSTEM_NAMESPACE
+          value: aci-containers-system
         image: noirolabs/aci-containers-controller:ci_test
         imagePullPolicy: Always
         livenessProbe:
