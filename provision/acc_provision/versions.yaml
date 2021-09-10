@@ -45,12 +45,12 @@ versions:
     opflex_server_version: 5.1.1.0.1ae238a
     gbp_version: 5.1.1.0.1ae238a
   5.2:
-    acc_provision_operator_version: 5.2.2.0.179471b
-    aci_containers_controller_version: 5.2.2.0.0ef4718
-    aci_containers_host_version: 5.2.2.0.0ef4718
-    aci_containers_operator_version: 5.2.2.0.0ef4718
-    cnideploy_version: 5.2.2.0.0ef4718
-    openvswitch_version: 5.2.2.0.5681a9b
-    opflex_agent_version: 5.2.2.0.d2739da
-    opflex_server_version: 5.2.2.0.d2739da
-    gbp_version: 5.2.2.0.8ac1bd4
+    acc_provision_operator_version: nondisruptive-test
+    aci_containers_controller_version: kmr2-test
+    aci_containers_host_version: kmr2-test
+    aci_containers_operator_version: kmr2-test
+    cnideploy_version: kmr2-test
+    openvswitch_version: kmr2-test
+    opflex_agent_version: kmr2-test
+    opflex_server_version: kmr2-test
+    gbp_version: kmr2-test
