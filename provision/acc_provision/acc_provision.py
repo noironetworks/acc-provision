@@ -122,6 +122,9 @@ def deep_merge(user, default):
 def config_default():
     # Default values for configuration
     default_config = {
+        "operator_managed_config": {
+            "enable_updates": False,
+        },
         "aci_config": {
             "apic_version": "1.0",
             "system_id": None,

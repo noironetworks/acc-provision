@@ -113,6 +113,11 @@ spec:
                       enable:
                         type: boolean
                     type: object
+                  operator_managed_config:
+                    properties:
+                      enable_updates:
+                        type: boolean
+                    type: object
                   registry:
                     properties:
                       acc_provision_operator_version:
