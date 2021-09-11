@@ -1,14 +1,15 @@
 apiVersion: v1
 data:
-  spec: "{\n    \"acc_provision_input\": {\n        \"aci_config\": {\n          \
-    \  \"system_id\": \"kube\",\n            \"apic_hosts\": [\n                \"\
-    10.30.120.100\"\n            ],\n            \"aep\": \"kube-aep\",\n        \
-    \    \"vrf\": {\n                \"name\": \"kube\",\n                \"tenant\"\
-    : \"common\"\n            },\n            \"sync_login\": {\n                \"\
-    certfile\": \"user.crt\", \n                \"keyfile\": \"user.key\"\n      \
-    \      },\n            \"vmm_domain\": {\n              \"nested_inside\": {\n\
-    \                \"installer_provisioned_lb_ip\": \"192.168.18.201\"\n       \
-    \       }\n            },\n            \"l3out\": {\n                \"name\"\
+  spec: "{\n    \"acc_provision_input\": {\n        \"operator_managed_config\": {\n\
+    \            \"enable_updates\": false\n        },\n        \"aci_config\": {\n\
+    \            \"system_id\": \"kube\",\n            \"apic_hosts\": [\n       \
+    \         \"10.30.120.100\"\n            ],\n            \"aep\": \"kube-aep\"\
+    ,\n            \"vrf\": {\n                \"name\": \"kube\",\n             \
+    \   \"tenant\": \"common\"\n            },\n            \"sync_login\": {\n  \
+    \              \"certfile\": \"user.crt\", \n                \"keyfile\": \"user.key\"\
+    \n            },\n            \"vmm_domain\": {\n              \"nested_inside\"\
+    : {\n                \"installer_provisioned_lb_ip\": \"192.168.18.201\"\n   \
+    \           }\n            },\n            \"l3out\": {\n                \"name\"\
     : \"l3out\",\n                \"external_networks\": [\n                    \"\
     default\"\n                ]\n            }\n        },\n        \"registry\"\
     : {\n            \"image_prefix\": \"noiro\"\n        },\n        \"kube_config\"\

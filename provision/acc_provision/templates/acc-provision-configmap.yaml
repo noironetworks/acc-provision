@@ -11,6 +11,9 @@ data:
   spec: |-
     {
         "acc_provision_input": {
+            "operator_managed_config": {
+                "enable_updates": {{config.operator_managed_config.enable_updates|json}}
+            },
             "aci_config": {
                 "system_id": {{config.aci_config.system_id|json}},
                 {% if config.user_config.aci_config.apic_hosts %}

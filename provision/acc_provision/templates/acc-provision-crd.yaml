@@ -33,6 +33,11 @@ spec:
               acc_provision_input:
                 type: object
                 properties:
+                  operator_managed_config:
+                    type: object
+                    properties:
+                      enable_updates:
+                        type: boolean
                   aci_config:
                     type: object
                     properties:

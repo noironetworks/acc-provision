@@ -1190,6 +1190,11 @@ spec:
               acc_provision_input:
                 type: object
                 properties:
+                  operator_managed_config:
+                    type: object
+                    properties:
+                      enable_updates:
+                        type: boolean
                   aci_config:
                     type: object
                     properties:
@@ -1341,6 +1346,9 @@ data:
   spec: |-
     {
         "acc_provision_input": {
+            "operator_managed_config": {
+                "enable_updates": false
+            },
             "aci_config": {
                 "system_id": "kube",
                 "apic_hosts": [
