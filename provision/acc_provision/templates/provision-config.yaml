@@ -99,3 +99,6 @@ registry:
 
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
+
+#operator_managed_config:
+  # enable_updates: True
