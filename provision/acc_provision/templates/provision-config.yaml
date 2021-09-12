@@ -1,8 +1,6 @@
 #
 # Configuration for ACI Fabric
-#
-operator_managed_config: 
-  enable_updates: false         
+#         
 aci_config:
   system_id: mykube             # Every opflex cluster must have a distinct ID
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
@@ -83,6 +81,10 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
+        
+# operator_managed_config: 
+    #enable_updates: True # Default is False
+
 #istio_config:
   # install_istio: False         # default is True
   # install_profile: "default"   # override if needed, default is "demo"
