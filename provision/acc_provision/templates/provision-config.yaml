@@ -81,6 +81,13 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
+ 
+#
+# Configuration for ACI CNI Operator
+#
+# operator_managed_config: 
+    #enable_updates: True # Default is False
+
 #istio_config:
   # install_istio: False         # default is True
   # install_profile: "default"   # override if needed, default is "demo"
