@@ -217,7 +217,7 @@ def config_default():
             "enable_endpointslice": False,
         },
         "istio_config": {
-            "install_istio": True,
+            "install_istio": False,
             "install_profile": "demo",
             "istio_ns": "istio-system",
             "istio_operator_ns": "istio-operator"

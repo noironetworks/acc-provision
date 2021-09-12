@@ -1624,9 +1624,7 @@ rules:
   - services
   - events
   - replicationcontrollers
-{% if config.istio_config.install_istio %}
   - serviceaccounts
-{% endif %}
   verbs:
   - list
   - watch
@@ -1652,7 +1650,6 @@ rules:
   - customresourcedefinitions
   verbs:
   - '*'
-{% if config.istio_config.install_istio %}
 - apiGroups:
   - "rbac.authorization.k8s.io"
   resources:
@@ -1660,6 +1657,7 @@ rules:
   - clusterrolebindings
   verbs:
   - '*'
+{% if config.istio_config.install_istio %}
 - apiGroups:
   - "install.istio.io"
   resources:
@@ -2483,10 +2481,8 @@ spec:
               value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
             - name: ACI_RDCONFIG_NAME
               value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
-            {% if config.istio_config.install_istio %}
             - name: SYSTEM_NAMESPACE
               value: "{{ config.kube_config.system_namespace}}"
-            {% endif %}
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/

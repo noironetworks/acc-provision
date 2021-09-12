@@ -50,20 +50,6 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - install.istio.io
-  resources:
-  - istiocontrolplanes
-  - istiooperators
-  verbs:
-  - '*'
-- apiGroups:
-  - aci.istio
-  resources:
-  - aciistiooperators
-  - aciistiooperator
-  verbs:
-  - '*'
-- apiGroups:
   - networking.k8s.io
   resources:
   - networkpolicies
