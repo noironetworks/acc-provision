@@ -122,6 +122,8 @@ spec:
                     properties:
                       acc_provision_operator_version:
                         type: string
+                      aci_cni_operator_version:
+                        type: string
                       aci_containers_controller_version:
                         type: string
                       aci_containers_host_version:

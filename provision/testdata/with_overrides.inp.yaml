@@ -1,3 +1,6 @@
+operator_managed_config:
+  enable_updates: true
+
 aci_config:
   system_id: kube
   use_legacy_kube_naming_convention: True
@@ -53,6 +56,7 @@ kube_config:
   
 registry:
   image_prefix: noiro
+  aci_cni_operator_version: AciCniOperatorTag
 
 logging:
   controller_log_level: debug

@@ -224,6 +224,7 @@ def config_default():
         },
         "registry": {
             "image_prefix": "noiro",
+            "aci_cni_operator_version": None,
         },
         "logging": {
             "controller_log_level": "info",
@@ -1527,6 +1528,10 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    if config["registry"]["aci_cni_operator_version"] is not None:
+        config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
+        config["registry"]["acc_provision_operator_version"] = config["registry"]["aci_cni_operator_version"]
 
     if flavor in ["cloud", "aks", "eks"]:
         if prov_apic is None:

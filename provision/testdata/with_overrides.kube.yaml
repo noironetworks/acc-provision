@@ -1190,6 +1190,8 @@ spec:
                         type: string
                       acc_provision_operator_version:
                         type: string
+                      aci_cni_operator_version:
+                        type: string
                       cnideploy_version:
                         type: string
                       opflex_agent_version:
@@ -1300,7 +1302,7 @@ data:
     {
         "acc_provision_input": {
             "operator_managed_config": {
-                "enable_updates": false
+                "enable_updates": true
             },
             "aci_config": {
                 "system_id": "kube",
@@ -1324,7 +1326,8 @@ data:
                 }
             },
             "registry": {
-                "image_prefix": "noiro"
+                "image_prefix": "noiro", 
+                "aci_cni_operator_version": "AciCniOperatorTag"
             },
             "kube_config": {
                 "use_external_service_ip_allocator": true, 
@@ -2379,7 +2382,7 @@ spec:
         network-plugin: aci-containers
     spec:
       containers:
-      - image: noiro/aci-containers-operator:5.2.2.0.0ef4718
+      - image: noiro/aci-containers-operator:AciCniOperatorTag
         imagePullPolicy: IfNotPresent
         name: aci-containers-operator
         resources: {}
@@ -2406,7 +2409,7 @@ spec:
           value: "kubernetes-1.22"
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: "accprovisioninput"
-        image: noiro/acc-provision-operator:5.2.2.0.179471b
+        image: noiro/acc-provision-operator:AciCniOperatorTag
         imagePullPolicy: IfNotPresent
         name: acc-provision-operator
         resources: {}
