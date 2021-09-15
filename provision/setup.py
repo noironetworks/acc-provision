@@ -6,7 +6,7 @@ from gitversion.gitversion import get_git_version
 
 setup(
     name='acc_provision',
-    version='5.2.2.0',
+    version='5.2.3.0',
     description='Tool to provision ACI for ACI Containers Controller  Build info: ' + get_git_version(),
     author="Cisco Systems, Inc.",
     author_email="apicapi@noironetworks.com",
