@@ -1505,6 +1505,9 @@ data:
           {% if config.kube_config.run_gbp_container %}
             ,"statistics" : { "mode" : "off" }
           {% endif %}
+        },
+        "prometheus": {
+            "enabled": "false"
         }
     }
   {% if config.kube_config.run_gbp_container %}

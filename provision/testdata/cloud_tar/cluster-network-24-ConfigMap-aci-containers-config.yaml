@@ -68,7 +68,8 @@ data:
     : false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
     \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" }\n        ,\"\
-    statistics\" : { \"mode\" : \"off\" }\n    }\n}"
+    statistics\" : { \"mode\" : \"off\" }\n    },\n    \"prometheus\": {\n       \
+    \ \"enabled\": \"false\"\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:
