@@ -1343,6 +1343,9 @@ data:
         "opflex": {
             "notif" : { "enabled" : "false" }
             ,"statistics" : { "mode" : "off" }
+        },
+        "prometheus": {
+            "enabled": "false"
         }
     }
   gbp-server-config: |-
