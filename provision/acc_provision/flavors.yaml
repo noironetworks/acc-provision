@@ -22,7 +22,7 @@ flavors:
   # Upstream Kubernetes
   kubernetes-1.22:
     desc: Kubernetes 1.22
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: false
     order: 16
@@ -33,7 +33,7 @@ flavors:
   # Upstream Kubernetes
   kubernetes-1.21:
     desc: Kubernetes 1.21
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: false
     order: 17
@@ -43,7 +43,7 @@ flavors:
         use_host_netns_volume: True
   kubernetes-1.20:
     desc: Kubernetes 1.20
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: false
     order: 18
@@ -53,7 +53,7 @@ flavors:
         use_host_netns_volume: True
   kubernetes-1.19:
     desc: Kubernetes 1.19
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 19
@@ -62,7 +62,7 @@ flavors:
         allow_kube_api_default_epg: True
   kubernetes-1.18:
     desc: Kubernetes 1.18
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 20
@@ -71,37 +71,37 @@ flavors:
         allow_kube_api_default_epg: True
   kubernetes-1.17:
     desc: Kubernetes 1.17
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 21
   kubernetes-1.16:
     desc: Kubernetes 1.16
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 22
   kubernetes-1.15:
     desc: Kubernetes 1.15
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 23
   kubernetes-1.14:
     desc: Kubernetes 1.14
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 24
   kubernetes-1.13:
     desc: Kubernetes 1.13
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 25
   kubernetes-1.12:
     desc: Kubernetes 1.12
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: true
     order: 26
@@ -125,7 +125,7 @@ flavors:
         no_priority_class: True
   openshift-4.7-openstack:
     desc: Red Hat OpenShift Container Platform 4.7 on OpenStack
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -259,7 +259,7 @@ flavors:
     order: 0
   openshift-4.6-openstack:
     desc: Red Hat OpenShift Container Platform 4.6 on OpenStack
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -393,7 +393,7 @@ flavors:
     order: 1
   openshift-4.6-baremetal:
     desc: Red Hat OpenShift Container Platform 4.6 on Baremetal
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         kubeapi_vlan_mode: untagged
@@ -529,7 +529,7 @@ flavors:
     order: 2
   openshift-4.5-openstack:
     desc: Red Hat OpenShift Container Platform 4.5 on OpenStack
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -655,7 +655,7 @@ flavors:
     order: 3
   openshift-4.8-esx:
     desc: Red Hat OpenShift Container Platform 4.8 on ESX
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         second_kubeapi_portgroup: True
@@ -792,7 +792,7 @@ flavors:
     order: 4
   openshift-4.7-esx:
     desc: Red Hat OpenShift Container Platform 4.7 on ESX
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         second_kubeapi_portgroup: True
@@ -929,7 +929,7 @@ flavors:
     order: 5
   openshift-4.6-esx:
     desc: Red Hat OpenShift Container Platform 4.6 on ESX
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         second_kubeapi_portgroup: True
@@ -1066,7 +1066,7 @@ flavors:
     order: 6
   openshift-4.5-esx:
     desc: Red Hat OpenShift Container Platform 4.5 on ESX
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         second_kubeapi_portgroup: True
@@ -1195,7 +1195,7 @@ flavors:
     order: 7
   openshift-4.4-openstack:
     desc: Red Hat OpenShift Container Platform 4.4 on OpenStack
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -1321,7 +1321,7 @@ flavors:
     order: 8
   openshift-4.4-esx:
     desc: Red Hat OpenShift Container Platform 4.4 on ESX
-    default_version: 5.2
+    default_version: 6.0
     config:
       net_config:
         second_kubeapi_portgroup: True
@@ -1450,7 +1450,7 @@ flavors:
     order: 9
   openshift-4.4:
     desc: Red Hat OpenShift Container Platform 4.4
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -1550,7 +1550,7 @@ flavors:
     order: 10
   openshift-4.3:
     desc: Red Hat OpenShift Container Platform 4.3
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -1650,7 +1650,7 @@ flavors:
     order: 11
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -1695,7 +1695,7 @@ flavors:
     order: 12
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -1739,7 +1739,7 @@ flavors:
     order: 13
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
-    default_version: 5.2
+    default_version: 6.0
     config:
       kube_config:
         use_external_service_ip_allocator: True
@@ -1784,7 +1784,7 @@ flavors:
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
-    default_version: 5.2
+    default_version: 6.0
     status: null
     hidden: false
     config:
@@ -1817,7 +1817,7 @@ flavors:
     order: 15
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
-    default_version: 5.2
+    default_version: 6.0
     options:
       template_generator: generate_rancher_yaml
     config:
@@ -1873,7 +1873,7 @@ flavors:
     order: 29
   k8s-overlay:
     desc: Kubernetes basic overlay
-    default_version: 5.2
+    default_version: 6.0
     overlay: True
     config:
       aci_config:
@@ -1919,7 +1919,7 @@ flavors:
     order: 30
   aks:
     desc: Azure Kubernetes Service
-    default_version: 5.2
+    default_version: 6.0
     overlay: True
     config:
       net_config:
@@ -1978,7 +1978,7 @@ flavors:
     order: 31
   cloud:
     desc: Openshift IPI/AWS
-    default_version: 5.2
+    default_version: 6.0
     overlay: True
     config:
       net_config:
@@ -2106,7 +2106,7 @@ flavors:
     order: 32
   eks:
     desc: Elastic Kubernetes Service (aws)
-    default_version: 5.2
+    default_version: 6.0
     overlay: True
     config:
       net_config:
