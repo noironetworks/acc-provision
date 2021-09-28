@@ -504,8 +504,6 @@ spec:
                 items:
                   type: string
                 type: array
-            required:
-            - usersubnets
             type: object
           status:
             description: NodeinfoStatus defines the observed state of Nodeinfo
