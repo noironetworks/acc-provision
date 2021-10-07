@@ -11,7 +11,7 @@ spec:
     singular: acicontainersoperator
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1
     schema:
       openAPIV3Schema:
         description: acicontainersoperator owns the lifecycle of ACI objects in the
