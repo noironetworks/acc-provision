@@ -164,3 +164,6 @@ spec:
     storage: true
     subresources:
       status: {}
+  - name: v1alpha1
+    served: false
+    storage: false

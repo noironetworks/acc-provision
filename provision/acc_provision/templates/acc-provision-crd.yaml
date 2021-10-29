@@ -163,3 +163,6 @@ spec:
         required:
         - spec
         type: object
+  - name: v1alpha1
+    served: false
+    storage: false
