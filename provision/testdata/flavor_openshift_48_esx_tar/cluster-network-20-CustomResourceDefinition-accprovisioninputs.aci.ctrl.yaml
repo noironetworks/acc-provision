@@ -11,7 +11,7 @@ spec:
     singular: accprovisioninput
   scope: Namespaced
   versions:
-  - name: v1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: accprovisioninput defines the input configuration for ACI CNI

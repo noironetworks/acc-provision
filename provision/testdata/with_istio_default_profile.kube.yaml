@@ -11,7 +11,7 @@ spec:
     singular: acicontainersoperator
   scope: Namespaced
   versions:
-  - name: v1
+  - name: v1alpha1
     served: true
     storage: true
     subresources:
@@ -1166,7 +1166,7 @@ spec:
     singular: accprovisioninput
   scope: Namespaced
   versions:
-  - name: v1
+  - name: v1alpha1
     served: true
     storage: true
     subresources:
