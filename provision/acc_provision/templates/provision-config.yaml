@@ -71,6 +71,20 @@ net_config:
                                   # Only enabled if disable_wait_for_network
                                   # is set to false.
 
+calico_config:
+  # net_config:
+    # block_size: 26 # The block size to use for IP address assignments from
+                   # this pool. Defaults to 26 for IPv4 and 112 for IPv6.
+    # service_cluster_ip: 172.30.0.0/16
+  bgp_config:
+    bgp_secret: test
+  bgp_peer_config:
+    as_number: 64512 # [Default:64512]
+    racks:
+      - [192.168.2.201, 192.168.2.202]
+      - [192.168.2.203, 192.168.2.204]
+    
+
 #
 # Configuration for container registry
 # Update if a custom container registry has been setup

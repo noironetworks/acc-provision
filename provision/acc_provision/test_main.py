@@ -1082,3 +1082,14 @@ def create_certificate(input_file, cert_file, **overrides):
         assert cert_data['issuer'][1][0][1] == 'Cisco Systems'
     finally:
         os.chdir(old_working_directory)
+
+@in_testdir
+def test_flavor_cko_calico():
+    run_provision(
+        "flavor_cko_calico.inp.yaml",
+        "flavor_cko_calico.kube.yaml",
+        None,
+        None,
+        "flavor_cko_calico.apic.txt",
+        overrides={"flavor": "cko-calico"}
+    )

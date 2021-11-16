@@ -182,6 +182,27 @@ def config_default():
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
         },
+        "calico_config": {
+            "net_config": {
+                "block_size" : 26,
+                "service_cluster_ip": "172.30.0.0/16",
+                "encapsulation": "IPIP",
+                "nat_outgoing": False,
+            },
+            "bgp_config": {
+                "bgp_secret": None,
+            },
+            "bgp_peer_config": {
+                "name": None,
+                "as_number": 64512,
+                "racks" : None,
+            },
+            "cert_info": {
+                "certfile": "user-cko.crt",
+                "keyfile": "user-cko.key",
+                "cert_reused": False,
+            }
+        },
         "kube_config": {
             "controller": "1.1.1.1",
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
@@ -383,10 +404,15 @@ def config_adjust(args, config, prov_apic, no_random):
     if args.version_token:
         token = args.version_token
 
-    if extern_static:
+    if config["flavor"] != "cko-calico" and extern_static:
         static_service_ip_pool = [{"start": cidr_split(extern_static)[0], "end": cidr_split(extern_static)[1]}]
     else:
         static_service_ip_pool = []
+        
+    if config["flavor"] != "cko-calico" and node_svc_subnet:
+        node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
+    else:
+        node_service_ip_pool = []
 
     adj_config = {
         "aci_config": {
@@ -490,12 +516,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 },
             ],
             "static_service_ip_pool": static_service_ip_pool,
-            "node_service_ip_pool": [
-                {
-                    "start": cidr_split(node_svc_subnet)[0],
-                    "end": cidr_split(node_svc_subnet)[1],
-                },
-            ],
+            "node_service_ip_pool": node_service_ip_pool,
             "node_service_gw_subnets": [
                 node_svc_subnet,
             ],
@@ -505,7 +526,7 @@ def config_adjust(args, config, prov_apic, no_random):
         "registry": {
             "configuration_version": token,
         }
-    }
+    }    
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
@@ -838,6 +859,12 @@ def config_validate(flavor_opts, config):
 
         if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
             del extra_checks["net_config/extern_static"]
+            
+        # Remove extra checks for cko-calico flavor
+        if config["flavor"] == "cko-calico":
+            del extra_checks["net_config/extern_static"]
+            del extra_checks["net_config/node_svc_subnet"]
+            del extra_checks["net_config/service_vlan"]
 
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
@@ -1028,6 +1055,56 @@ def generate_cert(username, cert_file, key_file):
             key_data = keyp.read()
     return key_data, cert_data, reused
 
+def generate_cko_cert(username, cert_file, key_file):
+    reused = False
+    if not exists(cert_file) or not exists(key_file):
+        info("Generating certs for cko")
+        info("  Private key file: \"%s\"" % key_file)
+        info("  Certificate file: \"%s\"" % cert_file)
+
+        # create a key pair
+        k = crypto.PKey()
+        k.generate_key(crypto.TYPE_RSA, 1024)
+
+        # create a self-signed cert
+        cert = crypto.X509()
+        cert.get_subject().C = "US"
+        cert.get_subject().O = "Cisco Systems"
+        cert.get_subject().CN = "User %s" % username
+        cert.set_serial_number(1000)
+        cert.gmtime_adj_notBefore(-12 * 60 * 60)
+        cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+        cert.set_issuer(cert.get_subject())
+        cert.set_pubkey(k)
+        # Work around this bug:
+        # https://github.com/pyca/pyopenssl/issues/741
+
+        # This should be b'sha1' on both 2 and 3, but the bug requires
+        # passing a string on Python 3.
+        if sys.version_info[0] >= 3:
+            hash_algorithm = 'sha1'
+        else:
+            hash_algorithm = b'sha1'
+        cert.sign(k, hash_algorithm)
+
+        cert_data = crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
+        key_data = crypto.dump_privatekey(crypto.FILETYPE_PEM, k)
+        with open(cert_file, "wb") as certp:
+            certp.write(cert_data)
+        with open(key_file, "wb") as keyp:
+            keyp.write(key_data)
+    else:
+        # Do not overwrite previously generated data if it exists
+        reused = True
+        info("Reusing existing certs for cko")
+        info("  Private key file: \"%s\"" % key_file)
+        info("  Certificate file: \"%s\"" % cert_file)
+        with open(cert_file, "rb") as certp:
+            cert_data = certp.read()
+        with open(key_file, "rb") as keyp:
+            key_data = keyp.read()
+    return key_data, cert_data, reused
+
 
 def get_jinja_template(file):
     env = Environment(
@@ -1122,6 +1199,54 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
         else:
             template.stream(config=config).dump(operator_output)
 
+def generate_calico_yaml(config, network_operator_output):
+    if network_operator_output and network_operator_output != "/dev/null":
+        calico_crds_template = get_jinja_template('calico-crds.yaml')
+        calico_crds_output = calico_crds_template.render(config=config)
+        
+        calico_crs_template = get_jinja_template('calico-crs.yaml')
+        calico_crs_output = calico_crs_template.render(config=config)
+        
+        # Render calico bgp peer CR from calico_bgp_peer_template template and add it to calico_net_op_template
+        # It has to be rendered in a nested loop
+        bgp_peer=''
+        calico_bgp_peer_template = get_jinja_template('calico-bgp-peer.yaml')
+        for rack in config["calico_config"]["bgp_peer_config"]["racks"]:
+            rackID = config["calico_config"]["bgp_peer_config"]["racks"].index(rack) + 1
+            for peerIP in rack:
+                configTemp = dict(config)
+                configTemp["calico_config"]["bgp_peer_config"]["peerIP"] = peerIP
+                configTemp["calico_config"]["bgp_peer_config"]["name"] = peerIP.replace(".","-")
+                configTemp["calico_config"]["bgp_peer_config"]["rackID"] = rackID
+                bgp_peer = bgp_peer + "\n---\n" + calico_bgp_peer_template.render(config=configTemp)
+        
+        calico_bgp_config_template = get_jinja_template('calico-bgp-config.yaml')
+        calico_bgp_config_output = calico_bgp_config_template.render(config=config)
+        
+        calico_bgp_spec = calico_bgp_config_output + "\n---\n" + bgp_peer
+        # Encode the generated calico bgp spec to base64
+        base64_encoded_calico_bgp_spec = base64.b64encode(calico_bgp_spec.encode('ascii')).decode('ascii')
+        # Encode the generated calico crds spec to base64
+        base64_encoded_calico_crds_spec = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
+        # Encode the generated calico crs spec to base64
+        base64_encoded_calico_crs_spec = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
+        
+        network_operator_spec_template = get_jinja_template('network-operator-spec.yaml')
+        network_operator_spec_output = network_operator_spec_template.render(config=config)
+        
+        network_operator_CR_template = get_jinja_template('network-operator-CR.yaml')
+        netopConfig = dict(config)
+        netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_calico_crds_spec
+        netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_calico_crs_spec
+        netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_calico_bgp_spec
+        network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
+        
+        network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+        
+        print("writing the deployment file")
+        
+        with open(network_operator_output, "w") as fh:
+            fh.write(network_operator_yaml)
 
 def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
@@ -1398,15 +1523,23 @@ def get_versions(versions_url):
 
 def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
-    subnet_info = {
-        "pod_subnet": config["net_config"]["pod_subnet"],
-        "node_subnet": config["net_config"]["node_subnet"],
-        "extern_dynamic": config["net_config"]["extern_dynamic"],
-        "node_svc_subnet": config["net_config"]["node_svc_subnet"]
-    }
+    if config["flavor"] != "cko-calico":
+        subnet_info = {
+            "pod_subnet": config["net_config"]["pod_subnet"],
+            "node_subnet": config["net_config"]["node_subnet"],
+            "extern_dynamic": config["net_config"]["extern_dynamic"],
+            "node_svc_subnet": config["net_config"]["node_svc_subnet"]
+        }
+    else:
+    # node_svc_subnet is ignored in "cko-calico" flavor
+        subnet_info = {
+            "pod_subnet": config["net_config"]["pod_subnet"],
+            "node_subnet": config["net_config"]["node_subnet"],
+            "extern_dynamic": config["net_config"]["extern_dynamic"],
+        }
 
     # Don't have extern_static field set for OpenShift flavors
-    if config["net_config"]["extern_static"]:
+    if config["flavor"] != "cko-calico" and config["net_config"]["extern_static"]:
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
@@ -1456,6 +1589,7 @@ def provision(args, apic_file, no_random):
             warn("Invalid timeout value ignored: '%s'" % timeout)
 
     generate_cert_data = True
+    generate_cko_cert_data = True
     if args.delete:
         output_file = "/dev/null"
         output_tar = "/dev/null"
@@ -1592,16 +1726,17 @@ def provision(args, apic_file, no_random):
         pass
 
     # generate key and cert if needed
-    username = config["aci_config"]["sync_login"]["username"]
-    certfile = config["aci_config"]["sync_login"]["certfile"]
-    keyfile = config["aci_config"]["sync_login"]["keyfile"]
-    key_data, cert_data = None, None
-    reused = True
-    if generate_cert_data:
-        key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
-    config["aci_config"]["sync_login"]["key_data"] = key_data
-    config["aci_config"]["sync_login"]["cert_data"] = cert_data
-    config["aci_config"]["sync_login"]["cert_reused"] = reused
+    if flavor != "cko-calico":
+        username = config["aci_config"]["sync_login"]["username"]
+        certfile = config["aci_config"]["sync_login"]["certfile"]
+        keyfile = config["aci_config"]["sync_login"]["keyfile"]
+        key_data, cert_data = None, None
+        reused = True
+        if generate_cert_data:
+            key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
+        config["aci_config"]["sync_login"]["key_data"] = key_data
+        config["aci_config"]["sync_login"]["cert_data"] = cert_data
+        config["aci_config"]["sync_login"]["cert_reused"] = reused
 
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
@@ -1619,6 +1754,32 @@ def provision(args, apic_file, no_random):
             return False
         cloud_prov = CloudProvision(apic, config, args)
         return cloud_prov.Run(flavor_opts, generate_kube_yaml)
+        
+    # generate cko network operator output file and cert,key
+    if flavor == "cko-calico":
+        cko_certfile = config["calico_config"]["cert_info"]["certfile"]
+        cko_keyfile = config["calico_config"]["cert_info"]["keyfile"]
+        username = "cko"
+        cko_key_data, cko_cert_data = None, None
+        reused = True
+        if generate_cko_cert_data:
+            cko_key_data, cko_cert_data, reused = generate_cko_cert(username, cko_certfile, cko_keyfile)
+        config["calico_config"]["cert_info"]["key_data"] = cko_key_data
+        config["calico_config"]["cert_info"]["cert_data"] = cko_cert_data
+        config["calico_config"]["cert_info"]["cert_reused"] = reused
+        print("using flavor cko-calico")
+        gen = flavor_opts.get("template_generator", generate_calico_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+        
+        if prov_apic is None:
+            return True
+
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)

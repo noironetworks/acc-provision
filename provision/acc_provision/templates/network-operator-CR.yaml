@@ -1,0 +1,13 @@
+apiVersion: network-operator-controller.net.op/v1
+kind: NetworkOperator
+metadata:
+  name: networkoperator-sample
+spec:
+  netopcontrol: Install
+  clusterprofile: cko-calico
+  config:
+    clusterspec:
+      cko-calico:
+        calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
+        calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
+        calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}

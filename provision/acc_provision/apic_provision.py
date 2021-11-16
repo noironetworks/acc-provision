@@ -474,24 +474,24 @@ class ApicKubeConfig(object):
                     data.append((path, None))
 
         data = []
-        update(data, self.pdom_pool())
-        update(data, self.vdom_pool())
-        update(data, self.mcast_pool())
-        update(data, self.phys_dom())
-        update(data, self.kube_dom(apic_version))
-        update(data, self.nested_dom())
-        update(data, self.associate_aep())
-        update(data, self.opflex_cert(apic_version))
-        self.apic_version = apic_version
-        if self.is_newer_version(apic_version, "5.0"):
-            update(data, self.cluster_info())
-
-        update(data, self.l3out_tn())
         update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
-        update(data, self.add_apivlan_for_second_portgroup())
-        update(data, self.nested_dom_second_portgroup())
-        for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
-            update(data, self.l3out_contract(l3out_instp))
+        if self.config['flavor'] != "cko-calico":
+            update(data, self.pdom_pool())
+            update(data, self.vdom_pool())
+            update(data, self.mcast_pool())
+            update(data, self.phys_dom())
+            update(data, self.kube_dom(apic_version))
+            update(data, self.nested_dom())
+            update(data, self.associate_aep())
+            update(data, self.opflex_cert(apic_version))
+            self.apic_version = apic_version
+            if self.is_newer_version(apic_version, "5.0"):
+                update(data, self.cluster_info())
+            update(data, self.add_apivlan_for_second_portgroup())
+            update(data, self.nested_dom_second_portgroup())
+            update(data, self.l3out_tn())
+            for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
+                update(data, self.l3out_contract(l3out_instp))
 
         update(data, self.kube_user())
         update(data, self.kube_cert())
@@ -2754,6 +2754,30 @@ class ApicKubeConfig(object):
                         prov[idx1] = self.ACI_PREFIX + prov[idx1]
                 config["aci_config"]["items"][idx]["provided"] = prov
 
+    def cko_calico_kube_tn(self, flavor):
+        tn_name = self.config["aci_config"]["system_id"]
+        path = "/api/mo/uni/tn-%s.json" % tn_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvTenant",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name)]
+                                ),
+                            ),
+                        ]
+                    ),
+                ),
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+        
+        
     def kube_tn(self, flavor):
         system_id = self.config["aci_config"]["system_id"]
         app_profile = self.config["aci_config"]["app_profile"]

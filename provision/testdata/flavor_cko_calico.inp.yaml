@@ -1,0 +1,36 @@
+aci_config:
+  system_id: kube 
+  use_legacy_kube_naming_convention: False  
+  apic_hosts:                  
+    - 172.28.184.60
+  apic_login:
+    username: admin
+    password: noir0123
+  aep: sauto_aep                   
+  vrf:                               
+    name: sauto_l3out-1_vrf      
+    tenant: common       
+  l3out:                             
+    name: sauto_l3out-1           
+    external_networks:
+        - sauto_l3out-1_epg        
+
+net_config:
+  node_subnet: 15.11.0.2/27
+  pod_subnet: 15.128.0.1/27 
+  extern_dynamic: 151.9.1.1/24   
+  kubeapi_vlan: 2032                                
+  infra_vlan: 3801
+
+calico_config:
+  bgp_config:
+    bgp_secret: test
+  bgp_peer_config:
+    as_number: 64512 # [Default:64512]
+    racks:
+      - [192.168.2.201, 192.168.2.202]
+      - [192.168.2.203, 192.168.2.204]
+
+registry:
+  image_prefix: quay.io/noirolabs
+  network_operator_version: test

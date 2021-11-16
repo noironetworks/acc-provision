@@ -64,3 +64,4 @@ versions:
     opflex_agent_version: 6.0.0.0.d2739da
     opflex_server_version: 6.0.0.0.d2739da
     gbp_version: 6.0.0.0.8ac1bd4
+    network_operator_version: test

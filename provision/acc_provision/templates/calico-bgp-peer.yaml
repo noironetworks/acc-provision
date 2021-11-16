@@ -1,0 +1,14 @@
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata: 
+  name: {{config.calico_config.bgp_peer_config.name}}
+spec:
+  peerIP: {{config.calico_config.bgp_peer_config.peerIP}}
+  asNumber: {{ config.calico_config.bgp_peer_config.as_number }}
+  nodeSelector: rack_id == "{{config.calico_config.bgp_peer_config.rackID}}"
+  password:
+    secretKeyRef:
+      name: bgp-secrets
+      key: {{ config.calico_config.bgp_config.bgp_secret }}
+
+
