@@ -1363,7 +1363,14 @@ def check_overlapping_subnets(config):
         if out:
             return False
     return True
-
+def check_image_pull_secret(config):
+    # Check if the image_pull_secret is valid
+    image_pull_secret = config["registry"]["image_pull_secret"]
+    #This is the regex used by kubect to validate objects names
+    pattern = re.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*")
+    if not pattern.match(str(image_pull_secret)):
+        return False
+    return True
 
 def provision(args, apic_file, no_random):
     config_file = args.config
@@ -1507,6 +1514,12 @@ def provision(args, apic_file, no_random):
     if not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
+        
+    # Verify that image_pull_secret is a valid K8s secret name and not a YAML string
+    if "registry" in config.keys() and "image_pull_secret" in config["registry"]:
+        if not check_image_pull_secret(config):
+            err("Invalid image_pull_secret: The image_pull_secret is the name of the K8s secret")
+            return False
 
     # Adjust config based on convention/apic data
     adj_config = config_adjust(args, config, prov_apic, no_random)
