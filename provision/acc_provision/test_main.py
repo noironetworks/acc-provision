@@ -908,6 +908,28 @@ def test_overlapping_subnets():
 
 
 @in_testdir
+def test_image_pull_secret():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "with_image_pull_secret.inp.yaml",
+                None,
+                None,
+                None,
+                None
+            )
+        except SystemExit:
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("image_pull_secret.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
 def test_preexisting_kube_convention():
     with tempfile.NamedTemporaryFile("w+") as tmperr:
         sys.stderr = tmperr
