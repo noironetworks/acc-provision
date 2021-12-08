@@ -2043,9 +2043,15 @@ spec:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
           livenessProbe:
+            failureThreshold: 10
             httpGet:
               path: /status
               port: 8091
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 30
       volumes:
         - name: controller-config-volume
           configMap:

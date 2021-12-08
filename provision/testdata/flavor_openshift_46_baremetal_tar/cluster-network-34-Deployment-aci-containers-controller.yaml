@@ -40,9 +40,15 @@ spec:
         image: noiro/aci-containers-controller:5.2.3.2.1d150da
         imagePullPolicy: Always
         livenessProbe:
+          failureThreshold: 10
           httpGet:
             path: /status
             port: 8091
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
         name: aci-containers-controller
         volumeMounts:
         - mountPath: /usr/local/etc/aci-containers/
