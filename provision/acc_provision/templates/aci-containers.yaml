@@ -2492,9 +2492,15 @@ spec:
               mountPath: /usr/local/etc/aci-cert/
             {% endif %}
           livenessProbe:
+            failureThreshold: 10
             httpGet:
               path: /status
               port: 8091
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 30
       {% if config.aci_config.capic %}
       initContainers:
         - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
