@@ -36,9 +36,15 @@ spec:
         image: noiro/aci-containers-host:6.0.0.0.0ef4718
         imagePullPolicy: Always
         livenessProbe:
+          failureThreshold: 10
           httpGet:
             path: /status
             port: 8090
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
         name: aci-containers-host
         securityContext:
           capabilities:
