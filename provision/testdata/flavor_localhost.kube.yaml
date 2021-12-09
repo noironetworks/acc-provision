@@ -1825,9 +1825,15 @@ spec:
               readOnly: true
               mountPropagation: HostToContainer
           livenessProbe:
+            failureThreshold: 10
             httpGet:
               path: /status
               port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 30
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
