@@ -398,7 +398,6 @@ def test_flavor_openshift_48_esx():
     )
 
 
-
 @in_testdir
 def test_flavor_openshift_49_esx():
     run_provision(
