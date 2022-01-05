@@ -17,7 +17,11 @@ metadata:
 ---
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
+{% if config.flavor != "openshift-4.9-openstack" %}
 apiVersion: scheduling.k8s.io/v1beta1
+{% else %}
+apiVersion: scheduling.k8s.io/v1
+{% endif %}
 kind: PriorityClass
 metadata:
   name: acicni-priority
