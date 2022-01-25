@@ -1354,7 +1354,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
-    configurator = ApicKubeConfig(config)
+    apic = get_apic(config)
+    configurator = ApicKubeConfig(config, apic)
     for k, v in flavor_opts.get("apic", {}).items():
         setattr(configurator, k, v)
     apic_config = configurator.get_config(config["aci_config"]["apic_version"])
@@ -1370,7 +1371,7 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     ret = True
     sync_login = config["aci_config"]["sync_login"]["username"]
     if prov_apic is not None:
-        apic = get_apic(config)
+        #apic = get_apic(config)
         if apic is not None:
             if prov_apic is True:
                 info("Provisioning configuration in APIC")
@@ -1759,7 +1760,7 @@ def provision(args, apic_file, no_random):
     if flavor == "cko-calico":
         cko_certfile = config["calico_config"]["cert_info"]["certfile"]
         cko_keyfile = config["calico_config"]["cert_info"]["keyfile"]
-        username = "cko"
+        username ="cko" 
         cko_key_data, cko_cert_data = None, None
         reused = True
         if generate_cko_cert_data:
@@ -1845,7 +1846,9 @@ def main(args=None, apic_file=None, no_random=False):
             pass
         except Exception as e:
             success = False
+            print('**************************Handling run-time error:', e)
             err("%s: %s" % (e.__class__.__name__, e))
+            
 
     if not success:
         sys.exit(1)
