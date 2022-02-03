@@ -197,11 +197,6 @@ def config_default():
                 "as_number": 64512,
                 "racks" : None,
             },
-            "cert_info": {
-                "certfile": "user-cko.crt",
-                "keyfile": "user-cko.key",
-                "cert_reused": False,
-            }
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -523,6 +518,14 @@ def config_adjust(args, config, prov_apic, no_random):
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
         },
+        "calico_config": {
+            "cert_info": {
+                    "username": system_id,
+                    "certfile": "user-%s.crt" % system_id,
+                    "keyfile": "user-%s.key" % system_id,
+                    "cert_reused": False,
+                },
+            },
         "registry": {
             "configuration_version": token,
         }
@@ -1008,7 +1011,7 @@ def generate_password(no_random):
 def generate_cert(username, cert_file, key_file):
     reused = False
     if not exists(cert_file) or not exists(key_file):
-        info("Generating certs for kubernetes controller")
+        #info("Generating certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
         info("  Certificate file: \"%s\"" % cert_file)
 
@@ -1046,7 +1049,7 @@ def generate_cert(username, cert_file, key_file):
     else:
         # Do not overwrite previously generated data if it exists
         reused = True
-        info("Reusing existing certs for kubernetes controller")
+        #info("Reusing existing certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
         info("  Certificate file: \"%s\"" % cert_file)
         with open(cert_file, "rb") as certp:
@@ -1054,57 +1057,6 @@ def generate_cert(username, cert_file, key_file):
         with open(key_file, "rb") as keyp:
             key_data = keyp.read()
     return key_data, cert_data, reused
-
-def generate_cko_cert(username, cert_file, key_file):
-    reused = False
-    if not exists(cert_file) or not exists(key_file):
-        info("Generating certs for cko")
-        info("  Private key file: \"%s\"" % key_file)
-        info("  Certificate file: \"%s\"" % cert_file)
-
-        # create a key pair
-        k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 1024)
-
-        # create a self-signed cert
-        cert = crypto.X509()
-        cert.get_subject().C = "US"
-        cert.get_subject().O = "Cisco Systems"
-        cert.get_subject().CN = "User %s" % username
-        cert.set_serial_number(1000)
-        cert.gmtime_adj_notBefore(-12 * 60 * 60)
-        cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(k)
-        # Work around this bug:
-        # https://github.com/pyca/pyopenssl/issues/741
-
-        # This should be b'sha1' on both 2 and 3, but the bug requires
-        # passing a string on Python 3.
-        if sys.version_info[0] >= 3:
-            hash_algorithm = 'sha1'
-        else:
-            hash_algorithm = b'sha1'
-        cert.sign(k, hash_algorithm)
-
-        cert_data = crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
-        key_data = crypto.dump_privatekey(crypto.FILETYPE_PEM, k)
-        with open(cert_file, "wb") as certp:
-            certp.write(cert_data)
-        with open(key_file, "wb") as keyp:
-            keyp.write(key_data)
-    else:
-        # Do not overwrite previously generated data if it exists
-        reused = True
-        info("Reusing existing certs for cko")
-        info("  Private key file: \"%s\"" % key_file)
-        info("  Certificate file: \"%s\"" % cert_file)
-        with open(cert_file, "rb") as certp:
-            cert_data = certp.read()
-        with open(key_file, "rb") as keyp:
-            key_data = keyp.read()
-    return key_data, cert_data, reused
-
 
 def get_jinja_template(file):
     env = Environment(
@@ -1383,7 +1335,11 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
-                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming)
+                l3out_name = config["aci_config"]["l3out"]["name"]
+                l3out_tn = config["aci_config"]["l3out"]["l3out_tenant"]
+                lnodep = config["aci_config"]["l3out"]["node_profile_name"]
+                lifp = config["aci_config"]["l3out"]["int_prof_name"]
+                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_tn, l3out_name, lnodep, lifp)
             ret = False if apic.errors > 0 else True
     return ret
 
@@ -1590,7 +1546,6 @@ def provision(args, apic_file, no_random):
             warn("Invalid timeout value ignored: '%s'" % timeout)
 
     generate_cert_data = True
-    generate_cko_cert_data = True
     if args.delete:
         output_file = "/dev/null"
         output_tar = "/dev/null"
@@ -1734,6 +1689,10 @@ def provision(args, apic_file, no_random):
         key_data, cert_data = None, None
         reused = True
         if generate_cert_data:
+            if not exists(certfile) or not exists(keyfile):
+                info("Generating certs for kubernetes controller")
+            else:
+                info("Reusing existing certs for kubernetes controller")
             key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
         config["aci_config"]["sync_login"]["key_data"] = key_data
         config["aci_config"]["sync_login"]["cert_data"] = cert_data
@@ -1760,11 +1719,15 @@ def provision(args, apic_file, no_random):
     if flavor == "cko-calico":
         cko_certfile = config["calico_config"]["cert_info"]["certfile"]
         cko_keyfile = config["calico_config"]["cert_info"]["keyfile"]
-        username ="cko" 
+        username = config["calico_config"]["cert_info"]["username"]
         cko_key_data, cko_cert_data = None, None
         reused = True
-        if generate_cko_cert_data:
-            cko_key_data, cko_cert_data, reused = generate_cko_cert(username, cko_certfile, cko_keyfile)
+        if generate_cert_data:
+            if not exists(cko_certfile) or not exists(cko_keyfile):
+                info("Generating certs for network-operator")
+            else:
+                info("Reusing existing certs for network-operator")
+            cko_key_data, cko_cert_data, reused = generate_cert(username, cko_certfile, cko_keyfile)
         config["calico_config"]["cert_info"]["key_data"] = cko_key_data
         config["calico_config"]["cert_info"]["cert_data"] = cko_cert_data
         config["calico_config"]["cert_info"]["cert_reused"] = reused
@@ -1846,7 +1809,6 @@ def main(args=None, apic_file=None, no_random=False):
             pass
         except Exception as e:
             success = False
-            print('**************************Handling run-time error:', e)
             err("%s: %s" % (e.__class__.__name__, e))
             
 
