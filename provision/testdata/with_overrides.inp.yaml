@@ -12,6 +12,7 @@ aci_config:
     password: noir0123
   apic_version: "5.0"
   aep: kube-aep
+  opflex_device_delete_timeout: 1200
   vrf:
     name: kubernetes-vrf
     tenant: common

@@ -22,6 +22,9 @@ data:
                 {% if config.user_config.aci_config.aep %}
                 "aep": {{config.aci_config.aep|json}},
                 {% endif %}
+                {% if config.aci_config.opflex_device_delete_timeout %}
+                "opflex-device-delete-timeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
+                {% endif %}
                 {% if config.user_config.aci_config.tenant %}
                 "tenant": {
                     "name": {{config.user_config.aci_config.tenant.name|json}}
