@@ -160,6 +160,7 @@ def config_default():
             "kube_default_provide_kube_api": False,
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
+            "opflex_device_delete_timeout": None,
         },
         "net_config": {
             "node_subnet": None,
@@ -596,6 +597,22 @@ def is_valid_headroom(xval):
     raise(Exception("Must be integer >= %d" % (xmin)))
 
 
+def is_valid_dev_del_timeout(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 1
+    xmax = 65535
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_ipsla_interval(xval):
     if xval is None:
         # use default configured on this host
@@ -712,6 +729,8 @@ def config_validate(flavor_opts, config):
                                      lambda x: required(x) and isname(x, 32)),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
+            "aci_config/opflex_device_delete_timeout": (get(("aci_config", "opflex_device_delete_timeout")),
+                                                        is_valid_dev_del_timeout),
             "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
             "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
             "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
