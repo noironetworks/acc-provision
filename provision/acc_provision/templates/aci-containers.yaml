@@ -1337,6 +1337,9 @@ data:
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
         {% endif %}
+        {% if config.aci_config.apic_subscription_delay %}
+        "apic-subscription-delay": "{{config.aci_config.apic_subscription_delay|json}}",
+        {% endif %}
         "apic-username": {{config.aci_config.sync_login.username|json}},
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
         "aci-prefix": {{config.aci_config.system_id|json}},
