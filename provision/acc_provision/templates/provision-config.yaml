@@ -4,6 +4,7 @@
 aci_config:
   system_id: mykube             # Every opflex cluster must have a distinct ID
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
   #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
   apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101
