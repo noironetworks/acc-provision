@@ -198,6 +198,16 @@ def config_default():
                 "racks" : None,
             },
         },
+        "service_mesh_config": {
+            "enable": True,
+            "mesh_type": "Cisco-SMM",
+            "mesh_mode": "primary",
+            "version": "v1.8.1",
+            "network_name": "network1",
+            "mesh_name": "mesh1",
+            "cluster_name": "primary",
+            "remote_ctrl_plane": "",
+        },
         "kube_config": {
             "controller": "1.1.1.1",
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
@@ -408,6 +418,12 @@ def config_adjust(args, config, prov_apic, no_random):
         node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
     else:
         node_service_ip_pool = []
+
+    if config["flavor"] != "cko-calico":
+        config["calico_config"] = {}
+
+    if config["flavor"] != "cko-calico" or config["flavor"] != "aci-cni-kubernetes-1.22":
+        config["service_mesh_config"] = {}
 
     adj_config = {
         "aci_config": {

@@ -84,6 +84,15 @@ calico_config:
       - [192.168.2.201, 192.168.2.202]
       - [192.168.2.203, 192.168.2.204]
     
+# service_mesh_config:
+  # enable: False                        # default is True
+  # mesh_type: Istio                     # default is "Cisco-SMM"
+  # mesh_mode: remote                    # default is "primary"
+  # version : v1.1.1                     # default is "v1.8.1"
+  # network_name: test-network           # default is "network1"
+  # mesh_name: test-mesh                 # default is "mesh1"
+  # cluster_name: test-cluster           # default is "primary"
+  # remote_ctrl_plane : test-ctrl-plane  # default is ""
 
 #
 # Configuration for container registry
