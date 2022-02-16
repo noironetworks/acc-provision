@@ -5314,7 +5314,9 @@ class ApicKubeConfig(object):
         mtu = self.config["aci_config"]["l3out"]["mtu"]
         node_subnet = self.config["net_config"]["node_subnet"]
         primary_addr = primary_ip + "/" + node_subnet.split("/")[-1]
-        cluster_subnet = self.config["aci_config"]["l3out"]["cluster_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        floating_ip = self.config["aci_config"]["l3out"]["floating_ip"]
+        physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
         asn = self.config["calico_config"]["bgp_peer_config"]["as_number"]
         logical_node_profile = self.config["aci_config"]["l3out"]["node_profile_name"]
         int_prof = self.config["aci_config"]["l3out"]["int_prof_name"]
@@ -5346,6 +5348,30 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
+                                                # relation_l3ext_rs_dyn_path_att
+                                                "l3extRsDynPathAtt",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tDn", "uni/phys-%s" % physical_domain_name),
+                                                                    ("floatingAddr", floating_ip),
+                                                                    ("forgedTransmit", "Disabled"),
+                                                                    ("promMode", "Disabled"),
+                                                                    ("macChange", "Disabled")
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
                                                 # BGP Peer Connectivity Profile
                                                 "bgpPeerP",
                                                 collections.OrderedDict(
@@ -5354,7 +5380,7 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("addr", cluster_subnet),
+                                                                    ("addr", cluster_svc_subnet),
                                                                     ("ctrl", "as-override,dis-peer-as-check"),
                                                                 ]
                                                             ),
@@ -5690,7 +5716,6 @@ class ApicKubeConfig(object):
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
-        pod_subnet_v6 = self.config["net_config"]["pod_subnet_v6"]
         path = "/api/mo/uni/tn-%s/subj-%s-export-match.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -5721,27 +5746,6 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", pod_subnet),
-                                                                    ("aggregate", "yes"),
-                                                                ]
-                                                            ),
-                                                        ),
-                                                    ]
-                                                ),
-                                            )
-                                        ]
-                                    ),
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                # Create Match Rule Subnet V6
-                                                "rtctrlMatchRtDest",
-                                                collections.OrderedDict(
-                                                    [
-                                                        (
-                                                            "attributes",
-                                                            collections.OrderedDict(
-                                                                [
-                                                                    ("ip", pod_subnet_v6),
                                                                     ("aggregate", "yes"),
                                                                 ]
                                                             ),
@@ -5843,9 +5847,9 @@ class ApicKubeConfig(object):
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
-        pod_subnet_v6 = self.config["net_config"]["pod_subnet_v6"]
         node_subnet = self.config["net_config"]["node_subnet"]
-        node_subnet_v6 = self.config["net_config"]["node_subnet_v6"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
         path = "/api/mo/uni/tn-%s/subj-%s-import-match.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -5888,7 +5892,7 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
-                                                # Create Pod Match Rule Subnet V6
+                                                # Create Node Match Rule Subnet
                                                 "rtctrlMatchRtDest",
                                                 collections.OrderedDict(
                                                     [
@@ -5909,7 +5913,7 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
-                                                # Create Node Match Rule Subnet V6
+                                                # Create Svc Match Rule Subnet
                                                 "rtctrlMatchRtDest",
                                                 collections.OrderedDict(
                                                     [
@@ -5917,7 +5921,7 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", node_subnet_v6),
+                                                                    ("ip", cluster_svc_subnet),
                                                                     ("aggregate", "yes"),
                                                                 ]
                                                             ),
@@ -5930,7 +5934,7 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
-                                                # Create Node Match Rule Subnet V6
+                                                # Create Ext Svc Match Rule Subnet
                                                 "rtctrlMatchRtDest",
                                                 collections.OrderedDict(
                                                     [
@@ -5938,7 +5942,7 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet_v6),
+                                                                    ("ip", external_svc_subnet),
                                                                     ("aggregate", "yes"),
                                                                 ]
                                                             ),
