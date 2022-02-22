@@ -109,7 +109,7 @@ class CloudProvision(object):
 
     def Run(self, flavor_opts, kube_yaml_gen_func):
         self.adjust_cidrs()
-        self.configurator = ApicKubeConfig(self.config)
+        self.configurator = ApicKubeConfig(self.config, self.apic)
         self.deleter = MoCleaner(self.apic, self.config, self.args.debug)
 
         underlay_posts = []

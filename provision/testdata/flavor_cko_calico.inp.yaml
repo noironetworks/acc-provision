@@ -1,10 +1,9 @@
 aci_config:
   physical_domain:
     domain: bm-srvrs-calico-pd
-  system_id: kube 
-  use_legacy_kube_naming_convention: False  
+  system_id: test
   apic_hosts:                  
-    - 172.28.184.60
+    - 10.30.120.100
   apic_login:
     username: admin
     password: noir0123
@@ -34,12 +33,11 @@ net_config:
 
 calico_config:
   bgp_config:
-    bgp_secret: test
+    bgp_secret: noir0123
   bgp_peer_config:
-    as_number: 64512 # [Default:64512]
+    as_number: 650011 # [Default:64512]
     racks:
-      - [192.168.2.201, 192.168.2.202]
-      - [192.168.2.203, 192.168.2.204]
+      - [2.100.101.201, 2.100.101.202]
 
 registry:
   image_prefix: quay.io/noirolabs

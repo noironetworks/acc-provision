@@ -505,6 +505,19 @@ def test_flavor_openshift_46_esx():
         overrides={"flavor": "openshift-4.6-esx"}
     )
 
+@in_testdir
+def test_flavor_cko_calico():
+    run_provision(
+        "flavor_cko_calico.inp.yaml",
+        "flavor_cko_calico.kube.yaml",
+        #None,
+        #"flavor_cko_calico_tar",
+        None,
+        None,
+        "flavor_cko_calico.apic.txt",
+        overrides={"flavor": "cko-calico"}
+    )
+
 
 @in_testdir
 def test_flavor_openshift_45_esx():
@@ -1041,6 +1054,7 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
     # Exec main
     with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile, tempfile.NamedTemporaryFile('w+', suffix='.tar.gz') as out_tar:
 
+        print(apicfile)
         args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
 
@@ -1082,14 +1096,3 @@ def create_certificate(input_file, cert_file, **overrides):
         assert cert_data['issuer'][1][0][1] == 'Cisco Systems'
     finally:
         os.chdir(old_working_directory)
-
-@in_testdir
-def test_flavor_cko_calico():
-    run_provision(
-        "flavor_cko_calico.inp.yaml",
-        "flavor_cko_calico.kube.yaml",
-        None,
-        None,
-        "flavor_cko_calico.apic.txt",
-        overrides={"flavor": "cko-calico"}
-    )
