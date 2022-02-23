@@ -198,7 +198,7 @@ def config_default():
             },
         },
         "service_mesh_config": {
-            "enable": False,
+            "enable": True,
             "mesh_type": "Cisco-SMM",
             "mesh_mode": "primary",
             "version": "v1.8.1",
@@ -417,12 +417,6 @@ def config_adjust(args, config, prov_apic, no_random):
         node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
     else:
         node_service_ip_pool = []
-
-    if config["flavor"] != "cko-calico":
-        config["calico_config"] = {}
-
-    if config["flavor"] != "cko-calico" or config["flavor"] != "aci-cni-kubernetes-1.22":
-        config["service_mesh_config"] = {}
 
     adj_config = {
         "aci_config": {
@@ -1166,13 +1160,16 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
         else:
             template.stream(config=config).dump(operator_output)
 
-def generate_calico_yaml(config, network_operator_output):
+def generate_cko_calico_yaml(config, network_operator_output):
     if network_operator_output and network_operator_output != "/dev/null":
         calico_crds_template = get_jinja_template('calico-crds.yaml')
         calico_crds_output = calico_crds_template.render(config=config)
         
         calico_crs_template = get_jinja_template('calico-crs.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
+
+        calicoctl_template = get_jinja_template('calicoctl.yaml')
+        calicoctl_output = calicoctl_template.render(config=config)
         
         # Render calico bgp peer CR from calico_bgp_peer_template template and add it to calico_net_op_template
         # It has to be rendered in a nested loop
@@ -1197,15 +1194,18 @@ def generate_calico_yaml(config, network_operator_output):
         base64_encoded_calico_crds_spec = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
         # Encode the generated calico crs spec to base64
         base64_encoded_calico_crs_spec = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
+        # Encode the calicoctl spec to base64
+        base64_encoded_calicoctl_spec = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
         
-        network_operator_spec_template = get_jinja_template('network-operator-spec.yaml')
+        network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
         
-        network_operator_CR_template = get_jinja_template('network-operator-CR.yaml')
+        network_operator_CR_template = get_jinja_template('network-manager-calico.yaml')
         netopConfig = dict(config)
         netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_calico_crds_spec
         netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_calico_crs_spec
         netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_calico_bgp_spec
+        netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_calicoctl_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
         
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
@@ -1214,6 +1214,26 @@ def generate_calico_yaml(config, network_operator_output):
         
         with open(network_operator_output, "w") as fh:
             fh.write(network_operator_yaml)
+
+def generate_cko_aci_yaml(config, network_operator_output):
+    if network_operator_output and network_operator_output != "/dev/null":
+        network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+        network_operator_spec_output = network_operator_spec_template.render(config=config)
+        aci_cni_template = get_jinja_template('aci-containers.yaml')
+        aci_cni_output = aci_cni_template.render(config=config)
+
+        network_operator_CR_template = get_jinja_template('network-manager-aci.yaml')
+        base64_encoded_cko_aci_spec = base64.b64encode(aci_cni_output.encode('ascii')).decode('ascii')
+        netopConfig = dict(config)
+        netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
+        network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
+        network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+        print("writing the deployment file")
+
+        with open(network_operator_output, "w") as fh:
+            fh.write(network_operator_yaml)
+
 
 def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
@@ -1321,6 +1341,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
+    print(apic_file)
     apic = get_apic(config)
     configurator = ApicKubeConfig(config, apic)
     for k, v in flavor_opts.get("apic", {}).items():
@@ -1338,7 +1359,7 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     ret = True
     sync_login = config["aci_config"]["sync_login"]["username"]
     if prov_apic is not None:
-        #apic = get_apic(config)
+        apic = get_apic(config)
         if apic is not None:
             if prov_apic is True:
                 info("Provisioning configuration in APIC")
@@ -1697,21 +1718,58 @@ def provision(args, apic_file, no_random):
         pass
 
     # generate key and cert if needed
-    if flavor != "cko-calico":
-        username = config["aci_config"]["sync_login"]["username"]
-        certfile = config["aci_config"]["sync_login"]["certfile"]
-        keyfile = config["aci_config"]["sync_login"]["keyfile"]
-        key_data, cert_data = None, None
-        reused = True
-        if generate_cert_data:
-            if not exists(certfile) or not exists(keyfile):
+    username = config["aci_config"]["sync_login"]["username"]
+    certfile = config["aci_config"]["sync_login"]["certfile"]
+    keyfile = config["aci_config"]["sync_login"]["keyfile"]
+    key_data, cert_data = None, None
+    reused = True
+    if generate_cert_data:
+        if not exists(certfile) or not exists(keyfile):
+            if flavor == "cko-calico" or flavor == "cko-aci":
+                info("Generating certs for network-operator")
+            else:
                 info("Generating certs for kubernetes controller")
+        else:
+            if flavor == "cko-calico" or flavor == "cko-aci":
+                info("Reusing existing certs for network-operator")
             else:
                 info("Reusing existing certs for kubernetes controller")
-            key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
-        config["aci_config"]["sync_login"]["key_data"] = key_data
-        config["aci_config"]["sync_login"]["cert_data"] = cert_data
-        config["aci_config"]["sync_login"]["cert_reused"] = reused
+        key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
+    config["aci_config"]["sync_login"]["key_data"] = key_data
+    config["aci_config"]["sync_login"]["cert_data"] = cert_data
+    config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    # generate cko network operator output file
+    if flavor == "cko-calico":
+        print("using flavor cko-calico")
+        gen = flavor_opts.get("template_generator", generate_cko_calico_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+
+        if prov_apic is None:
+            return True
+
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
+
+    if flavor == "cko-aci":
+        print("using flavor cko-aci")
+        gen = flavor_opts.get("template_generator", generate_cko_aci_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+        
+        if prov_apic is None:
+            return True
+
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
+    
 
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
@@ -1729,36 +1787,6 @@ def provision(args, apic_file, no_random):
             return False
         cloud_prov = CloudProvision(apic, config, args)
         return cloud_prov.Run(flavor_opts, generate_kube_yaml)
-        
-    # generate cko network operator output file and cert,key
-    if flavor == "cko-calico":
-        cko_certfile = config["calico_config"]["cert_info"]["certfile"]
-        cko_keyfile = config["calico_config"]["cert_info"]["keyfile"]
-        username = config["calico_config"]["cert_info"]["username"]
-        cko_key_data, cko_cert_data = None, None
-        reused = True
-        if generate_cert_data:
-            if not exists(cko_certfile) or not exists(cko_keyfile):
-                info("Generating certs for network-operator")
-            else:
-                info("Reusing existing certs for network-operator")
-            cko_key_data, cko_cert_data, reused = generate_cert(username, cko_certfile, cko_keyfile)
-        config["calico_config"]["cert_info"]["key_data"] = cko_key_data
-        config["calico_config"]["cert_info"]["cert_data"] = cko_cert_data
-        config["calico_config"]["cert_info"]["cert_reused"] = reused
-        print("using flavor cko-calico")
-        gen = flavor_opts.get("template_generator", generate_calico_yaml)
-        if not callable(gen):
-            gen = globals()[gen]
-        netop_output_file = args.output
-        print("generating network operator output file")
-        gen(config, netop_output_file)
-        
-        if prov_apic is None:
-            return True
-
-        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
-        return ret
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)

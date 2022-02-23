@@ -1,0 +1,26 @@
+apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+kind: Installer
+metadata:
+  namespace: netop-manager-system
+  name: sample-installer
+spec:
+  config:
+    networkFunctions:
+      {% if config.service_mesh_config.enable %}
+      cko-sm:
+        type: cko-sm-smm
+        version: "0.1"
+        options:
+          meshType: {{ config.service_mesh_config.mesh_type }}
+          clusterName: {{ config.service_mesh_config.cluster_name }}
+          networkName: {{ config.service_mesh_config.network_name }}
+          meshName: {{ config.service_mesh_config.mesh_name }}
+      {% endif %}
+      cko-cni:
+        version: '0.1'
+        type: cko-cni-calico
+        options:
+          calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
+          calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
+          calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
+          calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}
