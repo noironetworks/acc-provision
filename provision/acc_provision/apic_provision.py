@@ -557,6 +557,7 @@ class ApicKubeConfig(object):
             ipList = [item for items in self.config["calico_config"]["bgp_peer_config"]["racks"] for item in items]
             for node_id in self.apic.get_anchor_nodes():
                 update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
+                update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
                 ipCount += 1
 
             #Enable BGP
@@ -5306,6 +5307,37 @@ class ApicKubeConfig(object):
         )
         self.annotateApicObjects(data)
         return path, data
+
+    def add_configured_nodes(self, node_id, primary_ip):
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
+        lnodep = self.config["aci_config"]["l3out"]["node_profile_name"]
+        router_id = "1.1.4." + primary_ip.split(".")[-1]
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, logical_node_profile, node_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extRsNodeL3OutAtt",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("rtrId", router_id),
+                                        ("tDn", node_id)
+                                     ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
 
     def calico_floating_svi(self, node_id, primary_ip):
         l3out_name = self.config["aci_config"]["l3out"]["name"]

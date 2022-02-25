@@ -198,7 +198,7 @@ def config_default():
             },
         },
         "service_mesh_config": {
-            "enable": True,
+            "enable": False,
             "mesh_type": "Cisco-SMM",
             "mesh_mode": "primary",
             "version": "v1.8.1",
