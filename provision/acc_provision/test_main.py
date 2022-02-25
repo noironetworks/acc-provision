@@ -518,6 +518,19 @@ def test_flavor_cko_calico():
         overrides={"flavor": "cko-calico"}
     )
 
+@in_testdir
+def test_flavor_cko_aci():
+    run_provision(
+        "flavor_cko_aci.inp.yaml",
+        "flavor_cko_aci.kube.yaml",
+        #None,
+        #"flavor_cko_calico_tar",
+        None,
+        None,
+        "flavor_cko_aci.apic.txt",
+        overrides={"flavor": "cko-aci"}
+    )
+
 
 @in_testdir
 def test_flavor_openshift_45_esx():

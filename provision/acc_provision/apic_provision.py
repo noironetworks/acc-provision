@@ -1,5 +1,5 @@
 from __future__ import print_function, unicode_literals
-
+import pdb
 import collections
 import json
 import sys
@@ -243,6 +243,9 @@ class Apic(object):
         path = "/api/node/class/fabricNode.json?query-target=self&query-target-filter=and(eq(fabricNode.role,\"leaf\"))"
         node_paths = self.get_path(path, multi=True)
         node_ids = []
+        sorted_list = []
+        if self.apic.cookies is None:
+            return sorted_list
         if type(node_paths) is list:
             for node_id in node_paths:
                 node_ids.append(node_id["fabricNode"]["attributes"]["dn"])
@@ -484,12 +487,17 @@ class ApicKubeConfig(object):
 
     ACI_PREFIX = aci_prefix
 
-    def __init__(self, config, apic):
+    def __init__(self, config):
         self.config = config
-        self.apic = apic
+        self.apic = None
         self.use_kubeapi_vlan = True
         self.tenant_generator = "kube_tn"
         self.associate_aep_to_nested_inside_domain = False
+
+    def init_apic(self, apic):
+        if apic is not None:
+            self.apic = apic
+
 
     def get_nested_domain_type(self):
         inside = self.config["aci_config"]["vmm_domain"].get("nested_inside")
@@ -532,7 +540,6 @@ class ApicKubeConfig(object):
                     data.append((path, None))
 
         data = []
-        update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
         if self.config['flavor'] != "cko-calico":
             update(data, self.pdom_pool())
             update(data, self.vdom_pool())
@@ -545,20 +552,25 @@ class ApicKubeConfig(object):
             self.apic_version = apic_version
             if self.is_newer_version(apic_version, "5.0"):
                 update(data, self.cluster_info())
+                
+            update(data, self.l3out_tn())
+            update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
             update(data, self.add_apivlan_for_second_portgroup())
             update(data, self.nested_dom_second_portgroup())
-            update(data, self.l3out_tn())
             for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
                 update(data, self.l3out_contract(l3out_instp))
 
         else:
+            # l3out has to be updated with "L3 Domain". Also ensure that the VRF is correct
             #update(data, self.logical_node_profile())
             ipCount = 0
             ipList = [item for items in self.config["calico_config"]["bgp_peer_config"]["racks"] for item in items]
-            for node_id in self.apic.get_anchor_nodes():
-                update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
-                update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
-                ipCount += 1
+            #anchor_nodes = ["a", "b"]
+            if self.apic is not None:
+                for node_id in self.apic.get_anchor_nodes():
+                    update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
+                    update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
+                    ipCount += 1
 
             #Enable BGP
             update(data, self.enable_bgp())
@@ -5309,12 +5321,11 @@ class ApicKubeConfig(object):
         return path, data
 
     def add_configured_nodes(self, node_id, primary_ip):
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
         lnodep = self.config["aci_config"]["l3out"]["node_profile_name"]
         router_id = "1.1.4." + primary_ip.split(".")[-1]
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, logical_node_profile, node_id)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, lnodep, node_id)
         data = collections.OrderedDict(
             [
                 (

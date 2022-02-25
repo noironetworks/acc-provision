@@ -1,0 +1,290 @@
+/api/mo/uni/tn-common/out-sauto_l3out-1/bgpExtP.json
+{
+    "bgpExtP": {
+        "attributes": {
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1.json
+{
+    "l3extOut": {
+        "attributes": {
+            "enforceRtctrl": "export,import",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/bgpCtxP-sauto_l3out-1-Timers.json
+{
+    "bgpCtxPol": {
+        "attributes": {
+            "holdIntvl": "3",
+            "staleIntvl": "6",
+            "kaIntvl": "1",
+            "maxAsLimit": "1",
+            "name": "sauto_l3out-1-Timers",
+            "grCtrl": "helper",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/bestpath-sauto_l3out-1-Relax-AS.json
+{
+    "bgpBestPathCtrlPol": {
+        "attributes": {
+            "name": "sauto_l3out-1-Relax-AS",
+            "ctrl": "asPathMultipathRelax",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/protp.json
+{
+    "bgpProtP": {
+        "attributes": {
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "bgpRsBgpNodeCtxPol": {
+                    "attributes": {
+                        "tnBgpCtxPolName": "sauto_l3out-1-Timers",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpRsBestPathCtrlPol": {
+                    "attributes": {
+                        "tnBgpBestPathCtrlPolName": "sauto_l3out-1-Relax-AS",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/bgpCtxAfP-sauto_l3out-1.json
+{
+    "bgpCtxAfPol": {
+        "attributes": {
+            "name": "sauto_l3out-1",
+            "maxEcmpIbgp": "64",
+            "maxEcmp": "64",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/ctx-sauto_l3out-3_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv4-ucast.json
+{
+    "fvRsCtxToBgpCtxAfPol": {
+        "attributes": {
+            "tnBgpCtxAfPolName": "sauto_l3out-1",
+            "af": "ipv4-ucast",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/ctx-sauto_l3out-3_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv6-ucast.json
+{
+    "fvRsCtxToBgpCtxAfPol": {
+        "attributes": {
+            "tnBgpCtxAfPolName": "sauto_l3out-1",
+            "af": "ipv6-ucast",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/subj-sauto_l3out-1-export-match.json
+{
+    "rtctrlSubjP": {
+        "attributes": {
+            "name": "sauto_l3out-1-export-match",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.2.0.1/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/prof-default-export.json
+{
+    "rtctrlProfile": {
+        "attributes": {
+            "name": "default-export",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlCtxP": {
+                    "attributes": {
+                        "name": "export_pod_subnet",
+                        "order": "0",
+                        "action": "permit",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "rtctrlRsCtxPToSubjP": {
+                                "attributes": {
+                                    "tnRtctrlSubjPName": "sauto_l3out-1-export-match",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/subj-sauto_l3out-1-import-match.json
+{
+    "rtctrlSubjP": {
+        "attributes": {
+            "name": "sauto_l3out-1-import-match",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.2.0.1/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "2.100.101.1/24",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "10.96.0.1/12",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.3.0.1/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/prof-default-import.json
+{
+    "rtctrlProfile": {
+        "attributes": {
+            "name": "default-import",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlCtxP": {
+                    "attributes": {
+                        "name": "import_cluster_subnets",
+                        "order": "0",
+                        "action": "permit",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "rtctrlRsCtxPToSubjP": {
+                                "attributes": {
+                                    "tnRtctrlSubjPName": "sauto_l3out-1-import-match",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/bgpPfxP-sauto_l3out-1.json
+{
+    "bgpPeerPfxPol": {
+        "attributes": {
+            "action": "reject",
+            "maxPfx": "500",
+            "name": "sauto_l3out-1",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/node/mo/uni/userext/user-key.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "key",
+            "accountStatus": "active",
+            "pwd": "NotRandom!",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserDomain": {
+                    "attributes": {
+                        "name": "all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "aaaUserRole": {
+                                "attributes": {
+                                    "name": "admin",
+                                    "privType": "writePriv",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/node/mo/uni/userext/user-key.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "key",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserCert": {
+                    "attributes": {
+                        "name": "key.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIIB4DCCAUkCAgPoMA0GCSqGSIb3DQEBBQUAMDgxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMREwDwYDVQQDDAhVc2VyIGtleTAeFw0yMjAyMjIw\nMzQxMTBaFw0zMjAyMjAxNTQxMTBaMDgxCzAJBgNVBAYTAlVTMRYwFAYDVQQKDA1D\naXNjbyBTeXN0ZW1zMREwDwYDVQQDDAhVc2VyIGtleTCBnzANBgkqhkiG9w0BAQEF\nAAOBjQAwgYkCgYEA40sNBxs3mnYTZh6Wgt6KObb3GwfKmMEJbfvkuBTOqP9ecMpb\nim9ug0hMi3/3pLpmqnz5YJ7cAy+Z2pxpNNWi8c4cpU2zl67EqbiHRySoZAvxPwEs\nELD7QCd5roz61Au9j4soGUgTJDtN1sBDK1WU08lG4xlMdFbGLM0/3sPkc/UCAwEA\nATANBgkqhkiG9w0BAQUFAAOBgQCy8If3m1JoxSQTnQKEZSPp5MoQD1q1gC2HXxdg\nMo80kD7tmidR3PHH8MUpU2q3WkwanxBtcA9F3x84lUwwL8lOVObftuc/RfdJfmG7\nXJtglVRGxGUS8CcTpeqOmFwgTQfzcfr9sy51jZ7JV8fh2DzFPlq4odpQaNUlABd7\nd3zUxw==\n-----END CERTIFICATE-----\n",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}

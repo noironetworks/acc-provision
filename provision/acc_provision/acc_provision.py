@@ -16,7 +16,7 @@ import re
 import string
 import sys
 import uuid
-
+import traceback
 import pkg_resources
 import pkgutil
 import tarfile
@@ -1341,9 +1341,11 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
-    print(apic_file)
-    apic = get_apic(config)
-    configurator = ApicKubeConfig(config, apic)
+    #apic=None
+    #if prov_apic is not None:
+    #    apic = get_apic(config)
+    configurator = ApicKubeConfig(config)
+    #ApicKubeConfig.init_apic(config, apic)
     for k, v in flavor_opts.get("apic", {}).items():
         setattr(configurator, k, v)
     apic_config = configurator.get_config(config["aci_config"]["apic_version"])
@@ -1360,6 +1362,7 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     sync_login = config["aci_config"]["sync_login"]["username"]
     if prov_apic is not None:
         apic = get_apic(config)
+        ApicKubeConfig.init_apic(config, apic)
         if apic is not None:
             if prov_apic is True:
                 info("Provisioning configuration in APIC")
@@ -1749,9 +1752,6 @@ def provision(args, apic_file, no_random):
         print("generating network operator output file")
         gen(config, netop_output_file)
 
-        if prov_apic is None:
-            return True
-
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
 
@@ -1763,9 +1763,6 @@ def provision(args, apic_file, no_random):
         netop_output_file = args.output
         print("generating network operator output file")
         gen(config, netop_output_file)
-        
-        if prov_apic is None:
-            return True
 
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
@@ -1853,6 +1850,7 @@ def main(args=None, apic_file=None, no_random=False):
         except Exception as e:
             success = False
             err("%s: %s" % (e.__class__.__name__, e))
+            traceback.print_exception(*sys.exc_info())
             
 
     if not success:
