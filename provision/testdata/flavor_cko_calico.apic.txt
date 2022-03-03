@@ -1,3 +1,155 @@
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
+{
+    "l3extVirtualLIfP": {
+        "attributes": {
+            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
+            "addr": "2.100.101.201/24",
+            "encap": "vlan-13",
+            "nodeDn": "topology/pod-1/node-101",
+            "ifInstT": "ext-svi",
+            "autostate": "enabled",
+            "encapScope": "local",
+            "mtu": "9000",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsDynPathAtt": {
+                    "attributes": {
+                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "floatingAddr": "2.100.101.100/24",
+                        "forgedTransmit": "Disabled",
+                        "promMode": "Disabled",
+                        "macChange": "Disabled",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extIp": {
+                    "attributes": {
+                        "addr": "2.100.101.254/24",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpPeerP": {
+                    "attributes": {
+                        "addr": "2.100.101.1/24",
+                        "ctrl": "as-override,dis-peer-as-check",
+                        "password": "noir0123",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "bgpAsP": {
+                                "attributes": {
+                                    "asn": "650011",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "bgpRsPeerPfxPol": {
+                                "attributes": {
+                                    "tnBgpPeerPfxPolName": "sauto_l3out-1",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-101].json
+{
+    "l3extRsNodeL3OutAtt": {
+        "attributes": {
+            "rtrId": "1.1.4.201",
+            "tDn": "topology/pod-1/node-101",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
+{
+    "l3extVirtualLIfP": {
+        "attributes": {
+            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
+            "addr": "2.100.101.202/24",
+            "encap": "vlan-13",
+            "nodeDn": "topology/pod-1/node-102",
+            "ifInstT": "ext-svi",
+            "autostate": "enabled",
+            "encapScope": "local",
+            "mtu": "9000",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsDynPathAtt": {
+                    "attributes": {
+                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "floatingAddr": "2.100.101.100/24",
+                        "forgedTransmit": "Disabled",
+                        "promMode": "Disabled",
+                        "macChange": "Disabled",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extIp": {
+                    "attributes": {
+                        "addr": "2.100.101.254/24",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpPeerP": {
+                    "attributes": {
+                        "addr": "2.100.101.1/24",
+                        "ctrl": "as-override,dis-peer-as-check",
+                        "password": "noir0123",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "bgpAsP": {
+                                "attributes": {
+                                    "asn": "650011",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "bgpRsPeerPfxPol": {
+                                "attributes": {
+                                    "tnBgpPeerPfxPolName": "sauto_l3out-1",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
+{
+    "l3extRsNodeL3OutAtt": {
+        "attributes": {
+            "rtrId": "1.1.4.202",
+            "tDn": "topology/pod-1/node-102",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
 /api/mo/uni/tn-common/out-sauto_l3out-1/bgpExtP.json
 {
     "bgpExtP": {

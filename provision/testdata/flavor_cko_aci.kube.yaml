@@ -59,12 +59,15 @@ spec:
             description: CniOpsStatus defines the observed state of CniOps
             properties:
               cniStatus:
-                description: Store Spec Location
-                items:
+                additionalProperties:
                   type: string
-                type: array
+                description: Store Spec Location
+                type: object
               cniType:
                 type: string
+              observedGeneration:
+                format: int64
+                type: integer
               state:
                 type: string
             type: object
@@ -133,9 +136,6 @@ spec:
                           type: string
                         version:
                           type: string
-                      required:
-                      - type
-                      - version
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: NetworkFunctions/Operators
@@ -143,9 +143,17 @@ spec:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               wscClient:
+                description: websocket Client
                 properties:
-                  createClient:
-                    type: boolean
+                  serverIP:
+                    description: server is the hostname or IP address of the websocket server
+                    type: string
+                  targetPort:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: targetport for the server
+                    x-kubernetes-int-or-string: true
                 type: object
             type: object
           status:
@@ -153,18 +161,39 @@ spec:
             properties:
               componentStatus:
                 additionalProperties:
-                  type: string
+                  properties:
+                    op:
+                      type: string
+                    state:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                description: Single String String
                 type: object
-              configValidationStatus:
-                description: is desired intent supported
-                type: string
               desiredIntent:
-                description: Install x cni with y lb and z sm
+                additionalProperties:
+                  properties:
+                    op:
+                      type: string
+                    state:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: object
+              observedGeneration:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                format: int64
+                type: integer
+              state:
+                description: 'Todo: Store predefined keys for faster checking'
                 type: string
-              stage:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file 1. CNI 2. LB 3. SM  //optional'
-                type: string
-              vlidtionStatus:
+              validtionStatus:
                 type: string
             type: object
         type: object
@@ -889,18 +918,17 @@ spec:
     spec:
       containers:
       - args:
-        - --secure-listen-address=0.0.0.0:8443
+        - --secure-listen-address=0.0.0.0:8444
         - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
         - --v=10
         image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
         name: kube-rbac-proxy
         ports:
-        - containerPort: 8443
+        - containerPort: 8444
           name: https
           protocol: TCP
       - args:
-        - --health-probe-bind-address=:8081
         - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         command:
@@ -912,19 +940,7 @@ spec:
               fieldPath: metadata.namespace
         image: quay.io/noirolabs/cni-manager:test
         imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 15
-          periodSeconds: 20
         name: manager
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 10
         resources:
           limits:
             cpu: 500m
@@ -934,6 +950,7 @@ spec:
             memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
+      hostNetwork: true
       securityContext:
         runAsNonRoot: false
       serviceAccountName: netop-manager-controller-manager
@@ -946,6 +963,9 @@ metadata:
   namespace: netop-manager-system
   name: sample-installer
 spec:
+  wsClient:
+    serverIP: 10.96.101.1/12
+    targetPort: 1234
   config:
     networkFunctions:
       cko-sm:

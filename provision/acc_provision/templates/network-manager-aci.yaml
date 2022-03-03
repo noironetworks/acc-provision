@@ -4,6 +4,9 @@ metadata:
   namespace: netop-manager-system
   name: sample-installer
 spec:
+  wsClient:
+    serverIP: {{ config.control_cluster_websocket.ip }}
+    targetPort: {{ config.control_cluster_websocket.port }}
   config:
     networkFunctions:
     {% if config.service_mesh_config.enable %}

@@ -565,12 +565,19 @@ class ApicKubeConfig(object):
             #update(data, self.logical_node_profile())
             ipCount = 0
             ipList = [item for items in self.config["calico_config"]["bgp_peer_config"]["racks"] for item in items]
-            #anchor_nodes = ["a", "b"]
             if self.apic is not None:
                 for node_id in self.apic.get_anchor_nodes():
                     update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
                     update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
                     ipCount += 1
+            # For "cko-calico" flavor based UT
+            else:
+                anchor_nodes = ["topology/pod-1/node-101","topology/pod-1/node-102"]
+                for node_id in anchor_nodes:
+                    update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
+                    update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
+                    ipCount += 1
+
 
             #Enable BGP
             update(data, self.enable_bgp())
@@ -5362,6 +5369,7 @@ class ApicKubeConfig(object):
         secondary_ip = self.config["aci_config"]["l3out"]["secondary_ip"]
         physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
         asn = self.config["calico_config"]["bgp_peer_config"]["as_number"]
+        password = self.config["calico_config"]["bgp_config"]["bgp_secret"]
         logical_node_profile = self.config["aci_config"]["l3out"]["node_profile_name"]
         int_prof = self.config["aci_config"]["l3out"]["int_prof_name"]
         path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s].json" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_id, vlan_id)
@@ -5446,6 +5454,7 @@ class ApicKubeConfig(object):
                                                                 [
                                                                     ("addr", node_subnet),
                                                                     ("ctrl", "as-override,dis-peer-as-check"),
+                                                                    ("password", password)
                                                                 ]
                                                             ),
                                                         ),

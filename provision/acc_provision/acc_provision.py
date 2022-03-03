@@ -181,6 +181,7 @@ def config_default():
             "disable_wait_for_network": False,
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
+            "cluster_svc_subnet": None,
         },
         "calico_config": {
             "net_config": {
@@ -199,13 +200,6 @@ def config_default():
         },
         "service_mesh_config": {
             "enable": False,
-            "mesh_type": "Cisco-SMM",
-            "mesh_mode": "primary",
-            "version": "v1.8.1",
-            "network_name": "network1",
-            "mesh_name": "mesh1",
-            "cluster_name": "primary",
-            "remote_ctrl_plane": "",
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -374,6 +368,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
+    install_sm = config["service_mesh_config"]["enable"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
@@ -535,6 +530,9 @@ def config_adjust(args, config, prov_apic, no_random):
                     "cert_reused": False,
                 },
             },
+        "service_mesh_config": {
+            "enable": install_sm,
+        },
         "registry": {
             "configuration_version": token,
         }
@@ -598,6 +596,15 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
+
+    if config["service_mesh_config"].get("enable"):
+        adj_config["service_mesh_config"]["mesh_type"] = "Cisco-SMM"
+        adj_config["service_mesh_config"]["mesh_mode"] = "primary"
+        adj_config["service_mesh_config"]["version"] = "v1.8.1"
+        adj_config["service_mesh_config"]["network_name"] = "network1"
+        adj_config["service_mesh_config"]["mesh_name"] = "mesh1"
+        adj_config["service_mesh_config"]["cluster_name"] = "primary"
+        adj_config["service_mesh_config"]["remote_ctrl_plane"] = ""
 
     return adj_config
 
@@ -1532,6 +1539,7 @@ def check_overlapping_subnets(config):
             "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
+            "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
 
     # Don't have extern_static field set for OpenShift flavors
@@ -1744,6 +1752,7 @@ def provision(args, apic_file, no_random):
 
     # generate cko network operator output file
     if flavor == "cko-calico":
+        print(config)
         print("using flavor cko-calico")
         gen = flavor_opts.get("template_generator", generate_cko_calico_yaml)
         if not callable(gen):

@@ -43,6 +43,10 @@ calico_config:
 service_mesh_config:
   enable: True
 
+control_cluster_websocket:
+  ip: 10.96.101.1/12
+  port: 1234
+
 registry:
   image_prefix: quay.io/noirolabs
-  network_operator_version: test
+  network_operator_version: 0.0.1-test
