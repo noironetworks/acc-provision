@@ -51,6 +51,14 @@
                             }
                         },
                         {
+                            "bgpLocalAsnP": {
+                                "attributes": {
+                                    "asnPropagate": "replace-as",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
                             "bgpRsPeerPfxPol": {
                                 "attributes": {
                                     "tnBgpPeerPfxPolName": "sauto_l3out-1",
@@ -127,6 +135,14 @@
                             }
                         },
                         {
+                            "bgpLocalAsnP": {
+                                "attributes": {
+                                    "asnPropagate": "replace-as",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
                             "bgpRsPeerPfxPol": {
                                 "attributes": {
                                     "tnBgpPeerPfxPolName": "sauto_l3out-1",
@@ -148,6 +164,56 @@
             "tDn": "topology/pod-1/node-102",
             "annotation": "orchestrator:aci-containers-controller"
         }
+    }
+}
+/api/mo/uni/tn-common/out-sauto_l3out-1/instP-default.json
+{
+    "l3extInstP": {
+        "attributes": {
+            "name": "default",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "20.2.0.1/16",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "2.100.101.1/24",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "10.96.0.1/12",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "20.3.0.1/16",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
     }
 }
 /api/mo/uni/tn-common/out-sauto_l3out-1/bgpExtP.json

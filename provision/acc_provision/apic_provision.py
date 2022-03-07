@@ -579,6 +579,7 @@ class ApicKubeConfig(object):
                     ipCount += 1
 
 
+            update(data, self.add_subnets_to_ext_epg())
             #Enable BGP
             update(data, self.enable_bgp())
             #Set BGP Route Control Enforcement to Import/Export
@@ -5483,6 +5484,25 @@ class ApicKubeConfig(object):
                                                                 collections.OrderedDict(
                                                                     [
                                                                         (
+                                                                            "bgpLocalAsnP",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("asnPropagate", "replace-as"),
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
                                                                             "bgpRsPeerPfxPol",
                                                                             collections.OrderedDict(
                                                                                 [
@@ -5534,6 +5554,130 @@ class ApicKubeConfig(object):
                                         ("enforceRtctrl", "export,import"),
                                      ]
                                 ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Add subnets to ext EPG 
+    def add_subnets_to_ext_epg(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
+        ext_epg = self.config["aci_config"]["l3out"]["l3out_tenant"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
+        path = "/api/mo/uni/tn-%s/out-%s/instP-default.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "default"),
+                                     ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add pod subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add node subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", node_subnet),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add cluster subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", cluster_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add external svc subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", external_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
                             ),
                         ]
                     )
