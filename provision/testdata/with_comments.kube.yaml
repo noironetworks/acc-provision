@@ -2345,6 +2345,16 @@ spec:
         name: aci-containers-operator
         network-plugin: aci-containers
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: preferred-node
+                operator: In
+                values:
+                - aci-containers-operator-2577247291
+            weight: 1
       containers:
       - image: noiro/aci-containers-operator:5.2.3.2.1d150da
         imagePullPolicy: Always
