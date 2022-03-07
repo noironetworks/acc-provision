@@ -7,6 +7,6 @@ spec:
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
   serviceClusterIPs:
-  - cidr: {{ config.calico_config.net_config.service_cluster_ip }}
+  - cidr: {{ config.calico_config.net_config.cluster_svc_subnet }}
   serviceExternalIPs:
   - cidr: {{ config.net_config.extern_dynamic }}
