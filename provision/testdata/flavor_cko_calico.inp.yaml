@@ -33,6 +33,8 @@ net_config:
   infra_vlan: 3801
 
 calico_config:
+  net_config:
+    encapsulation: None
   bgp_config:
     bgp_secret: noir0123
   bgp_peer_config:

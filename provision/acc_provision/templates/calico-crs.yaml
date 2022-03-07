@@ -11,9 +11,9 @@ spec:
     ipPools:
     - blockSize: {{ config.calico_config.net_config.block_size }}
       cidr: {{ config.net_config.pod_subnet }}
-      encapsulation: IPIP
-      natOutgoing: Disabled
-      nodeSelector: all()
+      encapsulation: {{ config.calico_config.net_config.encapsulation }}
+      natOutgoing: {{ config.calico_config.net_config.nat_outgoing }}
+      nodeSelector: {{ config.calico_config.net_config.nodeSelector }}
 ---
 # This section configures the Calico API server.
 # For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.APIServer

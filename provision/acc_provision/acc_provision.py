@@ -186,8 +186,9 @@ def config_default():
         "calico_config": {
             "net_config": {
                 "block_size" : 26,
-                "encapsulation": "IPIP",
-                "nat_outgoing": False,
+                "encapsulation": "None",
+                "nat_outgoing": "Disabled",
+                "nodeSelector": "all()",
             },
             "bgp_config": {
                 "bgp_secret": None,
@@ -200,6 +201,10 @@ def config_default():
         },
         "service_mesh_config": {
             "enable": False,
+        },
+        "control_cluster_websocket": {
+            "ip": None,
+            "port": None,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -1752,7 +1757,6 @@ def provision(args, apic_file, no_random):
 
     # generate cko network operator output file
     if flavor == "cko-calico":
-        print(config)
         print("using flavor cko-calico")
         gen = flavor_opts.get("template_generator", generate_cko_calico_yaml)
         if not callable(gen):
