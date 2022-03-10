@@ -3343,5 +3343,21 @@ flavors:
                   prot: icmp
             
     status: Experimental
+    hidden: False
+    order: 36
+  cko-calico:
+    desc: cko-calico (experimental)
+    default_version: 6.0
+    options:
+      template_generator: generate_cko_calico_yaml
+    status: null
     hidden: true
-    order: 42
+    order: 37
+  cko-aci:
+    desc: cko-aci (experimental)
+    default_version: 6.0
+    options:
+      template_generator: generate_cko_aci_yaml
+    status: null
+    hidden: true
+    order: 38
