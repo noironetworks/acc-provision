@@ -1094,6 +1094,11 @@ def test_normalize_cidr():
     ipv6 = acc_provision.normalize_cidr('2001:db8::8a2e:370:0001/16')
     assert ipv6 == '2001::/16'
 
+@in_testdir
+def test_validate_subnet():
+    ip = acc_provision.validate_subnet('10.8.0.0/16')
+    assert ip == '10.8.0.1/16'
+
 
 def create_certificate(input_file, cert_file, **overrides):
     temp = tempfile.mkdtemp()

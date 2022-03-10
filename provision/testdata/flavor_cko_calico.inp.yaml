@@ -25,10 +25,10 @@ aci_config:
         - sauto_l3out-1_epg        
 
 net_config:
-  node_subnet: 2.100.101.1/24
-  pod_subnet: 20.2.0.1/16
-  extern_dynamic: 20.3.0.1/16
-  cluster_svc_subnet: 10.96.0.1/12
+  node_subnet: 2.100.101.0/24
+  pod_subnet: 20.2.0.0/16
+  extern_dynamic: 20.3.0.0/16
+  cluster_svc_subnet: 10.96.0.0/12
   kubeapi_vlan: 2032                                
   infra_vlan: 3801
 

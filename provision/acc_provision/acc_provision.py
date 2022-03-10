@@ -356,6 +356,13 @@ def normalize_cidr(cidr):
         n = ipaddress.IPv6Network(cidr, strict=False)
     return str(n)
 
+def validate_subnet(subnet):
+    # Default to IP ending with .1 in that subnet if a .0 subnet was provided For eg, convert 10.0.0.0/16 to 10.0.0.1/16
+    rtr, mask = subnet.split('/')
+    bits = rtr.split('.')
+    if bits[-1] == "0":
+        ip = ipaddress.IPv4Address(rtr)
+        return (str(ip + 1) + '/' + mask)
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
@@ -363,6 +370,7 @@ def config_adjust(args, config, prov_apic, no_random):
     node_subnet = config["net_config"]["node_subnet"]
     pod_subnet = config["net_config"]["pod_subnet"]
     extern_dynamic = config["net_config"]["extern_dynamic"]
+    cluster_svc_subnet = config["net_config"]["cluster_svc_subnet"]
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
@@ -417,6 +425,12 @@ def config_adjust(args, config, prov_apic, no_random):
         node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
     else:
         node_service_ip_pool = []
+
+    if config["flavor"] == "cko-calico":
+        config["net_config"]["pod_subnet"] = validate_subnet(pod_subnet)
+        config["net_config"]["node_subnet"] = validate_subnet(node_subnet)
+        config["net_config"]["extern_dynamic"] = validate_subnet(extern_dynamic)
+        config["net_config"]["cluster_svc_subnet"] = validate_subnet(cluster_svc_subnet)
 
     adj_config = {
         "aci_config": {
