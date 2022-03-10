@@ -1,8 +1,8 @@
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
+            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
             "addr": "2.100.101.201/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-101",
@@ -72,7 +72,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-101].json
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-101].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -82,11 +82,11 @@
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/lifp-sauto_l3out-3_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
+            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
             "addr": "2.100.101.202/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-102",
@@ -156,7 +156,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -257,7 +257,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-3_node_prof/protp.json
+/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/protp.json
 {
     "bgpProtP": {
         "attributes": {
@@ -294,7 +294,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/ctx-sauto_l3out-3_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv4-ucast.json
+/api/mo/uni/tn-common/ctx-sauto_l3out-1_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv4-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {
@@ -304,7 +304,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/ctx-sauto_l3out-3_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv6-ucast.json
+/api/mo/uni/tn-common/ctx-sauto_l3out-1_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv6-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {

@@ -5,8 +5,8 @@ metadata:
   name: sample-installer
 spec:
   wsClient:
-    serverIP: {{ config.control_cluster_websocket.ip }}
-    targetPort: {{ config.control_cluster_websocket.port }}
+    serverIP: {{ config.control_cluster_websocket.server_ip }}
+    targetPort: {{ config.control_cluster_websocket.target_port }}
   config:
     networkFunctions:
     {% if config.service_mesh_config.enable %}

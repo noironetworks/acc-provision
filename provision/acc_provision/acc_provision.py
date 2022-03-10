@@ -203,8 +203,8 @@ def config_default():
             "enable": False,
         },
         "control_cluster_websocket": {
-            "ip": None,
-            "port": None,
+            "server_ip": None,
+            "target_port": None,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -363,6 +363,8 @@ def validate_subnet(subnet):
     if bits[-1] == "0":
         ip = ipaddress.IPv4Address(rtr)
         return (str(ip + 1) + '/' + mask)
+    else:
+        return subnet
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
@@ -382,6 +384,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     install_sm = config["service_mesh_config"]["enable"]
+    l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
@@ -431,6 +434,8 @@ def config_adjust(args, config, prov_apic, no_random):
         config["net_config"]["node_subnet"] = validate_subnet(node_subnet)
         config["net_config"]["extern_dynamic"] = validate_subnet(extern_dynamic)
         config["net_config"]["cluster_svc_subnet"] = validate_subnet(cluster_svc_subnet)
+        config["aci_config"]["l3out"]["node_profile_name"] = l3out_name + "_node_prof"
+        config["aci_config"]["l3out"]["int_prof_name"] = l3out_name + "_int_prof"
 
     adj_config = {
         "aci_config": {
@@ -643,6 +648,20 @@ def is_valid_mtu(xval):
         pass
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
+def is_valid_mtu_VirtualLIfP(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 576
+    xmax = 9216
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 def is_valid_headroom(xval):
     if xval is None:
@@ -859,6 +878,24 @@ def config_validate(flavor_opts, config):
             }
         else:
             extra_checks = {}
+    if config["flavor"] == "cko-calico":
+        extra_checks = {
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
+            "aci_config/aep": (get(("aci_config", "aep")), required),
+            "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
+                                      required),
+            "aci_config/l3out/mtu": (get(("aci_config", "l3out", "mtu")),
+                                         is_valid_mtu_VirtualLIfP),
+            "aci_config/l3out/external-networks":
+            (get(("aci_config", "l3out", "external_networks")), required),
+            "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
+                                      required),
+            "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
+                                          required),
+            "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
+                                          required),
+        }
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -899,10 +936,10 @@ def config_validate(flavor_opts, config):
             del extra_checks["net_config/extern_static"]
             
         # Remove extra checks for cko-calico flavor
-        if config["flavor"] == "cko-calico":
-            del extra_checks["net_config/extern_static"]
-            del extra_checks["net_config/node_svc_subnet"]
-            del extra_checks["net_config/service_vlan"]
+        #if config["flavor"] == "cko-calico":
+            #del extra_checks["net_config/extern_static"]
+            #del extra_checks["net_config/node_svc_subnet"]
+            #del extra_checks["net_config/service_vlan"]
 
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (

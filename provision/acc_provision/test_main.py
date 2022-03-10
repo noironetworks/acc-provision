@@ -510,8 +510,6 @@ def test_flavor_cko_calico():
     run_provision(
         "flavor_cko_calico.inp.yaml",
         "flavor_cko_calico.kube.yaml",
-        #None,
-        #"flavor_cko_calico_tar",
         None,
         None,
         "flavor_cko_calico.apic.txt",
