@@ -20,6 +20,8 @@ spec:
   nodeSelector:
     kubernetes.io/os: linux
   hostNetwork: true
+  tolerations:
+    - key: node.kubernetes.io/network-unavailable
   serviceAccountName: calicoctl
   containers:
   - name: calicoctl
