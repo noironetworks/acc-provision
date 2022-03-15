@@ -14,6 +14,7 @@ aci_config:
   aep: kube-aep
   apic_subscription_delay: 100
   opflex_device_delete_timeout: 1200
+  apic_refreshticker_adjust: 150
   vrf:
     name: kubernetes-vrf
     tenant: common

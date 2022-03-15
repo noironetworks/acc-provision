@@ -25,6 +25,9 @@ data:
                 {% if config.aci_config.apic_subscription_delay %}
                 "apic-subscription-delay": {{ config.aci_config.apic_subscription_delay|json }},
                 {% endif %}
+                {% if config.aci_config.apic_refreshticker_adjust %}
+                "apic_refreshticker_adjust": {{ config.aci_config.apic_refreshticker_adjust|json }},
+                {% endif %}
                 {% if config.aci_config.opflex_device_delete_timeout %}
                 "opflex-device-delete-timeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
                 {% endif %}

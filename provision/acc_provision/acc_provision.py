@@ -161,6 +161,7 @@ def config_default():
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
             "apic_subscription_delay": None,
+            "apic_refreshticker_adjust": None,
             "opflex_device_delete_timeout": None,
         },
         "net_config": {
@@ -661,6 +662,22 @@ def is_valid_refreshtime(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_apic_refreshticker_adjust(xval):
+    if xval is None:
+        # use default configured on this host(150 seconds)
+        return True
+
+    xmin = 1
+    xmax = 65535
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_max_nodes_svc_graph(xval):
     if xval is None:
         return True
@@ -746,6 +763,8 @@ def config_validate(flavor_opts, config):
                                      lambda x: required(x) and isname(x, 32)),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
+            "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
+                                                     is_valid_apic_refreshticker_adjust),
             "aci_config/apic_subscription_delay": (get(("aci_config", "apic_subscription_delay")),
                                                    is_valid_apic_sub_delay),
             "aci_config/opflex_device_delete_timeout": (get(("aci_config", "opflex_device_delete_timeout")),
