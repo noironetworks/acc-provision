@@ -139,6 +139,12 @@ def config_default():
             },
             "l3out": {
                 "name": None,
+                "l3out_tenant": None,
+                "floating_ip": None,
+                "secondary_ip": None,
+                "vrf_name": None,
+                "vlan_id": None,
+                "mtu": None,
                 "external_networks": None,
             },
             "vmm_domain": {
@@ -358,13 +364,14 @@ def normalize_cidr(cidr):
 
 def validate_subnet(subnet):
     # Default to IP ending with .1 in that subnet if a .0 subnet was provided For eg, convert 10.0.0.0/16 to 10.0.0.1/16
-    rtr, mask = subnet.split('/')
-    bits = rtr.split('.')
-    if bits[-1] == "0":
-        ip = ipaddress.IPv4Address(rtr)
-        return (str(ip + 1) + '/' + mask)
-    else:
-        return subnet
+    if subnet is not None:
+        rtr, mask = subnet.split('/')
+        bits = rtr.split('.')
+        if bits[-1] == "0":
+            ip = ipaddress.IPv4Address(rtr)
+            return (str(ip + 1) + '/' + mask)
+        else:
+            return subnet
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
@@ -893,8 +900,8 @@ def config_validate(flavor_opts, config):
                                       required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
-            "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
-                                          required),
+            #"net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
+                                          #required),
         }
     else:
         extra_checks = {
@@ -1595,7 +1602,7 @@ def check_overlapping_subnets(config):
             "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
-            "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
+            #"cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
 
     # Don't have extern_static field set for OpenShift flavors
