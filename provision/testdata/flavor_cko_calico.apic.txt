@@ -45,7 +45,7 @@
                         {
                             "bgpAsP": {
                                 "attributes": {
-                                    "asn": "650011",
+                                    "asn": "64518",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -54,6 +54,7 @@
                             "bgpLocalAsnP": {
                                 "attributes": {
                                     "asnPropagate": "replace-as",
+                                    "localAsn": "64519",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -129,7 +130,7 @@
                         {
                             "bgpAsP": {
                                 "attributes": {
-                                    "asn": "650011",
+                                    "asn": "64518",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -138,6 +139,7 @@
                             "bgpLocalAsnP": {
                                 "attributes": {
                                     "asnPropagate": "replace-as",
+                                    "localAsn": "64519",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -261,6 +263,7 @@
 {
     "bgpProtP": {
         "attributes": {
+            "name": "default",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [

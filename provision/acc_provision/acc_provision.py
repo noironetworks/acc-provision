@@ -201,7 +201,8 @@ def config_default():
             },
             "bgp_peer_config": {
                 "name": None,
-                "as_number": 64512,
+                "remote_as_number": 64513,
+                "local_as_number": 64512,
                 "racks" : None,
             },
         },
@@ -1411,10 +1412,10 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
-    #apic=None
-    #if prov_apic is not None:
-    #    apic = get_apic(config)
-    configurator = ApicKubeConfig(config)
+    apic=None
+    if prov_apic is not None:
+        apic = get_apic(config)
+    configurator = ApicKubeConfig(config, apic)
     #ApicKubeConfig.init_apic(config, apic)
     for k, v in flavor_opts.get("apic", {}).items():
         setattr(configurator, k, v)
@@ -1432,7 +1433,7 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     sync_login = config["aci_config"]["sync_login"]["username"]
     if prov_apic is not None:
         apic = get_apic(config)
-        ApicKubeConfig.init_apic(config, apic)
+        #ApicKubeConfig.init_apic(config, apic)
         if apic is not None:
             if prov_apic is True:
                 info("Provisioning configuration in APIC")

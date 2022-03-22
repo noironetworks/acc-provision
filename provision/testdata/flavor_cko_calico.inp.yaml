@@ -38,7 +38,8 @@ calico_config:
   bgp_config:
     bgp_secret: noir0123
   bgp_peer_config:
-    as_number: 650011 # [Default:64512]
+    remote_as_number: 64518
+    local_as_number: 64519
     racks:
       - [2.100.101.201, 2.100.101.202]
 

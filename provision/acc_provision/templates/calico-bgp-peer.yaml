@@ -4,7 +4,7 @@ metadata:
   name: {{config.calico_config.bgp_peer_config.name}}
 spec:
   peerIP: {{config.calico_config.bgp_peer_config.peerIP}}
-  asNumber: {{ config.calico_config.bgp_peer_config.as_number }}
+  asNumber: {{ config.calico_config.bgp_peer_config.remote_as_number }}
   nodeSelector: rack_id == "{{config.calico_config.bgp_peer_config.rackID}}"
   password:
     secretKeyRef:

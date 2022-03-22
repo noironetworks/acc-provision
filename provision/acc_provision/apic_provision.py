@@ -244,8 +244,8 @@ class Apic(object):
         node_paths = self.get_path(path, multi=True)
         node_ids = []
         sorted_list = []
-        if self.apic.cookies is None:
-            return sorted_list
+        #if self.apic.cookies is None:
+        #    return sorted_list
         if type(node_paths) is list:
             for node_id in node_paths:
                 node_ids.append(node_id["fabricNode"]["attributes"]["dn"])
@@ -313,6 +313,18 @@ class Apic(object):
                     fsvi_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s.json" % (l3out_tn, l3out_name, lnodep, lifp)
                     fsvi_path += "?query-target=children&target-subtree-class=l3extVirtualLIfP"
                     resp = self.get(fsvi_path)
+                    self.check_resp(resp)
+                    respj = json.loads(resp.text)
+                    respj = respj["imdata"]
+                    for resp in respj:
+                        for val in resp.values():
+                            del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                            resp = self.delete(del_path)
+                            self.check_resp(resp)
+                            dbg("%s: %s" % (del_path, resp.text))
+                    conf_node_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
+                    conf_node_path += "?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt"
+                    resp = self.get(conf_node_path)
                     self.check_resp(resp)
                     respj = json.loads(resp.text)
                     respj = respj["imdata"]
@@ -487,9 +499,9 @@ class ApicKubeConfig(object):
 
     ACI_PREFIX = aci_prefix
 
-    def __init__(self, config):
+    def __init__(self, config, apic):
         self.config = config
-        self.apic = None
+        self.apic = apic if apic else None
         self.use_kubeapi_vlan = True
         self.tenant_generator = "kube_tn"
         self.associate_aep_to_nested_inside_domain = False
@@ -5369,7 +5381,8 @@ class ApicKubeConfig(object):
         floating_ip = self.config["aci_config"]["l3out"]["floating_ip"]
         secondary_ip = self.config["aci_config"]["l3out"]["secondary_ip"]
         physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
-        asn = self.config["calico_config"]["bgp_peer_config"]["as_number"]
+        remote_asn = self.config["calico_config"]["bgp_peer_config"]["remote_as_number"]
+        local_asn = self.config["calico_config"]["bgp_peer_config"]["local_as_number"]
         password = self.config["calico_config"]["bgp_config"]["bgp_secret"]
         logical_node_profile = self.config["aci_config"]["l3out"]["node_profile_name"]
         int_prof = self.config["aci_config"]["l3out"]["int_prof_name"]
@@ -5472,7 +5485,7 @@ class ApicKubeConfig(object):
                                                                                         "attributes",
                                                                                         collections.OrderedDict(
                                                                                             [
-                                                                                                ("asn", str(asn)),
+                                                                                                ("asn", str(remote_asn)),
                                                                                             ]
                                                                                         ),
                                                                                     ),
@@ -5492,6 +5505,7 @@ class ApicKubeConfig(object):
                                                                                         collections.OrderedDict(
                                                                                             [
                                                                                                 ("asnPropagate", "replace-as"),
+                                                                                                ("localAsn", str(local_asn))
                                                                                             ]
                                                                                         ),
                                                                                     ),
@@ -5786,7 +5800,9 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    []
+                                    [
+                                        ("name", "default"),
+                                    ]
                                 ),
                             ),
                             (
