@@ -5,7 +5,7 @@ aci_config:
     - 10.30.120.100
   apic_login:
     username: admin
-    password: noir0123
+    password: test
   aep: kube-aep
   vrf:
     name: kube

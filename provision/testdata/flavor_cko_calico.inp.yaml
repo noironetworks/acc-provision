@@ -1,12 +1,12 @@
 aci_config:
   physical_domain:
     domain: bm-srvrs-calico-pd
-  system_id: key
+  system_id: calicotest
   apic_hosts:                  
     - 10.30.120.100
   apic_login:
     username: admin
-    password: noir0123
+    password: test
   aep: sauto_aep                   
   vrf:                               
     name: sauto_l3out-1_vrf      
@@ -36,10 +36,10 @@ calico_config:
   net_config:
     encapsulation: None
   bgp_config:
-    bgp_secret: noir0123
+    bgp_secret: test
   bgp_peer_config:
-    remote_as_number: 64518
-    local_as_number: 64519
+    remote_as_number: 64514
+    local_as_number: 64513
     racks:
       - [2.100.101.201, 2.100.101.202]
 

@@ -38,14 +38,14 @@
                     "attributes": {
                         "addr": "2.100.101.1/24",
                         "ctrl": "as-override,dis-peer-as-check",
-                        "password": "noir0123",
+                        "password": "test",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
                         {
                             "bgpAsP": {
                                 "attributes": {
-                                    "asn": "64518",
+                                    "asn": "64514",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -54,7 +54,7 @@
                             "bgpLocalAsnP": {
                                 "attributes": {
                                     "asnPropagate": "replace-as",
-                                    "localAsn": "64519",
+                                    "localAsn": "64513",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -123,14 +123,14 @@
                     "attributes": {
                         "addr": "2.100.101.1/24",
                         "ctrl": "as-override,dis-peer-as-check",
-                        "password": "noir0123",
+                        "password": "test",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
                         {
                             "bgpAsP": {
                                 "attributes": {
-                                    "asn": "64518",
+                                    "asn": "64514",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -139,7 +139,7 @@
                             "bgpLocalAsnP": {
                                 "attributes": {
                                     "asnPropagate": "replace-as",
-                                    "localAsn": "64519",
+                                    "localAsn": "64513",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -457,11 +457,11 @@
         }
     }
 }
-/api/node/mo/uni/userext/user-key.json
+/api/node/mo/uni/userext/user-calicotest.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "key",
+            "name": "calicotest",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -489,19 +489,19 @@
         ]
     }
 }
-/api/node/mo/uni/userext/user-key.json
+/api/node/mo/uni/userext/user-calicotest.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "key",
+            "name": "calicotest",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "key.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB4DCCAUkCAgPoMA0GCSqGSIb3DQEBBQUAMDgxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMREwDwYDVQQDDAhVc2VyIGtleTAeFw0yMjAyMjIw\nMzQxMTBaFw0zMjAyMjAxNTQxMTBaMDgxCzAJBgNVBAYTAlVTMRYwFAYDVQQKDA1D\naXNjbyBTeXN0ZW1zMREwDwYDVQQDDAhVc2VyIGtleTCBnzANBgkqhkiG9w0BAQEF\nAAOBjQAwgYkCgYEA40sNBxs3mnYTZh6Wgt6KObb3GwfKmMEJbfvkuBTOqP9ecMpb\nim9ug0hMi3/3pLpmqnz5YJ7cAy+Z2pxpNNWi8c4cpU2zl67EqbiHRySoZAvxPwEs\nELD7QCd5roz61Au9j4soGUgTJDtN1sBDK1WU08lG4xlMdFbGLM0/3sPkc/UCAwEA\nATANBgkqhkiG9w0BAQUFAAOBgQCy8If3m1JoxSQTnQKEZSPp5MoQD1q1gC2HXxdg\nMo80kD7tmidR3PHH8MUpU2q3WkwanxBtcA9F3x84lUwwL8lOVObftuc/RfdJfmG7\nXJtglVRGxGUS8CcTpeqOmFwgTQfzcfr9sy51jZ7JV8fh2DzFPlq4odpQaNUlABd7\nd3zUxw==\n-----END CERTIFICATE-----\n",
+                        "name": "calicotest.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7jCCAVcCAgPoMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRgwFgYDVQQDDA9Vc2VyIGNhbGljb3Rlc3QwHhcN\nMjIwMzI1MDQwNzE5WhcNMzIwMzIyMTYwNzE5WjA/MQswCQYDVQQGEwJVUzEWMBQG\nA1UECgwNQ2lzY28gU3lzdGVtczEYMBYGA1UEAwwPVXNlciBjYWxpY290ZXN0MIGf\nMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDK5rAdxsMwXi+ZuQBx4UJiydArx8aQ\n6S0tehmDE3DthWR8fNhzau1Jg6oJ0RNx/AhVGQ7/rJ6+YxqjqbxAVBwPFjrwtbsR\nUCYR+zKxwnww4FCaj5Iyqi5ucEPnzEiK6j/xEHONfYRNdQMkXDanMsVlBRBFTi7g\nOyo12zXvuYylJwIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAC4GZjFaUxZki6YfgvJ6\n3giOkfVcq3hCaOu19E3e1JnoV3zEflEfLDtJhUhZyuW1H+6/vwxR3yJWJLIgNUF+\nokNm05nqVa/Yb+AsiCPzs5ms5lOgDE2DQ2hWjzisu32SQSsd+9/mhm6up+xuGX0L\nILQxdGWcWmoW4q0G8jA1swl6\n-----END CERTIFICATE-----\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }

@@ -505,6 +505,7 @@ def test_flavor_openshift_46_esx():
         overrides={"flavor": "openshift-4.6-esx"}
     )
 
+
 @in_testdir
 def test_flavor_cko_calico():
     run_provision(
@@ -516,13 +517,12 @@ def test_flavor_cko_calico():
         overrides={"flavor": "cko-calico"}
     )
 
+
 @in_testdir
 def test_flavor_cko_aci():
     run_provision(
         "flavor_cko_aci.inp.yaml",
         "flavor_cko_aci.kube.yaml",
-        #None,
-        #"flavor_cko_calico_tar",
         None,
         None,
         "flavor_cko_aci.apic.txt",
@@ -1065,7 +1065,6 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
     # Exec main
     with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile, tempfile.NamedTemporaryFile('w+', suffix='.tar.gz') as out_tar:
 
-        print(apicfile)
         args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
 
@@ -1091,6 +1090,7 @@ def test_normalize_cidr():
     assert ipv4 == '10.8.0.0/16'
     ipv6 = acc_provision.normalize_cidr('2001:db8::8a2e:370:0001/16')
     assert ipv6 == '2001::/16'
+
 
 @in_testdir
 def test_validate_subnet():

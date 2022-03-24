@@ -1,5 +1,4 @@
 from __future__ import print_function, unicode_literals
-import pdb
 import collections
 import json
 import sys
@@ -244,14 +243,14 @@ class Apic(object):
         node_paths = self.get_path(path, multi=True)
         node_ids = []
         sorted_list = []
-        #if self.apic.cookies is None:
-        #    return sorted_list
+        # if self.apic.cookies is None:
+        #     return sorted_list
         if type(node_paths) is list:
             for node_id in node_paths:
                 node_ids.append(node_id["fabricNode"]["attributes"]["dn"])
         else:
             node_ids.append(node_paths["fabricNode"]["attributes"]["dn"])
-        sorted_list = sorted(node_ids, key = lambda x: int(x.split("node-")[-1]))
+        sorted_list = sorted(node_ids, key=lambda x: int(x.split("node-")[-1]))
         return sorted_list
 
     def provision(self, data, sync_login):
@@ -310,59 +309,59 @@ class Apic(object):
                                             self.check_resp(resp)
                                             dbg("%s: %s" % (del_path, resp.text))
             if cfg["flavor"] == "cko-calico":
-                    fsvi_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s.json" % (l3out_tn, l3out_name, lnodep, lifp)
-                    fsvi_path += "?query-target=children&target-subtree-class=l3extVirtualLIfP"
-                    resp = self.get(fsvi_path)
-                    self.check_resp(resp)
-                    respj = json.loads(resp.text)
-                    respj = respj["imdata"]
-                    for resp in respj:
-                        for val in resp.values():
+                fsvi_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s.json" % (l3out_tn, l3out_name, lnodep, lifp)
+                fsvi_path += "?query-target=children&target-subtree-class=l3extVirtualLIfP"
+                resp = self.get(fsvi_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (del_path, resp.text))
+                conf_node_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
+                conf_node_path += "?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt"
+                resp = self.get(conf_node_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (del_path, resp.text))
+                bgp_prot_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (l3out_tn, l3out_name, lnodep)
+                resp = self.delete(bgp_prot_path)
+                self.check_resp(resp)
+                dbg("%s: %s" % (bgp_prot_path, resp.text))
+                bgp_res_path = "/api/node/mo/uni/tn-%s.json" % l3out_tn
+                bgp_res_path += "?query-target=children&target-subtree-class=bgpCtxPol,bgpCtxAfPol,bgpBestPathCtrlPol,bgpPeerPfxPol"
+                resp = self.get(bgp_res_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        if l3out_name in val['attributes']['dn']:
                             del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
                             resp = self.delete(del_path)
                             self.check_resp(resp)
                             dbg("%s: %s" % (del_path, resp.text))
-                    conf_node_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
-                    conf_node_path += "?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt"
-                    resp = self.get(conf_node_path)
-                    self.check_resp(resp)
-                    respj = json.loads(resp.text)
-                    respj = respj["imdata"]
-                    for resp in respj:
-                        for val in resp.values():
-                            del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
-                            resp = self.delete(del_path)
-                            self.check_resp(resp)
-                            dbg("%s: %s" % (del_path, resp.text))
-                    bgp_prot_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (l3out_tn, l3out_name, lnodep)
-                    resp = self.delete(bgp_prot_path)
-                    self.check_resp(resp)
-                    dbg("%s: %s" % (bgp_prot_path, resp.text))
-                    bgp_res_path = "/api/node/mo/uni/tn-%s.json" % l3out_tn
-                    bgp_res_path += "?query-target=children&target-subtree-class=bgpCtxPol,bgpCtxAfPol,bgpBestPathCtrlPol,bgpPeerPfxPol"
-                    resp = self.get(bgp_res_path)
-                    self.check_resp(resp)
-                    respj = json.loads(resp.text)
-                    respj = respj["imdata"]
-                    for resp in respj:
-                        for val in resp.values():
-                            if l3out_name in val['attributes']['dn']:
-                                del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
-                                resp = self.delete(del_path)
-                                self.check_resp(resp)
-                                dbg("%s: %s" % (del_path, resp.text))
-                    bgp_route_path = "/api/node/mo/uni/tn-%s/out-%s.json" % (l3out_tn, l3out_name)
-                    bgp_route_path += "?query-target=children&target-subtree-class=rtctrlProfile"
-                    resp = self.get(bgp_route_path)
-                    self.check_resp(resp)
-                    respj = json.loads(resp.text)
-                    respj = respj["imdata"]
-                    for resp in respj:
-                        for val in resp.values():
-                            del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
-                            resp = self.delete(del_path)
-                            self.check_resp(resp)
-                            dbg("%s: %s" % (del_path, resp.text))
+                bgp_route_path = "/api/node/mo/uni/tn-%s/out-%s.json" % (l3out_tn, l3out_name)
+                bgp_route_path += "?query-target=children&target-subtree-class=rtctrlProfile"
+                resp = self.get(bgp_route_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (del_path, resp.text))
 
             if old_naming:
                 for object in self.TENANT_OBJECTS:
@@ -510,7 +509,6 @@ class ApicKubeConfig(object):
         if apic is not None:
             self.apic = apic
 
-
     def get_nested_domain_type(self):
         inside = self.config["aci_config"]["vmm_domain"].get("nested_inside")
         if not inside:
@@ -564,7 +562,7 @@ class ApicKubeConfig(object):
             self.apic_version = apic_version
             if self.is_newer_version(apic_version, "5.0"):
                 update(data, self.cluster_info())
-                
+
             update(data, self.l3out_tn())
             update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
             update(data, self.add_apivlan_for_second_portgroup())
@@ -574,7 +572,7 @@ class ApicKubeConfig(object):
 
         else:
             # l3out has to be updated with "L3 Domain". Also ensure that the VRF is correct
-            #update(data, self.logical_node_profile())
+            # update(data, self.logical_node_profile())
             ipCount = 0
             ipList = [item for items in self.config["calico_config"]["bgp_peer_config"]["racks"] for item in items]
             if self.apic is not None:
@@ -584,36 +582,24 @@ class ApicKubeConfig(object):
                     ipCount += 1
             # For "cko-calico" flavor based UT
             else:
-                anchor_nodes = ["topology/pod-1/node-101","topology/pod-1/node-102"]
+                anchor_nodes = ["topology/pod-1/node-101", "topology/pod-1/node-102"]
                 for node_id in anchor_nodes:
                     update(data, self.calico_floating_svi(node_id, ipList[ipCount]))
                     update(data, self.add_configured_nodes(node_id, ipList[ipCount]))
                     ipCount += 1
 
-
             update(data, self.add_subnets_to_ext_epg())
-            #Enable BGP
             update(data, self.enable_bgp())
-            #Set BGP Route Control Enforcement to Import/Export
             update(data, self.bgp_route_control())
-            #Create BGP timer
             update(data, self.bgp_timers())
-            #Create BGP Best Path Policy
             update(data, self.bgp_relax_as_policy())
             update(data, self.bgp_prot_pfl())
-            #Create BGP Address Family Context Policy
             update(data, self.bgp_addr_family_context())
-            # Map BGP Address Family Context Policy to Calico VRF for V4
             update(data, self.bgp_addr_family_context_to_vrf())
-            # Map BGP Address Family Context Policy to Calico VRF for V4
             update(data, self.bgp_addr_family_context_to_vrf_v6())
-            # Create Export Match Rule
             update(data, self.export_match_rule())
-            # Attach Rule to default-export policy
             update(data, self.attach_rule_to_default_export_pol())
-            # Create Import Match Rule
             update(data, self.import_match_rule())
-            # Attach Rule to default-import policy
             update(data, self.attach_rule_to_default_import_pol())
             update(data, self.bgp_peer_prefix())
         update(data, self.kube_user())
@@ -1167,8 +1153,6 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    
-    
     def make_entry(self, e_spec):
         name = e_spec["name"]
         data = aci_obj("vzEntry", [('name', name)])
@@ -5305,7 +5289,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("name", lnodep),
-                                     ]
+                                    ]
                                 ),
                             ),
                             (
@@ -5357,8 +5341,8 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("rtrId", router_id),
-                                        ("tDn", node_id)
-                                     ]
+                                        ("tDn", node_id),
+                                    ]
                                 ),
                             ),
                         ]
@@ -5369,7 +5353,6 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-
     def calico_floating_svi(self, node_id, primary_ip):
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
@@ -5377,7 +5360,6 @@ class ApicKubeConfig(object):
         mtu = self.config["aci_config"]["l3out"]["mtu"]
         node_subnet = self.config["net_config"]["node_subnet"]
         primary_addr = primary_ip + "/" + node_subnet.split("/")[-1]
-        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
         floating_ip = self.config["aci_config"]["l3out"]["floating_ip"]
         secondary_ip = self.config["aci_config"]["l3out"]["secondary_ip"]
         physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
@@ -5405,7 +5387,7 @@ class ApicKubeConfig(object):
                                         ("autostate", "enabled"),
                                         ("encapScope", "local"),
                                         ("mtu", str(mtu)),
-                                     ]
+                                    ]
                                 ),
                             ),
                             (
@@ -5550,7 +5532,7 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    # Set BGP Route Control Enforcement to Import/Export 
+    # Set BGP Route Control Enforcement to Import/Export
     def bgp_route_control(self):
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
@@ -5566,7 +5548,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("enforceRtctrl", "export,import"),
-                                     ]
+                                    ]
                                 ),
                             ),
                         ]
@@ -5577,11 +5559,10 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    # Add subnets to ext EPG 
+    # Add subnets to ext EPG
     def add_subnets_to_ext_epg(self):
         l3out_name = self.config["aci_config"]["l3out"]["name"]
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
-        ext_epg = self.config["aci_config"]["l3out"]["l3out_tenant"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
         node_subnet = self.config["net_config"]["node_subnet"]
         cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
@@ -5598,7 +5579,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("name", "default"),
-                                     ]
+                                    ]
                                 ),
                             ),
                             (
@@ -5811,7 +5792,6 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
-                                                #Map Timers to BGP Protocol Profile
                                                 "bgpRsBgpNodeCtxPol",
                                                 collections.OrderedDict(
                                                     [
@@ -5831,7 +5811,6 @@ class ApicKubeConfig(object):
                                     collections.OrderedDict(
                                         [
                                             (
-                                                #Map BGP Best Path Policy to BGP Protocol Profile
                                                 "bgpRsBestPathCtrlPol",
                                                 collections.OrderedDict(
                                                     [
@@ -5915,7 +5894,7 @@ class ApicKubeConfig(object):
         )
         self.annotateApicObjects(data)
         return path, data
-    
+
     # Map BGP Address Family Context Policy to Calico VRF for V6
     def bgp_addr_family_context_to_vrf_v6(self):
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
@@ -6075,7 +6054,7 @@ class ApicKubeConfig(object):
         )
         self.annotateApicObjects(data)
         return path, data
-    
+
     def import_match_rule(self):
         l3out_tn = self.config["aci_config"]["l3out"]["l3out_tenant"]
         l3out_name = self.config["aci_config"]["l3out"]["name"]

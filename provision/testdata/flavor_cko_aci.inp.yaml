@@ -1,12 +1,12 @@
 aci_config:
   physical_domain:
     domain: bm-srvrs-calico-pd
-  system_id: key
+  system_id: acitest
   apic_hosts:                  
     - 10.30.120.100
   apic_login:
     username: admin
-    password: noir0123
+    password: test
   aep: sauto_aep                   
   vrf:                               
     name: sauto_l3out-1_vrf      
@@ -14,8 +14,8 @@ aci_config:
   l3out:                             
     name: sauto_l3out-1
     l3out_tenant: common
-    node_profile_name: sauto_l3out-3_node_prof
-    int_prof_name: sauto_l3out-3_int_prof
+    node_profile_name: sauto_l3out-1_node_prof
+    int_prof_name: sauto_l3out-1_int_prof
     floating_ip: 2.100.101.100/24
     secondary_ip: 2.100.101.254/24
     vrf_name: sauto_l3out-3_vrf
