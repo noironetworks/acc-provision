@@ -51,12 +51,12 @@
         ]
     }
 }
-/api/mo/uni/phys-bm-srvrs-calico-pd.json
+/api/mo/uni/phys-acitest-pdom.json
 {
     "physDomP": {
         "attributes": {
-            "dn": "uni/phys-bm-srvrs-calico-pd",
-            "name": "bm-srvrs-calico-pd",
+            "dn": "uni/phys-acitest-pdom",
+            "name": "acitest-pdom",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -125,7 +125,7 @@
             {
                 "infraRsDomP": {
                     "attributes": {
-                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "tDn": "uni/phys-acitest-pdom",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -183,7 +183,7 @@
 }
 /api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/vmmp-Kubernetes/dom-acitest].json
 None
-/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/phys-bm-srvrs-calico-pd].json
+/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/phys-acitest-pdom].json
 None
 /api/mo/uni/infra/attentp-sauto_aep/gen-default/rsfuncToEpg-[uni/tn-acitest/ap-aci-containers-acitest/epg-aci-containers-nodes].json
 None
@@ -491,7 +491,7 @@ None
                                         "fvRsDomAtt": {
                                             "attributes": {
                                                 "encap": "vlan-2032",
-                                                "tDn": "uni/phys-bm-srvrs-calico-pd",
+                                                "tDn": "uni/phys-acitest-pdom",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }

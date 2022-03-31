@@ -3350,7 +3350,7 @@ flavors:
     default_version: 6.0
     options:
       template_generator: generate_cko_calico_yaml
-    status: null
+    status: Experimental
     hidden: true
     order: 37
   cko-aci:
@@ -3358,6 +3358,6 @@ flavors:
     default_version: 6.0
     options:
       template_generator: generate_cko_aci_yaml
-    status: null
+    status: Experimental
     hidden: true
     order: 38

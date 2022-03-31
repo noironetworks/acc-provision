@@ -139,13 +139,13 @@ def config_default():
             },
             "l3out": {
                 "name": None,
-                "l3out_tenant": None,
-                "floating_ip": None,
-                "secondary_ip": None,
-                "vrf_name": None,
-                "vlan_id": None,
-                "mtu": None,
                 "external_networks": None,
+                "svi": {
+                    "floating_ip": None,
+                    "secondary_ip": None,
+                    "vlan_id": None,
+                    "mtu": None,
+                },
             },
             "vmm_domain": {
                 "type": "Kubernetes",
@@ -211,7 +211,7 @@ def config_default():
         },
         "control_cluster_websocket": {
             "server_ip": None,
-            "target_port": None,
+            "server_port": None,
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -444,8 +444,8 @@ def config_adjust(args, config, prov_apic, no_random):
         config["net_config"]["node_subnet"] = validate_subnet(node_subnet)
         config["net_config"]["extern_dynamic"] = validate_subnet(extern_dynamic)
         config["net_config"]["cluster_svc_subnet"] = validate_subnet(cluster_svc_subnet)
-        config["aci_config"]["l3out"]["node_profile_name"] = l3out_name + "_node_prof"
-        config["aci_config"]["l3out"]["int_prof_name"] = l3out_name + "_int_prof"
+        config["aci_config"]["l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
+        config["aci_config"]["l3out"]["svi"]["int_prof_name"] = l3out_name + "_int_prof"
 
     adj_config = {
         "aci_config": {
@@ -901,8 +901,6 @@ def config_validate(flavor_opts, config):
                                      is_valid_mtu_VirtualLIfP),
             "aci_config/l3out/external-networks":
             (get(("aci_config", "l3out", "external_networks")), required),
-            "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
-                                      required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
             # "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
@@ -1451,10 +1449,9 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
                 l3out_name = config["aci_config"]["l3out"]["name"]
-                l3out_tn = config["aci_config"]["l3out"]["l3out_tenant"]
-                lnodep = config["aci_config"]["l3out"]["node_profile_name"]
-                lifp = config["aci_config"]["l3out"]["int_prof_name"]
-                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_tn, l3out_name, lnodep, lifp)
+                lnodep = config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+                lifp = config["aci_config"]["l3out"]["svi"]["int_prof_name"]
+                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name, lnodep, lifp)
             ret = False if apic.errors > 0 else True
     return ret
 

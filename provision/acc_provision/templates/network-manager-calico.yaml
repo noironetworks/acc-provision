@@ -6,7 +6,7 @@ metadata:
 spec:
   wsClient:
     serverIP: {{ config.control_cluster_websocket.server_ip }}
-    targetPort: {{ config.control_cluster_websocket.target_port }}
+    targetPort: {{ config.control_cluster_websocket.server_port }}
   config:
     networkFunctions:
       {% if config.service_mesh_config.enable %}

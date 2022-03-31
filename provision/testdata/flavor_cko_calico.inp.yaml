@@ -13,24 +13,21 @@ aci_config:
     tenant: common
   l3out:                             
     name: sauto_l3out-1
-    l3out_tenant: common
-    node_profile_name: sauto_l3out-1_node_prof
-    int_prof_name: sauto_l3out-1_int_prof
-    floating_ip: 2.100.101.100/24
-    secondary_ip: 2.100.101.254/24
-    vrf_name: sauto_l3out-1_vrf
-    vlan_id: 13
-    mtu: 9000
     external_networks:
         - sauto_l3out-1_epg        
+    svi:
+      node_profile_name: sauto_l3out-1_node_prof
+      int_prof_name: sauto_l3out-1_int_prof
+      floating_ip: 2.100.101.100/24
+      secondary_ip: 2.100.101.254/24
+      vlan_id: 13
+      mtu: 9000
 
 net_config:
   node_subnet: 2.100.101.0/24
   pod_subnet: 20.2.0.0/16
   extern_dynamic: 20.3.0.0/16
   cluster_svc_subnet: 10.96.0.0/12
-  kubeapi_vlan: 2032                                
-  infra_vlan: 3801
 
 calico_config:
   net_config:
@@ -48,7 +45,7 @@ service_mesh_config:
 
 control_cluster_websocket:
   server_ip: 10.96.101.1/12
-  target_port: 1234
+  server_port: 1234
 
 registry:
   image_prefix: quay.io/noirolabs
