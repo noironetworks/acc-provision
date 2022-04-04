@@ -9,13 +9,7 @@ rm -rf $BUILD_DIR/*
 NAME=`python3 setup.py --name`
 VERSION=`python3 setup.py --version`
 REVISION=${REVISION:-1}
-if [ -z ${OVERRIDE_VERSION+x} ] ; then
-    python3 setup.py sdist --dist-dir $BUILD_DIR
-else
-    VERSION=${OVERRIDE_VERSION}
-    echo "Override version is: " $VERSION
-    python3 setup.py sdist --version ${VERSION} --dist-dir $BUILD_DIR
-fi
+python3 setup.py sdist --dist-dir $BUILD_DIR
 SOURCE_FILE=${NAME}-${VERSION}.tar.gz
 tar -C $BUILD_DIR -xf $BUILD_DIR/$SOURCE_FILE
 SOURCE_DIR=$BUILD_DIR/${NAME}-${VERSION}
