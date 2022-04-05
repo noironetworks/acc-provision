@@ -59,7 +59,14 @@ spec:
       priorityClassName: system-node-critical
       serviceAccountName: aci-containers-controller
       tolerations:
+      - effect: NoExecute
+        operator: Exists
+        tolerationSeconds: 60
       - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
         operator: Exists
       volumes:
       - name: aci-user-cert-volume
