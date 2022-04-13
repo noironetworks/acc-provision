@@ -37,7 +37,7 @@ spec:
           value: routingdomain-config
         - name: SYSTEM_NAMESPACE
           value: kube-system
-        image: noiro/aci-containers-controller:5.2.3.2.1d150da
+        image: noiro/aci-containers-controller:5.2.3.3.1d150da
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
