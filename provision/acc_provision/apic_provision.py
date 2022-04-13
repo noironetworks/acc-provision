@@ -1,4 +1,5 @@
 from __future__ import print_function, unicode_literals
+from collections.abc import Mapping
 
 import collections
 import json
@@ -449,7 +450,7 @@ class ApicKubeConfig(object):
     def get_config(self, apic_version):
         def assert_attributes_is_first_key(data):
             """Check that attributes is the first key in the JSON."""
-            if isinstance(data, collections.Mapping) and "attributes" in data:
+            if isinstance(data, Mapping) and "attributes" in data:
                 assert next(iter(data.keys())) == "attributes"
                 for item in data.items():
                     assert_attributes_is_first_key(item)
