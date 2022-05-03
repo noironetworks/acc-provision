@@ -17,6 +17,13 @@ metadata:
 ---
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
+{% set flavor_version = config.flavor.split('-') %}
+{% set major_version = flavor_version[1].split('.')[0] | int %}
+{% set minor_version = flavor_version[1].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
 apiVersion: scheduling.k8s.io/v1beta1
 kind: PriorityClass
 metadata:
