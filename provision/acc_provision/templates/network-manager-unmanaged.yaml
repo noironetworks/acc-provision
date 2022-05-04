@@ -1,14 +1,14 @@
 apiVersion: netop-manager-cntrlr.netop-manager.io/v1
 kind: Installer
 metadata:
+  name: installer-sample
   namespace: netop-manager-system
-  name: sample-installer
 spec:
   config:
     networkFunctions:
       {% if config.service_mesh_config.enable %}
       cko-sm:
-        type: "cko-sm-smm"
+        type: cko-sm-smm
         version: "0.1"
         options:
           meshType: {{ config.service_mesh_config.mesh_type }}
@@ -16,15 +16,10 @@ spec:
           networkName: {{ config.service_mesh_config.network_name }}
           meshName: {{ config.service_mesh_config.mesh_name }}
       {% endif %}
-      cko-cni:
-        version: '0.1'
-        type: "cko-cni-aci"
-        options:
-          aci-cni: {{ config.aci_config.base64_encoded_cko_aci_spec }}
       {% if config.monitoring_config.enable %}
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus
         options:
-          prometheus-config: {{ config.aci_config.base64_encoded_prometheus_spec }}
+          prometheus-config: {{ config.calico_config.base64_encoded_prometheus_spec }}
       {% endif %}

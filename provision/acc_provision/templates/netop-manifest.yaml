@@ -9,7 +9,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: cniops.cni-manager.netop-manager.io
 spec:
@@ -50,26 +50,38 @@ spec:
                         type: object
                       type:
                         type: string
+                      unmanaged:
+                        type: boolean
                       version:
                         type: string
+                    required:
+                    - type
+                    - version
                     type: object
                 type: object
             type: object
           status:
             description: CniOpsStatus defines the observed state of CniOps
             properties:
+              Multus:
+                type: boolean
               cniStatus:
                 additionalProperties:
                   type: string
                 description: Store Spec Location
                 type: object
               cniType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 type: string
               observedGeneration:
                 format: int64
                 type: integer
               state:
                 type: string
+              workloadCheck:
+                additionalProperties:
+                  type: string
+                type: object
             type: object
         type: object
     served: true
@@ -87,7 +99,58 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: cniopsstatuses.cni-manager.netop-manager.io
+spec:
+  group: cni-manager.netop-manager.io
+  names:
+    kind: CniOpsStatuses
+    listKind: CniOpsStatusesList
+    plural: cniopsstatuses
+    singular: cniopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: CniOpsStatuses is the Schema for the cniopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsStatusesSpec defines the desired state of CniOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of CniOpsStatuses. Edit cniopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: CniOpsStatusesStatus defines the observed state of CniOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: installers.netop-manager-cntrlr.netop-manager.io
 spec:
@@ -142,16 +205,6 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
-              wsClient:
-                description: websocket Client
-                properties:
-                  serverIP:
-                    description: server is the hostname or IP address of the websocket server
-                    type: string
-                  targetPort:
-                    description: targetport for the server
-                    type: string
-                type: object
             type: object
           status:
             description: InstallerStatus defines the observed state of Installer
@@ -209,7 +262,211 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanacerops.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOps
+    listKind: LoadBalanacerOpsList
+    plural: loadbalanacerops
+    singular: loadbalanacerops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOps is the Schema for the loadbalanacerops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsSpec defines the desired state of LoadBalanacerOps
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOps. Edit loadbalanacerops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatus defines the observed state of LoadBalanacerOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanaceropsstatuses.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOpsStatuses
+    listKind: LoadBalanacerOpsStatusesList
+    plural: loadbalanaceropsstatuses
+    singular: loadbalanaceropsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOpsStatuses is the Schema for the loadbalanaceropsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsStatusesSpec defines the desired state of LoadBalanacerOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOpsStatuses. Edit loadbalanaceropsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatusesStatus defines the observed state of LoadBalanacerOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringops.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOps
+    listKind: MonitoringOpsList
+    plural: monitoringops
+    singular: monitoringops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOps is the Schema for the monitoringops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsSpec defines the desired state of MonitoringOps
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOps. Edit monitoringops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatus defines the observed state of MonitoringOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringopsstatuses.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOpsStatuses
+    listKind: MonitoringOpsStatusesList
+    plural: monitoringopsstatuses
+    singular: monitoringopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOpsStatuses is the Schema for the monitoringopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsStatusesSpec defines the desired state of MonitoringOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOpsStatuses. Edit monitoringopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatusesStatus defines the observed state of MonitoringOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: servicemeshops.service-mesh.netop-manager.io
 spec:
@@ -258,6 +515,57 @@ spec:
                 type: string
               state:
                 type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: servicemeshopsstatuses.service-mesh.netop-manager.io
+spec:
+  group: service-mesh.netop-manager.io
+  names:
+    kind: ServiceMeshOpsStatuses
+    listKind: ServiceMeshOpsStatusesList
+    plural: servicemeshopsstatuses
+    singular: servicemeshopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ServiceMeshOpsStatuses is the Schema for the servicemeshopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceMeshOpsStatusesSpec defines the desired state of ServiceMeshOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of ServiceMeshOpsStatuses. Edit servicemeshopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: ServiceMeshOpsStatusesStatus defines the observed state of ServiceMeshOpsStatuses
             type: object
         type: object
     served: true
@@ -414,6 +722,136 @@ rules:
   - cni-manager.netop-manager.io
   resources:
   - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/status
   verbs:
   - get
   - patch
@@ -779,6 +1217,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - servicemesh.cisco.com
   resources:
   - istiocontrolplanes
@@ -875,7 +1339,7 @@ data:
       resourceName: 51681485.netop-manager.io
 kind: ConfigMap
 metadata:
-  name: netop-manager-manager-config
+  name: netop-manager-config
   namespace: netop-manager-system
 ---
 apiVersion: v1
@@ -935,6 +1399,20 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: SYSTEM_ID
+          value: {{config.aci_config.system_id}}
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              key: serverIP
+              name: websocket-config
+              optional: true
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: serverPort
+              name: websocket-config
+              optional: true
         image: {{ config.registry.image_prefix }}/cni-manager:{{ config.registry.network_operator_version }}
         imagePullPolicy: Always
         name: manager
@@ -946,7 +1424,22 @@ spec:
             cpu: 125m
             memory: 64Mi
         securityContext:
-          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /mnt/cni-config
+          name: cni-config-volume
+        - mountPath: /status
+          name: status-config-volume
       hostNetwork: true
       securityContext:
         runAsNonRoot: false
@@ -954,3 +1447,70 @@ spec:
       terminationGracePeriodSeconds: 10
       tolerations:
       - key: node.kubernetes.io/network-unavailable
+      - key: node.kubernetes.io/not-ready
+      - key: node.kubernetes.io/unreachable
+      volumes:
+      - hostPath:
+          path: /opt
+        name: cni-bin
+      - hostPath:
+          path: /etc
+        name: cni-conf
+      - configMap:
+          name: cni-config
+          optional: true
+        name: cni-config-volume
+      - configMap:
+          name: status-config
+          optional: true
+        name: status-config-volume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cni-config
+  namespace: netop-manager-system
+data:
+  cniconfig.yaml: |-
+    cniConfig:
+      cko-cni-calico:
+      - "01-calico.conflist"
+      - "01-calico.conf"
+      - "10-calico.conflist"
+      - "10-calico.conf"
+      cko-cni-aci:
+      - "01-opflex-cni.conf"
+      - "10-opflex-cni.conf"
+      cko-cni-cilium:
+      - "05-cilium.conf"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: status-config
+  namespace: netop-manager-system
+data:
+    variable.sh: |-
+     #!/bin/bash
+      
+      namespace="netop-manager-system"
+      resourcelabelKey="netop-manager-resource"
+      projectlabelKey="netop-manager"
+      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      gitrepo={{ config.cko_git_config.git_repo }}
+      gitdir={{ config.cko_git_config.git_dir }}
+      gitbranch={{ config.cko_git_config.git_branch }}
+      gittoken={{ config.cko_git_config.git_token }}
+      gituser={{ config.cko_git_config.git_user }}
+      gitemail={{ config.cko_git_config.git_email }}
+      sleepduration={{ config.cko_git_config.sleep_duration }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: websocket-config
+  namespace: netop-manager-system
+data:
+  serverIP: {{ config.control_cluster_websocket.server_ip }}
+  serverPort: {{ config.control_cluster_websocket.server_port }}
+  serverEnabled: false

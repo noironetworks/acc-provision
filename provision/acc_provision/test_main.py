@@ -531,6 +531,42 @@ def test_flavor_cko_aci():
 
 
 @in_testdir
+def test_flavor_cko_cilium():
+    run_provision(
+        "flavor_cko_cilium.inp.yaml",
+        "flavor_cko_cilium.kube.yaml",
+        None,
+        None,
+        "flavor_cko_cilium.apic.txt",
+        overrides={"flavor": "cko-cilium"}
+    )
+
+
+@in_testdir
+def test_flavor_cko_unmanaged():
+    run_provision(
+        "flavor_cko_unmanaged.inp.yaml",
+        "flavor_cko_unmanaged.kube.yaml",
+        None,
+        None,
+        "flavor_cko_unmanaged.apic.txt",
+        overrides={"flavor": "cko-v"}
+    )
+
+
+@in_testdir
+def test_flavor_calico():
+    run_provision(
+        "flavor_calico.inp.yaml",
+        "flavor_calico.kube.yaml",
+        None,
+        None,
+        "flavor_calico.apic.txt",
+        overrides={"flavor": "calico"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_45_esx():
     run_provision(
         "flavor_openshift_45_esx.inp.yaml",

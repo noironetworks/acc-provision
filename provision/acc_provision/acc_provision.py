@@ -209,6 +209,21 @@ def config_default():
         "service_mesh_config": {
             "enable": False,
         },
+        "monitoring_config": {
+            "enable": False,
+        },
+        "cko_proxy_config": {
+            "enable": False,
+        },
+        "cko_git_config": {
+            "git_repo": "github.com/networkoperator/demo-clusters.git",
+            "git_dir": "demo-cluster",
+            "git_branch": "test",
+            "git_token": "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",
+            "git_user": "networkoperator-gittest",
+            "git_email": "test@cisco.com",
+            "sleep_duration": 5,
+        },
         "control_cluster_websocket": {
             "server_ip": None,
             "server_port": None,
@@ -394,6 +409,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     install_sm = config["service_mesh_config"]["enable"]
+    install_monitoring = config["monitoring_config"]["enable"]
     l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
@@ -439,7 +455,7 @@ def config_adjust(args, config, prov_apic, no_random):
     else:
         node_service_ip_pool = []
 
-    if config["flavor"] == "cko-calico":
+    if config["flavor"] == "cko-calico" or config["flavor"] == "calico":
         config["net_config"]["pod_subnet"] = validate_subnet(pod_subnet)
         config["net_config"]["node_subnet"] = validate_subnet(node_subnet)
         config["net_config"]["extern_dynamic"] = validate_subnet(extern_dynamic)
@@ -556,16 +572,11 @@ def config_adjust(args, config, prov_apic, no_random):
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
         },
-        "calico_config": {
-            "cert_info": {
-                "username": system_id,
-                "certfile": "user-%s.crt" % system_id,
-                "keyfile": "user-%s.key" % system_id,
-                "cert_reused": False,
-            },
-        },
         "service_mesh_config": {
             "enable": install_sm,
+        },
+        "monitoring_config": {
+            "enable": install_monitoring,
         },
         "registry": {
             "configuration_version": token,
@@ -903,8 +914,8 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "l3out", "external_networks")), required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
-            # "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
-            #                                    required),
+             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
+                                                required),
         }
     else:
         extra_checks = {
@@ -944,12 +955,6 @@ def config_validate(flavor_opts, config):
 
         if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
             del extra_checks["net_config/extern_static"]
-
-        # Remove extra checks for cko-calico flavor
-        # if config["flavor"] == "cko-calico":
-        #     del extra_checks["net_config/extern_static"]
-        #     del extra_checks["net_config/node_svc_subnet"]
-        #     del extra_checks["net_config/service_vlan"]
 
         if flavor_opts.get("apic", {}).get("use_kubeapi_vlan", True):
             checks["net_config/kubeapi_vlan"] = (
@@ -1244,6 +1249,9 @@ def generate_cko_calico_yaml(config, network_operator_output):
         calicoctl_template = get_jinja_template('calicoctl.yaml')
         calicoctl_output = calicoctl_template.render(config=config)
 
+        prometheus_template = get_jinja_template('prometheus-config.yaml')
+        prometheus_output = prometheus_template.render(config=config)
+
         # Render calico bgp peer CR from calico_bgp_peer_template template and add it to calico_net_op_template
         # It has to be rendered in a nested loop
         bgp_peer = ''
@@ -1269,6 +1277,8 @@ def generate_cko_calico_yaml(config, network_operator_output):
         base64_encoded_calico_crs_spec = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
         # Encode the calicoctl spec to base64
         base64_encoded_calicoctl_spec = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
+        # Encode the prometheus spec to base64
+        base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
 
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
@@ -1279,6 +1289,7 @@ def generate_cko_calico_yaml(config, network_operator_output):
         netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_calico_crs_spec
         netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_calico_bgp_spec
         netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_calicoctl_spec
+        netopConfig["calico_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
 
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
@@ -1291,6 +1302,10 @@ def generate_cko_calico_yaml(config, network_operator_output):
 
 def generate_cko_aci_yaml(config, network_operator_output):
     if network_operator_output and network_operator_output != "/dev/null":
+
+        prometheus_template = get_jinja_template('prometheus-config.yaml')
+        prometheus_output = prometheus_template.render(config=config)
+
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
         aci_cni_template = get_jinja_template('aci-containers.yaml')
@@ -1298,10 +1313,74 @@ def generate_cko_aci_yaml(config, network_operator_output):
 
         network_operator_CR_template = get_jinja_template('network-manager-aci.yaml')
         base64_encoded_cko_aci_spec = base64.b64encode(aci_cni_output.encode('ascii')).decode('ascii')
+        base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
         netopConfig = dict(config)
         netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
+        netopConfig["aci_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+        print("writing the deployment file")
+
+        with open(network_operator_output, "w") as fh:
+            fh.write(network_operator_yaml)
+
+def generate_cko_cilium_yaml(config, network_operator_output):
+    if network_operator_output and network_operator_output != "/dev/null":
+
+        network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+        network_operator_spec_output = network_operator_spec_template.render(config=config)
+
+        network_operator_CR_template = get_jinja_template('network-manager-cilium.yaml')
+        network_operator_CR_output = network_operator_CR_template.render(config=config)
+        network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+        print("writing the deployment file")
+
+        with open(network_operator_output, "w") as fh:
+            fh.write(network_operator_yaml)
+
+def generate_cko_unmanaged_yaml(config, network_operator_output):
+    if network_operator_output and network_operator_output != "/dev/null":
+
+        network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+        network_operator_spec_output = network_operator_spec_template.render(config=config)
+
+        network_operator_CR_template = get_jinja_template('network-manager-unmanaged.yaml')
+        network_operator_CR_output = network_operator_CR_template.render(config=config)
+        network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+        print("writing the deployment file")
+
+        with open(network_operator_output, "w") as fh:
+            fh.write(network_operator_yaml)
+
+
+def generate_calico_yaml(config, network_operator_output):
+    if network_operator_output and network_operator_output != "/dev/null":
+        calico_crds_template = get_jinja_template('calico-crds.yaml')
+        calico_crds_output = calico_crds_template.render(config=config)
+
+        calico_crs_template = get_jinja_template('calico-crs.yaml')
+        calico_crs_output = calico_crs_template.render(config=config)
+
+        bgp_peer = ''
+        calico_bgp_peer_template = get_jinja_template('calico-bgp-peer.yaml')
+        for rack in config["calico_config"]["bgp_peer_config"]["racks"]:
+            rackID = config["calico_config"]["bgp_peer_config"]["racks"].index(rack) + 1
+            for peerIP in rack:
+                configTemp = dict(config)
+                configTemp["calico_config"]["bgp_peer_config"]["peerIP"] = peerIP
+                configTemp["calico_config"]["bgp_peer_config"]["name"] = peerIP.replace(".", "-")
+                configTemp["calico_config"]["bgp_peer_config"]["rackID"] = rackID
+                bgp_peer = bgp_peer + "\n---\n" + calico_bgp_peer_template.render(config=configTemp)
+
+        calico_bgp_config_template = get_jinja_template('calico-bgp-config.yaml')
+        calico_bgp_config_output = calico_bgp_config_template.render(config=config)
+
+        calico_bgp_spec = calico_bgp_config_output + "\n---\n" + bgp_peer
+
+        network_operator_yaml = calico_crds_output + "\n---\n" + calico_crs_output + "\n---\n" + calico_bgp_spec
 
         print("writing the deployment file")
 
@@ -1600,15 +1679,15 @@ def check_overlapping_subnets(config):
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
     else:
-        # node_svc_subnet is ignored in "cko-calico" flavor
+        # node_svc_subnet is ignored in "cko-calico" and "calico" flavor
         subnet_info = {
             "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
-            # "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
+            "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
 
-    # Don't have extern_static field set for OpenShift flavors
+    # Don't have extern_static field set for calico flavors
     if config["flavor"] != "cko-calico" and config["net_config"]["extern_static"]:
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
@@ -1832,6 +1911,18 @@ def provision(args, apic_file, no_random):
     if flavor == "cko-aci":
         print("using flavor cko-aci")
         gen = flavor_opts.get("template_generator", generate_cko_aci_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
+
+    if flavor == "calico":
+        print("using flavor calico")
+        gen = flavor_opts.get("template_generator", generate_calico_yaml)
         if not callable(gen):
             gen = globals()[gen]
         netop_output_file = args.output

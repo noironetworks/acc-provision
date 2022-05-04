@@ -4,9 +4,6 @@ metadata:
   namespace: netop-manager-system
   name: sample-installer
 spec:
-  wsClient:
-    serverIP: {{ config.control_cluster_websocket.server_ip }}
-    targetPort: {{ config.control_cluster_websocket.server_port }}
   config:
     networkFunctions:
       {% if config.service_mesh_config.enable %}
@@ -27,3 +24,10 @@ spec:
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
           calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
           calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}
+      {% if config.monitoring_config.enable %}
+      cko-monitoring:
+        version: '0.1'
+        type: cko-m-prometheus
+        options:
+          prometheus-config: {{ config.calico_config.base64_encoded_prometheus_spec }}
+      {% endif %}

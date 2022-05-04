@@ -9,7 +9,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: cniops.cni-manager.netop-manager.io
 spec:
@@ -50,26 +50,38 @@ spec:
                         type: object
                       type:
                         type: string
+                      unmanaged:
+                        type: boolean
                       version:
                         type: string
+                    required:
+                    - type
+                    - version
                     type: object
                 type: object
             type: object
           status:
             description: CniOpsStatus defines the observed state of CniOps
             properties:
+              Multus:
+                type: boolean
               cniStatus:
                 additionalProperties:
                   type: string
                 description: Store Spec Location
                 type: object
               cniType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 type: string
               observedGeneration:
                 format: int64
                 type: integer
               state:
                 type: string
+              workloadCheck:
+                additionalProperties:
+                  type: string
+                type: object
             type: object
         type: object
     served: true
@@ -87,7 +99,58 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: cniopsstatuses.cni-manager.netop-manager.io
+spec:
+  group: cni-manager.netop-manager.io
+  names:
+    kind: CniOpsStatuses
+    listKind: CniOpsStatusesList
+    plural: cniopsstatuses
+    singular: cniopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: CniOpsStatuses is the Schema for the cniopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsStatusesSpec defines the desired state of CniOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of CniOpsStatuses. Edit cniopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: CniOpsStatusesStatus defines the observed state of CniOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: installers.netop-manager-cntrlr.netop-manager.io
 spec:
@@ -142,16 +205,6 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
-              wsClient:
-                description: websocket Client
-                properties:
-                  serverIP:
-                    description: server is the hostname or IP address of the websocket server
-                    type: string
-                  targetPort:
-                    description: targetport for the server
-                    type: string
-                type: object
             type: object
           status:
             description: InstallerStatus defines the observed state of Installer
@@ -209,7 +262,211 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanacerops.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOps
+    listKind: LoadBalanacerOpsList
+    plural: loadbalanacerops
+    singular: loadbalanacerops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOps is the Schema for the loadbalanacerops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsSpec defines the desired state of LoadBalanacerOps
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOps. Edit loadbalanacerops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatus defines the observed state of LoadBalanacerOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanaceropsstatuses.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOpsStatuses
+    listKind: LoadBalanacerOpsStatusesList
+    plural: loadbalanaceropsstatuses
+    singular: loadbalanaceropsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOpsStatuses is the Schema for the loadbalanaceropsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsStatusesSpec defines the desired state of LoadBalanacerOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOpsStatuses. Edit loadbalanaceropsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatusesStatus defines the observed state of LoadBalanacerOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringops.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOps
+    listKind: MonitoringOpsList
+    plural: monitoringops
+    singular: monitoringops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOps is the Schema for the monitoringops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsSpec defines the desired state of MonitoringOps
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOps. Edit monitoringops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatus defines the observed state of MonitoringOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringopsstatuses.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOpsStatuses
+    listKind: MonitoringOpsStatusesList
+    plural: monitoringopsstatuses
+    singular: monitoringopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOpsStatuses is the Schema for the monitoringopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsStatusesSpec defines the desired state of MonitoringOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOpsStatuses. Edit monitoringopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatusesStatus defines the observed state of MonitoringOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
   name: servicemeshops.service-mesh.netop-manager.io
 spec:
@@ -258,6 +515,57 @@ spec:
                 type: string
               state:
                 type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: servicemeshopsstatuses.service-mesh.netop-manager.io
+spec:
+  group: service-mesh.netop-manager.io
+  names:
+    kind: ServiceMeshOpsStatuses
+    listKind: ServiceMeshOpsStatusesList
+    plural: servicemeshopsstatuses
+    singular: servicemeshopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ServiceMeshOpsStatuses is the Schema for the servicemeshopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceMeshOpsStatusesSpec defines the desired state of ServiceMeshOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of ServiceMeshOpsStatuses. Edit servicemeshopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: ServiceMeshOpsStatusesStatus defines the observed state of ServiceMeshOpsStatuses
             type: object
         type: object
     served: true
@@ -414,6 +722,136 @@ rules:
   - cni-manager.netop-manager.io
   resources:
   - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/status
   verbs:
   - get
   - patch
@@ -779,6 +1217,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - servicemesh.cisco.com
   resources:
   - istiocontrolplanes
@@ -875,7 +1339,7 @@ data:
       resourceName: 51681485.netop-manager.io
 kind: ConfigMap
 metadata:
-  name: netop-manager-manager-config
+  name: netop-manager-config
   namespace: netop-manager-system
 ---
 apiVersion: v1
@@ -935,6 +1399,20 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: SYSTEM_ID
+          value: calicotest
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              key: serverIP
+              name: websocket-config
+              optional: true
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: serverPort
+              name: websocket-config
+              optional: true
         image: quay.io/noirolabs/cni-manager:0.0.1-test
         imagePullPolicy: Always
         name: manager
@@ -946,7 +1424,22 @@ spec:
             cpu: 125m
             memory: 64Mi
         securityContext:
-          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /mnt/cni-config
+          name: cni-config-volume
+        - mountPath: /status
+          name: status-config-volume
       hostNetwork: true
       securityContext:
         runAsNonRoot: false
@@ -954,7 +1447,73 @@ spec:
       terminationGracePeriodSeconds: 10
       tolerations:
       - key: node.kubernetes.io/network-unavailable
-
+      - key: node.kubernetes.io/not-ready
+      - key: node.kubernetes.io/unreachable
+      volumes:
+      - hostPath:
+          path: /opt
+        name: cni-bin
+      - hostPath:
+          path: /etc
+        name: cni-conf
+      - configMap:
+          name: cni-config
+          optional: true
+        name: cni-config-volume
+      - configMap:
+          name: status-config
+          optional: true
+        name: status-config-volume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cni-config
+  namespace: netop-manager-system
+data:
+  cniconfig.yaml: |-
+    cniConfig:
+      cko-cni-calico:
+      - "01-calico.conflist"
+      - "01-calico.conf"
+      - "10-calico.conflist"
+      - "10-calico.conf"
+      cko-cni-aci:
+      - "01-opflex-cni.conf"
+      - "10-opflex-cni.conf"
+      cko-cni-cilium:
+      - "05-cilium.conf"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: status-config
+  namespace: netop-manager-system
+data:
+    variable.sh: |-
+     #!/bin/bash
+      
+      namespace="netop-manager-system"
+      resourcelabelKey="netop-manager-resource"
+      projectlabelKey="netop-manager"
+      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      gitrepo=github.com/networkoperator/demo-clusters.git
+      gitdir=demo-cluster
+      gitbranch=test
+      gittoken=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
+      gituser=networkoperator-gittest
+      gitemail=test@cisco.com
+      sleepduration=5
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: websocket-config
+  namespace: netop-manager-system
+data:
+  serverIP: 10.96.101.1/12
+  serverPort: 1234
+  serverEnabled: false
 ---
 apiVersion: netop-manager-cntrlr.netop-manager.io/v1
 kind: Installer
@@ -962,9 +1521,6 @@ metadata:
   namespace: netop-manager-system
   name: sample-installer
 spec:
-  wsClient:
-    serverIP: 10.96.101.1/12
-    targetPort: 1234
   config:
     networkFunctions:
       cko-sm:
@@ -983,3 +1539,8 @@ spec:
           calico-cr: IyBUaGlzIHNlY3Rpb24gaW5jbHVkZXMgYmFzZSBDYWxpY28gaW5zdGFsbGF0aW9uIGNvbmZpZ3VyYXRpb24uCiMgRm9yIG1vcmUgaW5mb3JtYXRpb24sIHNlZTogaHR0cHM6Ly9kb2NzLnByb2plY3RjYWxpY28ub3JnL3YzLjIxL3JlZmVyZW5jZS9pbnN0YWxsYXRpb24vYXBpI29wZXJhdG9yLnRpZ2VyYS5pby92MS5JbnN0YWxsYXRpb24KYXBpVmVyc2lvbjogb3BlcmF0b3IudGlnZXJhLmlvL3YxCmtpbmQ6IEluc3RhbGxhdGlvbgptZXRhZGF0YToKICBuYW1lOiBkZWZhdWx0CnNwZWM6CiAgIyBDb25maWd1cmVzIENhbGljbyBuZXR3b3JraW5nLgogIGNhbGljb05ldHdvcms6CiAgICAjIE5vdGU6IFRoZSBpcFBvb2xzIHNlY3Rpb24gY2Fubm90IGJlIG1vZGlmaWVkIHBvc3QtaW5zdGFsbC4KICAgIGlwUG9vbHM6CiAgICAtIGJsb2NrU2l6ZTogMjYKICAgICAgY2lkcjogMjAuMi4wLjEvMTYKICAgICAgZW5jYXBzdWxhdGlvbjogTm9uZQogICAgICBuYXRPdXRnb2luZzogRGlzYWJsZWQKICAgICAgbm9kZVNlbGVjdG9yOiBhbGwoKQotLS0KIyBUaGlzIHNlY3Rpb24gY29uZmlndXJlcyB0aGUgQ2FsaWNvIEFQSSBzZXJ2ZXIuCiMgRm9yIG1vcmUgaW5mb3JtYXRpb24sIHNlZTogaHR0cHM6Ly9kb2NzLnByb2plY3RjYWxpY28ub3JnL3YzLjIxL3JlZmVyZW5jZS9pbnN0YWxsYXRpb24vYXBpI29wZXJhdG9yLnRpZ2VyYS5pby92MS5BUElTZXJ2ZXIKYXBpVmVyc2lvbjogb3BlcmF0b3IudGlnZXJhLmlvL3YxCmtpbmQ6IEFQSVNlcnZlciAKbWV0YWRhdGE6IAogIG5hbWU6IGRlZmF1bHQgCnNwZWM6IHt9Ci0tLQojVGhpcyBjcmVhdGVzIGEgc2VjcmV0IHRvIHN0b3JlIHRoZSBCR1AgUGFzc3dvcmQuIFdlIGFsc28gbmVlZCB0byBhZGQgYSBSb2xlYW5kIFJvbGVCaW5kaW5nIHRvIGVuc3VyZSB0aGUgY2FsaWNvLW5vZGUgU2VydmljZUFjY291bnQgY2FuIGFjY2VzcyB0aGUgU2VjcmV0LgphcGlWZXJzaW9uOiB2MQpraW5kOiBTZWNyZXQKbWV0YWRhdGE6CiAgbmFtZTogYmdwLXNlY3JldHMKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCnR5cGU6IE9wYXF1ZQpzdHJpbmdEYXRhOgogIHJyLXBhc3N3b3JkOiB0ZXN0Ci0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IFJvbGUKbWV0YWRhdGE6CiAgbmFtZTogc2VjcmV0LWFjY2VzcwogIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KcnVsZXM6Ci0gYXBpR3JvdXBzOiBbIiJdCiAgcmVzb3VyY2VzOiBbInNlY3JldHMiXQogIHJlc291cmNlTmFtZXM6IFsiYmdwLXNlY3JldHMiXQogIHZlcmJzOiBbIndhdGNoIiwgImxpc3QiLCAiZ2V0Il0KLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogUm9sZUJpbmRpbmcKbWV0YWRhdGE6CiAgbmFtZTogc2VjcmV0LWFjY2VzcwogIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0Kcm9sZVJlZjoKICBhcGlHcm91cDogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pbwogIGtpbmQ6IFJvbGUKICBuYW1lOiBzZWNyZXQtYWNjZXNzCnN1YmplY3RzOgotIGtpbmQ6IFNlcnZpY2VBY2NvdW50CiAgbmFtZTogY2FsaWNvLW5vZGUKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCi0tLQ==
           calico-bgp: I1RoaXMgc2VjdGlvbiBkaXNhYmxlcyBCR1AgZnVsbCBtZXNoIGJldHdlZW4gdGhlIEs4cyBub2RlcyBhbmQgc2V0IHRoZSBzZXJ2aWNlQ2x1c3RlcklQcyBhbmQgc2VydmljZUV4dGVybmFsSVBzIHN1Ym5ldHMgc28gdGhhdCB0aGV5IGNhbiBiZSBhZHZlcnRpc2VkIGJ5IGVCR1AuIFRoZXNlIHN1Ym5ldHMgYXJlIHRoZSBTZXJ2aWNlIGFuZCBFeHRlcm5hbCBTZXJ2aWNlIHN1Ym5ldHMgaW4gS3ViZXJuZXRlcy4KYXBpVmVyc2lvbjogcHJvamVjdGNhbGljby5vcmcvdjMKa2luZDogQkdQQ29uZmlndXJhdGlvbgptZXRhZGF0YToKICBuYW1lOiBkZWZhdWx0CnNwZWM6CiAgbG9nU2V2ZXJpdHlTY3JlZW46IEluZm8KICBub2RlVG9Ob2RlTWVzaEVuYWJsZWQ6IGZhbHNlCiAgc2VydmljZUNsdXN0ZXJJUHM6CiAgLSBjaWRyOiAKICBzZXJ2aWNlRXh0ZXJuYWxJUHM6CiAgLSBjaWRyOiAyMC4zLjAuMS8xNgotLS0KCi0tLQphcGlWZXJzaW9uOiBwcm9qZWN0Y2FsaWNvLm9yZy92MwpraW5kOiBCR1BQZWVyCm1ldGFkYXRhOiAKICBuYW1lOiAyLTEwMC0xMDEtMjAxCnNwZWM6CiAgcGVlcklQOiAyLjEwMC4xMDEuMjAxCiAgYXNOdW1iZXI6IDY0NTE0CiAgbm9kZVNlbGVjdG9yOiByYWNrX2lkID09ICIxIgogIHBhc3N3b3JkOgogICAgc2VjcmV0S2V5UmVmOgogICAgICBuYW1lOiBiZ3Atc2VjcmV0cwogICAgICBrZXk6IHRlc3QKCgoKLS0tCmFwaVZlcnNpb246IHByb2plY3RjYWxpY28ub3JnL3YzCmtpbmQ6IEJHUFBlZXIKbWV0YWRhdGE6IAogIG5hbWU6IDItMTAwLTEwMS0yMDIKc3BlYzoKICBwZWVySVA6IDIuMTAwLjEwMS4yMDIKICBhc051bWJlcjogNjQ1MTQKICBub2RlU2VsZWN0b3I6IHJhY2tfaWQgPT0gIjEiCiAgcGFzc3dvcmQ6CiAgICBzZWNyZXRLZXlSZWY6CiAgICAgIG5hbWU6IGJncC1zZWNyZXRzCiAgICAgIGtleTogdGVzdAoKCg==
           calicoctl: IyBDYWxpY28gVmVyc2lvbiB2My4yMS4yCiMgaHR0cHM6Ly9kb2NzLnByb2plY3RjYWxpY28ub3JnL3JlbGVhc2VzI3YzLjIxLjIKIyBUaGlzIG1hbmlmZXN0IGluY2x1ZGVzIHRoZSBmb2xsb3dpbmcgY29tcG9uZW50IHZlcnNpb25zOgojICAgY2FsaWNvL2N0bDp2My4yMS4yCgphcGlWZXJzaW9uOiB2MQpraW5kOiBTZXJ2aWNlQWNjb3VudAptZXRhZGF0YToKICBuYW1lOiBjYWxpY29jdGwKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCgotLS0KCmFwaVZlcnNpb246IHYxCmtpbmQ6IFBvZAptZXRhZGF0YToKICBuYW1lOiBjYWxpY29jdGwKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCnNwZWM6CiAgbm9kZVNlbGVjdG9yOgogICAga3ViZXJuZXRlcy5pby9vczogbGludXgKICBob3N0TmV0d29yazogdHJ1ZQogIHRvbGVyYXRpb25zOgogICAgLSBrZXk6IG5vZGUua3ViZXJuZXRlcy5pby9uZXR3b3JrLXVuYXZhaWxhYmxlCiAgc2VydmljZUFjY291bnROYW1lOiBjYWxpY29jdGwKICBjb250YWluZXJzOgogIC0gbmFtZTogY2FsaWNvY3RsCiAgICBpbWFnZTogY2FsaWNvL2N0bDp2My4yMS4yCiAgICBjb21tYW5kOgogICAgICAtIC9jYWxpY29jdGwKICAgIGFyZ3M6CiAgICAgIC0gdmVyc2lvbgogICAgICAtIC0tcG9sbD0xbQogICAgZW52OgogICAgLSBuYW1lOiBEQVRBU1RPUkVfVFlQRQogICAgICB2YWx1ZToga3ViZXJuZXRlcwoKLS0tCgpraW5kOiBDbHVzdGVyUm9sZQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCm1ldGFkYXRhOgogIG5hbWU6IGNhbGljb2N0bApydWxlczoKICAtIGFwaUdyb3VwczogWyIiXQogICAgcmVzb3VyY2VzOgogICAgICAtIG5hbWVzcGFjZXMKICAgICAgLSBub2RlcwogICAgdmVyYnM6CiAgICAgIC0gZ2V0CiAgICAgIC0gbGlzdAogICAgICAtIHVwZGF0ZQogIC0gYXBpR3JvdXBzOiBbIiJdCiAgICByZXNvdXJjZXM6CiAgICAgIC0gbm9kZXMvc3RhdHVzCiAgICB2ZXJiczoKICAgICAgLSB1cGRhdGUKICAtIGFwaUdyb3VwczogWyIiXQogICAgcmVzb3VyY2VzOgogICAgICAtIHBvZHMKICAgICAgLSBzZXJ2aWNlYWNjb3VudHMKICAgIHZlcmJzOgogICAgICAtIGdldAogICAgICAtIGxpc3QKICAtIGFwaUdyb3VwczogWyIiXQogICAgcmVzb3VyY2VzOgogICAgICAtIHBvZHMvc3RhdHVzCiAgICB2ZXJiczoKICAgICAgLSB1cGRhdGUKICAtIGFwaUdyb3VwczogWyJjcmQucHJvamVjdGNhbGljby5vcmciXQogICAgcmVzb3VyY2VzOgogICAgICAtIGJncHBlZXJzCiAgICAgIC0gYmdwY29uZmlndXJhdGlvbnMKICAgICAgLSBjbHVzdGVyaW5mb3JtYXRpb25zCiAgICAgIC0gZmVsaXhjb25maWd1cmF0aW9ucwogICAgICAtIGdsb2JhbG5ldHdvcmtwb2xpY2llcwogICAgICAtIGdsb2JhbG5ldHdvcmtzZXRzCiAgICAgIC0gaXBwb29scwogICAgICAtIGlwcmVzZXJ2YXRpb25zCiAgICAgIC0ga3ViZWNvbnRyb2xsZXJzY29uZmlndXJhdGlvbnMKICAgICAgLSBuZXR3b3JrcG9saWNpZXMKICAgICAgLSBuZXR3b3Jrc2V0cwogICAgICAtIGhvc3RlbmRwb2ludHMKICAgICAgLSBpcGFtYmxvY2tzCiAgICAgIC0gYmxvY2thZmZpbml0aWVzCiAgICAgIC0gaXBhbWhhbmRsZXMKICAgICAgLSBpcGFtY29uZmlncwogICAgdmVyYnM6CiAgICAgIC0gY3JlYXRlCiAgICAgIC0gZ2V0CiAgICAgIC0gbGlzdAogICAgICAtIHVwZGF0ZQogICAgICAtIGRlbGV0ZQogIC0gYXBpR3JvdXBzOiBbIm5ldHdvcmtpbmcuazhzLmlvIl0KICAgIHJlc291cmNlczoKICAgICAgLSBuZXR3b3JrcG9saWNpZXMKICAgIHZlcmJzOgogICAgICAtIGdldAogICAgICAtIGxpc3QKCi0tLQoKYXBpVmVyc2lvbjogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pby92MQpraW5kOiBDbHVzdGVyUm9sZUJpbmRpbmcKbWV0YWRhdGE6CiAgbmFtZTogY2FsaWNvY3RsCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IGNhbGljb2N0bApzdWJqZWN0czoKLSBraW5kOiBTZXJ2aWNlQWNjb3VudAogIG5hbWU6IGNhbGljb2N0bAogIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KCg==
+      cko-monitoring:
+        version: '0.1'
+        type: cko-m-prometheus
+        options:
+          prometheus-config: YXBpVmVyc2lvbjogdjEKa2luZDogTmFtZXNwYWNlCm1ldGFkYXRhOgogIG5hbWU6IG1vbml0b3JpbmcKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cwpydWxlczoKLSBhcGlHcm91cHM6IFsiIl0KICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbm9kZXMvcHJveHkKICAtIHNlcnZpY2VzCiAgLSBlbmRwb2ludHMKICAtIHBvZHMKICB2ZXJiczogWyJnZXQiLCAibGlzdCIsICJ3YXRjaCJdCi0gYXBpR3JvdXBzOgogIC0gZXh0ZW5zaW9ucwogIHJlc291cmNlczoKICAtIGluZ3Jlc3NlcwogIHZlcmJzOiBbImdldCIsICJsaXN0IiwgIndhdGNoIl0KLSBub25SZXNvdXJjZVVSTHM6IFsiL21ldHJpY3MiXQogIHZlcmJzOiBbImdldCJdCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IHByb21ldGhldXMKc3ViamVjdHM6Ci0ga2luZDogU2VydmljZUFjY291bnQKICBuYW1lOiBkZWZhdWx0CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCi0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIGxhYmVsczoKICAgIG5hbWU6IHByb21ldGhldXMtc2VydmVyLWNvbmYKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKZGF0YToKICBwcm9tZXRoZXVzLnJ1bGVzOiB8LQogICAgZ3JvdXBzOgogICAgLSBuYW1lOiBkZXZvcHNjdWJlIGRlbW8gYWxlcnQKICAgICAgcnVsZXM6CiAgICAgIC0gYWxlcnQ6IEhpZ2ggUG9kIE1lbW9yeQogICAgICAgIGV4cHI6IHN1bShjb250YWluZXJfbWVtb3J5X3VzYWdlX2J5dGVzKSA+IDEKICAgICAgICBmb3I6IDFtCiAgICAgICAgbGFiZWxzOgogICAgICAgICAgc2V2ZXJpdHk6IHNsYWNrCiAgICAgICAgYW5ub3RhdGlvbnM6CiAgICAgICAgICBzdW1tYXJ5OiBIaWdoIE1lbW9yeSBVc2FnZQogIHByb21ldGhldXMueW1sOiB8LQogICAgZ2xvYmFsOgogICAgICBzY3JhcGVfaW50ZXJ2YWw6IDVzCiAgICAgIGV2YWx1YXRpb25faW50ZXJ2YWw6IDVzCiAgICAgIGV4dGVybmFsX2xhYmVsczoKICAgICAgICBjbHVzdGVyOiBjYWxpY290ZXN0CiAgICBydWxlX2ZpbGVzOgogICAgICAtIC9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnJ1bGVzCiAgICBhbGVydGluZzoKICAgICAgYWxlcnRtYW5hZ2VyczoKICAgICAgLSBzY2hlbWU6IGh0dHAKICAgICAgICBzdGF0aWNfY29uZmlnczoKICAgICAgICAtIHRhcmdldHM6CiAgICAgICAgICAtICJhbGVydG1hbmFnZXIubW9uaXRvcmluZy5zdmM6OTA5MyIKICAgIHJlbW90ZV93cml0ZToKICAgICAgLSB1cmw6IGh0dHA6Ly8xLjEuMS4xOjEwMDAwL2FwaS92MS9yZWNlaXZlCiAgICAgICAgcHJveHlfdXJsOiBodHRwOi8vcHJveHkuZXNsLmNpc2NvLmNvbTo4MAoKICAgIHNjcmFwZV9jb25maWdzOgogICAgICAtIGpvYl9uYW1lOiAnbm9kZS1leHBvcnRlcicKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19lbmRwb2ludHNfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAnbm9kZS1leHBvcnRlcicKICAgICAgICAgIGFjdGlvbjoga2VlcAogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtYXBpc2VydmVycycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogZW5kcG9pbnRzCiAgICAgICAgc2NoZW1lOiBodHRwcwoKICAgICAgICB0bHNfY29uZmlnOgogICAgICAgICAgY2FfZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L2NhLmNydAogICAgICAgIGJlYXJlcl90b2tlbl9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvdG9rZW4KCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZSwgX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9uYW1lLCBfX21ldGFfa3ViZXJuZXRlc19lbmRwb2ludF9wb3J0X25hbWVdCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgICAgIHJlZ2V4OiBkZWZhdWx0O2t1YmVybmV0ZXM7aHR0cHMKCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLW5vZGVzJwoKICAgICAgICBzY2hlbWU6IGh0dHBzCgogICAgICAgIHRsc19jb25maWc6CiAgICAgICAgICBjYV9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvY2EuY3J0CiAgICAgICAgYmVhcmVyX3Rva2VuX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbgoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBub2RlCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19ub2RlX2xhYmVsXyguKykKICAgICAgICAtIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlcGxhY2VtZW50OiBrdWJlcm5ldGVzLmRlZmF1bHQuc3ZjOjQ0MwogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25vZGVfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlcGxhY2VtZW50OiAvYXBpL3YxL25vZGVzLyR7MX0vcHJveHkvbWV0cmljcyAgICAgCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1wb2RzJwoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBwb2QKCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NyYXBlXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogdHJ1ZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fcGF0aF0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX21ldHJpY3NfcGF0aF9fCiAgICAgICAgICByZWdleDogKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fYWRkcmVzc19fLCBfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BvcnRdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHJlZ2V4OiAoW146XSspKD86OlxkKyk/OyhcZCspCiAgICAgICAgICByZXBsYWNlbWVudDogJDE6JDIKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19wb2RfbGFiZWxfKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9uYW1lXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IGt1YmVybmV0ZXNfcG9kX25hbWUKICAgICAgCiAgICAgIC0gam9iX25hbWU6ICdrdWJlLXN0YXRlLW1ldHJpY3MnCiAgICAgICAgc3RhdGljX2NvbmZpZ3M6CiAgICAgICAgICAtIHRhcmdldHM6IFsna3ViZS1zdGF0ZS1tZXRyaWNzLmt1YmUtc3lzdGVtLnN2Yy5jbHVzdGVyLmxvY2FsOjgwODAnXQoKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtY2Fkdmlzb3InCgogICAgICAgIHNjaGVtZTogaHR0cHMKCiAgICAgICAgdGxzX2NvbmZpZzoKICAgICAgICAgIGNhX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9jYS5jcnQKICAgICAgICBiZWFyZXJfdG9rZW5fZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3Rva2VuCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IG5vZGUKCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gYWN0aW9uOiBsYWJlbG1hcAogICAgICAgICAgcmVnZXg6IF9fbWV0YV9rdWJlcm5ldGVzX25vZGVfbGFiZWxfKC4rKQogICAgICAgIC0gdGFyZ2V0X2xhYmVsOiBfX2FkZHJlc3NfXwogICAgICAgICAgcmVwbGFjZW1lbnQ6IGt1YmVybmV0ZXMuZGVmYXVsdC5zdmM6NDQzCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfbm9kZV9uYW1lXQogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVwbGFjZW1lbnQ6IC9hcGkvdjEvbm9kZXMvJHsxfS9wcm94eS9tZXRyaWNzL2NhZHZpc29yCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1zZXJ2aWNlLWVuZHBvaW50cycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogZW5kcG9pbnRzCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19zY3JhcGVdCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgICAgIHJlZ2V4OiB0cnVlCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NoZW1lXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fc2NoZW1lX18KICAgICAgICAgIHJlZ2V4OiAoaHR0cHM/KQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BhdGhdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX2FkZHJlc3NfXywgX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fcG9ydF0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX2FkZHJlc3NfXwogICAgICAgICAgcmVnZXg6IChbXjpdKykoPzo6XGQrKT87KFxkKykKICAgICAgICAgIHJlcGxhY2VtZW50OiAkMTokMgogICAgICAgIC0gYWN0aW9uOiBsYWJlbG1hcAogICAgICAgICAgcmVnZXg6IF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbGFiZWxfKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbmFtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWUKLS0tCmFwaVZlcnNpb246IGFwcHMvdjEKa2luZDogRGVwbG95bWVudAptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzLWRlcGxveW1lbnQKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKICBsYWJlbHM6CiAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCnNwZWM6CiAgcmVwbGljYXM6IDEKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgdGVtcGxhdGU6CiAgICBtZXRhZGF0YToKICAgICAgbGFiZWxzOgogICAgICAgIGFwcDogcHJvbWV0aGV1cy1zZXJ2ZXIKICAgIHNwZWM6CiAgICAgIGNvbnRhaW5lcnM6CiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzCiAgICAgICAgICBpbWFnZTogcXVheS5pby9wcm9tZXRoZXVzL3Byb21ldGhldXMKICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogSWZOb3RQcmVzZW50CiAgICAgICAgICBhcmdzOgogICAgICAgICAgICAtICItLWNvbmZpZy5maWxlPS9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnltbCIKICAgICAgICAgICAgLSAiLS1zdG9yYWdlLnRzZGIucGF0aD0vcHJvbWV0aGV1cy8iCiAgICAgICAgICBwb3J0czoKICAgICAgICAgICAgLSBjb250YWluZXJQb3J0OiA5MDkwCiAgICAgICAgICB2b2x1bWVNb3VudHM6CiAgICAgICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1jb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvZXRjL3Byb21ldGhldXMvCiAgICAgICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1zdG9yYWdlLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Byb21ldGhldXMvCiAgICAgIHZvbHVtZXM6CiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzLWNvbmZpZy12b2x1bWUKICAgICAgICAgIGNvbmZpZ01hcDoKICAgICAgICAgICAgZGVmYXVsdE1vZGU6IDQyMAogICAgICAgICAgICBuYW1lOiBwcm9tZXRoZXVzLXNlcnZlci1jb25mCiAgCiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzLXN0b3JhZ2Utdm9sdW1lCiAgICAgICAgICBlbXB0eURpcjoge30KLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlcnZpY2UKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2aWNlCiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCiAgYW5ub3RhdGlvbnM6CiAgICAgIHByb21ldGhldXMuaW8vc2NyYXBlOiAndHJ1ZScKICAgICAgcHJvbWV0aGV1cy5pby9wb3J0OiAgICc5MDkwJwogIApzcGVjOgogIHNlbGVjdG9yOiAKICAgIGFwcDogcHJvbWV0aGV1cy1zZXJ2ZXIKICB0eXBlOiBOb2RlUG9ydCAgCiAgcG9ydHM6CiAgICAtIHBvcnQ6IDgwODAKICAgICAgdGFyZ2V0UG9ydDogOTA5MCAKICAgICAgbm9kZVBvcnQ6IDMwMDAwCg==

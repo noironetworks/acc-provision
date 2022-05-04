@@ -3361,3 +3361,27 @@ flavors:
     status: Experimental
     hidden: true
     order: 38
+  cko-cilium:
+    desc: cko-cilium (experimental)
+    default_version: 6.0
+    options:
+      template_generator: generate_cko_cilium_yaml
+    status: Experimental
+    hidden: true
+    order: 39
+  cko-unmanaged:
+    desc: cko-unmanaged (experimental)
+    default_version: 6.0
+    options:
+      template_generator: generate_cko_unmanaged_yaml
+    status: Experimental
+    hidden: true
+    order: 40
+  calico:
+    desc: calico (experimental)
+    default_version: 6.0
+    options:
+      template_generator: generate_calico_yaml
+    status: Experimental
+    hidden: true
+    order: 41
