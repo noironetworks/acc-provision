@@ -43,6 +43,9 @@ calico_config:
 service_mesh_config:
   enable: True
 
+metallb_config:
+  enable: True
+
 monitoring_config:
   enable: True
   remote_write_ip: 1.1.1.1

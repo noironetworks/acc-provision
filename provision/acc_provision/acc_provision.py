@@ -209,6 +209,9 @@ def config_default():
         "service_mesh_config": {
             "enable": False,
         },
+        "metallb_config": {
+            "enable": False,
+        },
         "monitoring_config": {
             "enable": False,
         },
@@ -393,6 +396,7 @@ def validate_subnet(subnet):
 def config_adjust_cilium_unmanaged(args, config):
     install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
+    install_metallb = config["metallb_config"]["enable"]
     token = str(uuid.uuid4())
     adj_config = {
         "service_mesh_config": {
@@ -400,6 +404,9 @@ def config_adjust_cilium_unmanaged(args, config):
         },
         "monitoring_config": {
             "enable": install_monitoring,
+        },
+        "metallb_config": {
+            "enable": install_metallb,
         },
         "registry": {
             "configuration_version": token,
@@ -434,6 +441,7 @@ def config_adjust(args, config, prov_apic, no_random):
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
+    install_metallb = config["metallb_config"]["enable"]
     l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
@@ -601,6 +609,9 @@ def config_adjust(args, config, prov_apic, no_random):
         },
         "monitoring_config": {
             "enable": install_monitoring,
+        },
+        "metallb_config": {
+            "enable": install_metallb,
         },
         "registry": {
             "configuration_version": token,

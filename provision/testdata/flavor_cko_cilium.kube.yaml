@@ -1531,6 +1531,14 @@ spec:
           clusterName: primary
           networkName: network1
           meshName: mesh1
+      cko-lb:
+        type: "cko-lb-metallb"
+        version: "0.1"
+        options:
+          lBType: MetalLB
+        arrayOptions:
+          externalCIDRs:
+          - "None"
       cko-cni:
         type: cko-cni-cilium
         version: '1.11.2'
