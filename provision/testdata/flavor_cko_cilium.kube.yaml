@@ -1,0 +1,1541 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: netop-manager-system
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: cniops.cni-manager.netop-manager.io
+spec:
+  group: cni-manager.netop-manager.io
+  names:
+    kind: CniOps
+    listKind: CniOpsList
+    plural: cniops
+    singular: cniops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: CniOps is the Schema for the cniops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsSpec defines the desired state of CniOps
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      cniConfig:
+                        type: object
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: CniOpsStatus defines the observed state of CniOps
+            properties:
+              Multus:
+                type: boolean
+              cniStatus:
+                additionalProperties:
+                  type: string
+                description: Store Spec Location
+                type: object
+              cniType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+              workloadCheck:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: cniopsstatuses.cni-manager.netop-manager.io
+spec:
+  group: cni-manager.netop-manager.io
+  names:
+    kind: CniOpsStatuses
+    listKind: CniOpsStatusesList
+    plural: cniopsstatuses
+    singular: cniopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: CniOpsStatuses is the Schema for the cniopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsStatusesSpec defines the desired state of CniOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of CniOpsStatuses. Edit cniopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: CniOpsStatusesStatus defines the observed state of CniOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: installers.netop-manager-cntrlr.netop-manager.io
+spec:
+  group: netop-manager-cntrlr.netop-manager.io
+  names:
+    kind: Installer
+    listKind: InstallerList
+    plural: installers
+    singular: installer
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Installer is the Schema for the installers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: InstallerSpec defines the desired state of Installer
+            properties:
+              config:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run "make" to regenerate code after modifying this file'
+                properties:
+                  networkFunctions:
+                    additionalProperties:
+                      description: Individual CNI Configs
+                      properties:
+                        cniConfig:
+                          type: object
+                        lbConfig:
+                          type: object
+                        options:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        smConfig:
+                          type: object
+                        type:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    description: NetworkFunctions/Operators
+                    type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          status:
+            description: InstallerStatus defines the observed state of Installer
+            properties:
+              componentStatus:
+                additionalProperties:
+                  properties:
+                    op:
+                      type: string
+                    state:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                description: Single String String
+                type: object
+              desiredIntent:
+                additionalProperties:
+                  properties:
+                    op:
+                      type: string
+                    state:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: object
+              observedGeneration:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                format: int64
+                type: integer
+              state:
+                description: 'Todo: Store predefined keys for faster checking'
+                type: string
+              validtionStatus:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanacerops.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOps
+    listKind: LoadBalanacerOpsList
+    plural: loadbalanacerops
+    singular: loadbalanacerops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOps is the Schema for the loadbalanacerops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsSpec defines the desired state of LoadBalanacerOps
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOps. Edit loadbalanacerops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatus defines the observed state of LoadBalanacerOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: loadbalanaceropsstatuses.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalanacerOpsStatuses
+    listKind: LoadBalanacerOpsStatusesList
+    plural: loadbalanaceropsstatuses
+    singular: loadbalanaceropsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalanacerOpsStatuses is the Schema for the loadbalanaceropsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalanacerOpsStatusesSpec defines the desired state of LoadBalanacerOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of LoadBalanacerOpsStatuses. Edit loadbalanaceropsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: LoadBalanacerOpsStatusesStatus defines the observed state of LoadBalanacerOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringops.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOps
+    listKind: MonitoringOpsList
+    plural: monitoringops
+    singular: monitoringops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOps is the Schema for the monitoringops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsSpec defines the desired state of MonitoringOps
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOps. Edit monitoringops_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatus defines the observed state of MonitoringOps
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: monitoringopsstatuses.monitoring-manager.netop-manager.io
+spec:
+  group: monitoring-manager.netop-manager.io
+  names:
+    kind: MonitoringOpsStatuses
+    listKind: MonitoringOpsStatusesList
+    plural: monitoringopsstatuses
+    singular: monitoringopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringOpsStatuses is the Schema for the monitoringopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringOpsStatusesSpec defines the desired state of MonitoringOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of MonitoringOpsStatuses. Edit monitoringopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: MonitoringOpsStatusesStatus defines the observed state of MonitoringOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: servicemeshops.service-mesh.netop-manager.io
+spec:
+  group: service-mesh.netop-manager.io
+  names:
+    kind: ServiceMeshOps
+    listKind: ServiceMeshOpsList
+    plural: servicemeshops
+    singular: servicemeshops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ServiceMeshOps is the Schema for the servicemeshops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceMeshOpsSpec defines the desired state of ServiceMeshOps
+            properties:
+              clusterName:
+                type: string
+              meshMode:
+                type: string
+              meshName:
+                type: string
+              meshType:
+                type: string
+              networkName:
+                type: string
+              remoteCtrlPlane:
+                type: string
+            type: object
+          status:
+            description: ServiceMeshOpsStatus defines the observed state of ServiceMeshOps
+            properties:
+              meshType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              state:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: servicemeshopsstatuses.service-mesh.netop-manager.io
+spec:
+  group: service-mesh.netop-manager.io
+  names:
+    kind: ServiceMeshOpsStatuses
+    listKind: ServiceMeshOpsStatusesList
+    plural: servicemeshopsstatuses
+    singular: servicemeshopsstatuses
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ServiceMeshOpsStatuses is the Schema for the servicemeshopsstatuses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceMeshOpsStatusesSpec defines the desired state of ServiceMeshOpsStatuses
+            properties:
+              foo:
+                description: Foo is an example field of ServiceMeshOpsStatuses. Edit servicemeshopsstatuses_types.go to remove/update
+                type: string
+            type: object
+          status:
+            description: ServiceMeshOpsStatusesStatus defines the observed state of ServiceMeshOpsStatuses
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: netop-manager-leader-election-role
+  namespace: netop-manager-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: netop-manager-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - events
+  - namespaces
+  - nodes
+  - pods
+  - podtemplates
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  - deployments
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - backyards.banzaicloud.io
+  resources:
+  - controlplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cni-manager.netop-manager.io
+  resources:
+  - cniopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanacerops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalanaceropsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring-manager.netop-manager.io
+  resources:
+  - monitoringopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - netop-manager-cntrlr.netop-manager.io
+  resources:
+  - installers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - netop-manager-cntrlr.netop-manager.io
+  resources:
+  - installers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - netop-manager-cntrlr.netop-manager.io
+  resources:
+  - installers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - amazoncloudintegrations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - amazoncloudintegrations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - apiservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - apiservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - applicationlayers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - applicationlayers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - authentications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - authentications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - compliances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - compliances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - installations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - installations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - intrusiondetections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - intrusiondetections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logcollectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logcollectors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logstorages
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logstorages/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managementclusterconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managementclusterconnections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - monitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - monitors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgpconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgpconfigurations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgppeers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgppeers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - bind
+  - create
+  - delete
+  - escalate
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - service-mesh.netop-manager.io
+  resources:
+  - servicemeshopsstatuses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.cisco.com
+  resources:
+  - istiocontrolplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: netop-manager-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: netop-manager-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: netop-manager-leader-election-rolebinding
+  namespace: netop-manager-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: netop-manager-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: netop-manager-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: netop-manager-manager-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: netop-manager-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: netop-manager-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: v1
+data:
+  controller_manager_config.yaml: |
+    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+    kind: ControllerManagerConfig
+    health:
+      healthProbeBindAddress: :8081
+    metrics:
+      bindAddress: 127.0.0.1:8080
+    webhook:
+      port: 9443
+    leaderElection:
+      leaderElect: true
+      resourceName: 51681485.netop-manager.io
+kind: ConfigMap
+metadata:
+  name: netop-manager-config
+  namespace: netop-manager-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: netop-manager-controller-manager-metrics-service
+  namespace: netop-manager-system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8444
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=10
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8444
+          name: https
+          protocol: TCP
+      - args:
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        command:
+        - /manager
+        env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SYSTEM_ID
+          value: ciliumtest
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              key: serverIP
+              name: websocket-config
+              optional: true
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: serverPort
+              name: websocket-config
+              optional: true
+        image: quay.io/noirolabs/cni-manager:test
+        imagePullPolicy: Always
+        name: manager
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 125m
+            memory: 64Mi
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /mnt/cni-config
+          name: cni-config-volume
+        - mountPath: /status
+          name: status-config-volume
+      hostNetwork: true
+      securityContext:
+        runAsNonRoot: false
+      serviceAccountName: netop-manager-controller-manager
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - key: node.kubernetes.io/network-unavailable
+      - key: node.kubernetes.io/not-ready
+      - key: node.kubernetes.io/unreachable
+      volumes:
+      - hostPath:
+          path: /opt
+        name: cni-bin
+      - hostPath:
+          path: /etc
+        name: cni-conf
+      - configMap:
+          name: cni-config
+          optional: true
+        name: cni-config-volume
+      - configMap:
+          name: status-config
+          optional: true
+        name: status-config-volume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cni-config
+  namespace: netop-manager-system
+data:
+  cniconfig.yaml: |-
+    cniConfig:
+      cko-cni-calico:
+      - "01-calico.conflist"
+      - "01-calico.conf"
+      - "10-calico.conflist"
+      - "10-calico.conf"
+      cko-cni-aci:
+      - "01-opflex-cni.conf"
+      - "10-opflex-cni.conf"
+      cko-cni-cilium:
+      - "05-cilium.conf"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: status-config
+  namespace: netop-manager-system
+data:
+    variable.sh: |-
+     #!/bin/bash
+      
+      namespace="netop-manager-system"
+      resourcelabelKey="netop-manager-resource"
+      projectlabelKey="netop-manager"
+      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      gitrepo=github.com/networkoperator/demo-clusters.git
+      gitdir=demo-cluster
+      gitbranch=test
+      gittoken=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
+      gituser=networkoperator-gittest
+      gitemail=test@cisco.com
+      sleepduration=5
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: websocket-config
+  namespace: netop-manager-system
+data:
+  serverIP: 10.96.101.1/12
+  serverPort: 1234
+  serverEnabled: false
+---
+apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+kind: Installer
+metadata:
+  name: installer-sample
+  namespace: netop-manager-system
+spec:
+  config:
+    networkFunctions:
+      cko-sm:
+        type: cko-sm-smm
+        version: "0.1"
+        options:
+          meshType: Cisco-SMM
+          clusterName: primary
+          networkName: network1
+          meshName: mesh1
+      cko-cni:
+        type: cko-cni-cilium
+        version: '1.11.2'
+      cko-monitoring:
+        version: '0.1'
+        type: cko-m-prometheus
+        options:
+          prometheus-config: YXBpVmVyc2lvbjogdjEKa2luZDogTmFtZXNwYWNlCm1ldGFkYXRhOgogIG5hbWU6IG1vbml0b3JpbmcKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cwpydWxlczoKLSBhcGlHcm91cHM6IFsiIl0KICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbm9kZXMvcHJveHkKICAtIHNlcnZpY2VzCiAgLSBlbmRwb2ludHMKICAtIHBvZHMKICB2ZXJiczogWyJnZXQiLCAibGlzdCIsICJ3YXRjaCJdCi0gYXBpR3JvdXBzOgogIC0gZXh0ZW5zaW9ucwogIHJlc291cmNlczoKICAtIGluZ3Jlc3NlcwogIHZlcmJzOiBbImdldCIsICJsaXN0IiwgIndhdGNoIl0KLSBub25SZXNvdXJjZVVSTHM6IFsiL21ldHJpY3MiXQogIHZlcmJzOiBbImdldCJdCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IHByb21ldGhldXMKc3ViamVjdHM6Ci0ga2luZDogU2VydmljZUFjY291bnQKICBuYW1lOiBkZWZhdWx0CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCi0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIGxhYmVsczoKICAgIG5hbWU6IHByb21ldGhldXMtc2VydmVyLWNvbmYKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKZGF0YToKICBwcm9tZXRoZXVzLnJ1bGVzOiB8LQogICAgZ3JvdXBzOgogICAgLSBuYW1lOiBkZXZvcHNjdWJlIGRlbW8gYWxlcnQKICAgICAgcnVsZXM6CiAgICAgIC0gYWxlcnQ6IEhpZ2ggUG9kIE1lbW9yeQogICAgICAgIGV4cHI6IHN1bShjb250YWluZXJfbWVtb3J5X3VzYWdlX2J5dGVzKSA+IDEKICAgICAgICBmb3I6IDFtCiAgICAgICAgbGFiZWxzOgogICAgICAgICAgc2V2ZXJpdHk6IHNsYWNrCiAgICAgICAgYW5ub3RhdGlvbnM6CiAgICAgICAgICBzdW1tYXJ5OiBIaWdoIE1lbW9yeSBVc2FnZQogIHByb21ldGhldXMueW1sOiB8LQogICAgZ2xvYmFsOgogICAgICBzY3JhcGVfaW50ZXJ2YWw6IDVzCiAgICAgIGV2YWx1YXRpb25faW50ZXJ2YWw6IDVzCiAgICAgIGV4dGVybmFsX2xhYmVsczoKICAgICAgICBjbHVzdGVyOiBjaWxpdW10ZXN0CiAgICBydWxlX2ZpbGVzOgogICAgICAtIC9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnJ1bGVzCiAgICBhbGVydGluZzoKICAgICAgYWxlcnRtYW5hZ2VyczoKICAgICAgLSBzY2hlbWU6IGh0dHAKICAgICAgICBzdGF0aWNfY29uZmlnczoKICAgICAgICAtIHRhcmdldHM6CiAgICAgICAgICAtICJhbGVydG1hbmFnZXIubW9uaXRvcmluZy5zdmM6OTA5MyIKICAgIHJlbW90ZV93cml0ZToKICAgICAgLSB1cmw6IGh0dHA6Ly8xLjEuMS4xOjEwMDAwL2FwaS92MS9yZWNlaXZlCiAgICAgICAgcHJveHlfdXJsOiAKCiAgICBzY3JhcGVfY29uZmlnczoKICAgICAgLSBqb2JfbmFtZTogJ25vZGUtZXhwb3J0ZXInCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgICAgLSByb2xlOiBlbmRwb2ludHMKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfZW5kcG9pbnRzX25hbWVdCiAgICAgICAgICByZWdleDogJ25vZGUtZXhwb3J0ZXInCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLWFwaXNlcnZlcnMnCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwogICAgICAgIHNjaGVtZTogaHR0cHMKCiAgICAgICAgdGxzX2NvbmZpZzoKICAgICAgICAgIGNhX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9jYS5jcnQKICAgICAgICBiZWFyZXJfdG9rZW5fZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3Rva2VuCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2UsIF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbmFtZSwgX19tZXRhX2t1YmVybmV0ZXNfZW5kcG9pbnRfcG9ydF9uYW1lXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogZGVmYXVsdDtrdWJlcm5ldGVzO2h0dHBzCgogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1ub2RlcycKCiAgICAgICAgc2NoZW1lOiBodHRwcwoKICAgICAgICB0bHNfY29uZmlnOgogICAgICAgICAgY2FfZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L2NhLmNydAogICAgICAgIGJlYXJlcl90b2tlbl9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvdG9rZW4KCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogbm9kZQoKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBhY3Rpb246IGxhYmVsbWFwCiAgICAgICAgICByZWdleDogX19tZXRhX2t1YmVybmV0ZXNfbm9kZV9sYWJlbF8oLispCiAgICAgICAgLSB0YXJnZXRfbGFiZWw6IF9fYWRkcmVzc19fCiAgICAgICAgICByZXBsYWNlbWVudDoga3ViZXJuZXRlcy5kZWZhdWx0LnN2Yzo0NDMKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19ub2RlX25hbWVdCiAgICAgICAgICByZWdleDogKC4rKQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX21ldHJpY3NfcGF0aF9fCiAgICAgICAgICByZXBsYWNlbWVudDogL2FwaS92MS9ub2Rlcy8kezF9L3Byb3h5L21ldHJpY3MgICAgIAogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtcG9kcycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogcG9kCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3NjcmFwZV0KICAgICAgICAgIGFjdGlvbjoga2VlcAogICAgICAgICAgcmVnZXg6IHRydWUKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BhdGhdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX2FkZHJlc3NfXywgX19tZXRhX2t1YmVybmV0ZXNfcG9kX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19wb3J0XQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICByZWdleDogKFteOl0rKSg/OjpcZCspPzsoXGQrKQogICAgICAgICAgcmVwbGFjZW1lbnQ6ICQxOiQyCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fYWRkcmVzc19fCiAgICAgICAgLSBhY3Rpb246IGxhYmVsbWFwCiAgICAgICAgICByZWdleDogX19tZXRhX2t1YmVybmV0ZXNfcG9kX2xhYmVsXyguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2VdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lc3BhY2UKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfbmFtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX3BvZF9uYW1lCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZS1zdGF0ZS1tZXRyaWNzJwogICAgICAgIHN0YXRpY19jb25maWdzOgogICAgICAgICAgLSB0YXJnZXRzOiBbJ2t1YmUtc3RhdGUtbWV0cmljcy5rdWJlLXN5c3RlbS5zdmMuY2x1c3Rlci5sb2NhbDo4MDgwJ10KCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLWNhZHZpc29yJwoKICAgICAgICBzY2hlbWU6IGh0dHBzCgogICAgICAgIHRsc19jb25maWc6CiAgICAgICAgICBjYV9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvY2EuY3J0CiAgICAgICAgYmVhcmVyX3Rva2VuX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbgoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBub2RlCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19ub2RlX2xhYmVsXyguKykKICAgICAgICAtIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlcGxhY2VtZW50OiBrdWJlcm5ldGVzLmRlZmF1bHQuc3ZjOjQ0MwogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25vZGVfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlcGxhY2VtZW50OiAvYXBpL3YxL25vZGVzLyR7MX0vcHJveHkvbWV0cmljcy9jYWR2aXNvcgogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtc2VydmljZS1lbmRwb2ludHMnCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwoKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NyYXBlXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogdHJ1ZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3NjaGVtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX3NjaGVtZV9fCiAgICAgICAgICByZWdleDogKGh0dHBzPykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19wYXRoXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19hZGRyZXNzX18sIF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BvcnRdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlZ2V4OiAoW146XSspKD86OlxkKyk/OyhcZCspCiAgICAgICAgICByZXBsYWNlbWVudDogJDE6JDIKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2xhYmVsXyguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2VdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lc3BhY2UKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX25hbWVdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERlcGxveW1lbnQKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1kZXBsb3ltZW50CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCiAgbGFiZWxzOgogICAgYXBwOiBwcm9tZXRoZXVzLXNlcnZlcgpzcGVjOgogIHJlcGxpY2FzOiAxCiAgc2VsZWN0b3I6CiAgICBtYXRjaExhYmVsczoKICAgICAgYXBwOiBwcm9tZXRoZXVzLXNlcnZlcgogIHRlbXBsYXRlOgogICAgbWV0YWRhdGE6CiAgICAgIGxhYmVsczoKICAgICAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgICBzcGVjOgogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cwogICAgICAgICAgaW1hZ2U6IHF1YXkuaW8vcHJvbWV0aGV1cy9wcm9tZXRoZXVzCiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IElmTm90UHJlc2VudAogICAgICAgICAgYXJnczoKICAgICAgICAgICAgLSAiLS1jb25maWcuZmlsZT0vZXRjL3Byb21ldGhldXMvcHJvbWV0aGV1cy55bWwiCiAgICAgICAgICAgIC0gIi0tc3RvcmFnZS50c2RiLnBhdGg9L3Byb21ldGhldXMvIgogICAgICAgICAgcG9ydHM6CiAgICAgICAgICAgIC0gY29udGFpbmVyUG9ydDogOTA5MAogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IHByb21ldGhldXMtY29uZmlnLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL2V0Yy9wcm9tZXRoZXVzLwogICAgICAgICAgICAtIG5hbWU6IHByb21ldGhldXMtc3RvcmFnZS12b2x1bWUKICAgICAgICAgICAgICBtb3VudFBhdGg6IC9wcm9tZXRoZXVzLwogICAgICB2b2x1bWVzOgogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1jb25maWctdm9sdW1lCiAgICAgICAgICBjb25maWdNYXA6CiAgICAgICAgICAgIGRlZmF1bHRNb2RlOiA0MjAKICAgICAgICAgICAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIAogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1zdG9yYWdlLXZvbHVtZQogICAgICAgICAgZW1wdHlEaXI6IHt9Ci0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBTZXJ2aWNlCm1ldGFkYXRhOgogIG5hbWU6IHByb21ldGhldXMtc2VydmljZQogIG5hbWVzcGFjZTogbW9uaXRvcmluZwogIGFubm90YXRpb25zOgogICAgICBwcm9tZXRoZXVzLmlvL3NjcmFwZTogJ3RydWUnCiAgICAgIHByb21ldGhldXMuaW8vcG9ydDogICAnOTA5MCcKICAKc3BlYzoKICBzZWxlY3RvcjogCiAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgdHlwZTogTm9kZVBvcnQgIAogIHBvcnRzOgogICAgLSBwb3J0OiA4MDgwCiAgICAgIHRhcmdldFBvcnQ6IDkwOTAgCiAgICAgIG5vZGVQb3J0OiAzMDAwMAo=

@@ -1,5 +1,5 @@
 aci_config:
-  system_id: acitest
+  system_id: ciliumtest
 
 service_mesh_config:
   enable: True

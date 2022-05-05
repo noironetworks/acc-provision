@@ -3,6 +3,7 @@ kind: Installer
 metadata:
   name: installer-sample
   namespace: netop-manager-system
+{% if config.service_mesh_config.enable or config.monitoring_config.enable %}
 spec:
   config:
     networkFunctions:
@@ -21,5 +22,6 @@ spec:
         version: '0.1'
         type: cko-m-prometheus
         options:
-          prometheus-config: {{ config.calico_config.base64_encoded_prometheus_spec }}
+          prometheus-config: {{ config.monitoring_config.base64_encoded_prometheus_spec }}
       {% endif %}
+{% endif %}

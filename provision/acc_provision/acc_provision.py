@@ -390,6 +390,30 @@ def validate_subnet(subnet):
         else:
             return subnet
 
+def config_adjust_cilium_unmanaged(args, config):
+    install_sm = config["service_mesh_config"]["enable"]
+    install_monitoring = config["monitoring_config"]["enable"]
+    token = str(uuid.uuid4())
+    adj_config = {
+        "service_mesh_config": {
+            "enable": install_sm,
+        },
+        "monitoring_config": {
+            "enable": install_monitoring,
+        },
+        "registry": {
+            "configuration_version": token,
+        }
+    }
+    if config["service_mesh_config"].get("enable"):
+        adj_config["service_mesh_config"]["mesh_type"] = "Cisco-SMM"
+        adj_config["service_mesh_config"]["mesh_mode"] = "primary"
+        adj_config["service_mesh_config"]["version"] = "v1.8.1"
+        adj_config["service_mesh_config"]["network_name"] = "network1"
+        adj_config["service_mesh_config"]["mesh_name"] = "mesh1"
+        adj_config["service_mesh_config"]["cluster_name"] = "primary"
+        adj_config["service_mesh_config"]["remote_ctrl_plane"] = ""
+    return adj_config
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
@@ -884,6 +908,11 @@ def config_validate(flavor_opts, config):
             "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                       required),
         }
+        if config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+            del checks["aci_config/apic_host"]
+            del checks["aci_config/vrf/tenant"]
+            del checks["aci_config/vrf/name"]
+            del checks["net_config/pod_subnet"]
     else:
         checks = {
             "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
@@ -916,6 +945,11 @@ def config_validate(flavor_opts, config):
                                           required),
              "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                                 required),
+        }
+    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+        extra_checks = {
+            "aci_config/system_id": (get(("aci_config", "system_id")),
+                                     lambda x: required(x) and isname(x, 32)),
         }
     else:
         extra_checks = {
@@ -1331,8 +1365,14 @@ def generate_cko_cilium_yaml(config, network_operator_output):
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
 
+        prometheus_template = get_jinja_template('prometheus-config.yaml')
+        prometheus_output = prometheus_template.render(config=config)
+
         network_operator_CR_template = get_jinja_template('network-manager-cilium.yaml')
-        network_operator_CR_output = network_operator_CR_template.render(config=config)
+        base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        netopConfig = dict(config)
+        netopConfig["monitoring_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
+        network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 
         print("writing the deployment file")
@@ -1346,7 +1386,13 @@ def generate_cko_unmanaged_yaml(config, network_operator_output):
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
 
+        prometheus_template = get_jinja_template('prometheus-config.yaml')
+        prometheus_output = prometheus_template.render(config=config)
+
         network_operator_CR_template = get_jinja_template('network-manager-unmanaged.yaml')
+        base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        netopConfig = dict(config)
+        netopConfig["monitoring_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
         network_operator_CR_output = network_operator_CR_template.render(config=config)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 
@@ -1671,20 +1717,21 @@ def get_versions(versions_url):
 
 def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
-    if config["flavor"] != "cko-calico":
-        subnet_info = {
-            "pod_subnet": config["net_config"]["pod_subnet"],
-            "node_subnet": config["net_config"]["node_subnet"],
-            "extern_dynamic": config["net_config"]["extern_dynamic"],
-            "node_svc_subnet": config["net_config"]["node_svc_subnet"]
-        }
-    else:
-        # node_svc_subnet is ignored in "cko-calico" and "calico" flavor
+    if config["flavor"] == "cko-calico":
         subnet_info = {
             "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
+        }
+    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+        subnet_info = {}
+    else:
+        subnet_info = {
+            "pod_subnet": config["net_config"]["pod_subnet"],
+            "node_subnet": config["net_config"]["node_subnet"],
+            "extern_dynamic": config["net_config"]["extern_dynamic"],
+            "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
 
     # Don't have extern_static field set for calico flavors
@@ -1854,6 +1901,7 @@ def provision(args, apic_file, no_random):
         print("%s") % ex
 
     # Verify if overlapping subnet present in config input file
+    #if flavor != "cko-cilium":
     if not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
@@ -1865,8 +1913,12 @@ def provision(args, apic_file, no_random):
             return False
 
     # Adjust config based on convention/apic data
-    adj_config = config_adjust(args, config, prov_apic, no_random)
-    deep_merge(config, adj_config)
+    if flavor == "cko-cilium" or flavor == "cko-unmanaged":
+        adj_config = config_adjust_cilium_unmanaged(args, config)
+        deep_merge(config, adj_config)
+    else:
+        adj_config = config_adjust(args, config, prov_apic, no_random)
+        deep_merge(config, adj_config)
 
     # Advisory checks, including apic checks, ignore failures
     if not config_validate_preexisting(config, prov_apic):
@@ -1874,26 +1926,27 @@ def provision(args, apic_file, no_random):
         pass
 
     # generate key and cert if needed
-    username = config["aci_config"]["sync_login"]["username"]
-    certfile = config["aci_config"]["sync_login"]["certfile"]
-    keyfile = config["aci_config"]["sync_login"]["keyfile"]
-    key_data, cert_data = None, None
-    reused = True
-    if generate_cert_data:
-        if not exists(certfile) or not exists(keyfile):
-            if flavor == "cko-calico" or flavor == "cko-aci":
-                info("Generating certs for network-operator")
+    if flavor != "cko-cilium" and flavor != "cko-unmanaged":
+        username = config["aci_config"]["sync_login"]["username"]
+        certfile = config["aci_config"]["sync_login"]["certfile"]
+        keyfile = config["aci_config"]["sync_login"]["keyfile"]
+        key_data, cert_data = None, None
+        reused = True
+        if generate_cert_data:
+            if not exists(certfile) or not exists(keyfile):
+                if flavor == "cko-calico" or flavor == "cko-aci":
+                    info("Generating certs for network-operator")
+                else:
+                    info("Generating certs for kubernetes controller")
             else:
-                info("Generating certs for kubernetes controller")
-        else:
-            if flavor == "cko-calico" or flavor == "cko-aci":
-                info("Reusing existing certs for network-operator")
-            else:
-                info("Reusing existing certs for kubernetes controller")
-        key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
-    config["aci_config"]["sync_login"]["key_data"] = key_data
-    config["aci_config"]["sync_login"]["cert_data"] = cert_data
-    config["aci_config"]["sync_login"]["cert_reused"] = reused
+                if flavor == "cko-calico" or flavor == "cko-aci":
+                    info("Reusing existing certs for network-operator")
+                else:
+                    info("Reusing existing certs for kubernetes controller")
+            key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
+        config["aci_config"]["sync_login"]["key_data"] = key_data
+        config["aci_config"]["sync_login"]["cert_data"] = cert_data
+        config["aci_config"]["sync_login"]["cert_reused"] = reused
 
     # generate cko network operator output file
     if flavor == "cko-calico":
@@ -1919,6 +1972,28 @@ def provision(args, apic_file, no_random):
 
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
+
+    if flavor == "cko-cilium":
+        print("using flavor cko-cilium")
+        gen = flavor_opts.get("template_generator", generate_cko_cilium_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+    #if flavor == "cko-cilium":
+        return True
+
+    if flavor == "cko-unmanaged":
+        print("using flavor cko-unmanaged")
+        gen = flavor_opts.get("template_generator", generate_cko_unmanaged_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+    #if flavor == "cko-unmanaged":
+        return True
 
     if flavor == "calico":
         print("using flavor calico")

@@ -537,7 +537,7 @@ def test_flavor_cko_cilium():
         "flavor_cko_cilium.kube.yaml",
         None,
         None,
-        "flavor_cko_cilium.apic.txt",
+        None,
         overrides={"flavor": "cko-cilium"}
     )
 
@@ -549,8 +549,8 @@ def test_flavor_cko_unmanaged():
         "flavor_cko_unmanaged.kube.yaml",
         None,
         None,
-        "flavor_cko_unmanaged.apic.txt",
-        overrides={"flavor": "cko-v"}
+        None,
+        overrides={"flavor": "cko-unmanaged"}
     )
 
 
