@@ -198,7 +198,6 @@ def config_default():
             "snat_operator": {
                 "name": "snat-operator",
                 "watch_namespace": "",
-                "globalinfo_name": "snatglobalinfo",
                 "rdconfig_name": "routingdomain-config",
                 "port_range": {
                     "start": 5000,
