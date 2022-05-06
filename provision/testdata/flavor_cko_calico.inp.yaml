@@ -40,22 +40,24 @@ calico_config:
     racks:
       - [2.100.101.201, 2.100.101.202]
 
-service_mesh_config:
+service_mesh_config: #This section should be present at all times.
   enable: True
 
-metallb_config:
+lb_config: #This section should be present at all times.
   enable: True
+  lb_type: metallb # only for calico
+  
+monitoring_config: #This section should be present at all times.
+  enable: True
+  monitoring_type: prometheus
+  remote_write_ip: 3.237.37.136 #This value is derived from the configmap
+  remote_write_port: 32307 #This value is derived from the configmap
 
-monitoring_config:
+cko_proxy_config: #This section should be present at all times.
   enable: True
-  remote_write_ip: 1.1.1.1
-  remote_write_port: 10000
-
-cko_proxy_config:
-  enable: True
-  http: http://proxy.esl.cisco.com:80
-  https: http://proxy.esl.cisco.com:80
-  #no_proxy:
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
 
 cko_git_config:
   git_repo: "github.com/networkoperator/demo-clusters.git"

@@ -185,6 +185,12 @@ spec:
                     additionalProperties:
                       description: Individual CNI Configs
                       properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
                         cniConfig:
                           type: object
                         lbConfig:
@@ -264,57 +270,6 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: loadbalanacerops.lb-manager.netop-manager.io
-spec:
-  group: lb-manager.netop-manager.io
-  names:
-    kind: LoadBalanacerOps
-    listKind: LoadBalanacerOpsList
-    plural: loadbalanacerops
-    singular: loadbalanacerops
-  scope: Namespaced
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: LoadBalanacerOps is the Schema for the loadbalanacerops API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: LoadBalanacerOpsSpec defines the desired state of LoadBalanacerOps
-            properties:
-              foo:
-                description: Foo is an example field of LoadBalanacerOps. Edit loadbalanacerops_types.go to remove/update
-                type: string
-            type: object
-          status:
-            description: LoadBalanacerOpsStatus defines the observed state of LoadBalanacerOps
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
-  creationTimestamp: null
   name: loadbalanaceropsstatuses.lb-manager.netop-manager.io
 spec:
   group: lb-manager.netop-manager.io
@@ -366,6 +321,74 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
+  name: loadbalancerops.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalancerOps
+    listKind: LoadBalancerOpsList
+    plural: loadbalancerops
+    singular: loadbalancerops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalancerOps is the Schema for the loadbalancerops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalancerOpsSpec defines the desired state of LoadBalancerOps
+            properties:
+              externalCIDRs:
+                description: CIDR pools managed by this loadbalancer
+                items:
+                  type: string
+                type: array
+              lBType:
+                description: 'Load balancer flavor: Only MetalLB as of now'
+                type: string
+            type: object
+          status:
+            description: LoadBalancerOpsStatus defines the observed state of LoadBalancerOps
+            properties:
+              externalCIDRs:
+                description: CIDR pools managed by this loadbalancer
+                items:
+                  type: string
+                type: array
+              lBType:
+                description: 'Load balancer flavor: Only MetalLB as of now'
+                type: string
+              state:
+                description: Provisioningstatus - Started/Progressing/Complete/Degraded
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
   name: monitoringops.monitoring-manager.netop-manager.io
 spec:
   group: monitoring-manager.netop-manager.io
@@ -392,12 +415,42 @@ spec:
           spec:
             description: MonitoringOpsSpec defines the desired state of MonitoringOps
             properties:
-              foo:
-                description: Foo is an example field of MonitoringOps. Edit monitoringops_types.go to remove/update
-                type: string
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
             type: object
           status:
             description: MonitoringOpsStatus defines the observed state of MonitoringOps
+            properties:
+              mStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              mType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
             type: object
         type: object
     served: true
@@ -707,6 +760,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -755,32 +809,6 @@ rules:
 - apiGroups:
   - lb-manager.netop-manager.io
   resources:
-  - loadbalanacerops
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
-  - loadbalanacerops/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
-  - loadbalanacerops/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
   - loadbalanaceropsstatuses
   verbs:
   - create
@@ -805,12 +833,40 @@ rules:
   - patch
   - update
 - apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - monitoring-manager.netop-manager.io
   resources:
   - monitoringops
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -863,6 +919,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -1197,6 +1254,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -1401,6 +1459,14 @@ spec:
               fieldPath: metadata.namespace
         - name: SYSTEM_ID
           value: {{config.aci_config.system_id}}
+        {% if config.cko_proxy_config.enable %}
+        - name: HTTP_PROXY
+          value: {{config.cko_proxy_config.http_proxy}}
+        - name: HTTPS_PROXY
+          value: {{config.cko_proxy_config.https_proxy}}
+        - name: NO_PROXY
+          value: {{config.cko_proxy_config.no_proxy}}
+        {% endif %}
         - name: SERVER_IP
           valueFrom:
             configMapKeyRef:
@@ -1497,13 +1563,13 @@ data:
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
       resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
-      gitrepo={{ config.cko_git_config.git_repo }}
-      gitdir={{ config.cko_git_config.git_dir }}
-      gitbranch={{ config.cko_git_config.git_branch }}
-      gittoken={{ config.cko_git_config.git_token }}
-      gituser={{ config.cko_git_config.git_user }}
-      gitemail={{ config.cko_git_config.git_email }}
-      sleepduration={{ config.cko_git_config.sleep_duration }}
+      gitrepo="{{ config.cko_git_config.git_repo }}"
+      gitdir="{{ config.cko_git_config.git_dir }}"
+      gitbranch="{{ config.cko_git_config.git_branch }}"
+      gittoken="{{ config.cko_git_config.git_token }}"
+      gituser="{{ config.cko_git_config.git_user }}"
+      gitemail="{{ config.cko_git_config.git_email }}"
+      sleepduration={{ config.cko_git_config.sleep_duration }}s
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -209,7 +209,7 @@ def config_default():
         "service_mesh_config": {
             "enable": False,
         },
-        "metallb_config": {
+        "lb_config": {
             "enable": False,
         },
         "monitoring_config": {
@@ -396,7 +396,7 @@ def validate_subnet(subnet):
 def config_adjust_cilium_unmanaged(args, config):
     install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
-    install_metallb = config["metallb_config"]["enable"]
+    install_lb = config["lb_config"]["enable"]
     token = str(uuid.uuid4())
     adj_config = {
         "service_mesh_config": {
@@ -405,8 +405,8 @@ def config_adjust_cilium_unmanaged(args, config):
         "monitoring_config": {
             "enable": install_monitoring,
         },
-        "metallb_config": {
-            "enable": install_metallb,
+        "lb_config": {
+            "enable": install_lb,
         },
         "registry": {
             "configuration_version": token,
@@ -441,7 +441,7 @@ def config_adjust(args, config, prov_apic, no_random):
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
-    install_metallb = config["metallb_config"]["enable"]
+    install_lb = config["lb_config"]["enable"]
     l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
@@ -610,8 +610,8 @@ def config_adjust(args, config, prov_apic, no_random):
         "monitoring_config": {
             "enable": install_monitoring,
         },
-        "metallb_config": {
-            "enable": install_metallb,
+        "lb_config": {
+            "enable": install_lb,
         },
         "registry": {
             "configuration_version": token,
@@ -1296,6 +1296,8 @@ def generate_cko_calico_yaml(config, network_operator_output):
 
         prometheus_template = get_jinja_template('prometheus-config.yaml')
         prometheus_output = prometheus_template.render(config=config)
+        node_exporter_template = get_jinja_template('node-exporter-config.yaml')
+        node_exporter_output = node_exporter_template.render(config=config)
 
         # Render calico bgp peer CR from calico_bgp_peer_template template and add it to calico_net_op_template
         # It has to be rendered in a nested loop
@@ -1324,6 +1326,7 @@ def generate_cko_calico_yaml(config, network_operator_output):
         base64_encoded_calicoctl_spec = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
         # Encode the prometheus spec to base64
         base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        base64_encoded_node_exporter_spec = base64.b64encode(node_exporter_output.encode('ascii')).decode('ascii')
 
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
@@ -1335,6 +1338,7 @@ def generate_cko_calico_yaml(config, network_operator_output):
         netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_calico_bgp_spec
         netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_calicoctl_spec
         netopConfig["calico_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
+        netopConfig["calico_config"]["base64_encoded_node_exporter_spec"] = base64_encoded_node_exporter_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
 
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
@@ -1350,6 +1354,8 @@ def generate_cko_aci_yaml(config, network_operator_output):
 
         prometheus_template = get_jinja_template('prometheus-config.yaml')
         prometheus_output = prometheus_template.render(config=config)
+        node_exporter_template = get_jinja_template('node-exporter-config.yaml')
+        node_exporter_output = node_exporter_template.render(config=config)
 
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
@@ -1359,9 +1365,11 @@ def generate_cko_aci_yaml(config, network_operator_output):
         network_operator_CR_template = get_jinja_template('network-manager-aci.yaml')
         base64_encoded_cko_aci_spec = base64.b64encode(aci_cni_output.encode('ascii')).decode('ascii')
         base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        base64_encoded_node_exporter_spec = base64.b64encode(node_exporter_output.encode('ascii')).decode('ascii')
         netopConfig = dict(config)
         netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
         netopConfig["aci_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
+        netopConfig["aci_config"]["base64_encoded_node_exporter_spec"] = base64_encoded_node_exporter_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 
@@ -1378,11 +1386,15 @@ def generate_cko_cilium_yaml(config, network_operator_output):
 
         prometheus_template = get_jinja_template('prometheus-config.yaml')
         prometheus_output = prometheus_template.render(config=config)
+        node_exporter_template = get_jinja_template('node-exporter-config.yaml')
+        node_exporter_output = node_exporter_template.render(config=config)
 
         network_operator_CR_template = get_jinja_template('network-manager-cilium.yaml')
         base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        base64_encoded_node_exporter_spec = base64.b64encode(node_exporter_output.encode('ascii')).decode('ascii')
         netopConfig = dict(config)
         netopConfig["monitoring_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
+        netopConfig["monitoring_config"]["base64_encoded_node_exporter_spec"] = base64_encoded_node_exporter_spec
         network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 
@@ -1399,11 +1411,15 @@ def generate_cko_unmanaged_yaml(config, network_operator_output):
 
         prometheus_template = get_jinja_template('prometheus-config.yaml')
         prometheus_output = prometheus_template.render(config=config)
+        node_exporter_template = get_jinja_template('node-exporter-config.yaml')
+        node_exporter_output = node_exporter_template.render(config=config)
 
         network_operator_CR_template = get_jinja_template('network-manager-unmanaged.yaml')
         base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
+        base64_encoded_node_exporter_spec = base64.b64encode(node_exporter_output.encode('ascii')).decode('ascii')
         netopConfig = dict(config)
         netopConfig["monitoring_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
+        netopConfig["monitoring_config"]["base64_encoded_node_exporter_spec"] = base64_encoded_node_exporter_spec
         network_operator_CR_output = network_operator_CR_template.render(config=config)
         network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 

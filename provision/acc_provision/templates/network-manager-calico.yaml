@@ -16,7 +16,7 @@ spec:
           networkName: {{ config.service_mesh_config.network_name }}
           meshName: {{ config.service_mesh_config.mesh_name }}
       {% endif %}
-      {% if config.metallb_config.enable %}
+      {% if config.lb_config.enable %}
       cko-lb:
         type: "cko-lb-metallb"
         version: "0.1"
@@ -40,4 +40,5 @@ spec:
         type: cko-m-prometheus
         options:
           prometheus-config: {{ config.calico_config.base64_encoded_prometheus_spec }}
+          prometheus-node-exporter: {{ config.calico_config.base64_encoded_node_exporter_spec }}
       {% endif %}

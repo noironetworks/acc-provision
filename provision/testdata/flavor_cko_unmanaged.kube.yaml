@@ -185,6 +185,12 @@ spec:
                     additionalProperties:
                       description: Individual CNI Configs
                       properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
                         cniConfig:
                           type: object
                         lbConfig:
@@ -264,57 +270,6 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: loadbalanacerops.lb-manager.netop-manager.io
-spec:
-  group: lb-manager.netop-manager.io
-  names:
-    kind: LoadBalanacerOps
-    listKind: LoadBalanacerOpsList
-    plural: loadbalanacerops
-    singular: loadbalanacerops
-  scope: Namespaced
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: LoadBalanacerOps is the Schema for the loadbalanacerops API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: LoadBalanacerOpsSpec defines the desired state of LoadBalanacerOps
-            properties:
-              foo:
-                description: Foo is an example field of LoadBalanacerOps. Edit loadbalanacerops_types.go to remove/update
-                type: string
-            type: object
-          status:
-            description: LoadBalanacerOpsStatus defines the observed state of LoadBalanacerOps
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
-  creationTimestamp: null
   name: loadbalanaceropsstatuses.lb-manager.netop-manager.io
 spec:
   group: lb-manager.netop-manager.io
@@ -366,6 +321,74 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
+  name: loadbalancerops.lb-manager.netop-manager.io
+spec:
+  group: lb-manager.netop-manager.io
+  names:
+    kind: LoadBalancerOps
+    listKind: LoadBalancerOpsList
+    plural: loadbalancerops
+    singular: loadbalancerops
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalancerOps is the Schema for the loadbalancerops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalancerOpsSpec defines the desired state of LoadBalancerOps
+            properties:
+              externalCIDRs:
+                description: CIDR pools managed by this loadbalancer
+                items:
+                  type: string
+                type: array
+              lBType:
+                description: 'Load balancer flavor: Only MetalLB as of now'
+                type: string
+            type: object
+          status:
+            description: LoadBalancerOpsStatus defines the observed state of LoadBalancerOps
+            properties:
+              externalCIDRs:
+                description: CIDR pools managed by this loadbalancer
+                items:
+                  type: string
+                type: array
+              lBType:
+                description: 'Load balancer flavor: Only MetalLB as of now'
+                type: string
+              state:
+                description: Provisioningstatus - Started/Progressing/Complete/Degraded
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
   name: monitoringops.monitoring-manager.netop-manager.io
 spec:
   group: monitoring-manager.netop-manager.io
@@ -392,12 +415,42 @@ spec:
           spec:
             description: MonitoringOpsSpec defines the desired state of MonitoringOps
             properties:
-              foo:
-                description: Foo is an example field of MonitoringOps. Edit monitoringops_types.go to remove/update
-                type: string
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
             type: object
           status:
             description: MonitoringOpsStatus defines the observed state of MonitoringOps
+            properties:
+              mStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              mType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
             type: object
         type: object
     served: true
@@ -707,6 +760,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -755,32 +809,6 @@ rules:
 - apiGroups:
   - lb-manager.netop-manager.io
   resources:
-  - loadbalanacerops
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
-  - loadbalanacerops/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
-  - loadbalanacerops/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - lb-manager.netop-manager.io
-  resources:
   - loadbalanaceropsstatuses
   verbs:
   - create
@@ -805,12 +833,40 @@ rules:
   - patch
   - update
 - apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lb-manager.netop-manager.io
+  resources:
+  - loadbalancerops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - monitoring-manager.netop-manager.io
   resources:
   - monitoringops
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -863,6 +919,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -1197,6 +1254,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -1401,6 +1459,12 @@ spec:
               fieldPath: metadata.namespace
         - name: SYSTEM_ID
           value: unmanagedtest
+        - name: HTTP_PROXY
+          value: http://proxy.esl.cisco.com:80
+        - name: HTTPS_PROXY
+          value: http://proxy.esl.cisco.com:80
+        - name: NO_PROXY
+          value: 10.96.0.1
         - name: SERVER_IP
           valueFrom:
             configMapKeyRef:
@@ -1497,13 +1561,13 @@ data:
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
       resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
-      gitrepo=github.com/networkoperator/demo-clusters.git
-      gitdir=demo-cluster
-      gitbranch=test
-      gittoken=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
-      gituser=networkoperator-gittest
-      gitemail=test@cisco.com
-      sleepduration=5
+      gitrepo="github.com/networkoperator/demo-clusters.git"
+      gitdir="demo-cluster"
+      gitbranch="test"
+      gittoken="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"
+      gituser="networkoperator-gittest"
+      gitemail="test@cisco.com"
+      sleepduration=5s
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1531,16 +1595,9 @@ spec:
           clusterName: primary
           networkName: network1
           meshName: mesh1
-      cko-lb:
-        type: "cko-lb-metallb"
-        version: "0.1"
-        options:
-          lBType: MetalLB
-        arrayOptions:
-          externalCIDRs:
-          - "None"
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus
         options:
-          prometheus-config: YXBpVmVyc2lvbjogdjEKa2luZDogTmFtZXNwYWNlCm1ldGFkYXRhOgogIG5hbWU6IG1vbml0b3JpbmcKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cwpydWxlczoKLSBhcGlHcm91cHM6IFsiIl0KICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbm9kZXMvcHJveHkKICAtIHNlcnZpY2VzCiAgLSBlbmRwb2ludHMKICAtIHBvZHMKICB2ZXJiczogWyJnZXQiLCAibGlzdCIsICJ3YXRjaCJdCi0gYXBpR3JvdXBzOgogIC0gZXh0ZW5zaW9ucwogIHJlc291cmNlczoKICAtIGluZ3Jlc3NlcwogIHZlcmJzOiBbImdldCIsICJsaXN0IiwgIndhdGNoIl0KLSBub25SZXNvdXJjZVVSTHM6IFsiL21ldHJpY3MiXQogIHZlcmJzOiBbImdldCJdCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IHByb21ldGhldXMKc3ViamVjdHM6Ci0ga2luZDogU2VydmljZUFjY291bnQKICBuYW1lOiBkZWZhdWx0CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCi0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIGxhYmVsczoKICAgIG5hbWU6IHByb21ldGhldXMtc2VydmVyLWNvbmYKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKZGF0YToKICBwcm9tZXRoZXVzLnJ1bGVzOiB8LQogICAgZ3JvdXBzOgogICAgLSBuYW1lOiBkZXZvcHNjdWJlIGRlbW8gYWxlcnQKICAgICAgcnVsZXM6CiAgICAgIC0gYWxlcnQ6IEhpZ2ggUG9kIE1lbW9yeQogICAgICAgIGV4cHI6IHN1bShjb250YWluZXJfbWVtb3J5X3VzYWdlX2J5dGVzKSA+IDEKICAgICAgICBmb3I6IDFtCiAgICAgICAgbGFiZWxzOgogICAgICAgICAgc2V2ZXJpdHk6IHNsYWNrCiAgICAgICAgYW5ub3RhdGlvbnM6CiAgICAgICAgICBzdW1tYXJ5OiBIaWdoIE1lbW9yeSBVc2FnZQogIHByb21ldGhldXMueW1sOiB8LQogICAgZ2xvYmFsOgogICAgICBzY3JhcGVfaW50ZXJ2YWw6IDVzCiAgICAgIGV2YWx1YXRpb25faW50ZXJ2YWw6IDVzCiAgICAgIGV4dGVybmFsX2xhYmVsczoKICAgICAgICBjbHVzdGVyOiB1bm1hbmFnZWR0ZXN0CiAgICBydWxlX2ZpbGVzOgogICAgICAtIC9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnJ1bGVzCiAgICBhbGVydGluZzoKICAgICAgYWxlcnRtYW5hZ2VyczoKICAgICAgLSBzY2hlbWU6IGh0dHAKICAgICAgICBzdGF0aWNfY29uZmlnczoKICAgICAgICAtIHRhcmdldHM6CiAgICAgICAgICAtICJhbGVydG1hbmFnZXIubW9uaXRvcmluZy5zdmM6OTA5MyIKICAgIHJlbW90ZV93cml0ZToKICAgICAgLSB1cmw6IGh0dHA6Ly8xLjEuMS4xOjEwMDAwL2FwaS92MS9yZWNlaXZlCiAgICAgICAgcHJveHlfdXJsOiAKCiAgICBzY3JhcGVfY29uZmlnczoKICAgICAgLSBqb2JfbmFtZTogJ25vZGUtZXhwb3J0ZXInCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgICAgLSByb2xlOiBlbmRwb2ludHMKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfZW5kcG9pbnRzX25hbWVdCiAgICAgICAgICByZWdleDogJ25vZGUtZXhwb3J0ZXInCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLWFwaXNlcnZlcnMnCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwogICAgICAgIHNjaGVtZTogaHR0cHMKCiAgICAgICAgdGxzX2NvbmZpZzoKICAgICAgICAgIGNhX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9jYS5jcnQKICAgICAgICBiZWFyZXJfdG9rZW5fZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3Rva2VuCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2UsIF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbmFtZSwgX19tZXRhX2t1YmVybmV0ZXNfZW5kcG9pbnRfcG9ydF9uYW1lXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogZGVmYXVsdDtrdWJlcm5ldGVzO2h0dHBzCgogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1ub2RlcycKCiAgICAgICAgc2NoZW1lOiBodHRwcwoKICAgICAgICB0bHNfY29uZmlnOgogICAgICAgICAgY2FfZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L2NhLmNydAogICAgICAgIGJlYXJlcl90b2tlbl9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvdG9rZW4KCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogbm9kZQoKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBhY3Rpb246IGxhYmVsbWFwCiAgICAgICAgICByZWdleDogX19tZXRhX2t1YmVybmV0ZXNfbm9kZV9sYWJlbF8oLispCiAgICAgICAgLSB0YXJnZXRfbGFiZWw6IF9fYWRkcmVzc19fCiAgICAgICAgICByZXBsYWNlbWVudDoga3ViZXJuZXRlcy5kZWZhdWx0LnN2Yzo0NDMKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19ub2RlX25hbWVdCiAgICAgICAgICByZWdleDogKC4rKQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX21ldHJpY3NfcGF0aF9fCiAgICAgICAgICByZXBsYWNlbWVudDogL2FwaS92MS9ub2Rlcy8kezF9L3Byb3h5L21ldHJpY3MgICAgIAogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtcG9kcycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogcG9kCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3NjcmFwZV0KICAgICAgICAgIGFjdGlvbjoga2VlcAogICAgICAgICAgcmVnZXg6IHRydWUKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BhdGhdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX2FkZHJlc3NfXywgX19tZXRhX2t1YmVybmV0ZXNfcG9kX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19wb3J0XQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICByZWdleDogKFteOl0rKSg/OjpcZCspPzsoXGQrKQogICAgICAgICAgcmVwbGFjZW1lbnQ6ICQxOiQyCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fYWRkcmVzc19fCiAgICAgICAgLSBhY3Rpb246IGxhYmVsbWFwCiAgICAgICAgICByZWdleDogX19tZXRhX2t1YmVybmV0ZXNfcG9kX2xhYmVsXyguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2VdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lc3BhY2UKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19wb2RfbmFtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX3BvZF9uYW1lCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZS1zdGF0ZS1tZXRyaWNzJwogICAgICAgIHN0YXRpY19jb25maWdzOgogICAgICAgICAgLSB0YXJnZXRzOiBbJ2t1YmUtc3RhdGUtbWV0cmljcy5rdWJlLXN5c3RlbS5zdmMuY2x1c3Rlci5sb2NhbDo4MDgwJ10KCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLWNhZHZpc29yJwoKICAgICAgICBzY2hlbWU6IGh0dHBzCgogICAgICAgIHRsc19jb25maWc6CiAgICAgICAgICBjYV9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvY2EuY3J0CiAgICAgICAgYmVhcmVyX3Rva2VuX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbgoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBub2RlCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19ub2RlX2xhYmVsXyguKykKICAgICAgICAtIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlcGxhY2VtZW50OiBrdWJlcm5ldGVzLmRlZmF1bHQuc3ZjOjQ0MwogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25vZGVfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlcGxhY2VtZW50OiAvYXBpL3YxL25vZGVzLyR7MX0vcHJveHkvbWV0cmljcy9jYWR2aXNvcgogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtc2VydmljZS1lbmRwb2ludHMnCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwoKICAgICAgICByZWxhYmVsX2NvbmZpZ3M6CiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NyYXBlXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogdHJ1ZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3NjaGVtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX3NjaGVtZV9fCiAgICAgICAgICByZWdleDogKGh0dHBzPykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19wYXRoXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19hZGRyZXNzX18sIF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BvcnRdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlZ2V4OiAoW146XSspKD86OlxkKyk/OyhcZCspCiAgICAgICAgICByZXBsYWNlbWVudDogJDE6JDIKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2xhYmVsXyguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19uYW1lc3BhY2VdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lc3BhY2UKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX25hbWVdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDoga3ViZXJuZXRlc19uYW1lCi0tLQphcGlWZXJzaW9uOiBhcHBzL3YxCmtpbmQ6IERlcGxveW1lbnQKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1kZXBsb3ltZW50CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCiAgbGFiZWxzOgogICAgYXBwOiBwcm9tZXRoZXVzLXNlcnZlcgpzcGVjOgogIHJlcGxpY2FzOiAxCiAgc2VsZWN0b3I6CiAgICBtYXRjaExhYmVsczoKICAgICAgYXBwOiBwcm9tZXRoZXVzLXNlcnZlcgogIHRlbXBsYXRlOgogICAgbWV0YWRhdGE6CiAgICAgIGxhYmVsczoKICAgICAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgICBzcGVjOgogICAgICBjb250YWluZXJzOgogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cwogICAgICAgICAgaW1hZ2U6IHF1YXkuaW8vcHJvbWV0aGV1cy9wcm9tZXRoZXVzCiAgICAgICAgICBpbWFnZVB1bGxQb2xpY3k6IElmTm90UHJlc2VudAogICAgICAgICAgYXJnczoKICAgICAgICAgICAgLSAiLS1jb25maWcuZmlsZT0vZXRjL3Byb21ldGhldXMvcHJvbWV0aGV1cy55bWwiCiAgICAgICAgICAgIC0gIi0tc3RvcmFnZS50c2RiLnBhdGg9L3Byb21ldGhldXMvIgogICAgICAgICAgcG9ydHM6CiAgICAgICAgICAgIC0gY29udGFpbmVyUG9ydDogOTA5MAogICAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgICAgICAtIG5hbWU6IHByb21ldGhldXMtY29uZmlnLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL2V0Yy9wcm9tZXRoZXVzLwogICAgICAgICAgICAtIG5hbWU6IHByb21ldGhldXMtc3RvcmFnZS12b2x1bWUKICAgICAgICAgICAgICBtb3VudFBhdGg6IC9wcm9tZXRoZXVzLwogICAgICB2b2x1bWVzOgogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1jb25maWctdm9sdW1lCiAgICAgICAgICBjb25maWdNYXA6CiAgICAgICAgICAgIGRlZmF1bHRNb2RlOiA0MjAKICAgICAgICAgICAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIAogICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1zdG9yYWdlLXZvbHVtZQogICAgICAgICAgZW1wdHlEaXI6IHt9Ci0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBTZXJ2aWNlCm1ldGFkYXRhOgogIG5hbWU6IHByb21ldGhldXMtc2VydmljZQogIG5hbWVzcGFjZTogbW9uaXRvcmluZwogIGFubm90YXRpb25zOgogICAgICBwcm9tZXRoZXVzLmlvL3NjcmFwZTogJ3RydWUnCiAgICAgIHByb21ldGhldXMuaW8vcG9ydDogICAnOTA5MCcKICAKc3BlYzoKICBzZWxlY3RvcjogCiAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgdHlwZTogTm9kZVBvcnQgIAogIHBvcnRzOgogICAgLSBwb3J0OiA4MDgwCiAgICAgIHRhcmdldFBvcnQ6IDkwOTAgCiAgICAgIG5vZGVQb3J0OiAzMDAwMAo=
+          prometheus-config: YXBpVmVyc2lvbjogdjEKa2luZDogTmFtZXNwYWNlCm1ldGFkYXRhOgogIG5hbWU6IG1vbml0b3JpbmcKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cwpydWxlczoKLSBhcGlHcm91cHM6IFsiIl0KICByZXNvdXJjZXM6CiAgLSBub2RlcwogIC0gbm9kZXMvcHJveHkKICAtIHNlcnZpY2VzCiAgLSBlbmRwb2ludHMKICAtIHBvZHMKICB2ZXJiczogWyJnZXQiLCAibGlzdCIsICJ3YXRjaCJdCi0gYXBpR3JvdXBzOgogIC0gZXh0ZW5zaW9ucwogIHJlc291cmNlczoKICAtIGluZ3Jlc3NlcwogIHZlcmJzOiBbImdldCIsICJsaXN0IiwgIndhdGNoIl0KLSBub25SZXNvdXJjZVVSTHM6IFsiL21ldHJpY3MiXQogIHZlcmJzOiBbImdldCJdCi0tLQphcGlWZXJzaW9uOiByYmFjLmF1dGhvcml6YXRpb24uazhzLmlvL3YxCmtpbmQ6IENsdXN0ZXJSb2xlQmluZGluZwptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzCnJvbGVSZWY6CiAgYXBpR3JvdXA6IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8KICBraW5kOiBDbHVzdGVyUm9sZQogIG5hbWU6IHByb21ldGhldXMKc3ViamVjdHM6Ci0ga2luZDogU2VydmljZUFjY291bnQKICBuYW1lOiBkZWZhdWx0CiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCi0tLQphcGlWZXJzaW9uOiB2MQpraW5kOiBDb25maWdNYXAKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2ZXItY29uZgogIGxhYmVsczoKICAgIG5hbWU6IHByb21ldGhldXMtc2VydmVyLWNvbmYKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKZGF0YToKICBwcm9tZXRoZXVzLnltbDogfC0KICAgIGdsb2JhbDoKICAgICAgc2NyYXBlX2ludGVydmFsOiA1cwogICAgICBldmFsdWF0aW9uX2ludGVydmFsOiA1cwogICAgICBleHRlcm5hbF9sYWJlbHM6CiAgICAgICAgY2x1c3RlcjogdW5tYW5hZ2VkdGVzdAogICAgcmVtb3RlX3dyaXRlOgogICAgICAtIHVybDogaHR0cDovLzEuMS4xLjE6MTAwMDAvYXBpL3YxL3JlY2VpdmUKICAgICAgICBwcm94eV91cmw6IAoKICAgIHNjcmFwZV9jb25maWdzOgogICAgICAtIGpvYl9uYW1lOiAnbm9kZS1leHBvcnRlcicKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgICAtIHJvbGU6IGVuZHBvaW50cwogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19lbmRwb2ludHNfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAnbm9kZS1leHBvcnRlcicKICAgICAgICAgIGFjdGlvbjoga2VlcAogICAgICAKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtYXBpc2VydmVycycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogZW5kcG9pbnRzCiAgICAgICAgc2NoZW1lOiBodHRwcwoKICAgICAgICB0bHNfY29uZmlnOgogICAgICAgICAgY2FfZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L2NhLmNydAogICAgICAgIGJlYXJlcl90b2tlbl9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvdG9rZW4KCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZSwgX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9uYW1lLCBfX21ldGFfa3ViZXJuZXRlc19lbmRwb2ludF9wb3J0X25hbWVdCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgICAgIHJlZ2V4OiBkZWZhdWx0O2t1YmVybmV0ZXM7aHR0cHMKCiAgICAgIC0gam9iX25hbWU6ICdrdWJlcm5ldGVzLW5vZGVzJwoKICAgICAgICBzY2hlbWU6IGh0dHBzCgogICAgICAgIHRsc19jb25maWc6CiAgICAgICAgICBjYV9maWxlOiAvdmFyL3J1bi9zZWNyZXRzL2t1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvY2EuY3J0CiAgICAgICAgYmVhcmVyX3Rva2VuX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbgoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBub2RlCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19ub2RlX2xhYmVsXyguKykKICAgICAgICAtIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAgIHJlcGxhY2VtZW50OiBrdWJlcm5ldGVzLmRlZmF1bHQuc3ZjOjQ0MwogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25vZGVfbmFtZV0KICAgICAgICAgIHJlZ2V4OiAoLispCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fbWV0cmljc19wYXRoX18KICAgICAgICAgIHJlcGxhY2VtZW50OiAvYXBpL3YxL25vZGVzLyR7MX0vcHJveHkvbWV0cmljcyAgICAgCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1wb2RzJwoKICAgICAgICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgICAgICAgLSByb2xlOiBwb2QKCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NyYXBlXQogICAgICAgICAgYWN0aW9uOiBrZWVwCiAgICAgICAgICByZWdleDogdHJ1ZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fcGF0aF0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX21ldHJpY3NfcGF0aF9fCiAgICAgICAgICByZWdleDogKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fYWRkcmVzc19fLCBfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BvcnRdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHJlZ2V4OiAoW146XSspKD86OlxkKyk/OyhcZCspCiAgICAgICAgICByZXBsYWNlbWVudDogJDE6JDIKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19hZGRyZXNzX18KICAgICAgICAtIGFjdGlvbjogbGFiZWxtYXAKICAgICAgICAgIHJlZ2V4OiBfX21ldGFfa3ViZXJuZXRlc19wb2RfbGFiZWxfKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3BvZF9uYW1lXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IGt1YmVybmV0ZXNfcG9kX25hbWUKICAgICAgCiAgICAgIC0gam9iX25hbWU6ICdrdWJlLXN0YXRlLW1ldHJpY3MnCiAgICAgICAgc3RhdGljX2NvbmZpZ3M6CiAgICAgICAgICAtIHRhcmdldHM6IFsna3ViZS1zdGF0ZS1tZXRyaWNzLmt1YmUtc3lzdGVtLnN2Yy5jbHVzdGVyLmxvY2FsOjgwODAnXQoKICAgICAgLSBqb2JfbmFtZTogJ2t1YmVybmV0ZXMtY2Fkdmlzb3InCgogICAgICAgIHNjaGVtZTogaHR0cHMKCiAgICAgICAgdGxzX2NvbmZpZzoKICAgICAgICAgIGNhX2ZpbGU6IC92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9jYS5jcnQKICAgICAgICBiZWFyZXJfdG9rZW5fZmlsZTogL3Zhci9ydW4vc2VjcmV0cy9rdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3Rva2VuCgogICAgICAgIGt1YmVybmV0ZXNfc2RfY29uZmlnczoKICAgICAgICAtIHJvbGU6IG5vZGUKCiAgICAgICAgcmVsYWJlbF9jb25maWdzOgogICAgICAgIC0gYWN0aW9uOiBsYWJlbG1hcAogICAgICAgICAgcmVnZXg6IF9fbWV0YV9rdWJlcm5ldGVzX25vZGVfbGFiZWxfKC4rKQogICAgICAgIC0gdGFyZ2V0X2xhYmVsOiBfX2FkZHJlc3NfXwogICAgICAgICAgcmVwbGFjZW1lbnQ6IGt1YmVybmV0ZXMuZGVmYXVsdC5zdmM6NDQzCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfbm9kZV9uYW1lXQogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVwbGFjZW1lbnQ6IC9hcGkvdjEvbm9kZXMvJHsxfS9wcm94eS9tZXRyaWNzL2NhZHZpc29yCiAgICAgIAogICAgICAtIGpvYl9uYW1lOiAna3ViZXJuZXRlcy1zZXJ2aWNlLWVuZHBvaW50cycKCiAgICAgICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAgIC0gcm9sZTogZW5kcG9pbnRzCgogICAgICAgIHJlbGFiZWxfY29uZmlnczoKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX21ldGFfa3ViZXJuZXRlc19zZXJ2aWNlX2Fubm90YXRpb25fcHJvbWV0aGV1c19pb19zY3JhcGVdCiAgICAgICAgICBhY3Rpb246IGtlZXAKICAgICAgICAgIHJlZ2V4OiB0cnVlCiAgICAgICAgLSBzb3VyY2VfbGFiZWxzOiBbX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fc2NoZW1lXQogICAgICAgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgICB0YXJnZXRfbGFiZWw6IF9fc2NoZW1lX18KICAgICAgICAgIHJlZ2V4OiAoaHR0cHM/KQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfYW5ub3RhdGlvbl9wcm9tZXRoZXVzX2lvX3BhdGhdCiAgICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICAgIHRhcmdldF9sYWJlbDogX19tZXRyaWNzX3BhdGhfXwogICAgICAgICAgcmVnZXg6ICguKykKICAgICAgICAtIHNvdXJjZV9sYWJlbHM6IFtfX2FkZHJlc3NfXywgX19tZXRhX2t1YmVybmV0ZXNfc2VydmljZV9hbm5vdGF0aW9uX3Byb21ldGhldXNfaW9fcG9ydF0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX2FkZHJlc3NfXwogICAgICAgICAgcmVnZXg6IChbXjpdKykoPzo6XGQrKT87KFxkKykKICAgICAgICAgIHJlcGxhY2VtZW50OiAkMTokMgogICAgICAgIC0gYWN0aW9uOiBsYWJlbG1hcAogICAgICAgICAgcmVnZXg6IF9fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbGFiZWxfKC4rKQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIC0gc291cmNlX2xhYmVsczogW19fbWV0YV9rdWJlcm5ldGVzX3NlcnZpY2VfbmFtZV0KICAgICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgICAgdGFyZ2V0X2xhYmVsOiBrdWJlcm5ldGVzX25hbWUKLS0tCmFwaVZlcnNpb246IGFwcHMvdjEKa2luZDogRGVwbG95bWVudAptZXRhZGF0YToKICBuYW1lOiBwcm9tZXRoZXVzLWRlcGxveW1lbnQKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKICBsYWJlbHM6CiAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCnNwZWM6CiAgcmVwbGljYXM6IDEKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBhcHA6IHByb21ldGhldXMtc2VydmVyCiAgdGVtcGxhdGU6CiAgICBtZXRhZGF0YToKICAgICAgbGFiZWxzOgogICAgICAgIGFwcDogcHJvbWV0aGV1cy1zZXJ2ZXIKICAgIHNwZWM6CiAgICAgIGNvbnRhaW5lcnM6CiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzCiAgICAgICAgICBpbWFnZTogcXVheS5pby9wcm9tZXRoZXVzL3Byb21ldGhldXMKICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogSWZOb3RQcmVzZW50CiAgICAgICAgICBhcmdzOgogICAgICAgICAgICAtICItLWNvbmZpZy5maWxlPS9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnltbCIKICAgICAgICAgICAgLSAiLS1zdG9yYWdlLnRzZGIucGF0aD0vcHJvbWV0aGV1cy8iCiAgICAgICAgICBwb3J0czoKICAgICAgICAgICAgLSBjb250YWluZXJQb3J0OiA5MDkwCiAgICAgICAgICB2b2x1bWVNb3VudHM6CiAgICAgICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1jb25maWctdm9sdW1lCiAgICAgICAgICAgICAgbW91bnRQYXRoOiAvZXRjL3Byb21ldGhldXMvCiAgICAgICAgICAgIC0gbmFtZTogcHJvbWV0aGV1cy1zdG9yYWdlLXZvbHVtZQogICAgICAgICAgICAgIG1vdW50UGF0aDogL3Byb21ldGhldXMvCiAgICAgIHZvbHVtZXM6CiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzLWNvbmZpZy12b2x1bWUKICAgICAgICAgIGNvbmZpZ01hcDoKICAgICAgICAgICAgZGVmYXVsdE1vZGU6IDQyMAogICAgICAgICAgICBuYW1lOiBwcm9tZXRoZXVzLXNlcnZlci1jb25mCiAgCiAgICAgICAgLSBuYW1lOiBwcm9tZXRoZXVzLXN0b3JhZ2Utdm9sdW1lCiAgICAgICAgICBlbXB0eURpcjoge30KLS0tCmFwaVZlcnNpb246IHYxCmtpbmQ6IFNlcnZpY2UKbWV0YWRhdGE6CiAgbmFtZTogcHJvbWV0aGV1cy1zZXJ2aWNlCiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCiAgYW5ub3RhdGlvbnM6CiAgICAgIHByb21ldGhldXMuaW8vc2NyYXBlOiAndHJ1ZScKICAgICAgcHJvbWV0aGV1cy5pby9wb3J0OiAgICc5MDkwJwogIApzcGVjOgogIHNlbGVjdG9yOiAKICAgIGFwcDogcHJvbWV0aGV1cy1zZXJ2ZXIKICB0eXBlOiBOb2RlUG9ydCAgCiAgcG9ydHM6CiAgICAtIHBvcnQ6IDgwODAKICAgICAgdGFyZ2V0UG9ydDogOTA5MCAKICAgICAgbm9kZVBvcnQ6IDMwMDAwCg==
+          prometheus-node-exporter: YXBpVmVyc2lvbjogYXBwcy92MQpraW5kOiBEYWVtb25TZXQKbWV0YWRhdGE6CiAgbGFiZWxzOgogICAgYXBwLmt1YmVybmV0ZXMuaW8vY29tcG9uZW50OiBleHBvcnRlcgogICAgYXBwLmt1YmVybmV0ZXMuaW8vbmFtZTogbm9kZS1leHBvcnRlcgogIG5hbWU6IG5vZGUtZXhwb3J0ZXIKICBuYW1lc3BhY2U6IG1vbml0b3JpbmcKc3BlYzoKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBhcHAua3ViZXJuZXRlcy5pby9jb21wb25lbnQ6IGV4cG9ydGVyCiAgICAgIGFwcC5rdWJlcm5ldGVzLmlvL25hbWU6IG5vZGUtZXhwb3J0ZXIKICB0ZW1wbGF0ZToKICAgIG1ldGFkYXRhOgogICAgICBsYWJlbHM6CiAgICAgICAgYXBwLmt1YmVybmV0ZXMuaW8vY29tcG9uZW50OiBleHBvcnRlcgogICAgICAgIGFwcC5rdWJlcm5ldGVzLmlvL25hbWU6IG5vZGUtZXhwb3J0ZXIKICAgIHNwZWM6CiAgICAgIGNvbnRhaW5lcnM6CiAgICAgIC0gYXJnczoKICAgICAgICAtIC0tcGF0aC5zeXNmcz0vaG9zdC9zeXMKICAgICAgICAtIC0tcGF0aC5yb290ZnM9L2hvc3Qvcm9vdAogICAgICAgIC0gLS1uby1jb2xsZWN0b3Iud2lmaQogICAgICAgIC0gLS1uby1jb2xsZWN0b3IuaHdtb24KICAgICAgICAtIC0tY29sbGVjdG9yLmZpbGVzeXN0ZW0uaWdub3JlZC1tb3VudC1wb2ludHM9Xi8oZGV2fHByb2N8c3lzfHZhci9saWIvZG9ja2VyLy4rfHZhci9saWIva3ViZWxldC9wb2RzLy4rKSgkfC8pCiAgICAgICAgLSAtLWNvbGxlY3Rvci5uZXRjbGFzcy5pZ25vcmVkLWRldmljZXM9Xih2ZXRoLiopJAogICAgICAgIG5hbWU6IG5vZGUtZXhwb3J0ZXIKICAgICAgICBpbWFnZTogcXVheS5pby9wcm9tZXRoZXVzL25vZGUtZXhwb3J0ZXIKICAgICAgICBwb3J0czoKICAgICAgICAgIC0gY29udGFpbmVyUG9ydDogOTEwMAogICAgICAgICAgICBwcm90b2NvbDogVENQCiAgICAgICAgcmVzb3VyY2VzOgogICAgICAgICAgbGltaXRzOgogICAgICAgICAgICBjcHU6IDI1MG0KICAgICAgICAgICAgbWVtb3J5OiAxODBNaQogICAgICAgICAgcmVxdWVzdHM6CiAgICAgICAgICAgIGNwdTogMTAybQogICAgICAgICAgICBtZW1vcnk6IDE4ME1pCiAgICAgICAgdm9sdW1lTW91bnRzOgogICAgICAgIC0gbW91bnRQYXRoOiAvaG9zdC9zeXMKICAgICAgICAgIG1vdW50UHJvcGFnYXRpb246IEhvc3RUb0NvbnRhaW5lcgogICAgICAgICAgbmFtZTogc3lzCiAgICAgICAgICByZWFkT25seTogdHJ1ZQogICAgICAgIC0gbW91bnRQYXRoOiAvaG9zdC9yb290CiAgICAgICAgICBtb3VudFByb3BhZ2F0aW9uOiBIb3N0VG9Db250YWluZXIKICAgICAgICAgIG5hbWU6IHJvb3QKICAgICAgICAgIHJlYWRPbmx5OiB0cnVlCiAgICAgIHZvbHVtZXM6CiAgICAgIC0gaG9zdFBhdGg6CiAgICAgICAgICBwYXRoOiAvc3lzCiAgICAgICAgbmFtZTogc3lzCiAgICAgIC0gaG9zdFBhdGg6CiAgICAgICAgICBwYXRoOiAvCiAgICAgICAgbmFtZTogcm9vdAotLS0Ka2luZDogU2VydmljZQphcGlWZXJzaW9uOiB2MQptZXRhZGF0YToKICBuYW1lOiBub2RlLWV4cG9ydGVyCiAgbmFtZXNwYWNlOiBtb25pdG9yaW5nCiAgYW5ub3RhdGlvbnM6CiAgICAgIHByb21ldGhldXMuaW8vc2NyYXBlOiAndHJ1ZScKICAgICAgcHJvbWV0aGV1cy5pby9wb3J0OiAgICc5MTAwJwpzcGVjOgogIHNlbGVjdG9yOgogICAgICBhcHAua3ViZXJuZXRlcy5pby9jb21wb25lbnQ6IGV4cG9ydGVyCiAgICAgIGFwcC5rdWJlcm5ldGVzLmlvL25hbWU6IG5vZGUtZXhwb3J0ZXIKICBwb3J0czoKICAtIG5hbWU6IG5vZGUtZXhwb3J0ZXIKICAgIHByb3RvY29sOiBUQ1AKICAgIHBvcnQ6IDkxMDAKICAgIHRhcmdldFBvcnQ6IDkxMDA=

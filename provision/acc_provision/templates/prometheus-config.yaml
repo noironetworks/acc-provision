@@ -45,31 +45,12 @@ metadata:
     name: prometheus-server-conf
   namespace: monitoring
 data:
-  prometheus.rules: |-
-    groups:
-    - name: devopscube demo alert
-      rules:
-      - alert: High Pod Memory
-        expr: sum(container_memory_usage_bytes) > 1
-        for: 1m
-        labels:
-          severity: slack
-        annotations:
-          summary: High Memory Usage
   prometheus.yml: |-
     global:
       scrape_interval: 5s
       evaluation_interval: 5s
       external_labels:
         cluster: {{config.aci_config.system_id}}
-    rule_files:
-      - /etc/prometheus/prometheus.rules
-    alerting:
-      alertmanagers:
-      - scheme: http
-        static_configs:
-        - targets:
-          - "alertmanager.monitoring.svc:9093"
     remote_write:
       - url: http://{{config.monitoring_config.remote_write_ip}}:{{config.monitoring_config.remote_write_port}}/api/v1/receive
         proxy_url: {{config.cko_proxy_config.http}}

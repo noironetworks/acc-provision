@@ -32,11 +32,11 @@ monitoring_config:
   remote_write_ip: 1.1.1.1
   remote_write_port: 10000
 
-cko_proxy_config:
+cko_proxy_config: #This section should be present at all times.
   enable: True
-  http: http://proxy.esl.cisco.com:80
-  https: http://proxy.esl.cisco.com:80
-  #no_proxy:
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
 
 cko_git_config:
   git_repo: "github.com/networkoperator/demo-clusters.git"

@@ -4,9 +4,6 @@ aci_config:
 service_mesh_config:
   enable: True
 
-metallb_config:
-  enable: True
-
 monitoring_config:
   enable: True
   remote_write_ip: 1.1.1.1
@@ -20,6 +17,12 @@ cko_git_config:
   git_user: "networkoperator-gittest"
   git_email: "test@cisco.com"
   sleep_duration: 5
+
+cko_proxy_config: #This section should be present at all times.
+  enable: True
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
 
 control_cluster_websocket:
   server_ip: 10.96.101.1/12

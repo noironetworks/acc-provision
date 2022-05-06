@@ -27,4 +27,5 @@ spec:
         type: cko-m-prometheus
         options:
           prometheus-config: {{ config.aci_config.base64_encoded_prometheus_spec }}
+          prometheus-node-exporter: {{ config.aci_config.base64_encoded_node_exporter_spec }}
       {% endif %}
