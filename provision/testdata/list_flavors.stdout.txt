@@ -7,21 +7,12 @@ INFO: openshift-4.8-openstack:	Red Hat OpenShift Container Platform 4.8 on OpenS
 INFO: openshift-4.7-openstack:	Red Hat OpenShift Container Platform 4.7 on OpenStack
 INFO: openshift-4.7-baremetal:	Red Hat OpenShift Container Platform 4.7 on Baremetal
 INFO: openshift-4.6-openstack:	Red Hat OpenShift Container Platform 4.6 on OpenStack
-INFO: openshift-4.6-baremetal:	Red Hat OpenShift Container Platform 4.6 on Baremetal
-INFO: openshift-4.5-openstack:	Red Hat OpenShift Container Platform 4.5 on OpenStack
 INFO: openshift-4.10-esx:	Red Hat OpenShift Container Platform 4.10 on ESX
 INFO: openshift-4.9-esx:	Red Hat OpenShift Container Platform 4.9 on ESX
 INFO: openshift-4.8-esx:	Red Hat OpenShift Container Platform 4.8 on ESX
 INFO: openshift-4.7-esx:	Red Hat OpenShift Container Platform 4.7 on ESX
 INFO: openshift-4.6-esx:	Red Hat OpenShift Container Platform 4.6 on ESX
-INFO: openshift-4.5-esx:	Red Hat OpenShift Container Platform 4.5 on ESX
-INFO: openshift-3.11:	Red Hat OpenShift Container Platform 3.11
-INFO: docker-ucp-3.0:	Docker Universal Control Plane (UCP) 3.0
 INFO: kubernetes-1.22:	Kubernetes 1.22
 INFO: kubernetes-1.21:	Kubernetes 1.21
 INFO: kubernetes-1.20:	Kubernetes 1.20
 INFO: RKE-1.2.3:	Rancher Kubernetes Engine min version 1.2.3
-INFO: k8s-overlay:	Kubernetes basic overlay [Experimental]
-INFO: aks:	Azure Kubernetes Service [Experimental]
-INFO: cloud:	Openshift IPI/AWS [Experimental]
-INFO: eks:	Elastic Kubernetes Service (aws) [Experimental]

@@ -1421,7 +1421,7 @@ flavors:
         disable: True
     options: *anchor1
     status: null
-    hidden: false
+    hidden: true
     order: 9
   openshift-4.10-esx:
     desc: Red Hat OpenShift Container Platform 4.10 on ESX
@@ -2235,7 +2235,7 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
+    hidden: true
     order: 15
   openshift-4.4-openstack:
     desc: Red Hat OpenShift Container Platform 4.4 on OpenStack
@@ -2735,7 +2735,7 @@ flavors:
       multus:
         disable: False
     status: null
-    hidden: false
+    hidden: true
     order: 20
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
@@ -2830,7 +2830,7 @@ flavors:
     desc: Docker Universal Control Plane (UCP) 3.0
     default_version: 5.2
     status: null
-    hidden: false
+    hidden: true
     config:
       kube_config:
         no_priority_class: True
@@ -2959,7 +2959,7 @@ flavors:
       drop_log_config:
         enable: true
     status: Experimental
-    hidden: False
+    hidden: true
     order: 38
   aks:
     desc: Azure Kubernetes Service
@@ -3018,7 +3018,7 @@ flavors:
                 - name: ent1
                   prot: tcp
     status: Experimental
-    hidden: False
+    hidden: true
     order: 39
   cloud:
     desc: Openshift IPI/AWS
@@ -3146,7 +3146,7 @@ flavors:
                   prot: icmp
             
     status: Experimental
-    hidden: False
+    hidden: true
     order: 40
   eks:
     desc: Elastic Kubernetes Service (aws)
@@ -3272,5 +3272,5 @@ flavors:
                   prot: icmp
             
     status: Experimental
-    hidden: False
+    hidden: true
     order: 41
