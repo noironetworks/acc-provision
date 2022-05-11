@@ -9,7 +9,7 @@ spec:
       {% if config.service_mesh_config.enable %}
       cko-sm:
         type: "cko-sm-smm"
-        version: "0.1"
+        version: '0.1'
         options:
           meshType: {{ config.service_mesh_config.mesh_type }}
           clusterName: {{ config.service_mesh_config.cluster_name }}
@@ -17,7 +17,7 @@ spec:
           meshName: {{ config.service_mesh_config.mesh_name }}
       {% endif %}
       cko-cni:
-        version: '0.1'
+        version: "{{ config.aci_config.cni_flavor_version }}"
         type: "cko-cni-aci"
         options:
           aci-cni: {{ config.aci_config.base64_encoded_cko_aci_spec }}

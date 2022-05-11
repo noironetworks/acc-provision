@@ -1367,6 +1367,7 @@ def generate_cko_aci_yaml(config, network_operator_output):
         base64_encoded_prometheus_spec = base64.b64encode(prometheus_output.encode('ascii')).decode('ascii')
         base64_encoded_node_exporter_spec = base64.b64encode(node_exporter_output.encode('ascii')).decode('ascii')
         netopConfig = dict(config)
+        netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
         netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
         netopConfig["aci_config"]["base64_encoded_prometheus_spec"] = base64_encoded_prometheus_spec
         netopConfig["aci_config"]["base64_encoded_node_exporter_spec"] = base64_encoded_node_exporter_spec
@@ -1710,6 +1711,8 @@ def parse_args(show_help):
     parser.add_argument(
         '--disable-multus', default='true', metavar='disable_multus',
         help='true/false to disable/enable multus in cluster')
+    parser.add_argument(
+        '--flavor-version', default=None, metavar='flavor_version', help='CNI upgrade/downgrade')
     # This argument is set to True and used internally by the acc-provision-operator when invoking acc-provision. It is not meant to be invoked directly by the user from stand-alone acc-provision and hence set to False by default here and suppressed as well.
     parser.add_argument(
         '--operator-mode', default=False,
@@ -1890,6 +1893,9 @@ def provision(args, apic_file, no_random):
                     "version": FLAVORS[flavor]["default_version"]
                 }
             })
+            if args.flavor_version is not None:
+                config["registry"]["version"] = args.flavor_version
+
     else:
         err("Unknown flavor %s" % flavor)
         return False
