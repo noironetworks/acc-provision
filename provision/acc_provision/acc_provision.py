@@ -206,9 +206,9 @@ def config_default():
                 "racks": None,
             },
         },
-        "service_mesh_config": {
-            "enable": False,
-        },
+        #"service_mesh_config": {
+        #    "enable": False,
+        #},
         "lb_config": {
             "enable": False,
         },
@@ -394,14 +394,10 @@ def validate_subnet(subnet):
             return subnet
 
 def config_adjust_cilium_unmanaged(args, config):
-    install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
     install_lb = config["lb_config"]["enable"]
     token = str(uuid.uuid4())
     adj_config = {
-        "service_mesh_config": {
-            "enable": install_sm,
-        },
         "monitoring_config": {
             "enable": install_monitoring,
         },
@@ -412,14 +408,6 @@ def config_adjust_cilium_unmanaged(args, config):
             "configuration_version": token,
         }
     }
-    if config["service_mesh_config"].get("enable"):
-        adj_config["service_mesh_config"]["mesh_type"] = "Cisco-SMM"
-        adj_config["service_mesh_config"]["mesh_mode"] = "primary"
-        adj_config["service_mesh_config"]["version"] = "v1.8.1"
-        adj_config["service_mesh_config"]["network_name"] = "network1"
-        adj_config["service_mesh_config"]["mesh_name"] = "mesh1"
-        adj_config["service_mesh_config"]["cluster_name"] = "primary"
-        adj_config["service_mesh_config"]["remote_ctrl_plane"] = ""
     return adj_config
 
 def config_adjust(args, config, prov_apic, no_random):
@@ -439,7 +427,6 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
-    install_sm = config["service_mesh_config"]["enable"]
     install_monitoring = config["monitoring_config"]["enable"]
     install_lb = config["lb_config"]["enable"]
     l3out_name = config["aci_config"]["l3out"]["name"]
@@ -604,9 +591,6 @@ def config_adjust(args, config, prov_apic, no_random):
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
         },
-        "service_mesh_config": {
-            "enable": install_sm,
-        },
         "monitoring_config": {
             "enable": install_monitoring,
         },
@@ -676,15 +660,6 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
-
-    if config["service_mesh_config"].get("enable"):
-        adj_config["service_mesh_config"]["mesh_type"] = "Cisco-SMM"
-        adj_config["service_mesh_config"]["mesh_mode"] = "primary"
-        adj_config["service_mesh_config"]["version"] = "v1.8.1"
-        adj_config["service_mesh_config"]["network_name"] = "network1"
-        adj_config["service_mesh_config"]["mesh_name"] = "mesh1"
-        adj_config["service_mesh_config"]["cluster_name"] = "primary"
-        adj_config["service_mesh_config"]["remote_ctrl_plane"] = ""
 
     return adj_config
 
@@ -1285,8 +1260,6 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
 
 def generate_cko_calico_yaml(config, network_operator_output):
     if network_operator_output and network_operator_output != "/dev/null":
-        calico_crds_template = get_jinja_template('calico-crds.yaml')
-        calico_crds_output = calico_crds_template.render(config=config)
 
         calico_crs_template = get_jinja_template('calico-crs.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
@@ -1318,8 +1291,6 @@ def generate_cko_calico_yaml(config, network_operator_output):
         calico_bgp_spec = calico_bgp_config_output + "\n---\n" + bgp_peer
         # Encode the generated calico bgp spec to base64
         base64_encoded_calico_bgp_spec = base64.b64encode(calico_bgp_spec.encode('ascii')).decode('ascii')
-        # Encode the generated calico crds spec to base64
-        base64_encoded_calico_crds_spec = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
         # Encode the generated calico crs spec to base64
         base64_encoded_calico_crs_spec = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
         # Encode the calicoctl spec to base64
@@ -1333,7 +1304,6 @@ def generate_cko_calico_yaml(config, network_operator_output):
 
         network_operator_CR_template = get_jinja_template('network-manager-calico.yaml')
         netopConfig = dict(config)
-        netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_calico_crds_spec
         netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_calico_crs_spec
         netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_calico_bgp_spec
         netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_calicoctl_spec
@@ -2014,7 +1984,6 @@ def provision(args, apic_file, no_random):
         netop_output_file = args.output
         print("generating network operator output file")
         gen(config, netop_output_file)
-    #if flavor == "cko-cilium":
         return True
 
     if flavor == "cko-unmanaged":
@@ -2025,7 +1994,6 @@ def provision(args, apic_file, no_random):
         netop_output_file = args.output
         print("generating network operator output file")
         gen(config, netop_output_file)
-    #if flavor == "cko-unmanaged":
         return True
 
     if flavor == "calico":

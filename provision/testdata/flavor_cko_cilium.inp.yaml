@@ -1,8 +1,22 @@
 aci_config:
-  system_id: ciliumtest
+  system_id: ciliumtest1
 
 service_mesh_config:
-  enable: True
+  name: ciliumtest1
+  network: ciliumtest1
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: testurl1
+
+service_mesh_topology:
+  - service_mesh_config:
+    name: ciliumtest1
+    role: Primary
+    kubeconfig: testurl1
+  - service_mesh_config:
+    name: ciliumtest2
+    role: Primary
+    kubeconfig: testurl2
 
 monitoring_config:
   enable: True

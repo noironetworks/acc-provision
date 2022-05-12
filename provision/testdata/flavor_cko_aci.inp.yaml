@@ -1,5 +1,5 @@
 aci_config:
-  system_id: acitest
+  system_id: acitest1
   apic_hosts:                  
     - 10.30.120.100
   apic_login:
@@ -25,7 +25,21 @@ net_config:
   extern_static: 10.4.0.1/24
 
 service_mesh_config:
-  enable: True
+  name: acitest1
+  network: acitest1
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: testurl1
+
+service_mesh_topology:
+  - service_mesh_config:
+    name: acitest1
+    role: Primary
+    kubeconfig: testurl1
+  - service_mesh_config:
+    name: acitest2
+    role: Primary
+    kubeconfig: testurl2
 
 monitoring_config:
   enable: True

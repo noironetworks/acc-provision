@@ -1,7 +1,7 @@
 aci_config:
   physical_domain:
     domain: bm-srvrs-calico-pd
-  system_id: calicotest
+  system_id: calicotest1
   apic_hosts:                  
     - 10.30.120.100
   apic_login:
@@ -40,8 +40,22 @@ calico_config:
     racks:
       - [2.100.101.201, 2.100.101.202]
 
-service_mesh_config: #This section should be present at all times.
-  enable: True
+service_mesh_config:
+  name: calicotest1
+  network: calicotest1
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: testurl1
+
+service_mesh_topology:
+  - service_mesh_config:
+    name: calicotest1
+    role: Primary
+    kubeconfig: testurl1
+  - service_mesh_config:
+    name: calicotest2
+    role: Primary
+    kubeconfig: testurl2
 
 lb_config: #This section should be present at all times.
   enable: True

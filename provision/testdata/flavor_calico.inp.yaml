@@ -41,7 +41,11 @@ calico_config:
       - [2.100.101.201, 2.100.101.202]
 
 service_mesh_config:
-  enable: True
+  name: calicotest
+  network: calicotest
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: testurl
 
 control_cluster_websocket:
   server_ip: 10.96.101.1/12

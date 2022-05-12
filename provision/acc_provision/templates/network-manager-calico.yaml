@@ -6,15 +6,22 @@ metadata:
 spec:
   config:
     networkFunctions:
-      {% if config.service_mesh_config.enable %}
+      {% if config.service_mesh_config and config.service_mesh_topology%}
       cko-sm:
         type: cko-sm-smm
         version: "0.1"
         options:
-          meshType: {{ config.service_mesh_config.mesh_type }}
-          clusterName: {{ config.service_mesh_config.cluster_name }}
-          networkName: {{ config.service_mesh_config.network_name }}
-          meshName: {{ config.service_mesh_config.mesh_name }}
+          meshType: "Cisco-SMM"
+          clusterName: {{ config.service_mesh_config.name }}
+          networkName: {{ config.service_mesh_config.network }}
+          meshName: {{ config.service_mesh_config.mesh_id }}
+          meshMode: Active
+        arrayOptions:
+          remoteControlPlane: 
+          {% for sm_config in (config.service_mesh_topology) %}
+          {% if sm_config['name'] != config.aci_config.system_id %}
+          - "{{ sm_config['kubeconfig'] }}"
+          {% endif %}{% endfor %}
       {% endif %}
       {% if config.lb_config.enable %}
       cko-lb:
@@ -30,7 +37,6 @@ spec:
         version: '0.1'
         type: cko-cni-calico
         options:
-          calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
           calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
           calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}

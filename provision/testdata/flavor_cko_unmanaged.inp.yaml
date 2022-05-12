@@ -1,8 +1,22 @@
 aci_config:
-  system_id: unmanagedtest
+  system_id: unmanagedtest1
 
 service_mesh_config:
-  enable: True
+  name: unmanagedtest1
+  network: unmanagedtest1
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: testurl1
+
+service_mesh_topology:
+  - service_mesh_config:
+    name: unmanagedtest1
+    role: Primary
+    kubeconfig: testurl1
+  - service_mesh_config:
+    name: unmanagedtest2
+    role: Primary
+    kubeconfig: testurl2
 
 monitoring_config:
   enable: True

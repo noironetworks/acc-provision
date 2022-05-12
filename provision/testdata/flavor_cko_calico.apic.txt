@@ -457,11 +457,11 @@
         }
     }
 }
-/api/node/mo/uni/userext/user-calicotest.json
+/api/node/mo/uni/userext/user-calicotest1.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "calicotest",
+            "name": "calicotest1",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -489,19 +489,19 @@
         ]
     }
 }
-/api/node/mo/uni/userext/user-calicotest.json
+/api/node/mo/uni/userext/user-calicotest1.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "calicotest",
+            "name": "calicotest1",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "calicotest.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7jCCAVcCAgPoMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRgwFgYDVQQDDA9Vc2VyIGNhbGljb3Rlc3QwHhcN\nMjIwMzI1MDQwNzE5WhcNMzIwMzIyMTYwNzE5WjA/MQswCQYDVQQGEwJVUzEWMBQG\nA1UECgwNQ2lzY28gU3lzdGVtczEYMBYGA1UEAwwPVXNlciBjYWxpY290ZXN0MIGf\nMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDK5rAdxsMwXi+ZuQBx4UJiydArx8aQ\n6S0tehmDE3DthWR8fNhzau1Jg6oJ0RNx/AhVGQ7/rJ6+YxqjqbxAVBwPFjrwtbsR\nUCYR+zKxwnww4FCaj5Iyqi5ucEPnzEiK6j/xEHONfYRNdQMkXDanMsVlBRBFTi7g\nOyo12zXvuYylJwIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAC4GZjFaUxZki6YfgvJ6\n3giOkfVcq3hCaOu19E3e1JnoV3zEflEfLDtJhUhZyuW1H+6/vwxR3yJWJLIgNUF+\nokNm05nqVa/Yb+AsiCPzs5ms5lOgDE2DQ2hWjzisu32SQSsd+9/mhm6up+xuGX0L\nILQxdGWcWmoW4q0G8jA1swl6\n-----END CERTIFICATE-----\n",
+                        "name": "calicotest1.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIIB8DCCAVkCAgPoMA0GCSqGSIb3DQEBBQUAMEAxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRkwFwYDVQQDDBBVc2VyIGNhbGljb3Rlc3QxMB4X\nDTIyMDUxMjA2NDk0NVoXDTMyMDUwOTE4NDk0NVowQDELMAkGA1UEBhMCVVMxFjAU\nBgNVBAoMDUNpc2NvIFN5c3RlbXMxGTAXBgNVBAMMEFVzZXIgY2FsaWNvdGVzdDEw\ngZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANYWfgdnyE/vmVe3wAE5s1lUXRWU\n7V6T7Zn58MLUeYiOS40QQPTvB3XbI64VVoygue5n8N10YHGQJi+IPhAT8vgZiaES\nrWFPlFMX4Ew7vMnMquSgOayrQeEV3N6JRF98vWLGTdsXDKRMkQzVMcpx+fOSD+uP\ne9fpy0BhRddS7ADfAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEAzVzShNf+yyexlXpB\nxxRM0HBcn3G6+wI7vaNVBWaGqugERWgFw8o/BMM6bNpt/fd9n2NI5DVFJgVgrlp4\nawto/4WL3VKGY5zbUTdNN+HnUCCFphFRsD+EyWsKPjropmuRe2GWMbPPrCfJRdZ+\nHIsIWnlMlvHDgOcddoc6nXarKMM=\n-----END CERTIFICATE-----\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
