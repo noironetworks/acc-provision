@@ -27,6 +27,12 @@ try:
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 except Exception:
     pass
+#Try importing Mapping for python 3.10, if it fails default to the older version
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
+
 apic_debug = False
 apic_cookies = {}
 apic_default_timeout = (15, 90)
@@ -449,7 +455,7 @@ class ApicKubeConfig(object):
     def get_config(self, apic_version):
         def assert_attributes_is_first_key(data):
             """Check that attributes is the first key in the JSON."""
-            if isinstance(data, collections.Mapping) and "attributes" in data:
+            if isinstance(data, Mapping) and "attributes" in data:
                 assert next(iter(data.keys())) == "attributes"
                 for item in data.items():
                     assert_attributes_is_first_key(item)
