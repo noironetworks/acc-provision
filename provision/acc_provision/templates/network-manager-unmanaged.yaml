@@ -3,7 +3,7 @@ kind: Installer
 metadata:
   name: installer-sample
   namespace: netop-manager-system
-{% if config.service_mesh_config.enable or config.monitoring_config.enable %}
+{% if config.service_mesh_config or config.monitoring_config %}
 spec:
   config:
     networkFunctions:
@@ -23,7 +23,7 @@ spec:
           - "{{ sm_config['kubeconfig'] }}"
           {% endif %}{% endfor %}
       {% endif %}
-      {% if config.monitoring_config.enable %}
+      {% if config.monitoring_config %}
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus

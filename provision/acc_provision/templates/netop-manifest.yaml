@@ -1459,7 +1459,7 @@ spec:
               fieldPath: metadata.namespace
         - name: SYSTEM_ID
           value: {{config.aci_config.system_id}}
-        {% if config.cko_proxy_config.enable %}
+        {% if config.cko_proxy_config %}
         - name: HTTP_PROXY
           value: {{config.cko_proxy_config.http_proxy}}
         - name: HTTPS_PROXY

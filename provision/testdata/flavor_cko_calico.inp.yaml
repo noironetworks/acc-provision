@@ -58,17 +58,14 @@ service_mesh_topology:
     kubeconfig: testurl2
 
 lb_config: #This section should be present at all times.
-  enable: True
   lb_type: metallb # only for calico
   
 monitoring_config: #This section should be present at all times.
-  enable: True
   monitoring_type: prometheus
   remote_write_ip: 3.237.37.136 #This value is derived from the configmap
   remote_write_port: 32307 #This value is derived from the configmap
 
 cko_proxy_config: #This section should be present at all times.
-  enable: True
   http_proxy: http://proxy.esl.cisco.com:80
   https_proxy: http://proxy.esl.cisco.com:80
   no_proxy: 10.96.0.1

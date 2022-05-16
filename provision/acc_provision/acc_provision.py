@@ -206,18 +206,6 @@ def config_default():
                 "racks": None,
             },
         },
-        #"service_mesh_config": {
-        #    "enable": False,
-        #},
-        "lb_config": {
-            "enable": False,
-        },
-        "monitoring_config": {
-            "enable": False,
-        },
-        "cko_proxy_config": {
-            "enable": False,
-        },
         "cko_git_config": {
             "git_repo": "github.com/networkoperator/demo-clusters.git",
             "git_dir": "demo-cluster",
@@ -393,23 +381,6 @@ def validate_subnet(subnet):
         else:
             return subnet
 
-def config_adjust_cilium_unmanaged(args, config):
-    install_monitoring = config["monitoring_config"]["enable"]
-    install_lb = config["lb_config"]["enable"]
-    token = str(uuid.uuid4())
-    adj_config = {
-        "monitoring_config": {
-            "enable": install_monitoring,
-        },
-        "lb_config": {
-            "enable": install_lb,
-        },
-        "registry": {
-            "configuration_version": token,
-        }
-    }
-    return adj_config
-
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
@@ -427,8 +398,6 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
-    install_monitoring = config["monitoring_config"]["enable"]
-    install_lb = config["lb_config"]["enable"]
     l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
@@ -590,12 +559,6 @@ def config_adjust(args, config, prov_apic, no_random):
             ],
             "opflex_mode": opflex_mode,
             "enable_endpointslice": enable_endpointslice,
-        },
-        "monitoring_config": {
-            "enable": install_monitoring,
-        },
-        "lb_config": {
-            "enable": install_lb,
         },
         "registry": {
             "configuration_version": token,
@@ -1916,10 +1879,7 @@ def provision(args, apic_file, no_random):
             return False
 
     # Adjust config based on convention/apic data
-    if flavor == "cko-cilium" or flavor == "cko-unmanaged":
-        adj_config = config_adjust_cilium_unmanaged(args, config)
-        deep_merge(config, adj_config)
-    else:
+    if flavor != "cko-cilium" and flavor != "cko-unmanaged":
         adj_config = config_adjust(args, config, prov_apic, no_random)
         deep_merge(config, adj_config)
 

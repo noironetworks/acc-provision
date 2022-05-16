@@ -19,7 +19,6 @@ service_mesh_topology:
     kubeconfig: testurl2
 
 monitoring_config:
-  enable: True
   remote_write_ip: 1.1.1.1
   remote_write_port: 10000
 
@@ -33,7 +32,6 @@ cko_git_config:
   sleep_duration: 5
 
 cko_proxy_config: #This section should be present at all times.
-  enable: True
   http_proxy: http://proxy.esl.cisco.com:80
   https_proxy: http://proxy.esl.cisco.com:80
   no_proxy: 10.96.0.1

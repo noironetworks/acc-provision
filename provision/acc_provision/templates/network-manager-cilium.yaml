@@ -25,7 +25,7 @@ spec:
       cko-cni:
         type: cko-cni-cilium
         version: '1.11.2'
-      {% if config.monitoring_config.enable %}
+      {% if config.monitoring_config %}
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus

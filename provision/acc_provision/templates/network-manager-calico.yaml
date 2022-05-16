@@ -23,7 +23,7 @@ spec:
           - "{{ sm_config['kubeconfig'] }}"
           {% endif %}{% endfor %}
       {% endif %}
-      {% if config.lb_config.enable %}
+      {% if config.lb_config %}
       cko-lb:
         type: "cko-lb-metallb"
         version: "0.1"
@@ -40,7 +40,7 @@ spec:
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
           calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
           calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}
-      {% if config.monitoring_config.enable %}
+      {% if config.monitoring_config %}
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus

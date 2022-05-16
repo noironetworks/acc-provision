@@ -27,7 +27,7 @@ spec:
         type: "cko-cni-aci"
         options:
           aci-cni: {{ config.aci_config.base64_encoded_cko_aci_spec }}
-      {% if config.monitoring_config.enable %}
+      {% if config.monitoring_config %}
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus
