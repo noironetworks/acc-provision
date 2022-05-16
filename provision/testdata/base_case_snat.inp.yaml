@@ -42,7 +42,6 @@ kube_config:
   use_ds_rolling_update: true
   snat_operator: 
     name: test_snat-operator
-    globalinfo_name: test_snatglobalinfo
     port_range:
       start: 6000
       end: 62000

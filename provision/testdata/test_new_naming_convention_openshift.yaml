@@ -880,8 +880,6 @@ spec:
               value: ""
             - name: ACI_SNAT_NAMESPACE
               value: "aci-containers-system"
-            - name: ACI_SNAGLOBALINFO_NAME
-              value: "snatglobalinfo"
             - name: ACI_RDCONFIG_NAME
               value: "routingdomain-config"
           volumeMounts:

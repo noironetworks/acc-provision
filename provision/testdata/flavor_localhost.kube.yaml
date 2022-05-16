@@ -298,8 +298,11 @@ spec:
                     type: object
                   type: array
                 type: object
+              nodeName:
+                type: string
             required:
             - globalInfos
+            - nodeName
             type: object
           status:
             description: SnatGlobalInfoStatus defines the observed state of SnatGlobalInfo
@@ -2047,8 +2050,6 @@ spec:
           env:
             - name: ACI_SNAT_NAMESPACE
               value: "kube-system"
-            - name: ACI_SNAGLOBALINFO_NAME
-              value: "snatglobalinfo"
             - name: ACI_RDCONFIG_NAME
               value: "routingdomain-config"
             - name: SYSTEM_NAMESPACE
