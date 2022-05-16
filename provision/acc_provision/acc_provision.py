@@ -1292,7 +1292,7 @@ def generate_cko_aci_yaml(config, network_operator_output):
 
         network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
         network_operator_spec_output = network_operator_spec_template.render(config=config)
-        aci_cni_template = get_jinja_template('aci-containers.yaml')
+        aci_cni_template = get_jinja_template('network-manager-aci-containers.yaml')
         aci_cni_output = aci_cni_template.render(config=config)
 
         network_operator_CR_template = get_jinja_template('network-manager-aci.yaml')

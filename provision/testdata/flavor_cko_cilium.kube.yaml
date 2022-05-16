@@ -1587,17 +1587,6 @@ metadata:
 spec:
   config:
     networkFunctions:
-      cko-sm:
-        type: cko-sm-smm
-        version: "0.1"
-        options:
-          meshType: "Cisco-SMM"
-          clusterName: ciliumtest1
-          networkName: ciliumtest1
-          meshName: mesh1
-          meshMode: Active
-          remoteControlPlane: 
-          - "testurl2"
       cko-cni:
         type: cko-cni-cilium
         version: '1.11.2'

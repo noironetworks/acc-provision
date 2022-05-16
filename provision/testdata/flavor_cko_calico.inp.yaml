@@ -65,11 +65,6 @@ monitoring_config: #This section should be present at all times.
   remote_write_ip: 3.237.37.136 #This value is derived from the configmap
   remote_write_port: 32307 #This value is derived from the configmap
 
-cko_proxy_config: #This section should be present at all times.
-  http_proxy: http://proxy.esl.cisco.com:80
-  https_proxy: http://proxy.esl.cisco.com:80
-  no_proxy: 10.96.0.1
-
 cko_git_config:
   git_repo: "github.com/networkoperator/demo-clusters.git"
   git_dir: "demo-cluster"

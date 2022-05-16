@@ -6,22 +6,6 @@ metadata:
 spec:
   config:
     networkFunctions:
-      {% if config.service_mesh_config and config.service_mesh_topology%}
-      cko-sm:
-        type: cko-sm-smm
-        version: "0.1"
-        options:
-          meshType: "Cisco-SMM"
-          clusterName: {{ config.service_mesh_config.name }}
-          networkName: {{ config.service_mesh_config.network }}
-          meshName: {{ config.service_mesh_config.mesh_id }}
-          meshMode: Active
-          remoteControlPlane: 
-          {% for sm_config in (config.service_mesh_topology) %}
-          {% if sm_config['name'] != config.aci_config.system_id %}
-          - "{{ sm_config['kubeconfig'] }}"
-          {% endif %}{% endfor %}
-      {% endif %}
       cko-cni:
         type: cko-cni-cilium
         version: '1.11.2'

@@ -53,7 +53,9 @@ data:
         cluster: {{config.aci_config.system_id}}
     remote_write:
       - url: http://{{config.monitoring_config.remote_write_ip}}:{{config.monitoring_config.remote_write_port}}/api/v1/receive
+        {% if config.cko_proxy_config %}
         proxy_url: {{config.cko_proxy_config.http}}
+        {% endif %}
 
     scrape_configs:
       - job_name: 'node-exporter'
