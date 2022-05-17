@@ -37,7 +37,7 @@ spec:
           value: routingdomain-config
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
-        image: noiro/aci-containers-controller:5.2.3.2.1d150da
+        image: noiro/aci-containers-controller:6.0.0.0.0ef4718
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
@@ -59,7 +59,14 @@ spec:
       priorityClassName: acicni-priority
       serviceAccountName: aci-containers-controller
       tolerations:
+      - effect: NoExecute
+        operator: Exists
+        tolerationSeconds: 60
       - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
         operator: Exists
       volumes:
       - name: aci-user-cert-volume

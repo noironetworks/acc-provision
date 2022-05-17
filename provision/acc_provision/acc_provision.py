@@ -161,6 +161,7 @@ def config_default():
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
             "apic_subscription_delay": None,
+            "apic_refreshticker_adjust": None,
             "opflex_device_delete_timeout": None,
         },
         "net_config": {
@@ -661,6 +662,22 @@ def is_valid_refreshtime(xval):
     raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_apic_refreshticker_adjust(xval):
+    if xval is None:
+        # use default configured on this host(150 seconds)
+        return True
+
+    xmin = 1
+    xmax = 65535
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_max_nodes_svc_graph(xval):
     if xval is None:
         return True
@@ -746,6 +763,8 @@ def config_validate(flavor_opts, config):
                                      lambda x: required(x) and isname(x, 32)),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
+            "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
+                                                     is_valid_apic_refreshticker_adjust),
             "aci_config/apic_subscription_delay": (get(("aci_config", "apic_subscription_delay")),
                                                    is_valid_apic_sub_delay),
             "aci_config/opflex_device_delete_timeout": (get(("aci_config", "opflex_device_delete_timeout")),
@@ -1403,6 +1422,16 @@ def check_overlapping_subnets(config):
     return True
 
 
+def check_image_pull_secret(config):
+    # Check if the image_pull_secret is valid
+    image_pull_secret = config["registry"]["image_pull_secret"]
+    # This is the regex used by kubectl to validate objects names
+    pattern = "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    if not re.fullmatch(pattern, str(image_pull_secret)):
+        return False
+    return True
+
+
 def provision(args, apic_file, no_random):
     config_file = args.config
     output_file = args.output
@@ -1545,6 +1574,12 @@ def provision(args, apic_file, no_random):
     if not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
+
+    # Verify that image_pull_secret is a valid K8s secret name and not a YAML string
+    if "registry" in config.keys() and "image_pull_secret" in config["registry"]:
+        if not check_image_pull_secret(config):
+            err("Invalid image_pull_secret value, it must be a valid DNS subdomain name.")
+            return False
 
     # Adjust config based on convention/apic data
     adj_config = config_adjust(args, config, prov_apic, no_random)

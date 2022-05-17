@@ -27,13 +27,23 @@ spec:
       name: aci-containers-operator
       namespace: kube-system
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: preferred-node
+                operator: In
+                values:
+                - aci-containers-operator-2577247291
+            weight: 1
       containers:
       - env:
         - name: SYSTEM_NAMESPACE
           value: kube-system
         - name: ACC_PROVISION_FLAVOR
           value: kubernetes-1.22
-        image: noiro/aci-containers-operator:5.2.3.2.1d150da
+        image: noiro/aci-containers-operator:6.0.0.0.0ef4718
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
@@ -55,7 +65,7 @@ spec:
           value: kubernetes-1.22
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
-        image: noiro/acc-provision-operator:5.2.3.2.1d150da
+        image: noiro/acc-provision-operator:6.0.0.0.179471b
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}

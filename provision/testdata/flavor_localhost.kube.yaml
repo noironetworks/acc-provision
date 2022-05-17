@@ -1331,7 +1331,8 @@ data:
                 "name": "kubernetes|kube-system"
             }        },
         "enable-drop-log": true,
-        "enable-nodepodif": false
+        "enable-nodepodif": false,
+        "enable-ovs-hw-offload": false
     }
   opflex-agent-config: |-
     {
@@ -2020,8 +2021,15 @@ spec:
       hostNetwork: true
       serviceAccountName: aci-containers-controller
       tolerations:
-        - operator: Exists
-          effect: NoSchedule
+        - effect: NoExecute
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoSchedule
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
       priorityClassName: system-node-critical
       containers:
         - name: aci-gbpserver
