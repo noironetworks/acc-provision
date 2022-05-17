@@ -1201,6 +1201,8 @@ spec:
                   logging:
                     type: object
                     properties:
+                      size:
+                        type: integer
                       controller_log_level:
                         type: string
                       hostagent_log_level:

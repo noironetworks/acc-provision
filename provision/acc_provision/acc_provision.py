@@ -230,6 +230,7 @@ def config_default():
             "aci_cni_operator_version": None,
         },
         "logging": {
+            "size": None,
             "controller_log_level": "info",
             "hostagent_log_level": "info",
             "opflexagent_log_level": "info",
