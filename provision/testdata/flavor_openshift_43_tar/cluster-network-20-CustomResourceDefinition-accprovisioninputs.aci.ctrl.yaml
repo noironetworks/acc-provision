@@ -87,6 +87,8 @@ spec:
                         type: string
                       opflexagent_log_level:
                         type: string
+                      size:
+                        type: integer
                     type: object
                   multus:
                     properties:
