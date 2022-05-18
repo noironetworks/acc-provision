@@ -519,14 +519,14 @@ def test_flavor_cko_calico():
 
 
 @in_testdir
-def test_flavor_cko_aci():
+def test_flavor_cko_kubernetes_1_22():
     run_provision(
         "flavor_cko_aci.inp.yaml",
         "flavor_cko_aci.kube.yaml",
         None,
         None,
         "flavor_cko_aci.apic.txt",
-        overrides={"flavor": "cko-aci"}
+        overrides={"flavor": "kubernetes-1.22", "cko": True, "netop_image_tag": "1.1.1-test"}
     )
 
 
@@ -1054,6 +1054,8 @@ def get_args(**overrides):
         "infra_vlan": None,
         "test_run": True,
         "flavor_version": None,
+        "cko": True,
+        "netop_image_tag": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)

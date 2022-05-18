@@ -334,6 +334,14 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
+                                                "tnVzBrCPName": "aci-containers-acitest1-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
                                                 "tnVzBrCPName": "aci-containers-acitest1-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }

@@ -57,10 +57,10 @@ service_mesh_topology:
     role: Primary
     kubeconfig: testurl2
 
-lb_config: #This section should be present at all times.
+lb_config:
   lb_type: metallb # only for calico
   
-monitoring_config: #This section should be present at all times.
+monitoring_config:
   monitoring_type: prometheus
   remote_write_ip: 3.237.37.136 #This value is derived from the configmap
   remote_write_port: 32307 #This value is derived from the configmap

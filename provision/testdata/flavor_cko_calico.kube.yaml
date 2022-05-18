@@ -68,16 +68,32 @@ spec:
               cniStatus:
                 additionalProperties:
                   type: string
-                description: Store Spec Location
                 type: object
               cniType:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 type: string
+              cniVersion:
+                type: string
+              internalState:
+                type: string
+              ipam:
+                type: string
+              managedState:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer
-              state:
+              operatorStatus:
                 type: string
+              upgradeStatus:
+                properties:
+                  cniUpgradeState:
+                    type: string
+                  currentVersion:
+                    type: string
+                  previousVersion:
+                    type: string
+                type: object
               workloadCheck:
                 additionalProperties:
                   type: string
@@ -215,6 +231,11 @@ spec:
           status:
             description: InstallerStatus defines the observed state of Installer
             properties:
+              clusterOverview:
+                additionalProperties:
+                  type: string
+                description: store count of pods & services
+                type: object
               componentStatus:
                 additionalProperties:
                   properties:
@@ -682,6 +703,12 @@ metadata:
   creationTimestamp: null
   name: netop-manager-manager-role
 rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "*"
+  verbs:
+  - "*"
 - apiGroups:
   - ""
   resources:
@@ -1572,6 +1599,7 @@ data:
   serverIP: 10.96.101.1/12
   serverPort: 1234
   serverEnabled: false
+
 ---
 apiVersion: netop-manager-cntrlr.netop-manager.io/v1
 kind: Installer

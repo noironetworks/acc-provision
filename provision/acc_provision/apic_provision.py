@@ -274,7 +274,7 @@ class Apic(object):
                 self.errors += 1
                 err("Error in provisioning %s: %s" % (path, str(e)))
 
-    def unprovision(self, data, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name, lnodep, lifp):
+    def unprovision(self, data, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name=None, lnodep=None, lifp=None):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
@@ -282,32 +282,6 @@ class Apic(object):
             shared_resources.append("/api/mo/uni/tn-%s.json" % vrf_tenant)
 
         try:
-            for path, config in data:
-                if cfg["flavor"] == "cko-calico":
-                    continue
-                if path.split("/")[-1].startswith("instP-"):
-                    continue
-                if path not in shared_resources:
-                    resp = self.delete(path)
-                    self.check_resp(resp)
-                    dbg("%s: %s" % (path, resp.text))
-                else:
-                    if path == cluster_tenant_path:
-                        path += "?query-target=children"
-                        resp = self.get(path)
-                        self.check_resp(resp)
-                        respj = json.loads(resp.text)
-                        respj = respj["imdata"]
-                        for resp in respj:
-                            for val in resp.values():
-                                if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
-                                    del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
-                                    if 'name' in val['attributes']:
-                                        name = val['attributes']['name']
-                                        if (not old_naming) and (system_id in name):
-                                            resp = self.delete(del_path)
-                                            self.check_resp(resp)
-                                            dbg("%s: %s" % (del_path, resp.text))
             if cfg["flavor"] == "cko-calico":
                 fsvi_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s.json" % (tenant, l3out_name, lnodep, lifp)
                 fsvi_path += "?query-target=children&target-subtree-class=l3extVirtualLIfP"
@@ -362,6 +336,30 @@ class Apic(object):
                         resp = self.delete(del_path)
                         self.check_resp(resp)
                         dbg("%s: %s" % (del_path, resp.text))
+            for path, config in data:
+                if path.split("/")[-1].startswith("instP-"):
+                    continue
+                if path not in shared_resources:
+                    resp = self.delete(path)
+                    self.check_resp(resp)
+                    dbg("%s: %s" % (path, resp.text))
+                else:
+                    if path == cluster_tenant_path:
+                        path += "?query-target=children"
+                        resp = self.get(path)
+                        self.check_resp(resp)
+                        respj = json.loads(resp.text)
+                        respj = respj["imdata"]
+                        for resp in respj:
+                            for val in resp.values():
+                                if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
+                                    del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                                    if 'name' in val['attributes']:
+                                        name = val['attributes']['name']
+                                        if (not old_naming) and (system_id in name):
+                                            resp = self.delete(del_path)
+                                            self.check_resp(resp)
+                                            dbg("%s: %s" % (del_path, resp.text))
 
             if old_naming:
                 for object in self.TENANT_OBJECTS:
