@@ -27,7 +27,7 @@ try:
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 except Exception:
     pass
-#Try importing Mapping for python 3.10, if it fails default to the older version
+# Try importing Mapping for python 3.10, if it fails default to the older version
 try:
     from collections.abc import Mapping
 except ImportError:
