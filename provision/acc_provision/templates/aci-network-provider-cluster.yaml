@@ -51,6 +51,9 @@ network:
     {% if config.drop_log_config.enable != True %}
     droplog_enable: "{{ config.drop_log_config.enable|lower() }}"
     {% endif %}
+    {% if config.logging.size %}
+    size: {{ config.logging.size }}
+    {% endif %}
     {% if config.logging.controller_log_level != "info" %}
     controller_log_level: "{{ config.logging.controller_log_level }}"
     {% endif %}
