@@ -19,13 +19,23 @@ openshiftOpenstackFlavorOptions : &anchor1
     use_kubeapi_vlan: false
 
 flavors:
+  kubernetes-1.23:
+     desc: Kubernetes 1.23
+     default_version: 5.2
+     status: null
+     hidden: false
+     order: 25
+     config:
+       kube_config:
+         allow_kube_api_default_epg: True
+         use_host_netns_volume: True
   # Upstream Kubernetes
   kubernetes-1.22:
     desc: Kubernetes 1.22
     default_version: 5.2
     status: null
     hidden: false
-    order: 25
+    order: 26
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -36,7 +46,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: false
-    order: 26
+    order: 27
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -46,7 +56,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: false
-    order: 27
+    order: 28
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -56,7 +66,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 28
+    order: 29
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -65,7 +75,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 29
+    order: 30
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -74,43 +84,43 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 30
+    order: 31
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 5.2
     status: null
     hidden: true
-    order: 31
+    order: 32
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 5.2
     status: null
     hidden: true
-    order: 32
+    order: 33
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 5.2
     status: null
     hidden: true
-    order: 33
+    order: 34
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 5.2
     status: null
     hidden: true
-    order: 34
+    order: 35
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 5.2
     status: null
     hidden: true
-    order: 35
+    order: 36
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 36
+    order: 37
     config:
       kube_config:
         no_priority_class: True
@@ -119,7 +129,7 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 37
+    order: 38
     config:
       kube_config:
         no_priority_class: True
@@ -2985,7 +2995,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 38
+    order: 39
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 5.2
@@ -3031,7 +3041,7 @@ flavors:
         enable: true
     status: Experimental
     hidden: true
-    order: 39
+    order: 40
   aks:
     desc: Azure Kubernetes Service
     default_version: 5.2
@@ -3090,7 +3100,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: true
-    order: 40
+    order: 41
   cloud:
     desc: Openshift IPI/AWS
     default_version: 5.2
@@ -3218,7 +3228,7 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 41
+    order: 42
   eks:
     desc: Elastic Kubernetes Service (aws)
     default_version: 5.2
@@ -3344,4 +3354,4 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 42
+    order: 43
