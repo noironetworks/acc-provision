@@ -1575,14 +1575,13 @@ data:
     variable.sh: |-
      #!/bin/bash
       
-      namespace="netop-manager-system"
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
-      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
       gitrepo="github.com/networkoperator/demo-clusters.git"
       gitdir="demo-cluster"
       gitbranch="test"
-      gittoken=""
+      gittoken="Z2hwX2RwbWF2ODV4Y2NwQlJZdXhDSWNOc0hCRzQxeWViczNHNzlRUA=="
       gituser="networkoperator-gittest"
       gitemail="test@cisco.com"
       sleepduration=5s

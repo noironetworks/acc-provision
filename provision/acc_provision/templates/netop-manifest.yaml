@@ -1583,10 +1583,9 @@ data:
     variable.sh: |-
      #!/bin/bash
       
-      namespace="netop-manager-system"
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
-      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
       gitrepo="{{ config.cko_git_config.git_repo }}"
       gitdir="{{ config.cko_git_config.git_dir }}"
       gitbranch="{{ config.cko_git_config.git_branch }}"

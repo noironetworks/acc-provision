@@ -208,7 +208,7 @@ def config_default():
         },
         "cko_git_config": {
             "git_repo": "github.com/networkoperator/demo-clusters.git",
-            "git_dir": "demo-clusters",
+            "git_dir": "demo-cluster-manifests",
             "git_branch": "test",
             "git_user": "networkoperator-gittest",
             "git_email": "test@cisco.com",
