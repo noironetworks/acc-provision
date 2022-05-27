@@ -1465,7 +1465,7 @@ spec:
       containers:
       - args:
         - --secure-listen-address=0.0.0.0:8444
-        - --upstream=http://127.0.0.1:8080/
+        - --upstream=http://127.0.0.1:9999/
         - --logtostderr=true
         - --v=10
         image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
@@ -1475,7 +1475,7 @@ spec:
           name: https
           protocol: TCP
       - args:
-        - --metrics-bind-address=127.0.0.1:8080
+        - --metrics-bind-address=127.0.0.1:9999
         - --leader-elect
         command:
         - /manager
@@ -1508,12 +1508,9 @@ spec:
         imagePullPolicy: Always
         name: manager
         resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
           requests:
             cpu: 125m
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           capabilities:
             add:
@@ -1589,9 +1586,9 @@ data:
       projectlabelKey="netop-manager"
       resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
       gitrepo="github.com/networkoperator/demo-clusters.git"
-      gitdir="demo-cluster"
+      gitdir="demo-clusters"
       gitbranch="test"
-      gittoken="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"
+      gittoken=""
       gituser="networkoperator-gittest"
       gitemail="test@cisco.com"
       sleepduration=5s

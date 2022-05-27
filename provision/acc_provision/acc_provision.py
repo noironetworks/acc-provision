@@ -208,9 +208,8 @@ def config_default():
         },
         "cko_git_config": {
             "git_repo": "github.com/networkoperator/demo-clusters.git",
-            "git_dir": "demo-cluster",
+            "git_dir": "demo-clusters",
             "git_branch": "test",
-            "git_token": "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",
             "git_user": "networkoperator-gittest",
             "git_email": "test@cisco.com",
             "sleep_duration": 5,
