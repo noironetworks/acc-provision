@@ -12,10 +12,10 @@ spec:
         version: "0.1"
         options:
           meshType: "Cisco-SMM"
-          clusterName: {{ config.service_mesh_config.name }}
-          networkName: {{ config.service_mesh_config.network }}
-          meshName: {{ config.service_mesh_config.mesh_id }}
-          meshMode: Active
+          clusterName: "{{ config.service_mesh_config.name }}"
+          networkName: "{{ config.service_mesh_config.network }}"
+          meshName: "{{ config.service_mesh_config.mesh_id }}"
+          meshMode: "Active"
         arrayOptions:
           remoteControlPlane: 
           {% for sm_config in (config.service_mesh_topology) %}

@@ -260,6 +260,7 @@ def config_default():
         "registry": {
             "image_prefix": "noiro",
             "aci_cni_operator_version": None,
+            "network_operator_version": "demo-test",
         },
         "logging": {
             "size": None,
@@ -418,6 +419,9 @@ def config_adjust(args, config, prov_apic, no_random):
         config["aci_config"]["nodes_epg"] = "kube-nodes"
         bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
         istio_epg = "kube-istio"
+
+    if (config["monitoring_config"] or config["service_mesh_config"]):
+       config["kube_config"]["allow_kube_api_default_epg"] = True
 
     aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
@@ -618,7 +622,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
-
+   
     return adj_config
 
 

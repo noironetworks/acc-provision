@@ -1504,12 +1504,12 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
-        image: quay.io/noirolabs/cni-manager:test
+        image: quay.io/noirolabs/cni-manager:demo-test
         imagePullPolicy: Always
         name: manager
         resources:
           requests:
-            cpu: 125m
+            cpu: 500m
             memory: 128Mi
         securityContext:
           capabilities:
@@ -1571,6 +1571,9 @@ data:
       - "10-opflex-cni.conf"
       cko-cni-cilium:
       - "05-cilium.conf"
+      cko-cni-awsvpc:
+      - "10-aws.conflist"
+      - "10-aws.conf"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1581,10 +1584,9 @@ data:
     variable.sh: |-
      #!/bin/bash
       
-      namespace="netop-manager-system"
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
-      resources="cniops.cni-manager.netop-manager.io installers.netop-manager-cntrlr.netop-manager.io loadbalanacerops.lb-manager.netop-manager.io monitoringops.monitoring-manager.netop-manager.io servicemeshops.service-mesh.netop-manager.io"
+      resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
       gitrepo="github.com/networkoperator/demo-clusters.git"
       gitdir="demo-cluster"
       gitbranch="test"
@@ -1599,9 +1601,8 @@ metadata:
   name: websocket-config
   namespace: netop-manager-system
 data:
-  serverIP: 10.96.101.1/12
-  serverPort: 1234
-  serverEnabled: false
+  serverIP: "10.96.101.1/12"
+  serverPort: "1234"
 
 ---
 apiVersion: netop-manager-cntrlr.netop-manager.io/v1

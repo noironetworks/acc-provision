@@ -526,7 +526,7 @@ def test_flavor_cko_kubernetes_1_22():
         None,
         None,
         "flavor_cko_aci.apic.txt",
-        overrides={"flavor": "kubernetes-1.22", "cko": True, "netop_image_tag": "1.1.1-test"}
+        overrides={"flavor": "kubernetes-1.22", "cko": True}
     )
 
 

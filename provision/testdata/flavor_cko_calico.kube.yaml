@@ -1498,12 +1498,12 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
-        image: quay.io/noirolabs/cni-manager:0.0.1-test
+        image: quay.io/noirolabs/cni-manager:demo-test
         imagePullPolicy: Always
         name: manager
         resources:
           requests:
-            cpu: 125m
+            cpu: 500m
             memory: 128Mi
         securityContext:
           capabilities:
@@ -1565,6 +1565,9 @@ data:
       - "10-opflex-cni.conf"
       cko-cni-cilium:
       - "05-cilium.conf"
+      cko-cni-awsvpc:
+      - "10-aws.conflist"
+      - "10-aws.conf"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1592,9 +1595,8 @@ metadata:
   name: websocket-config
   namespace: netop-manager-system
 data:
-  serverIP: 10.96.101.1/12
-  serverPort: 1234
-  serverEnabled: false
+  serverIP: "10.96.101.1/12"
+  serverPort: "1234"
 
 ---
 apiVersion: netop-manager-cntrlr.netop-manager.io/v1
@@ -1610,10 +1612,10 @@ spec:
         version: "0.1"
         options:
           meshType: "Cisco-SMM"
-          clusterName: calicotest1
-          networkName: calicotest1
-          meshName: mesh1
-          meshMode: Active
+          clusterName: "calicotest1"
+          networkName: "calicotest1"
+          meshName: "mesh1"
+          meshMode: "Active"
         arrayOptions:
           remoteControlPlane: 
           - "testurl2"

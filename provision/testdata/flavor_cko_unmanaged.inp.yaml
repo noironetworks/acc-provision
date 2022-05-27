@@ -42,4 +42,3 @@ control_cluster_websocket:
 
 registry:
   image_prefix: quay.io/noirolabs
-  network_operator_version: test
