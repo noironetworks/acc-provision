@@ -197,7 +197,6 @@ def config_default():
                 "nodeSelector": "all()",
             },
             "bgp_config": {
-                "bgp_secret": None,
             },
             "bgp_peer_config": {
                 "name": None,
@@ -355,7 +354,7 @@ def cidr_split(cidr):
     return str(first), str(last), str(n[1]), str(n.network_address), mask, str(ip)
 
 
-def normalize_cidr(cidr):
+def normalize_cidr (cidr):
     # To convert CIDR network ending with .1 to .0. For eg, convert 10.0.0.1/16 to 10.0.0.0/16
     rtr, _ = cidr.split('/')
     ip = ipaddress.ip_address(rtr)
@@ -421,7 +420,7 @@ def config_adjust(args, config, prov_apic, no_random):
         istio_epg = "kube-istio"
 
     if (config["monitoring_config"] or config["service_mesh_config"]):
-       config["kube_config"]["allow_kube_api_default_epg"] = True
+       config["kube_config"]["allow_pods_external_access"] = True
 
     aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
@@ -443,10 +442,6 @@ def config_adjust(args, config, prov_apic, no_random):
         node_service_ip_pool = []
 
     if config["flavor"] == "cko-calico" or config["flavor"] == "calico":
-        config["net_config"]["pod_subnet"] = validate_subnet(pod_subnet)
-        config["net_config"]["node_subnet"] = validate_subnet(node_subnet)
-        config["net_config"]["extern_dynamic"] = validate_subnet(extern_dynamic)
-        config["net_config"]["cluster_svc_subnet"] = validate_subnet(cluster_svc_subnet)
         config["aci_config"]["l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
         config["aci_config"]["l3out"]["svi"]["int_prof_name"] = l3out_name + "_int_prof"
 

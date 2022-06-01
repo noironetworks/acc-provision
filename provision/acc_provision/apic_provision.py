@@ -5363,7 +5363,10 @@ class ApicKubeConfig(object):
         physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
         remote_asn = self.config["calico_config"]["bgp_peer_config"]["remote_as_number"]
         local_asn = self.config["calico_config"]["bgp_peer_config"]["local_as_number"]
-        password = self.config["calico_config"]["bgp_config"]["bgp_secret"]
+        if "bgp_secret" in self.config["calico_config"]["bgp_config"]:
+            password = self.config["calico_config"]["bgp_config"]["bgp_secret"]
+        else:
+            password = None
         logical_node_profile = self.config["aci_config"]["l3out"]["svi"]["node_profile_name"]
         int_prof = self.config["aci_config"]["l3out"]["svi"]["int_prof_name"]
         path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s].json" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_id, vlan_id)
@@ -5447,8 +5450,7 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("addr", node_subnet),
-                                                                    ("ctrl", "as-override,dis-peer-as-check"),
-                                                                    ("password", password)
+                                                                    ("ctrl", "as-override,dis-peer-as-check")
                                                                 ]
                                                             ),
                                                         ),
@@ -5527,6 +5529,14 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        if password is not None:
+            data["l3extVirtualLIfP"]["children"][2]["bgpPeerP"]["attributes"].update(             
+                collections.OrderedDict(
+                    [
+                        ("password", password)
+                    ]
+                ),
+            ),
         self.annotateApicObjects(data)
         return path, data
 

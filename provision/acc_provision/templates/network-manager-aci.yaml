@@ -16,6 +16,7 @@ spec:
           networkName: {{ config.service_mesh_config.network }}
           meshName: {{ config.service_mesh_config.mesh_id }}
           meshMode: Active
+        arrayOptions:
           remoteControlPlane: 
           {% for sm_config in (config.service_mesh_topology) %}
           {% if sm_config['name'] != config.aci_config.system_id %}

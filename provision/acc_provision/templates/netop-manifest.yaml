@@ -250,7 +250,7 @@ spec:
                   type: object
                 description: Single String String
                 type: object
-              desiredIntent:
+              deployedIntent:
                 additionalProperties:
                   properties:
                     op:

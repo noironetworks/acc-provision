@@ -24,16 +24,14 @@ aci_config:
       mtu: 9000
 
 net_config:
-  node_subnet: 2.100.101.0/24
-  pod_subnet: 20.2.0.0/16
-  extern_dynamic: 20.3.0.0/16
+  node_subnet: 2.100.101.1/24
+  pod_subnet: 20.2.0.1/16
+  extern_dynamic: 20.3.0.1/16
   cluster_svc_subnet: 10.96.0.0/12
 
 calico_config:
   net_config:
     encapsulation: None
-  bgp_config:
-    bgp_secret: test
   bgp_peer_config:
     remote_as_number: 64514
     local_as_number: 64513

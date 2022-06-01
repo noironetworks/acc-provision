@@ -6,9 +6,11 @@ spec:
   peerIP: {{config.calico_config.bgp_peer_config.peerIP}}
   asNumber: {{ config.calico_config.bgp_peer_config.remote_as_number }}
   nodeSelector: rack_id == "{{config.calico_config.bgp_peer_config.rackID}}"
+  {% if config.calico_config.bgp_config.bgp_secret %}
   password:
     secretKeyRef:
       name: bgp-secrets
       key: {{ config.calico_config.bgp_config.bgp_secret }}
+  {% endif %}
 
 

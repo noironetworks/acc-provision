@@ -22,6 +22,7 @@ kind: APIServer
 metadata: 
   name: default 
 spec: {}
+{% if config.calico_config.bgp_config.bgp_secret %}
 ---
 #This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
 apiVersion: v1
@@ -32,6 +33,7 @@ metadata:
 type: Opaque
 stringData:
   rr-password: {{ config.calico_config.bgp_config.bgp_secret }}
+{% endif %}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

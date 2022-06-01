@@ -6,7 +6,7 @@ metadata:
 spec:
   config:
     networkFunctions:
-      {% if config.service_mesh_config and config.service_mesh_topology%}
+      {% if config.service_mesh_config and config.service_mesh_topology %}
       cko-sm:
         type: cko-sm-smm
         version: "0.1"
