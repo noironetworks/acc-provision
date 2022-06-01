@@ -535,6 +535,8 @@ flavors:
     desc: Red Hat OpenShift Container Platform 4.7 on Baremetal
     default_version: 5.2
     config:
+      net_config:
+        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -554,7 +556,6 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
-        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
@@ -636,11 +637,12 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
-    options: *anchor1
     status: null
     hidden: false
     order: 3
@@ -648,6 +650,8 @@ flavors:
     desc: Red Hat OpenShift Container Platform 4.6 on Baremetal
     default_version: 5.2
     config:
+      net_config:
+        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -667,7 +671,6 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
-        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
@@ -749,17 +752,18 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
-    options: *anchor1
     status: null
     hidden: false
     order: 4
   openshift-4.10-openstack:
     desc: Red Hat OpenShift Container Platform 4.10 on OpenStack
-    default_version: 6.0
+    default_version: 5.2
     config:
       kube_config:
         use_acicni_priority_class: True
@@ -898,8 +902,7 @@ flavors:
         items:
           - name: openshift-svc-catalog
             range:
-              -
-                [2379, 2379]
+              - [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
@@ -907,46 +910,26 @@ flavors:
             provided: ["nodes"]
           - name: openshift-monitoring
             range:
-              -
-                [1936, 1936]
-              -
-                [2112, 2112]
-              -
-                [3000, 3000]
-              -
-                [8080, 8081]
-              -
-                [8383, 8383]
-              -
-                [8441, 8442]
-              -
-                [8686, 8686]
-              -
-                [9001, 9001]
-              -
-                [9091, 9091]
-              -
-                [9094, 9094]
-              -
-                [9095, 9095]
-              -
-                [9099, 9101]
-              -
-                [9192, 9192]
-              -
-                [9393, 9393]
-              -
-                [9537, 9537]
-              -
-                [10250, 10250]
-              -
-                [10257, 10257]
-              -
-                [10259, 10259]
-              -
-                [17698, 17698]
-              -
-                [60000, 60000]
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
             etherT: ip
             prot: tcp
             stateful: "no"
@@ -1008,8 +991,6 @@ flavors:
     desc: Red Hat OpenShift Container Platform 4.8 on OpenStack
     default_version: 5.2
     config:
-      net_config:
-        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -1029,12 +1010,12 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
+        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
             range:
-              -
-                [2379, 2379]
+              - [2379, 2379]
             etherT: ip
             prot: tcp
             stateful: "no"
@@ -1042,46 +1023,26 @@ flavors:
             provided: ["nodes"]
           - name: openshift-monitoring
             range:
-              -
-                [1936, 1936]
-              -
-                [2112, 2112]
-              -
-                [3000, 3000]
-              -
-                [8080, 8081]
-              -
-                [8383, 8383]
-              -
-                [8441, 8442]
-              -
-                [8686, 8686]
-              -
-                [9001, 9001]
-              -
-                [9091, 9091]
-              -
-                [9094, 9094]
-              -
-                [9095, 9095]
-              -
-                [9099, 9101]
-              -
-                [9192, 9192]
-              -
-                [9393, 9393]
-              -
-                [9537, 9537]
-              -
-                [10250, 10250]
-              -
-                [10257, 10257]
-              -
-                [10259, 10259]
-              -
-                [17698, 17698]
-              -
-                [60000, 60000]
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
             etherT: ip
             prot: tcp
             stateful: "no"
@@ -1131,12 +1092,11 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
-          nested_inside:
-            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
+    options: *anchor1
     status: null
     hidden: false
     order: 7
@@ -1278,8 +1238,6 @@ flavors:
     desc: Red Hat OpenShift Container Platform 4.6 on OpenStack
     default_version: 5.2
     config:
-      net_config:
-        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -1299,6 +1257,7 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
+        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
@@ -1401,12 +1360,11 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
-          nested_inside:
-            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
+    options: *anchor1
     status: null
     hidden: false
     order: 9
@@ -1493,17 +1451,17 @@ flavors:
           - name: etcd2
             range: [9978, 9979]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
           - name: http
             range: [http, http]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
           - name: https
             range: [https, https]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
         dns_entries:
           - name: dns-multicast-tcp

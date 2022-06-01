@@ -1331,7 +1331,8 @@ data:
                 "name": "kubernetes|kube-system"
             }        },
         "enable-drop-log": true,
-        "enable-nodepodif": false
+        "enable-nodepodif": false,
+        "enable-ovs-hw-offload": false
     }
   opflex-agent-config: |-
     {

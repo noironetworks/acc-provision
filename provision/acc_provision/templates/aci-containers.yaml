@@ -25,6 +25,7 @@ metadata:
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
 kind: PriorityClass
 metadata:
   name: acicni-priority
@@ -1498,12 +1499,14 @@ data:
         "enable_endpointslice": true,
         {% endif %}
         {% if config.nodepodif_config.enable %}
-        "enable-nodepodif": true
+        "enable-nodepodif": true,
         {% else %}
-        "enable-nodepodif": false
+        "enable-nodepodif": false,
         {% endif %}
         {% if config.sriov_config.enable %}
         "enable-ovs-hw-offload": true
+        {% else %}
+        "enable-ovs-hw-offload": false
         {% endif %}
     }
   opflex-agent-config: |-
