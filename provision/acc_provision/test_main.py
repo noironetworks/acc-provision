@@ -351,6 +351,42 @@ def test_flavor_openshift_46_openstack():
 
 
 @in_testdir
+def test_flavor_openshift_48_openstack():
+    run_provision(
+        "flavor_openshift_48_openstack.inp.yaml",
+        "flavor_openshift_48_openstack.kube.yaml",
+        "flavor_openshift_48_openstack_tar",
+        None,
+        "flavor_openshift_48_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.8-openstack"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_49_openstack():
+    run_provision(
+        "flavor_openshift_49_openstack.inp.yaml",
+        "flavor_openshift_49_openstack.kube.yaml",
+        "flavor_openshift_49_openstack_tar",
+        None,
+        "flavor_openshift_49_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.9-openstack"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_410_openstack():
+    run_provision(
+        "flavor_openshift_410_openstack.inp.yaml",
+        "flavor_openshift_410_openstack.kube.yaml",
+        "flavor_openshift_410_openstack_tar",
+        None,
+        "flavor_openshift_410_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.10-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_47_esx():
     run_provision(
         "flavor_openshift_47_esx.inp.yaml",
@@ -371,6 +407,78 @@ def test_flavor_openshift_48_esx():
         None,
         "flavor_openshift_48_esx.apic.txt",
         overrides={"flavor": "openshift-4.8-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_49_esx():
+    run_provision(
+        "flavor_openshift_49_esx.inp.yaml",
+        "flavor_openshift_49_esx.kube.yaml",
+        "flavor_openshift_49_esx_tar",
+        None,
+        "flavor_openshift_49_esx.apic.txt",
+        overrides={"flavor": "openshift-4.9-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_410_esx():
+    run_provision(
+        "flavor_openshift_410_esx.inp.yaml",
+        "flavor_openshift_410_esx.kube.yaml",
+        "flavor_openshift_410_esx_tar",
+        None,
+        "flavor_openshift_410_esx.apic.txt",
+        overrides={"flavor": "openshift-4.10-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_410_baremetal():
+    run_provision(
+        "flavor_openshift_410_baremetal.inp.yaml",
+        "flavor_openshift_410_baremetal.kube.yaml",
+        "flavor_openshift_410_baremetal_tar",
+        None,
+        "flavor_openshift_410_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.10-baremetal"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_49_baremetal():
+    run_provision(
+        "flavor_openshift_49_baremetal.inp.yaml",
+        "flavor_openshift_49_baremetal.kube.yaml",
+        "flavor_openshift_49_baremetal_tar",
+        None,
+        "flavor_openshift_49_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.9-baremetal"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_48_baremetal():
+    run_provision(
+        "flavor_openshift_48_baremetal.inp.yaml",
+        "flavor_openshift_48_baremetal.kube.yaml",
+        "flavor_openshift_48_baremetal_tar",
+        None,
+        "flavor_openshift_48_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.8-baremetal"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_47_baremetal():
+    run_provision(
+        "flavor_openshift_47_baremetal.inp.yaml",
+        "flavor_openshift_47_baremetal.kube.yaml",
+        "flavor_openshift_47_baremetal_tar",
+        None,
+        "flavor_openshift_47_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.7-baremetal"}
     )
 
 
@@ -812,6 +920,28 @@ def test_overlapping_subnets():
 
 
 @in_testdir
+def test_image_pull_secret():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "with_image_pull_secret.inp.yaml",
+                None,
+                None,
+                None,
+                None
+            )
+        except SystemExit:
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("image_pull_secret.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
 def test_preexisting_kube_convention():
     with tempfile.NamedTemporaryFile("w+") as tmperr:
         sys.stderr = tmperr
@@ -849,7 +979,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.22",
+        "flavor": "kubernetes-1.23",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,

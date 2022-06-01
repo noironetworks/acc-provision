@@ -19,13 +19,23 @@ openshiftOpenstackFlavorOptions : &anchor1
     use_kubeapi_vlan: false
 
 flavors:
+  kubernetes-1.23:
+     desc: Kubernetes 1.23
+     default_version: 5.2
+     status: null
+     hidden: false
+     order: 25
+     config:
+       kube_config:
+         allow_kube_api_default_epg: True
+         use_host_netns_volume: True
   # Upstream Kubernetes
   kubernetes-1.22:
     desc: Kubernetes 1.22
     default_version: 5.2
     status: null
     hidden: false
-    order: 16
+    order: 26
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -36,7 +46,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: false
-    order: 17
+    order: 27
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -46,7 +56,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: false
-    order: 18
+    order: 28
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -56,7 +66,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 19
+    order: 29
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -65,7 +75,7 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 20
+    order: 30
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -74,43 +84,43 @@ flavors:
     default_version: 5.2
     status: null
     hidden: true
-    order: 21
+    order: 31
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 5.2
     status: null
     hidden: true
-    order: 22
+    order: 32
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 5.2
     status: null
     hidden: true
-    order: 23
+    order: 33
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 5.2
     status: null
     hidden: true
-    order: 24
+    order: 34
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 5.2
     status: null
     hidden: true
-    order: 25
+    order: 35
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 5.2
     status: null
     hidden: true
-    order: 26
+    order: 36
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 27
+    order: 37
     config:
       kube_config:
         no_priority_class: True
@@ -119,14 +129,16 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 28
+    order: 38
     config:
       kube_config:
         no_priority_class: True
-  openshift-4.7-openstack:
-    desc: Red Hat OpenShift Container Platform 4.7 on OpenStack
+  openshift-4.10-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.10 on Baremetal
     default_version: 5.2
     config:
+      net_config:
+        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -146,7 +158,6 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
-        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
@@ -249,18 +260,21 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
-    options: *anchor1
     status: null
     hidden: false
     order: 0
-  openshift-4.6-openstack:
-    desc: Red Hat OpenShift Container Platform 4.6 on OpenStack
+  openshift-4.9-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.9 on Baremetal
     default_version: 5.2
     config:
+      net_config:
+        kubeapi_vlan_mode: untagged
       kube_config:
         use_acicni_priority_class: True
         use_external_service_ip_allocator: False
@@ -280,7 +294,6 @@ flavors:
         generate_cnet_file: True
         use_host_netns_volume: True
       aci_config:
-        disable_node_subnet_creation: True
         kube_default_provide_kube_api: True
         items:
           - name: openshift-svc-catalog
@@ -383,16 +396,17 @@ flavors:
             stateful: "no"
         vmm_domain:
           type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
       istio_config:
         install_istio: False
       multus:
         disable: True
-    options: *anchor1
     status: null
     hidden: false
     order: 1
-  openshift-4.6-baremetal:
-    desc: Red Hat OpenShift Container Platform 4.6 on Baremetal
+  openshift-4.8-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.8 on Baremetal
     default_version: 5.2
     config:
       net_config:
@@ -527,6 +541,843 @@ flavors:
     status: null
     hidden: false
     order: 2
+  openshift-4.7-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.7 on Baremetal
+    default_version: 5.2
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 3
+  openshift-4.6-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.6 on Baremetal
+    default_version: 5.2
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 4
+  openshift-4.10-openstack:
+    desc: Red Hat OpenShift Container Platform 4.10 on OpenStack
+    default_version: 5.2
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 5
+  openshift-4.9-openstack:
+    desc: Red Hat OpenShift Container Platform 4.9 on OpenStack
+    default_version: 5.2
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 6
+  openshift-4.8-openstack:
+    desc: Red Hat OpenShift Container Platform 4.8 on OpenStack
+    default_version: 5.2
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 7
+  openshift-4.7-openstack:
+    desc: Red Hat OpenShift Container Platform 4.7 on OpenStack
+    default_version: 5.2
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 8
+  openshift-4.6-openstack:
+    desc: Red Hat OpenShift Container Platform 4.6 on OpenStack
+    default_version: 5.2
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 9
   openshift-4.5-openstack:
     desc: Red Hat OpenShift Container Platform 4.5 on OpenStack
     default_version: 5.2
@@ -610,17 +1461,17 @@ flavors:
           - name: etcd2
             range: [9978, 9979]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
           - name: http
             range: [http, http]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
           - name: https
             range: [https, https]
             etherT: ip
-            prot: tcp 
+            prot: tcp
             stateful: "no"
         dns_entries:
           - name: dns-multicast-tcp
@@ -651,8 +1502,282 @@ flavors:
         disable: True
     options: *anchor1
     status: null
+    hidden: true
+    order: 10
+  openshift-4.10-esx:
+    desc: Red Hat OpenShift Container Platform 4.10 on ESX
+    default_version: 5.2
+    config:
+      net_config:
+        second_kubeapi_portgroup: True
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
     hidden: false
-    order: 3
+    order: 11
+  openshift-4.9-esx:
+    desc: Red Hat OpenShift Container Platform 4.9 on ESX
+    default_version: 5.2
+    config:
+      net_config:
+        second_kubeapi_portgroup: True
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 12
   openshift-4.8-esx:
     desc: Red Hat OpenShift Container Platform 4.8 on ESX
     default_version: 5.2
@@ -789,7 +1914,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 4
+    order: 13
   openshift-4.7-esx:
     desc: Red Hat OpenShift Container Platform 4.7 on ESX
     default_version: 5.2
@@ -926,7 +2051,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 5
+    order: 14
   openshift-4.6-esx:
     desc: Red Hat OpenShift Container Platform 4.6 on ESX
     default_version: 5.2
@@ -1063,7 +2188,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 6
+    order: 15
   openshift-4.5-esx:
     desc: Red Hat OpenShift Container Platform 4.5 on ESX
     default_version: 5.2
@@ -1191,8 +2316,8 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
-    order: 7
+    hidden: true
+    order: 16
   openshift-4.4-openstack:
     desc: Red Hat OpenShift Container Platform 4.4 on OpenStack
     default_version: 5.2
@@ -1318,7 +2443,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 8
+    order: 17
   openshift-4.4-esx:
     desc: Red Hat OpenShift Container Platform 4.4 on ESX
     default_version: 5.2
@@ -1447,7 +2572,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 9
+    order: 18
   openshift-4.4:
     desc: Red Hat OpenShift Container Platform 4.4
     default_version: 5.2
@@ -1547,7 +2672,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 10
+    order: 19
   openshift-4.3:
     desc: Red Hat OpenShift Container Platform 4.3
     default_version: 5.2
@@ -1647,7 +2772,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 11
+    order: 20
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 5.2
@@ -1691,8 +2816,8 @@ flavors:
       multus:
         disable: False
     status: null
-    hidden: false
-    order: 12
+    hidden: true
+    order: 21
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
     default_version: 5.2
@@ -1736,7 +2861,7 @@ flavors:
         disable: False
     status: null
     hidden: true
-    order: 13
+    order: 22
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
     default_version: 5.2
@@ -1780,13 +2905,13 @@ flavors:
         disable: False
     status: null
     hidden: true
-    order: 14
+    order: 23
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
     default_version: 5.2
     status: null
-    hidden: false
+    hidden: true
     config:
       kube_config:
         no_priority_class: True
@@ -1814,7 +2939,7 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-    order: 15
+    order: 24
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 5.2
@@ -1870,7 +2995,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 29
+    order: 39
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 5.2
@@ -1915,8 +3040,8 @@ flavors:
       drop_log_config:
         enable: true
     status: Experimental
-    hidden: False
-    order: 30
+    hidden: true
+    order: 40
   aks:
     desc: Azure Kubernetes Service
     default_version: 5.2
@@ -1974,8 +3099,8 @@ flavors:
                 - name: ent1
                   prot: tcp
     status: Experimental
-    hidden: False
-    order: 31
+    hidden: true
+    order: 41
   cloud:
     desc: Openshift IPI/AWS
     default_version: 5.2
@@ -2102,8 +3227,8 @@ flavors:
                   prot: icmp
             
     status: Experimental
-    hidden: False
-    order: 32
+    hidden: true
+    order: 42
   eks:
     desc: Elastic Kubernetes Service (aws)
     default_version: 5.2
@@ -2228,5 +3353,5 @@ flavors:
                   prot: icmp
             
     status: Experimental
-    hidden: False
-    order: 33
+    hidden: true
+    order: 43
