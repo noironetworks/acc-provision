@@ -3,6 +3,11 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
+  {% if "openshift" in config.flavor %}
+    openshift.io/run-level: "0"
+  annotations:
+    openshift.io/node-selector: ''
+  {% endif %}
   name: netop-manager-system
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -1531,6 +1536,9 @@ spec:
         - mountPath: /status
           name: status-config-volume
       hostNetwork: true
+      {% if "openshift" in config.flavor %}
+      priorityClassName: netop-priority
+      {% endif %}
       securityContext:
         runAsNonRoot: false
       serviceAccountName: netop-manager-controller-manager
@@ -1606,4 +1614,14 @@ metadata:
 data:
   serverIP: "{{ config.control_cluster_websocket.server_ip }}"
   serverPort: "{{ config.control_cluster_websocket.server_port }}"
+{% endif %}
+{% if "openshift" in config.flavor %}
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: netop-priority
+value: 1000000000
+globalDefault: false
+description: "This priority class is used for netop-manager resources"
 {% endif %}
