@@ -250,7 +250,7 @@ spec:
                   type: object
                 description: Single String String
                 type: object
-              desiredIntent:
+              deployedIntent:
                 additionalProperties:
                   properties:
                     op:
@@ -1613,17 +1613,6 @@ metadata:
 spec:
   config:
     networkFunctions:
-      cko-sm:
-        type: cko-sm-smm
-        version: "0.1"
-        options:
-          meshType: "Cisco-SMM"
-          clusterName: unmanagedtest1
-          networkName: unmanagedtest1
-          meshName: mesh1
-          meshMode: Active
-          remoteControlPlane: 
-          - "testurl2"
       cko-monitoring:
         version: '0.1'
         type: cko-m-prometheus

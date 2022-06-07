@@ -553,6 +553,17 @@ def test_flavor_cko_unmanaged():
         overrides={"flavor": "cko-unmanaged"}
     )
 
+@in_testdir
+def test_flavor_cko_openshift_unmanaged():
+    run_provision(
+        "flavor_cko_openshift_unmanaged.inp.yaml",
+        "flavor_cko_openshift_unmanaged.kube.yaml",
+        None,
+        None,
+        None,
+        overrides={"flavor": "cko-openshift-unmanaged"}
+    )
+
 
 @in_testdir
 def test_flavor_calico():

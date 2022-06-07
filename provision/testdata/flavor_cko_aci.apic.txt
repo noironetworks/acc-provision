@@ -1,8 +1,8 @@
-/api/mo/uni/infra/vlanns-[acitest1-pool]-static.json
+/api/mo/uni/infra/vlanns-[bm2acicni-pool]-static.json
 {
     "fvnsVlanInstP": {
         "attributes": {
-            "name": "acitest1-pool",
+            "name": "bm2acicni-pool",
             "allocMode": "static",
             "annotation": "orchestrator:aci-containers-controller"
         },
@@ -30,12 +30,12 @@
         ]
     }
 }
-/api/mo/uni/infra/maddrns-acitest1-mpool.json
+/api/mo/uni/infra/maddrns-bm2acicni-mpool.json
 {
     "fvnsMcastAddrInstP": {
         "attributes": {
-            "name": "acitest1-mpool",
-            "dn": "uni/infra/maddrns-acitest1-mpool",
+            "name": "bm2acicni-mpool",
+            "dn": "uni/infra/maddrns-bm2acicni-mpool",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -51,19 +51,19 @@
         ]
     }
 }
-/api/mo/uni/phys-acitest1-pdom.json
+/api/mo/uni/phys-bm2acicni-pdom.json
 {
     "physDomP": {
         "attributes": {
-            "dn": "uni/phys-acitest1-pdom",
-            "name": "acitest1-pdom",
+            "dn": "uni/phys-bm2acicni-pdom",
+            "name": "bm2acicni-pdom",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "infraRsVlanNs": {
                     "attributes": {
-                        "tDn": "uni/infra/vlanns-[acitest1-pool]-static",
+                        "tDn": "uni/infra/vlanns-[bm2acicni-pool]-static",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -71,11 +71,11 @@
         ]
     }
 }
-/api/mo/uni/vmmp-Kubernetes/dom-acitest1.json
+/api/mo/uni/vmmp-Kubernetes/dom-bm2acicni.json
 {
     "vmmDomP": {
         "attributes": {
-            "name": "acitest1",
+            "name": "bm2acicni",
             "mode": "k8s",
             "enfPref": "sw",
             "encapMode": "vxlan",
@@ -87,7 +87,7 @@
             {
                 "vmmCtrlrP": {
                     "attributes": {
-                        "name": "acitest1",
+                        "name": "bm2acicni",
                         "mode": "k8s",
                         "scope": "kubernetes",
                         "hostOrIp": "1.1.1.1",
@@ -98,7 +98,7 @@
             {
                 "vmmRsDomMcastAddrNs": {
                     "attributes": {
-                        "tDn": "uni/infra/maddrns-acitest1-mpool",
+                        "tDn": "uni/infra/maddrns-bm2acicni-mpool",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -117,7 +117,7 @@
             {
                 "infraRsDomP": {
                     "attributes": {
-                        "tDn": "uni/vmmp-Kubernetes/dom-acitest1",
+                        "tDn": "uni/vmmp-Kubernetes/dom-bm2acicni",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -125,7 +125,7 @@
             {
                 "infraRsDomP": {
                     "attributes": {
-                        "tDn": "uni/phys-acitest1-pdom",
+                        "tDn": "uni/phys-bm2acicni-pdom",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -168,7 +168,7 @@
                         {
                             "infraRsFuncToEpg": {
                                 "attributes": {
-                                    "tDn": "uni/tn-acitest1/ap-aci-containers-acitest1/epg-aci-containers-nodes",
+                                    "tDn": "uni/tn-bm2acicni/ap-aci-containers-bm2acicni/epg-aci-containers-nodes",
                                     "encap": "vlan-2032",
                                     "mode": "regular",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -181,11 +181,11 @@
         ]
     }
 }
-/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/vmmp-Kubernetes/dom-acitest1].json
+/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/vmmp-Kubernetes/dom-bm2acicni].json
 None
-/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/phys-acitest1-pdom].json
+/api/mo/uni/infra/attentp-sauto_aep/rsdomP-[uni/phys-bm2acicni-pdom].json
 None
-/api/mo/uni/infra/attentp-sauto_aep/gen-default/rsfuncToEpg-[uni/tn-acitest1/ap-aci-containers-acitest1/epg-aci-containers-nodes].json
+/api/mo/uni/infra/attentp-sauto_aep/gen-default/rsfuncToEpg-[uni/tn-bm2acicni/ap-aci-containers-bm2acicni/epg-aci-containers-nodes].json
 None
 /api/mo/uni/infra.json
 {
@@ -208,7 +208,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "acitest1-allow-all-filter",
+                        "name": "bm2acicni-allow-all-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -226,7 +226,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "acitest1-l3out-allow-all",
+                        "name": "bm2acicni-l3out-allow-all",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -242,7 +242,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "acitest1-allow-all-filter",
+                                                "tnVzFilterName": "bm2acicni-allow-all-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -256,23 +256,23 @@ None
         ]
     }
 }
-/api/mo/uni/tn-common/flt-acitest1-allow-all-filter.json
+/api/mo/uni/tn-common/flt-bm2acicni-allow-all-filter.json
 None
-/api/mo/uni/tn-common/brc-acitest1-l3out-allow-all.json
+/api/mo/uni/tn-common/brc-bm2acicni-l3out-allow-all.json
 None
-/api/mo/uni/tn-acitest1.json
+/api/mo/uni/tn-bm2acicni.json
 {
     "fvTenant": {
         "attributes": {
-            "name": "acitest1",
-            "dn": "uni/tn-acitest1",
+            "name": "bm2acicni",
+            "dn": "uni/tn-bm2acicni",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "fvAp": {
                     "attributes": {
-                        "name": "aci-containers-acitest1",
+                        "name": "aci-containers-bm2acicni",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -286,7 +286,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-Kubernetes/dom-acitest1",
+                                                "tDn": "uni/vmmp-Kubernetes/dom-bm2acicni",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -294,7 +294,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-dns",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -302,7 +302,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-health-check",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -310,7 +310,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-icmp",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -318,7 +318,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-istio",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -326,7 +326,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-acitest1-pod-bd",
+                                                "tnFvBDName": "aci-containers-bm2acicni-pod-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -334,7 +334,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-api",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -342,7 +342,15 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "bm2acicni-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -360,7 +368,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-dns",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -368,7 +376,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-icmp",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -376,7 +384,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-health-check",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -384,7 +392,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-icmp",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -392,7 +400,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-api",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -400,7 +408,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "acitest1-l3out-allow-all",
+                                                "tnVzBrCPName": "bm2acicni-l3out-allow-all",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -408,7 +416,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-Kubernetes/dom-acitest1",
+                                                "tDn": "uni/vmmp-Kubernetes/dom-bm2acicni",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -416,7 +424,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-acitest1-pod-bd",
+                                                "tnFvBDName": "aci-containers-bm2acicni-pod-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -424,7 +432,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -442,7 +450,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-dns",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -450,7 +458,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-api",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -458,7 +466,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-icmp",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -466,7 +474,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-health-check",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -474,7 +482,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "acitest1-l3out-allow-all",
+                                                "tnVzBrCPName": "bm2acicni-l3out-allow-all",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -482,7 +490,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-Kubernetes/dom-acitest1",
+                                                "tDn": "uni/vmmp-Kubernetes/dom-bm2acicni",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -490,7 +498,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-acitest1-node-bd",
+                                                "tnFvBDName": "aci-containers-bm2acicni-node-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -499,7 +507,7 @@ None
                                         "fvRsDomAtt": {
                                             "attributes": {
                                                 "encap": "vlan-2032",
-                                                "tDn": "uni/phys-acitest1-pdom",
+                                                "tDn": "uni/phys-bm2acicni-pdom",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -507,7 +515,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -525,7 +533,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-istio",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -533,7 +541,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-api",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -541,7 +549,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-icmp",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -549,7 +557,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-health-check",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -557,7 +565,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-acitest1-dns",
+                                                "tnVzBrCPName": "aci-containers-bm2acicni-dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -565,7 +573,7 @@ None
                                     {
                                         "fvRsDomAtt": {
                                             "attributes": {
-                                                "tDn": "uni/vmmp-Kubernetes/dom-acitest1",
+                                                "tDn": "uni/vmmp-Kubernetes/dom-bm2acicni",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -573,7 +581,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-acitest1-pod-bd",
+                                                "tnFvBDName": "aci-containers-bm2acicni-pod-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -587,7 +595,7 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-node-bd",
+                        "name": "aci-containers-bm2acicni-node-bd",
                         "arpFlood": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
@@ -623,7 +631,7 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-pod-bd",
+                        "name": "aci-containers-bm2acicni-pod-bd",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -631,6 +639,7 @@ None
                             "fvSubnet": {
                                 "attributes": {
                                     "ip": "20.2.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -642,6 +651,14 @@ None
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "sauto_l3out-1",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
                         }
                     ]
                 }
@@ -649,7 +666,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-icmp-filter",
+                        "name": "aci-containers-bm2acicni-icmp-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -679,7 +696,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-health-check-filter-in",
+                        "name": "aci-containers-bm2acicni-health-check-filter-in",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -701,7 +718,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-health-check-filter-out",
+                        "name": "aci-containers-bm2acicni-health-check-filter-out",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -723,7 +740,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-dns-filter",
+                        "name": "aci-containers-bm2acicni-dns-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -759,7 +776,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-api-filter",
+                        "name": "aci-containers-bm2acicni-api-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -797,7 +814,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-istio-filter",
+                        "name": "aci-containers-bm2acicni-istio-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -877,7 +894,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-api",
+                        "name": "aci-containers-bm2acicni-api",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -893,7 +910,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-acitest1-api-filter",
+                                                "tnVzFilterName": "aci-containers-bm2acicni-api-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -907,7 +924,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-health-check",
+                        "name": "aci-containers-bm2acicni-health-check",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -931,7 +948,7 @@ None
                                                 {
                                                     "vzRsFiltAtt": {
                                                         "attributes": {
-                                                            "tnVzFilterName": "aci-containers-acitest1-health-check-filter-out",
+                                                            "tnVzFilterName": "aci-containers-bm2acicni-health-check-filter-out",
                                                             "annotation": "orchestrator:aci-containers-controller"
                                                         }
                                                     }
@@ -949,7 +966,7 @@ None
                                                 {
                                                     "vzRsFiltAtt": {
                                                         "attributes": {
-                                                            "tnVzFilterName": "aci-containers-acitest1-health-check-filter-in",
+                                                            "tnVzFilterName": "aci-containers-bm2acicni-health-check-filter-in",
                                                             "annotation": "orchestrator:aci-containers-controller"
                                                         }
                                                     }
@@ -966,7 +983,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-dns",
+                        "name": "aci-containers-bm2acicni-dns",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -982,7 +999,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-acitest1-dns-filter",
+                                                "tnVzFilterName": "aci-containers-bm2acicni-dns-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -996,7 +1013,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-icmp",
+                        "name": "aci-containers-bm2acicni-icmp",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1012,7 +1029,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-acitest1-icmp-filter",
+                                                "tnVzFilterName": "aci-containers-bm2acicni-icmp-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1026,7 +1043,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-istio",
+                        "name": "aci-containers-bm2acicni-istio",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1042,7 +1059,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-acitest1-istio-filter",
+                                                "tnVzFilterName": "aci-containers-bm2acicni-istio-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1056,7 +1073,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-prometheus-opflex-agent-filter",
+                        "name": "aci-containers-bm2acicni-prometheus-opflex-agent-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1080,7 +1097,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-acitest1-prometheus-opflex-agent",
+                        "name": "aci-containers-bm2acicni-prometheus-opflex-agent",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1096,7 +1113,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-acitest1-prometheus-opflex-agent-filter",
+                                                "tnVzFilterName": "aci-containers-bm2acicni-prometheus-opflex-agent-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1115,18 +1132,18 @@ None
     "fvRsProv": {
         "attributes": {
             "matchT": "AtleastOne",
-            "tnVzBrCPName": "acitest1-l3out-allow-all",
+            "tnVzBrCPName": "bm2acicni-l3out-allow-all",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/instP-sauto_l3out-1_epg/rsprov-acitest1-l3out-allow-all.json
+/api/mo/uni/tn-common/out-sauto_l3out-1/instP-sauto_l3out-1_epg/rsprov-bm2acicni-l3out-allow-all.json
 None
-/api/node/mo/uni/userext/user-acitest1.json
+/api/node/mo/uni/userext/user-bm2acicni.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "acitest1",
+            "name": "bm2acicni",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -1154,19 +1171,19 @@ None
         ]
     }
 }
-/api/node/mo/uni/userext/user-acitest1.json
+/api/node/mo/uni/userext/user-bm2acicni.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "acitest1",
+            "name": "bm2acicni",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "acitest1.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB6jCCAVMCAgPoMA0GCSqGSIb3DQEBBQUAMD0xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRYwFAYDVQQDDA1Vc2VyIGFjaXRlc3QxMB4XDTIy\nMDUxMjA3Mjc1NVoXDTMyMDUwOTE5Mjc1NVowPTELMAkGA1UEBhMCVVMxFjAUBgNV\nBAoMDUNpc2NvIFN5c3RlbXMxFjAUBgNVBAMMDVVzZXIgYWNpdGVzdDEwgZ8wDQYJ\nKoZIhvcNAQEBBQADgY0AMIGJAoGBAMs3B219Y7SrLlvkFwvRbts8qOsowZJOUBKo\nGMWrxySnwP8Mm3Wy9sUnMAmxsDLbVdMdRNC0p7MYgwFGq9At9iM2g8FQYlye3nqm\nndTAn0uTlywnsizZLhXyaitiUvkT4iFll58qcFTJmFpOSIUUY5I+6h+2IKsafcec\nX1Rc2jxfAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEAaddcFfFT1ET2S7aiW6xoulBp\nZ5Uaw+xhB0U3j92Z9YeRzcOX6P/6CGsEbiALS2182dVx+FlqoL0Oz0kFyrDhadH2\ngMfIc5zdiykqgtKQn/zefXbYd9YYLuuT51q6QE2Y0YhuCjwY/3xrUiGOcI9JPpnF\nuoGAJeG4nAvLPAcUKKI=\n-----END CERTIFICATE-----\n",
+                        "name": "bm2acicni.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7DCCAVUCAgPoMA0GCSqGSIb3DQEBBQUAMD4xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRcwFQYDVQQDDA5Vc2VyIGJtMmFjaWNuaTAeFw0y\nMjA2MDkwMzE5MzVaFw0zMjA2MDYxNTE5MzVaMD4xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRcwFQYDVQQDDA5Vc2VyIGJtMmFjaWNuaTCBnzAN\nBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA99sLMZeCNo8lEETfCYY4nVHtKHJSGQsp\nio2apsY50IFAqIUHjed4vO3pmukM71A6SGCFVOFUeXCd7tBYJSvoqu7AXQ4C9ghg\nUzuQg+aTgKsteXifJ8IdpYd3ui9AETmiK1WBhYXkIJK3T5wJ4XYVSKhlG5zx4pYz\nCAIt2SheVEECAwEAATANBgkqhkiG9w0BAQUFAAOBgQA9DcwKRhZ2k8R9zc061UWU\nHKh2FSkZ0FDUmAVvMO0pY+gkWOzCkgOX1eKCx13DnhG6l4ekWjAFdvgOEn9kG7e4\nEgQoZzUtvl0NFf2Tw207uHVMvflNw6qvhICY6tl94f0i6tpN5/IpuQeyarA6gaUZ\nzVwZOC9pB8fjjq08cpb98g==\n-----END CERTIFICATE-----\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }

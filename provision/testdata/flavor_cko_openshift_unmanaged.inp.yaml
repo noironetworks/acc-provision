@@ -1,0 +1,27 @@
+aci_config:
+  system_id: unmanagedopenshift1
+  
+monitoring_config:
+  monitoring_type: prometheus
+  remote_write_ip: 3.237.37.136 #This value is derived from the configmap
+  remote_write_port: 32307 #This value is derived from the configmap
+
+cko_git_config:
+  git_repo: "github.com/networkoperator/demo-clusters.git"
+  git_dir: "demo-cluster"
+  git_branch: "test"
+  git_user: "networkoperator-gittest"
+  git_email: "test@cisco.com"
+  sleep_duration: 5
+
+cko_proxy_config:
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
+
+control_cluster_websocket:
+  server_ip: 10.96.101.1/12
+  server_port: 1234
+
+registry:
+  image_prefix: quay.io/noirolabs

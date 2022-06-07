@@ -205,6 +205,10 @@ def config_default():
                 "racks": None,
             },
         },
+        "service_mesh_config":{
+        },
+        "monitoring_config": {
+        },
         "cko_git_config": {
             "git_repo": "github.com/networkoperator/demo-clusters.git",
             "git_dir": "demo-cluster-manifests",
@@ -375,6 +379,14 @@ def validate_subnet(subnet):
             return (str(ip + 1) + '/' + mask)
         else:
             return subnet
+
+def config_adjust_unmanaged(config):
+    adj_config = {
+        "kube_config": {}
+    }
+    if (config["monitoring_config"] or config["service_mesh_config"]):
+       adj_config["kube_config"]["allow_pods_external_access"] = True
+    return adj_config
 
 def config_adjust(args, config, prov_apic, no_random):
     system_id = config["aci_config"]["system_id"]
@@ -851,7 +863,7 @@ def config_validate(flavor_opts, config):
             "net_config/pod_subnet": (get(("net_config", "pod_subnet")),
                                       required),
         }
-        if config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+        if config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged" or config["flavor"] == "cko-openshift-unmanaged":
             del checks["aci_config/apic_host"]
             del checks["aci_config/vrf/tenant"]
             del checks["aci_config/vrf/name"]
@@ -889,7 +901,7 @@ def config_validate(flavor_opts, config):
              "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                                 required),
         }
-    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged" or config["flavor"] == "cko-openshift-unmanaged":
         extra_checks = {
             "aci_config/system_id": (get(("aci_config", "system_id")),
                                      lambda x: required(x) and isname(x, 32)),
@@ -1348,7 +1360,7 @@ def generate_calico_yaml(config, network_operator_output):
         calico_bgp_config_template = get_jinja_template('calico-bgp-config.yaml')
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
-        calico_bgp_spec = calico_bgp_config_output + "\n---\n" + bgp_peer
+        calico_bgp_spec = calico_bgp_config_output + bgp_peer
 
         network_operator_yaml = calico_crds_output + "\n---\n" + calico_crs_output + "\n---\n" + calico_bgp_spec
 
@@ -1685,7 +1697,7 @@ def check_overlapping_subnets(config):
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
-    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged":
+    elif config["flavor"] == "cko-cilium" or config["flavor"] == "cko-unmanaged" or config["flavor"] == "cko-openshift-unmanaged":
         subnet_info = {}
     else:
         subnet_info = {
@@ -1879,8 +1891,11 @@ def provision(args, apic_file, no_random):
             return False
 
     # Adjust config based on convention/apic data
-    if flavor != "cko-cilium" and flavor != "cko-unmanaged":
+    if flavor != "cko-cilium" and flavor != "cko-unmanaged" and flavor != "cko-openshift-unmanaged":
         adj_config = config_adjust(args, config, prov_apic, no_random)
+        deep_merge(config, adj_config)
+    else:
+        adj_config = config_adjust_unmanaged(config)
         deep_merge(config, adj_config)
 
     # Advisory checks, including apic checks, ignore failures
@@ -1889,7 +1904,7 @@ def provision(args, apic_file, no_random):
         pass
 
     # generate key and cert if needed
-    if flavor != "cko-cilium" and flavor != "cko-unmanaged":
+    if flavor != "cko-cilium" and flavor != "cko-unmanaged" and config["flavor"] != "cko-openshift-unmanaged":
         username = config["aci_config"]["sync_login"]["username"]
         certfile = config["aci_config"]["sync_login"]["certfile"]
         keyfile = config["aci_config"]["sync_login"]["keyfile"]
@@ -1936,6 +1951,16 @@ def provision(args, apic_file, no_random):
 
     if flavor == "cko-unmanaged":
         print("using flavor cko-unmanaged")
+        gen = flavor_opts.get("template_generator", generate_cko_unmanaged_yaml)
+        if not callable(gen):
+            gen = globals()[gen]
+        netop_output_file = args.output
+        print("generating network operator output file")
+        gen(config, netop_output_file)
+        return True
+
+    if flavor == "cko-openshift-unmanaged":
+        print("using flavor cko-openshift-unmanaged")
         gen = flavor_opts.get("template_generator", generate_cko_unmanaged_yaml)
         if not callable(gen):
             gen = globals()[gen]

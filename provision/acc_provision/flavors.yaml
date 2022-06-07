@@ -3377,3 +3377,11 @@ flavors:
     status: Experimental
     hidden: true
     order: 40
+  cko-openshift-unmanaged:
+    desc: cko-openshift-unmanaged (experimental)
+    default_version: 5.2.3.2
+    options:
+      template_generator: generate_cko_unmanaged_yaml
+    status: Experimental
+    hidden: true
+    order: 41

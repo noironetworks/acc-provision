@@ -1,5 +1,5 @@
 aci_config:
-  system_id: acitest1
+  system_id: bm2acicni
   apic_hosts:                  
     - 10.30.120.100
   apic_login:
@@ -13,6 +13,23 @@ aci_config:
     name: sauto_l3out-1
     external_networks:
         - sauto_l3out-1_epg
+
+service_mesh_config:
+  name: bm2acicni
+  network: network1
+  mesh_id: mesh1
+  role: Primary
+  kubeconfig: https://github.com/networkoperator/demo-clusters/tree/kiran/aci-cni-cluster
+
+service_mesh_topology:
+  - service_mesh_config:
+    name: bm2acicni
+    role: Primary
+    kubeconfig: https://github.com/networkoperator/demo-clusters/tree/kiran/aci-cni-cluster
+  - service_mesh_config:
+    name: bm2calico
+    role: Primary
+    kubeconfig: https://github.com/networkoperator/demo-clusters/tree/kiran/calico-aci-cluster
 
 net_config:
   node_subnet: 2.100.101.1/24

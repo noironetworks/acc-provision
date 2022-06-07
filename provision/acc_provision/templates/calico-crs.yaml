@@ -59,4 +59,3 @@ subjects:
 - kind: ServiceAccount
   name: calico-node
   namespace: kube-system
----
