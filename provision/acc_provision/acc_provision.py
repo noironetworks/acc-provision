@@ -140,6 +140,16 @@ def config_default():
             "l3out": {
                 "name": None,
                 "external_networks": None,
+                "svi": {
+                    "type": "floating",
+                    "mtu": 9000
+                },
+                "bgp": {
+                    "peering": {
+                        "remote_as_number": 64512,
+                        "aci_as_number": 64513,
+                    },
+                },
             },
             "vmm_domain": {
                 "type": "Kubernetes",
@@ -181,6 +191,19 @@ def config_default():
             "disable_wait_for_network": False,
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
+            "cluster_svc_subnet": None,
+        },
+        "topology": {
+            "rack": {
+            },
+        },
+        "calico_config": {
+            "net_config": {
+                "block_size": 26,
+                "encapsulation": "None",
+                "nat_outgoing": "Disabled",
+                "nodeSelector": "all()",
+            },
         },
         "kube_config": {
             "controller": "1.1.1.1",
@@ -249,6 +272,9 @@ def config_default():
         },
         "nodepodif_config": {
             "enable": False,
+        },
+        "lb_config": {
+            "lb_type": "metallb",
         },
     }
     return default_config
@@ -349,6 +375,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
+    l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
@@ -383,10 +410,25 @@ def config_adjust(args, config, prov_apic, no_random):
     if args.version_token:
         token = args.version_token
 
-    if extern_static:
+    if not is_calico_flavor(config["flavor"]) and extern_static:
         static_service_ip_pool = [{"start": cidr_split(extern_static)[0], "end": cidr_split(extern_static)[1]}]
     else:
         static_service_ip_pool = []
+
+    if not is_calico_flavor(config["flavor"]) and node_svc_subnet:
+        node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
+    else:
+        node_service_ip_pool = []
+
+    if is_calico_flavor(config["flavor"]):
+        if not config["aci_config"]["l3out"]["svi"].get("node_profile_name"):
+            config["aci_config"]["l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
+        if not config["aci_config"]["l3out"]["svi"].get("int_prof_name"):
+            config["aci_config"]["l3out"]["svi"]["int_prof_name"] = l3out_name + "_int_prof"
+        if not config["aci_config"]["l3out"]["svi"].get("external_network"):
+            config["aci_config"]["l3out"]["svi"]["external_network"] = l3out_name + "_int_epg"
+        if not config["aci_config"]["l3out"]["svi"].get("external_network_svc"):
+            config["aci_config"]["l3out"]["svi"]["external_network_svc"] = l3out_name + "_svc_epg"
 
     adj_config = {
         "aci_config": {
@@ -490,12 +532,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 },
             ],
             "static_service_ip_pool": static_service_ip_pool,
-            "node_service_ip_pool": [
-                {
-                    "start": cidr_split(node_svc_subnet)[0],
-                    "end": cidr_split(node_svc_subnet)[1],
-                },
-            ],
+            "node_service_ip_pool": node_service_ip_pool,
             "node_service_gw_subnets": [
                 node_svc_subnet,
             ],
@@ -576,6 +613,22 @@ def is_valid_mtu(xval):
 
     xmin = 1280   # for IPv6
     xmax = 8900   # leave 100 byte header for VxLAN
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise(Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
+def is_valid_mtu_VirtualLIfP(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 576
+    xmax = 9216
     try:
         x = int(xval)
         if xmin <= x <= xmax:
@@ -800,6 +853,22 @@ def config_validate(flavor_opts, config):
             }
         else:
             extra_checks = {}
+    elif is_calico_flavor(config["flavor"]):
+        extra_checks = {
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
+            "aci_config/aep": (get(("aci_config", "aep")), required),
+            "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
+                                      required),
+            "aci_config/l3out/mtu": (get(("aci_config", "l3out", "mtu")),
+                                     is_valid_mtu_VirtualLIfP),
+            "aci_config/l3out/external-networks":
+            (get(("aci_config", "l3out", "external_networks")), required),
+            "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
+                                          required),
+            "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
+                                              required),
+        }
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -849,8 +918,9 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "system_id")), required)
 
     # Versions
-    for field in flavor_opts.get('version_fields', VERSION_FIELDS):
-        checks[field] = (get(("registry", field)), required)
+    if not is_calico_flavor(config["flavor"]):
+        for field in flavor_opts.get('version_fields', VERSION_FIELDS):
+            checks[field] = (get(("registry", field)), required)
 
     if flavor_opts.get("apic", {}).get("associate_aep_to_nested_inside_domain",
                                        False):
@@ -981,7 +1051,6 @@ def generate_password(no_random):
 def generate_cert(username, cert_file, key_file):
     reused = False
     if not exists(cert_file) or not exists(key_file):
-        info("Generating certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
         info("  Certificate file: \"%s\"" % cert_file)
 
@@ -1019,7 +1088,6 @@ def generate_cert(username, cert_file, key_file):
     else:
         # Do not overwrite previously generated data if it exists
         reused = True
-        info("Reusing existing certs for kubernetes controller")
         info("  Private key file: \"%s\"" % key_file)
         info("  Certificate file: \"%s\"" % cert_file)
         with open(cert_file, "rb") as certp:
@@ -1121,6 +1189,62 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
                 fh.write(template.render(config=config))
         else:
             template.stream(config=config).dump(operator_output)
+
+
+def is_calico_flavor(flavor):
+    return SafeDict(FLAVORS[flavor]).get("calico_cni")
+
+
+def generate_calico_deployment_files(config, network_operator_output):
+    filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
+    if network_operator_output and network_operator_output != "/dev/null":
+        calico_crds_template = get_jinja_template('tigera-operator.yaml')
+        calico_crds_output = calico_crds_template.render(config=config)
+        calico_crs_template = get_jinja_template('custom-resources-aci-calico.yaml')
+        calico_crs_output = calico_crs_template.render(config=config)
+
+        bgp_peer = ''
+        bgp_node = ''
+        calico_bgp_peer_template = get_jinja_template('calico-bgp-peer.yaml')
+        calico_node_template = get_jinja_template('calico-node.yaml')
+        for item in config["topology"]["rack"]:
+            for node_name in item["node"]:
+                configTemp = dict()
+                configTemp["node_name"] = node_name["name"]
+                configTemp["id"] = item["id"]
+                bgp_node = bgp_node + "\n---\n" + calico_node_template.render(config=configTemp)
+            for leaf in item["leaf"]:
+                if "local_ip" in leaf:
+                    configTemp = dict(config)
+                    configTemp["local_ip"] = leaf["local_ip"]
+                    configTemp["peer_name"] = leaf["local_ip"].replace(".", "-")
+                    configTemp["id"] = item["id"]
+                    bgp_peer = bgp_peer + "\n---\n" + calico_bgp_peer_template.render(config=configTemp)
+
+        calico_bgp_config_template = get_jinja_template('calico-bgp-config.yaml')
+        calico_bgp_config_output = calico_bgp_config_template.render(config=config)
+
+        tigera_operator_yaml = calico_crds_output
+        custom_resources_aci_calico_yaml = calico_crs_output
+        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
+
+        with open("custom_resources_aci_calico.yaml", "w") as fh:
+            fh.write(custom_resources_aci_calico_yaml)
+        with open("custom_resources_calicoctl.yaml", "w") as fh:
+            fh.write(custom_resources_calicoctl_yaml)
+        with open("tigera_operator.yaml", "w") as fh:
+            fh.write(tigera_operator_yaml)
+
+        if "tar.gz" not in network_operator_output:
+            err("Please provide the ouput file name in tar.gz format")
+            return False
+        with tarfile.open(network_operator_output, mode='w:gz') as tar:
+            for name in filenames:
+                tar.add(name, arcname=os.path.basename(name))
+                os.remove(name)
+            tar.close()
+
+        print("Generated the deployment tar file")
 
 
 def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
@@ -1229,7 +1353,10 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
-    configurator = ApicKubeConfig(config)
+    apic = None
+    if prov_apic is not None:
+        apic = get_apic(config)
+    configurator = ApicKubeConfig(config, apic)
     for k, v in flavor_opts.get("apic", {}).items():
         setattr(configurator, k, v)
     apic_config = configurator.get_config(config["aci_config"]["apic_version"])
@@ -1257,7 +1384,13 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
-                apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming)
+                if is_calico_flavor(config["flavor"]):
+                    l3out_name = config["aci_config"]["l3out"]["name"]
+                    lnodep = config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+                    lifp = config["aci_config"]["l3out"]["svi"]["int_prof_name"]
+                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name=l3out_name, lnodep=lnodep, lifp=lifp)
+                else:
+                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config)
             ret = False if apic.errors > 0 else True
     return ret
 
@@ -1398,15 +1531,23 @@ def get_versions(versions_url):
 
 def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
-    subnet_info = {
-        "pod_subnet": config["net_config"]["pod_subnet"],
-        "node_subnet": config["net_config"]["node_subnet"],
-        "extern_dynamic": config["net_config"]["extern_dynamic"],
-        "node_svc_subnet": config["net_config"]["node_svc_subnet"]
-    }
+    if is_calico_flavor(config["flavor"]):
+        subnet_info = {
+            "pod_subnet": config["net_config"]["pod_subnet"],
+            "node_subnet": config["net_config"]["node_subnet"],
+            "extern_dynamic": config["net_config"]["extern_dynamic"],
+            "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
+        }
+    else:
+        subnet_info = {
+            "pod_subnet": config["net_config"]["pod_subnet"],
+            "node_subnet": config["net_config"]["node_subnet"],
+            "extern_dynamic": config["net_config"]["extern_dynamic"],
+            "node_svc_subnet": config["net_config"]["node_svc_subnet"]
+        }
 
     # Don't have extern_static field set for OpenShift flavors
-    if config["net_config"]["extern_static"]:
+    if not is_calico_flavor(config["flavor"]) and config["net_config"]["extern_static"]:
         subnet_info["extern_static"] = config["net_config"]["extern_static"]
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
@@ -1598,10 +1739,30 @@ def provision(args, apic_file, no_random):
     key_data, cert_data = None, None
     reused = True
     if generate_cert_data:
+        if not exists(certfile) or not exists(keyfile):
+            if is_calico_flavor(config["flavor"]):
+                info("Generating certs for network-operator")
+            else:
+                info("Generating certs for kubernetes controller")
+        else:
+            if is_calico_flavor(config["flavor"]):
+                info("Reusing existing certs for network-operator")
+            else:
+                info("Reusing existing certs for kubernetes controller")
         key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    if is_calico_flavor(config["flavor"]):
+        print("Using flavor: ", config["flavor"])
+        gen = flavor_opts.get("template_generator", generate_calico_deployment_files)
+        if not callable(gen):
+            gen = globals()[gen]
+        gen(config, output_tar)
+
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
 
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
