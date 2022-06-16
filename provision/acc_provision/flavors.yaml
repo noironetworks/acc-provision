@@ -3364,4 +3364,13 @@ flavors:
             
     status: Experimental
     hidden: true
+    order: 43
+  calico-3.23.2:
+    desc: calico-3.23.2
+    default_version: 5.2.3.3
+    calico_cni: True
+    options:
+      template_generator: generate_calico_deployment_files
+    status: Experimental
+    hidden: False
     order: 44
