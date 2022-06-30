@@ -244,6 +244,9 @@ def config_default():
         "multus": {
             "disable": True,
         },
+        "dpu_config": {
+            "enable": False,
+        },
         "sriov_config": {
             "enable": False,
         },
@@ -565,6 +568,12 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
+
+    if config["dpu_config"].get("enable"):
+        if config["dpu_config"].get("dpuIp"):
+            adj_config["dpuIp"] = str(config["dpu_config"].get("dpuIp"))
+        if config["dpu_config"].get("dpuUser"):
+            adj_config["dpuUser"] = str(config["dpu_config"].get("dpuUser"))
 
     return adj_config
 

@@ -2218,6 +2218,10 @@ spec:
             - name: multus-cni-conf
               mountPath: /mnt/multus-cni-conf
             {% endif %}
+            {% if config.dpu_config.enable %}
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            {% endif %} 
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -2297,6 +2301,20 @@ spec:
             - name: hostrun
               mountPath: /usr/local/run
         {% endif %}
+        {% if config.dpu_config.enable %}
+        - name: lsyncd-daemon
+          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-lsyncd.sh"]
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            - name: lsyncd-config-volume
+              mountPath: /etc/configmap
+        {% endif %}
       restartPolicy: Always
       volumes:
         - name: cni-bin
@@ -2338,6 +2356,17 @@ spec:
         - name: multus-cni-conf
           hostPath:
             path: /var/run/multus/
+        {% endif %}
+        {% if config.dpu_config.enable %}
+        - name: opflex-lsyncd-volume
+          hostPath:
+            path: /usr/local/etc/opflex-agent-ovs
+        - name: lsyncd-config-volume
+          configMap:
+            name: lsyncd-config
+            items:
+              - key: lsyncd.json
+                path: lsyncd.json
         {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -2853,4 +2882,25 @@ spec:
                 config:
                   description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
                   type: string
+{% endif %}
+{% if config.dpu_config.enable %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lsyncd-config
+  {% if config.flavor != "k8s-overlay" %}
+  namespace: aci-containers-system
+  {% else %}
+  namespace: {{ config.kube_config.system_namespace }}
+  {% endif %}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+  lsyncd.json: |-
+    {
+       "dpuIp": "{{config.dpu_config.dpuIp}}"
+       "dpuUser": "{{config.dpu_config.dpuUser}}"
+    }
 {% endif %}

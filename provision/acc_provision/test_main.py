@@ -790,10 +790,10 @@ def test_sriov_config():
 
 
 @in_testdir
-def test_no_sriov_config():
+def test_sriov_with_no_deviceinfo():
     run_provision(
-        "with_no_sriov_config_input.yaml",
-        "with_no_sriov_config_kube.yaml",
+        "with_sriov_config_no_deviceinfo_input.yaml",
+        "with_sriov_config_no_deviceinfo_kube.yaml",
         None,
         None,
         "base_case.apic.txt"
@@ -801,10 +801,21 @@ def test_no_sriov_config():
 
 
 @in_testdir
-def test_sriov_with_no_deviceinfo():
+def test_dpu_config():
     run_provision(
-        "with_sriov_config_no_deviceinfo_input.yaml",
-        "with_sriov_config_no_deviceinfo_kube.yaml",
+        "with_dpu_config_input.yaml",
+        "with_dpu_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
+def test_no_dpu_config():
+    run_provision(
+        "with_no_dpu_config_input.yaml",
+        "with_no_dpu_config_kube.yaml",
         None,
         None,
         "base_case.apic.txt"

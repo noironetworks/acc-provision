@@ -27,8 +27,8 @@ net_config:
   node_subnet: 10.0.0.1/24      # must be part of machine_cidr
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
-  node_svc_subnet: 10.5.0.1/24  
-  opflex_server_port: 19999 
+  node_svc_subnet: 10.5.0.1/24
+  opflex_server_port: 19999
   #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
   #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
                                 # default is 5, set to 0 to disable, max: 65535
@@ -47,7 +47,7 @@ net_config:
 #  openvswitch_version: <version>
 #  gbp_version: <version>
 #  aci_containers_controller_version: <version>
-  
+
   # image_pull_secret: secret_name      # (if needed)
 
 kube_config:
@@ -70,3 +70,8 @@ istio_config:
   # device_info:
         # isRdma: True   # default is false
         # devices: ""    # default is "1014","101e"
+
+#dpu_config:
+   #enable: True
+   #dpuIp: 192.168.100.2
+   #dpuUser: opflex
