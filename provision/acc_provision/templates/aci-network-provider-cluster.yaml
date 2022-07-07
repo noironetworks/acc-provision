@@ -49,7 +49,7 @@ network:
     istio_profile: "{{ config.istio_config.istio_profile }}"
     {% endif %}
     {% if config.drop_log_config.enable != True %}
-    droplog_enable: "{{ config.drop_log_config.enable|lower() }}"
+    drop_log_enable: "{{ config.drop_log_config.enable|lower() }}"
     {% endif %}
     {% if config.logging.size %}
     size: {{ config.logging.size }}
