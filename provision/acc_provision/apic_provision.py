@@ -744,32 +744,34 @@ class ApicKubeConfig(object):
                 )
             ]
         )
-        if self.use_kubeapi_vlan:
-            kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
-            data["fvnsVlanInstP"]["children"].insert(
-                0,
-                collections.OrderedDict(
-                    [
-                        (
-                            "fvnsEncapBlk",
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "attributes",
-                                        collections.OrderedDict(
-                                            [
-                                                ("allocMode", "static"),
-                                                ("from", "vlan-%s" % kubeapi_vlan),
-                                                ("to", "vlan-%s" % kubeapi_vlan),
-                                            ]
-                                        ),
-                                    )
-                                ]
-                            ),
-                        )
-                    ]
-                ),
-            )
+        # To avoid kubeapi_vlan from being added to the vlan_pool for ESX install
+        if not self.config["aci_config"]["no_physdom_for_node_epg"]:
+            if self.use_kubeapi_vlan:
+                kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+                data["fvnsVlanInstP"]["children"].insert(
+                    0,
+                    collections.OrderedDict(
+                        [
+                            (
+                                "fvnsEncapBlk",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    ("allocMode", "static"),
+                                                    ("from", "vlan-%s" % kubeapi_vlan),
+                                                    ("to", "vlan-%s" % kubeapi_vlan),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
         self.annotateApicObjects(data)
         return path, data
 
@@ -5076,41 +5078,43 @@ class ApicKubeConfig(object):
 
         # If flavor requires adding kubeapi VLAN, add corresponding
         # fvRsDomAtt object to node-epg
-        if self.use_kubeapi_vlan:
-            kubeapi_dom_obj = collections.OrderedDict(
-                [
-                    (
-                        "fvRsDomAtt",
-                        collections.OrderedDict(
-                            [
-                                (
-                                    "attributes",
-                                    collections.OrderedDict(
-                                        [
-                                            (
-                                                "encap",
-                                                "vlan-%s"
-                                                % kubeapi_vlan,
-                                            ),
-                                            (
-                                                "tDn",
-                                                "uni/phys-%s"
-                                                % phys_name,
-                                            ),
-                                        ]
-                                    ),
-                                )
-                            ]
-                        ),
-                    )
-                ]
-            )
-            for i, child in enumerate(data["fvTenant"]["children"]):
-                if "fvAp" in child.keys():
-                    for j, ap_child in enumerate(child["fvAp"]["children"]):
-                        if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
-                            epg_object = ap_child["fvAEPg"]["children"]
-                            epg_object.append(kubeapi_dom_obj)
+        # To avoid association of physdom with node EPG for ESX install
+        if not self.config["aci_config"]["no_physdom_for_node_epg"]:
+            if self.use_kubeapi_vlan:
+                kubeapi_dom_obj = collections.OrderedDict(
+                    [
+                        (
+                            "fvRsDomAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "encap",
+                                                    "vlan-%s"
+                                                    % kubeapi_vlan,
+                                                ),
+                                                (
+                                                    "tDn",
+                                                    "uni/phys-%s"
+                                                    % phys_name,
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+                for i, child in enumerate(data["fvTenant"]["children"]):
+                    if "fvAp" in child.keys():
+                        for j, ap_child in enumerate(child["fvAp"]["children"]):
+                            if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
+                                epg_object = ap_child["fvAEPg"]["children"]
+                                epg_object.append(kubeapi_dom_obj)
 
         # If flavor requires not creating node subnet, remove it from
         # the data object
