@@ -2158,6 +2158,8 @@ spec:
                 - SYS_PTRACE
                 - NET_RAW
           env:
+            - name: GOTRACEBACK
+              value: "2"
             - name: KUBERNETES_NODE_NAME
               valueFrom:
                 fieldRef:
