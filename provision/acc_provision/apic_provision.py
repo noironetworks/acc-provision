@@ -1,5 +1,4 @@
 from __future__ import print_function, unicode_literals
-
 import collections
 import json
 import sys
@@ -239,6 +238,19 @@ class Apic(object):
         path = "/api/mo/uni/tn-%s/ap-kubernetes.json" % tenant
         return self.get_path(path)
 
+    def get_configured_node_dns(self, tenant, l3out, node_prof):
+        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (tenant, l3out, node_prof)
+        configured_node_dns = []
+        node_ids = self.get_path(path, multi=True)
+        if node_ids is None:
+            return configured_node_dns
+        if type(node_ids) is list:
+            for node_id in node_ids:
+                configured_node_dns.append(node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
+        else:
+            configured_node_dns.append(node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
+        return configured_node_dns
+
     def provision(self, data, sync_login):
         ignore_list = []
         if self.get_user(sync_login):
@@ -260,7 +272,7 @@ class Apic(object):
                 self.errors += 1
                 err("Error in provisioning %s: %s" % (path, str(e)))
 
-    def unprovision(self, data, system_id, tenant, vrf_tenant, cluster_tenant, old_naming):
+    def unprovision(self, data, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name=None, lnodep=None, lifp=None):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
@@ -268,30 +280,86 @@ class Apic(object):
             shared_resources.append("/api/mo/uni/tn-%s.json" % vrf_tenant)
 
         try:
-            for path, config in data:
-                if path.split("/")[-1].startswith("instP-"):
-                    continue
-                if path not in shared_resources:
-                    resp = self.delete(path)
-                    self.check_resp(resp)
-                    dbg("%s: %s" % (path, resp.text))
-                else:
-                    if path == cluster_tenant_path:
-                        path += "?query-target=children"
-                        resp = self.get(path)
+            if "calico" in cfg['flavor']:
+                fsvi_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s.json" % (tenant, l3out_name, lnodep, lifp)
+                fsvi_path += "?query-target=children&target-subtree-class=l3extVirtualLIfP"
+                resp = self.get(fsvi_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
                         self.check_resp(resp)
-                        respj = json.loads(resp.text)
-                        respj = respj["imdata"]
-                        for resp in respj:
-                            for val in resp.values():
-                                if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
-                                    del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
-                                    if 'name' in val['attributes']:
-                                        name = val['attributes']['name']
-                                        if (not old_naming) and (system_id in name):
-                                            resp = self.delete(del_path)
-                                            self.check_resp(resp)
-                                            dbg("%s: %s" % (del_path, resp.text))
+                        dbg("%s: %s" % (del_path, resp.text))
+                conf_node_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (tenant, l3out_name, lnodep)
+                conf_node_path += "?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt"
+                resp = self.get(conf_node_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (del_path, resp.text))
+                bgp_prot_path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (tenant, l3out_name, lnodep)
+                resp = self.delete(bgp_prot_path)
+                self.check_resp(resp)
+                dbg("%s: %s" % (bgp_prot_path, resp.text))
+                bgp_res_path = "/api/node/mo/uni/tn-%s.json" % tenant
+                bgp_res_path += "?query-target=children&target-subtree-class=bgpCtxPol,bgpCtxAfPol,bgpBestPathCtrlPol,bgpPeerPfxPol"
+                resp = self.get(bgp_res_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        if l3out_name in val['attributes']['dn']:
+                            del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                            resp = self.delete(del_path)
+                            self.check_resp(resp)
+                            dbg("%s: %s" % (del_path, resp.text))
+                bgp_route_path = "/api/node/mo/uni/tn-%s/out-%s.json" % (tenant, l3out_name)
+                bgp_route_path += "?query-target=children&target-subtree-class=rtctrlProfile"
+                resp = self.get(bgp_route_path)
+                self.check_resp(resp)
+                respj = json.loads(resp.text)
+                respj = respj["imdata"]
+                for resp in respj:
+                    for val in resp.values():
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        resp = self.delete(del_path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (del_path, resp.text))
+            else:
+                for path, config in data:
+                    if path.split("/")[-1].startswith("instP-"):
+                        continue
+                    if path not in shared_resources:
+                        resp = self.delete(path)
+                        self.check_resp(resp)
+                        dbg("%s: %s" % (path, resp.text))
+                    else:
+                        if path == cluster_tenant_path:
+                            path += "?query-target=children"
+                            resp = self.get(path)
+                            self.check_resp(resp)
+                            respj = json.loads(resp.text)
+                            respj = respj["imdata"]
+                            for resp in respj:
+                                for val in resp.values():
+                                    if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
+                                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                                        if 'name' in val['attributes']:
+                                            name = val['attributes']['name']
+                                            if (not old_naming) and (system_id in name):
+                                                resp = self.delete(del_path)
+                                                self.check_resp(resp)
+                                                dbg("%s: %s" % (del_path, resp.text))
+
             if old_naming:
                 for object in self.TENANT_OBJECTS:
                     del_path = "/api/node/mo/uni/tn-%s/%s.json" % (cluster_tenant, object)
@@ -427,8 +495,9 @@ class ApicKubeConfig(object):
 
     ACI_PREFIX = aci_prefix
 
-    def __init__(self, config):
+    def __init__(self, config, apic):
         self.config = config
+        self.apic = apic if apic else None
         self.use_kubeapi_vlan = True
         self.tenant_generator = "kube_tn"
         self.associate_aep_to_nested_inside_domain = False
@@ -474,25 +543,57 @@ class ApicKubeConfig(object):
                     data.append((path, None))
 
         data = []
-        update(data, self.pdom_pool())
-        update(data, self.vdom_pool())
-        update(data, self.mcast_pool())
-        update(data, self.phys_dom())
-        update(data, self.kube_dom(apic_version))
-        update(data, self.nested_dom())
-        update(data, self.associate_aep())
-        update(data, self.opflex_cert(apic_version))
-        self.apic_version = apic_version
-        if self.is_newer_version(apic_version, "5.0"):
-            update(data, self.cluster_info())
+        if "calico" not in self.config['flavor']:
+            update(data, self.pdom_pool())
+            update(data, self.vdom_pool())
+            update(data, self.mcast_pool())
+            update(data, self.phys_dom())
+            update(data, self.kube_dom(apic_version))
+            update(data, self.nested_dom())
+            update(data, self.associate_aep())
+            update(data, self.opflex_cert(apic_version))
+            self.apic_version = apic_version
+            if self.is_newer_version(apic_version, "5.0"):
+                update(data, self.cluster_info())
 
-        update(data, self.l3out_tn())
-        update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
-        update(data, self.add_apivlan_for_second_portgroup())
-        update(data, self.nested_dom_second_portgroup())
-        for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
-            update(data, self.l3out_contract(l3out_instp))
+            update(data, self.l3out_tn())
+            update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
+            update(data, self.add_apivlan_for_second_portgroup())
+            update(data, self.nested_dom_second_portgroup())
+            for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
+                update(data, self.l3out_contract(l3out_instp))
 
+        else:
+            # l3out has to be updated with "L3 Domain". Also ensure that the VRF is correct
+            update(data, self.logical_node_profile())
+            node_ids = None
+            if self.apic is not None:
+                node_ids = self.apic.get_configured_node_dns(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"], self.config["aci_config"]["l3out"]["svi"]["node_profile_name"])
+            else:
+                # For "calico" flavor based UT
+                node_ids = ["topology/pod-1/node-101", "topology/pod-1/node-102"]
+            for rack in self.config["topology"]["rack"]:
+                for leaf in rack["leaf"]:
+                    if "local_ip" in leaf:
+                        update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"]))
+                    if "id" in leaf and ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
+                        update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
+
+            update(data, self.ext_epg_svc())
+            update(data, self.add_subnets_to_ext_epg())
+            update(data, self.enable_bgp())
+            update(data, self.bgp_route_control())
+            update(data, self.bgp_timers())
+            update(data, self.bgp_relax_as_policy())
+            update(data, self.bgp_prot_pfl())
+            update(data, self.bgp_addr_family_context())
+            update(data, self.bgp_addr_family_context_to_vrf())
+            update(data, self.bgp_addr_family_context_to_vrf_v6())
+            update(data, self.export_match_rule())
+            update(data, self.attach_rule_to_default_export_pol())
+            update(data, self.import_match_rule())
+            update(data, self.attach_rule_to_default_import_pol())
+            update(data, self.bgp_peer_prefix())
         update(data, self.kube_user())
         update(data, self.kube_cert())
         return data
@@ -5162,6 +5263,1099 @@ class ApicKubeConfig(object):
             )
             children.append(subj)
         return aci_obj("vzBrCP", [('name', name), ('_children', children)])
+
+    def logical_node_profile(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        lnodep = self.config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+        lifp = self.config["aci_config"]["l3out"]["svi"]["int_prof_name"]
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s.json" % (l3out_tn, l3out_name, lnodep)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extLNodeP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", lnodep),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "l3extLIfP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("name", lifp),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def add_configured_nodes(self, pod_id, node_id):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        lnodep = self.config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+        node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
+        router_id = "1.1.4." + str(node_id)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, lnodep, node_dn)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extRsNodeL3OutAtt",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("rtrId", router_id),
+                                        ("tDn", node_dn),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def calico_floating_svi(self, pod_id, node_id, primary_ip):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
+        vlan_id = self.config["aci_config"]["l3out"]["svi"]["vlan_id"]
+        mtu = self.config["aci_config"]["l3out"]["svi"]["mtu"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        primary_addr = primary_ip + "/" + node_subnet.split("/")[-1]
+        floating_ip = self.config["aci_config"]["l3out"]["svi"]["floating_ip"]
+        secondary_ip = self.config["aci_config"]["l3out"]["svi"]["secondary_ip"]
+        physical_domain_name = self.config["aci_config"]["physical_domain"]["domain"]
+        remote_asn = self.config["aci_config"]["l3out"]["bgp"]["peering"]["remote_as_number"]
+        local_asn = self.config["aci_config"]["l3out"]["bgp"]["peering"]["aci_as_number"]
+        if "secret" in self.config["aci_config"]["l3out"]["bgp"]:
+            password = self.config["aci_config"]["l3out"]["bgp"]["secret"]
+        else:
+            password = None
+        logical_node_profile = self.config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+        int_prof = self.config["aci_config"]["l3out"]["svi"]["int_prof_name"]
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s].json" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extVirtualLIfP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("dn", "uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s]" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)),
+                                        ("addr", primary_addr),
+                                        ("encap", "vlan-%s" % vlan_id),
+                                        ("nodeDn", node_dn),
+                                        ("ifInstT", "ext-svi"),
+                                        ("autostate", "enabled"),
+                                        ("encapScope", "local"),
+                                        ("mtu", str(mtu)),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # relation_l3ext_rs_dyn_path_att
+                                                "l3extRsDynPathAtt",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tDn", "uni/phys-%s" % physical_domain_name),
+                                                                    ("floatingAddr", floating_ip),
+                                                                    ("forgedTransmit", "Disabled"),
+                                                                    ("promMode", "Disabled"),
+                                                                    ("macChange", "Disabled")
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # secondary IP
+                                                "l3extIp",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("addr", secondary_ip)
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # BGP Peer Connectivity Profile
+                                                "bgpPeerP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("addr", node_subnet),
+                                                                    ("ctrl", "as-override,dis-peer-as-check")
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "bgpAsP",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("asn", str(remote_asn)),
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "bgpLocalAsnP",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("asnPropagate", "replace-as"),
+                                                                                                ("localAsn", str(local_asn))
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "bgpRsPeerPfxPol",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("tnBgpPeerPfxPolName", l3out_name),
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        if password is not None:
+            data["l3extVirtualLIfP"]["children"][2]["bgpPeerP"]["attributes"].update(
+                collections.OrderedDict(
+                    [
+                        ("password", password)
+                    ]
+                ),
+            ),
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Set BGP Route Control Enforcement to Import/Export
+    def bgp_route_control(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/mo/uni/tn-%s/out-%s.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extOut",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("enforceRtctrl", "export,import"),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def ext_epg_svc(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
+        ext_epg = self.config["aci_config"]["l3out"]["svi"]["external_network_svc"]
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # provide l3out-allow-all contract
+                                                "fvRsProv",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzBrCPName", "common-l3out-allow-all"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add external svc subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", external_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Add subnets to svi ext EPG
+    def add_subnets_to_ext_epg(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        ext_epg = self.config["aci_config"]["l3out"]["svi"]["external_network"]
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Consume l3out-allow-all contract provided by l3out ext EPG
+                                                "fvRsCons",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzBrCPName", "common-l3out-allow-all"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add pod subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add node subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", node_subnet),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add cluster subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", cluster_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def enable_bgp(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/mo/uni/tn-%s/out-%s/bgpExtP.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpExtP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    []
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Create bgp timer
+    def bgp_timers(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/mo/uni/tn-%s/bgpCtxP-%s-Timers.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpCtxPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("holdIntvl", "3"),
+                                        ("staleIntvl", "6"),
+                                        ("kaIntvl", "1"),
+                                        ("maxAsLimit", "1"),
+                                        ("name", "%s-Timers" % l3out_name),
+                                        ("grCtrl", "helper"),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Create BGP Best Path Policy
+    def bgp_relax_as_policy(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/mo/uni/tn-%s/bestpath-%s-Relax-AS.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpBestPathCtrlPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "%s-Relax-AS" % l3out_name),
+                                        ("ctrl", "asPathMultipathRelax"),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Create BGP Protocol Profile
+    def bgp_prot_pfl(self):
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        logical_node_profile = self.config["aci_config"]["l3out"]["svi"]["node_profile_name"]
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (l3out_tn, l3out_name, logical_node_profile)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpProtP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "default"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "bgpRsBgpNodeCtxPol",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnBgpCtxPolName", "%s-Timers" % l3out_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "bgpRsBestPathCtrlPol",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnBgpBestPathCtrlPolName", "%s-Relax-AS" % l3out_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Create BGP Address Family Context Policy
+    def bgp_addr_family_context(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        path = "/api/mo/uni/tn-%s/bgpCtxAfP-%s.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpCtxAfPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", l3out_name),
+                                        ("maxEcmpIbgp", "64"),
+                                        ("maxEcmp", "64")
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Map BGP Address Family Context Policy to Calico VRF for V4
+    def bgp_addr_family_context_to_vrf(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_vrf = self.config["aci_config"]["vrf"]["name"]
+        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv4-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvRsCtxToBgpCtxAfPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tnBgpCtxAfPolName", l3out_name),
+                                        ("af", "ipv4-ucast"),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    # Map BGP Address Family Context Policy to Calico VRF for V6
+    def bgp_addr_family_context_to_vrf_v6(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        l3out_vrf = self.config["aci_config"]["vrf"]["name"]
+        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv6-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvRsCtxToBgpCtxAfPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("tnBgpCtxAfPolName", l3out_name),
+                                        ("af", "ipv6-ucast"),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def export_match_rule(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        path = "/api/mo/uni/tn-%s/subj-%s-export-match.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "rtctrlSubjP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "%s-export-match" % l3out_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create Match Rule Subnet
+                                                "rtctrlMatchRtDest",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "yes"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def attach_rule_to_default_export_pol(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        path = "/api/mo/uni/tn-%s/out-%s/prof-default-export.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "rtctrlProfile",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "default-export"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create permit rule
+                                                "rtctrlCtxP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("name", "export_pod_subnet"),
+                                                                    ("order", "0"),
+                                                                    ("action", "permit"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            # Add Match Rule to Permit Rule
+                                                                            "rtctrlRsCtxPToSubjP",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("tnRtctrlSubjPName", "%s-export-match" % l3out_name),
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def import_match_rule(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
+        path = "/api/mo/uni/tn-%s/subj-%s-import-match.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "rtctrlSubjP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "%s-import-match" % l3out_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create Pod Match Rule Subnet
+                                                "rtctrlMatchRtDest",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "yes"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create Node Match Rule Subnet
+                                                "rtctrlMatchRtDest",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", node_subnet),
+                                                                    ("aggregate", "yes"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create Svc Match Rule Subnet
+                                                "rtctrlMatchRtDest",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", cluster_svc_subnet),
+                                                                    ("aggregate", "yes"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create Ext Svc Match Rule Subnet
+                                                "rtctrlMatchRtDest",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", external_svc_subnet),
+                                                                    ("aggregate", "yes"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def attach_rule_to_default_import_pol(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        path = "/api/mo/uni/tn-%s/out-%s/prof-default-import.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "rtctrlProfile",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "default-import"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Create permit rule
+                                                "rtctrlCtxP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("name", "import_cluster_subnets"),
+                                                                    ("order", "0"),
+                                                                    ("action", "permit"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            # Add Match Rule to Permit Rule
+                                                                            "rtctrlRsCtxPToSubjP",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                ("tnRtctrlSubjPName", "%s-import-match" % l3out_name),
+                                                                                            ]
+                                                                                        ),
+                                                                                    ),
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def bgp_peer_prefix(self):
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["l3out"]["name"]
+        path = "/api/mo/uni/tn-%s/bgpPfxP-%s.json" % (l3out_tn, l3out_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "bgpPeerPfxPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("action", "reject"),
+                                        ("maxPfx", "500"),
+                                        ("name", l3out_name)
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
 
 
 def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix):
