@@ -963,6 +963,18 @@ def test_preexisting_kube_convention():
             assert tmperr.read() == stderr.read()
 
 
+@in_testdir
+def test_flavor_calico_3_23_2():
+    run_provision(
+        "flavor_calico-3.23.2.inp.yaml",
+        None,
+        "flavor_calico-3.23.2_tar",
+        None,
+        "flavor_calico-3.23.2.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
