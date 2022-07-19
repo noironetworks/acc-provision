@@ -168,6 +168,7 @@ def config_default():
             "client_cert": False,
             "client_ssl": True,
             "kube_default_provide_kube_api": False,
+            "no_physdom_for_node_epg": False,
             "disable_node_subnet_creation": False,
             "preexisting_kube_bd": None,
             "apic_subscription_delay": None,
