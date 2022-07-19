@@ -11,16 +11,6 @@
                 "fvnsEncapBlk": {
                     "attributes": {
                         "allocMode": "static",
-                        "from": "vlan-4001",
-                        "to": "vlan-4001",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "allocMode": "static",
                         "from": "vlan-4003",
                         "to": "vlan-4003",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -641,15 +631,6 @@ None
                                         "fvRsBd": {
                                             "attributes": {
                                                 "tnFvBDName": "kube-node-bd",
-                                                "annotation": "orchestrator:aci-containers-controller"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "fvRsDomAtt": {
-                                            "attributes": {
-                                                "encap": "vlan-4001",
-                                                "tDn": "uni/phys-kube-pdom",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
