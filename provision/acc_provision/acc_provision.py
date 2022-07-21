@@ -1815,7 +1815,7 @@ def provision(args, apic_file, no_random):
         return True
 
     if (config['net_config']['second_kubeapi_portgroup']):
-        if (prov_apic or config['provision'].get('upgrade_cluster')):
+        if (prov_apic is not None or config['provision'].get('upgrade_cluster')):
             apic = get_apic(config)
             nested_vswitch_vlanpool = \
                 apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
