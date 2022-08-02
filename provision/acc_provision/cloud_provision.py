@@ -283,7 +283,7 @@ class CloudProvision(object):
             ]
         for req in required:
             if self.cfg_get(req) is None:
-                raise(Exception("{} is required".format(req)))
+                raise (Exception("{} is required".format(req)))
 
     def cfg_get(self, key):
         keys = key.split("/")
@@ -382,7 +382,7 @@ class CloudProvision(object):
 
     def clusterInfo(self):
         overlayDn = self.getOverlayDn()
-        assert(overlayDn or self.args.delete), "Need an overlayDn"
+        assert (overlayDn or self.args.delete), "Need an overlayDn"
         if self.args.debug:
             print("overlayDn: {}".format(overlayDn))
         return self.configurator.capic_cluster_info(overlayDn)
@@ -427,12 +427,12 @@ class CloudProvision(object):
     def overlayCtx(self):
         underlay_ccp = self.getUnderlayCCP()
         # cannot proceed without an underlay ccp
-        assert(underlay_ccp or self.args.delete), "Need an underlay ccp"
+        assert (underlay_ccp or self.args.delete), "Need an underlay ccp"
         return self.configurator.capic_overlay(underlay_ccp)
 
     def getUnderlayCCPName(self):
         u_ccp = self.getUnderlayCCP()
-        assert(u_ccp), "Need an underlay ccp"
+        assert (u_ccp), "Need an underlay ccp"
         split_ccp = u_ccp.split("/")
         ccp_name = split_ccp[-1].replace("ctxprofile-", "")
         if self.args.debug:
@@ -523,7 +523,7 @@ class CloudProvision(object):
         kafka_cert.logger = kafka_cert.set_logger(wdir, "kc.log")
         res = kafka_cert.generate(wdir, apic_host, cn, user, pwd)
         if not res:
-            raise(Exception("Failed to get kafka certs"))
+            raise (Exception("Failed to get kafka certs"))
 
         readDict = {
             "server.key": "",
