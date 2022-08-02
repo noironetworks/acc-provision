@@ -600,7 +600,7 @@ class ApicKubeConfig(object):
 
     def annotateApicObjects(self, data, pre_existing_tenant=False, ann=aciContainersOwnerAnnotation):
         # apic objects are dicts of length 1
-        assert(len(data) <= 1)
+        assert (len(data) <= 1)
         for key, value in data.items():
             if "children" in value.keys():
                 children = value["children"]
@@ -6338,6 +6338,7 @@ class ApicKubeConfig(object):
     def bgp_peer_prefix(self):
         l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         l3out_name = self.config["aci_config"]["l3out"]["name"]
+        prefixes = self.config["aci_config"]["l3out"]["bgp"]["peering"]["prefixes"]
         path = "/api/mo/uni/tn-%s/bgpPfxP-%s.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6350,7 +6351,7 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("action", "reject"),
-                                        ("maxPfx", "500"),
+                                        ("maxPfx", str(prefixes)),
                                         ("name", l3out_name)
                                     ]
                                 ),

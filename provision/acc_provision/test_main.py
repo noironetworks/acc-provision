@@ -627,7 +627,7 @@ def test_flavor_cloud_delete():
         apic.shutdown()
         return False
 
-    assert(len(fake_apic.fake_deletes) != 0)
+    assert (len(fake_apic.fake_deletes) != 0)
     run_provision(
         "flavor_cloud.inp.yaml",
         None,
@@ -638,7 +638,7 @@ def test_flavor_cloud_delete():
     )
     apic.shutdown()
     # verify all deletes were executed
-    assert(len(fake_apic.fake_deletes) == 0)
+    assert (len(fake_apic.fake_deletes) == 0)
 
 
 @in_testdir
@@ -651,7 +651,7 @@ def test_flavor_aks_delete():
         apic.shutdown()
         return False
 
-    assert(len(fake_apic.fake_deletes) != 0)
+    assert (len(fake_apic.fake_deletes) != 0)
     run_provision(
         "flavor_aks.inp.yaml",
         None,
@@ -661,7 +661,7 @@ def test_flavor_aks_delete():
     )
     apic.shutdown()
     # verify all deletes were executed
-    assert(len(fake_apic.fake_deletes) == 0)
+    assert (len(fake_apic.fake_deletes) == 0)
 
 
 @in_testdir
@@ -674,7 +674,7 @@ def test_flavor_eks_delete():
         apic.shutdown()
         return False
 
-    assert(len(fake_apic.fake_deletes) != 0)
+    assert (len(fake_apic.fake_deletes) != 0)
     run_provision(
         "flavor_eks.inp.yaml",
         None,
@@ -684,7 +684,7 @@ def test_flavor_eks_delete():
     )
     apic.shutdown()
     # verify all deletes were executed
-    assert(len(fake_apic.fake_deletes) == 0)
+    assert (len(fake_apic.fake_deletes) == 0)
 
 
 @in_testdir
