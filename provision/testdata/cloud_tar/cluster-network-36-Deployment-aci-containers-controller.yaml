@@ -50,6 +50,8 @@ spec:
           value: routingdomain-config
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
+        - name: CONFORMANCE_TESTS
+          value: 'false'
         image: noirolabs/aci-containers-controller:ci_test
         imagePullPolicy: Always
         livenessProbe:

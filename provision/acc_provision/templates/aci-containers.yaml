@@ -2518,6 +2518,8 @@ spec:
               value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
             - name: SYSTEM_NAMESPACE
               value: "{{ config.kube_config.system_namespace}}"
+            - name: CONFORMANCE_TESTS
+              value: "false"
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
