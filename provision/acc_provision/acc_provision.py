@@ -1026,6 +1026,48 @@ def config_validate_preexisting(config, prov_apic):
     return True
 
 
+def calico_config_validate_preexisting(config, prov_apic):
+    try:
+        if prov_apic is not None:
+            apic = get_apic(config)
+            if apic is None:
+                return False
+        aep_name = config["aci_config"]["aep"]
+        physical_domain_name = config["aci_config"]["physical_domain"]["domain"]
+        vrf_tenant = config["aci_config"]["vrf"]["tenant"]
+        vrf_name = config["aci_config"]["vrf"]["name"]
+        vrf_dn = config["aci_config"]["vrf"]["dn"]
+        l3out_name = config["aci_config"]["l3out"]["name"]
+        phys_dom = apic.get_phys_dom(physical_domain_name)
+        if phys_dom is None:
+            err("Physical Domain %s not created on the APIC. Please create the Physical Domain and try again" % physical_domain_name)
+            return False
+        aep = apic.get_aep(aep_name)
+        if aep is None:
+            err("AEP %s not created on the APIC. Please create the AEP and try again" % aep_name)
+            return False
+        tenant = apic.get_tenant(vrf_tenant)
+        if tenant is None:
+            err("Tenant %s not created on the APIC. Please create the tenant and try again" % vrf_tenant)
+            return False
+        vrf = apic.get_vrf(vrf_dn)
+        if vrf is None:
+            err("VRF %s/%s not created on the APIC. Please create the vrf and try again" % (vrf_tenant, vrf_name))
+            return False
+        l3out = apic.get_l3out(vrf_tenant, l3out_name)
+        if l3out is None:
+            err("L3out %s/%s not created on the APIC. Please create the l3out and try again " % (vrf_tenant, l3out_name))
+            return False
+        else:
+            map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+            if not map_l3out_vrf:
+                err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
+                return False
+    except Exception as e:
+        warn("Unable to validate resources on APIC: {}".format(e))
+    return True
+
+
 def generate_sample(filep, flavor):
     if flavor in ["cloud", "eks"]:
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
@@ -1752,10 +1794,13 @@ def provision(args, apic_file, no_random):
     adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
 
-    # Advisory checks, including apic checks, ignore failures
-    if not config_validate_preexisting(config, prov_apic):
-        # Ignore failures, this check is just advisory for now
-        pass
+    if is_calico_flavor(config["flavor"]) and not calico_config_validate_preexisting(config, prov_apic):
+        return False
+    else:
+        # Advisory checks, including apic checks, ignore failures
+        if not config_validate_preexisting(config, prov_apic):
+            # Ignore failures, this check is just advisory for now
+            pass
 
     # generate key and cert if needed
     username = config["aci_config"]["sync_login"]["username"]
