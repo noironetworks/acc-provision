@@ -47,10 +47,6 @@ net_config:
 calico_config:
   net_config:
     # block_size: 20            # IPAM IPV4 block size. Valid values are 20-32(inclusive). Default value is 26
-    # encapsulation: IPIP       # Default is "None",
-    # nat_outgoing: Enabled     # When enabled, packets sent from Calico networked containers in this
-                                # pool to destinations  outside of any Calico IP pools will be masqueraded.
-                                # Default is Disabled
     # nodeSelector: all()       # Selects the nodes that Calico IPAM should assign addresses from this pool to. Default is all()
 
 #

@@ -54,8 +54,7 @@ topology:
     - name: k8s-node4
 
 calico_config:
-  net_config:
-    encapsulation: None
+  net_config: {}
 
 net_config:
   node_subnet: 2.100.101.0/24
