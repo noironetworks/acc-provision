@@ -212,6 +212,10 @@ class Apic(object):
         path = "/api/mo/%s.json" % dn
         return self.get_path(path)
 
+    def get_tenant(self, vrf_tn):
+        path = "/api/mo/uni/tn-%s.json" % vrf_tn
+        return self.get_path(path)
+
     def get_l3out(self, tenant, name):
         path = "/api/mo/uni/tn-%s/out-%s.json" % (tenant, name)
         return self.get_path(path)
@@ -220,6 +224,10 @@ class Apic(object):
         path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children&target-subtree-class=infraRsVlanNs" % (vmmdom)
         return self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
 
+    def get_phys_dom(self, domain):
+        path = "/api/mo/uni/phys-%s.json" % domain
+        return self.get_path(path)
+
     def check_l3out_vrf(self, tenant, name, vrf_name, vrf_dn):
         path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
         res = False
@@ -227,7 +235,7 @@ class Apic(object):
             tDn = self.get_path(path)["l3extRsEctx"]["attributes"]["tDn"]
             res = (tDn == vrf_dn)
         except Exception as e:
-            err("Error in getting configured vrf for %s/%s: %s" % (tenant, name, str(e)))
+            err("Error in getting configured l3out vrf for %s/%s: %s" % (tenant, name, str(e)))
         return res
 
     def get_user(self, name):
