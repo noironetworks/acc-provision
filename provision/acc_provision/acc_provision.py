@@ -215,6 +215,7 @@ def config_default():
             "host_agent_openshift_resource": False,
             "use_netpol_apigroup": "networking.k8s.io",
             "use_cluster_role": True,
+            "no_wait_for_service_ep_readiness": False,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "aci-containers-system",
