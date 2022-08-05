@@ -1,26 +1,13 @@
 aci_config:
-  physical_domain:
-    domain: bm-srvrs-calico-pd
-  system_id: mykube
   apic_hosts:
     - 10.30.120.100
-  apic_login:
-    username: admin
-    password: test
-  aep: sauto_aep
   vrf:
-    name: sauto_l3out-1_vrf
-    tenant: common
-  l3out:
-    name: sauto_l3out-1
-    external_networks:
-        - sauto_l3out-1_epg
+    name: mykube_vrf
+    tenant: test
+  cluster_l3out:
+    aep: kube-cluster 
     svi:
-      type: floating 
-      external_network: sauto_l3out-1_int_epg
-      external_network_svc: sauto_l3out-1_svc_epg
-      node_profile_name: sauto_l3out-1_node_prof
-      int_prof_name: sauto_l3out-1_int_prof
+      type: floating
       floating_ip: 2.100.101.100/24
       secondary_ip: 2.100.101.254/24
       vlan_id: 13
@@ -28,8 +15,13 @@ aci_config:
     bgp:
       secret: test
       peering:
+        prefixes: 500
         remote_as_number: 64512
-        aci_as_number: 64513
+        aci_as_number: 2
+  l3out:
+    name: ext-l3out
+    external_networks:
+    - mykube_extepg
 
 topology:
   rack:

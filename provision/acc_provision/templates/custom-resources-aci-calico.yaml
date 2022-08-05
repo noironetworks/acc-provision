@@ -22,7 +22,7 @@ kind: APIServer
 metadata: 
   name: default 
 spec: {}
-{% if config.aci_config.l3out.bgp.secret %}
+{% if config.aci_config.cluster_l3out.bgp.secret %}
 ---
 #This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
 apiVersion: v1
@@ -32,7 +32,7 @@ metadata:
   namespace: kube-system
 type: Opaque
 stringData:
-  rr-password: {{ config.aci_config.l3out.bgp.secret }}
+  rr-password: {{ config.aci_config.cluster_l3out.bgp.secret }}
 {% endif %}
 ---
 
