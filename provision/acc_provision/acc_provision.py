@@ -140,6 +140,9 @@ def config_default():
             "l3out": {
                 "name": None,
                 "external_networks": None,
+            },
+            "cluster_l3out": {
+                "name": None,
                 "svi": {
                     "type": "floating",
                     "mtu": 9000
@@ -148,7 +151,6 @@ def config_default():
                     "peering": {
                         "prefixes": 500,
                         "remote_as_number": 64512,
-                        "aci_as_number": 64513,
                     },
                 },
             },
@@ -363,7 +365,19 @@ def normalize_cidr(cidr):
 
 
 def config_adjust(args, config, prov_apic, no_random):
-    system_id = config["aci_config"]["system_id"]
+    if is_calico_flavor(config["flavor"]):
+        l3out_name = ""
+        if not config["aci_config"]["cluster_l3out"].get("name"):
+            vlan_id = config["aci_config"]["cluster_l3out"]["svi"]["vlan_id"]
+            l3out_name = "calico-l3out-fsvi-vlan-%s" % vlan_id
+            config["aci_config"]["cluster_l3out"]["name"] = l3out_name
+        l3out_name = config["aci_config"]["cluster_l3out"]["name"]
+        system_id = "calico-%s" % l3out_name if "calico" not in l3out_name else l3out_name
+        system_id = system_id[:20]
+        config["aci_config"]["system_id"] = system_id
+    else:
+        l3out_name = config["aci_config"]["l3out"]["name"]
+        system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
     node_subnet = config["net_config"]["node_subnet"]
     pod_subnet = config["net_config"]["pod_subnet"]
@@ -378,7 +392,6 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
-    l3out_name = config["aci_config"]["l3out"]["name"]
     token = str(uuid.uuid4())
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
@@ -424,14 +437,10 @@ def config_adjust(args, config, prov_apic, no_random):
         node_service_ip_pool = []
 
     if is_calico_flavor(config["flavor"]):
-        if not config["aci_config"]["l3out"]["svi"].get("node_profile_name"):
-            config["aci_config"]["l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
-        if not config["aci_config"]["l3out"]["svi"].get("int_prof_name"):
-            config["aci_config"]["l3out"]["svi"]["int_prof_name"] = l3out_name + "_int_prof"
-        if not config["aci_config"]["l3out"]["svi"].get("external_network"):
-            config["aci_config"]["l3out"]["svi"]["external_network"] = l3out_name + "_int_epg"
-        if not config["aci_config"]["l3out"]["svi"].get("external_network_svc"):
-            config["aci_config"]["l3out"]["svi"]["external_network_svc"] = l3out_name + "_svc_epg"
+        config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
+        config["aci_config"]["cluster_l3out"]["svi"]["int_prof_name"] = l3out_name + "_int_prof"
+        config["aci_config"]["cluster_l3out"]["svi"]["external_network"] = l3out_name + "_int_epg"
+        config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"] = l3out_name + "_svc_epg"
 
     adj_config = {
         "aci_config": {
@@ -813,7 +822,17 @@ def config_validate(flavor_opts, config):
         if x else Raise(Exception("Invalid name"))
     get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
 
-    if not isOverlay(config["flavor"]) or config["aci_config"]["capic"]:
+    if is_calico_flavor(config["flavor"]):
+        checks = {
+            # ACI config
+            "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
+            "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
+            "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")), required),
+            # Network Config
+            "net_config/pod_subnet": (get(("net_config", "pod_subnet")), required),
+            "net_config/node_subnet": (get(("net_config", "node_subnet")), required),
+        }
+    elif not isOverlay(config["flavor"]) or config["aci_config"]["capic"]:
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
@@ -858,15 +877,17 @@ def config_validate(flavor_opts, config):
             extra_checks = {}
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
-            "net_config/node_subnet": (get(("net_config", "node_subnet")),
-                                       required),
-            "aci_config/aep": (get(("aci_config", "aep")), required),
-            "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
-                                      required),
-            "aci_config/l3out/mtu": (get(("aci_config", "l3out", "mtu")),
-                                     is_valid_mtu_VirtualLIfP),
-            "aci_config/l3out/external-networks":
-            (get(("aci_config", "l3out", "external_networks")), required),
+            "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
+            "aci_config/cluster_l3out/svi/mtu": (get(("aci_config", "cluster_l3out", "svi", "mtu")),
+                                                 is_valid_mtu_VirtualLIfP),
+            "aci_config/cluster_l3out/svi/vlan_id": (get(("aci_config", "cluster_l3out", "svi", "vlan_id")),
+                                                     required),
+            "aci_config/cluster_l3out/svi/floating_ip": (get(("aci_config", "cluster_l3out", "svi", "floating_ip")),
+                                                         required),
+            "aci_config/cluster_l3out/svi/secondary_ip": (get(("aci_config", "cluster_l3out", "svi", "secondary_ip")),
+                                                          required),
+            "aci_config/cluster_l3out/bgp/peering/aci_as_number":
+            (get(("aci_config", "cluster_l3out", "bgp", "peering", "aci_as_number")), required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
@@ -916,7 +937,7 @@ def config_validate(flavor_opts, config):
                 get(("net_config", "kubeapi_vlan")), required)
 
     # Allow deletion of resources without isname check
-    if get(("provision", "prov_apic")) is False:
+    if get(("provision", "prov_apic")) is False and not is_calico_flavor(config["flavor"]):
         checks["aci_config/system_id"] = \
             (get(("aci_config", "system_id")), required)
 
@@ -1029,23 +1050,26 @@ def config_validate_preexisting(config, prov_apic):
 
 def calico_config_validate_preexisting(config, prov_apic):
     try:
+        apic = None
         if prov_apic is not None:
             apic = get_apic(config)
             if apic is None:
                 return False
-        aep_name = config["aci_config"]["aep"]
-        physical_domain_name = config["aci_config"]["physical_domain"]["domain"]
+        aep_name = config["aci_config"]["cluster_l3out"]["aep"]
         vrf_tenant = config["aci_config"]["vrf"]["tenant"]
         vrf_name = config["aci_config"]["vrf"]["name"]
         vrf_dn = config["aci_config"]["vrf"]["dn"]
         l3out_name = config["aci_config"]["l3out"]["name"]
-        phys_dom = apic.get_phys_dom(physical_domain_name)
-        if phys_dom is None:
-            err("Physical Domain %s not created on the APIC. Please create the Physical Domain and try again" % physical_domain_name)
-            return False
         aep = apic.get_aep(aep_name)
         if aep is None:
             err("AEP %s not created on the APIC. Please create the AEP and try again" % aep_name)
+            return False
+        check_local_asn = apic.get_local_asn()
+        aci_as_number = config["aci_config"]["cluster_l3out"]["bgp"]["peering"]["aci_as_number"]
+        if str(aci_as_number) != check_local_asn:
+            err("aci_as_number %s provided in the input file does not match the BGP route reflector asn %s on the APIC. "
+                "This check is only made if -a option is used. Please ensure the flavor manifests that are generated from"
+                "this step with -a are used instead of previous ones you may have had." % (aci_as_number, check_local_asn))
             return False
         tenant = apic.get_tenant(vrf_tenant)
         if tenant is None:
@@ -1057,12 +1081,17 @@ def calico_config_validate_preexisting(config, prov_apic):
             return False
         l3out = apic.get_l3out(vrf_tenant, l3out_name)
         if l3out is None:
-            err("L3out %s/%s not created on the APIC. Please create the l3out and try again " % (vrf_tenant, l3out_name))
+            err("External l3Out %s/%s not created on the APIC. Please create the external l3out and try again " % (vrf_tenant, l3out_name))
+            return False
+        map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+        if not map_l3out_vrf:
+            err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
             return False
         else:
-            map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
-            if not map_l3out_vrf:
-                err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
+            check_ext_l3out_epg = apic.check_ext_l3out_epg(vrf_tenant, l3out_name)
+            if check_ext_l3out_epg is None:
+                err("External l3out %s/%s does not have an external EPG configured on the APIC. Please fix the configuration and try again" %
+                    (vrf_tenant, l3out_name))
                 return False
     except Exception as e:
         warn("Unable to validate resources on APIC: {}".format(e))
@@ -1453,10 +1482,8 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
                 if is_calico_flavor(config["flavor"]):
-                    l3out_name = config["aci_config"]["l3out"]["name"]
-                    lnodep = config["aci_config"]["l3out"]["svi"]["node_profile_name"]
-                    lifp = config["aci_config"]["l3out"]["svi"]["int_prof_name"]
-                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name=l3out_name, lnodep=lnodep, lifp=lifp)
+                    l3out_name = config["aci_config"]["cluster_l3out"]["name"]
+                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name=l3out_name)
                 else:
                     apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config)
             ret = False if apic.errors > 0 else True
@@ -1812,14 +1839,14 @@ def provision(args, apic_file, no_random):
     if generate_cert_data:
         if not exists(certfile) or not exists(keyfile):
             if is_calico_flavor(config["flavor"]):
-                info("Generating certs for network-operator")
+                info("Generating certs for calico based kubernetes controller")
             else:
                 info("Generating certs for kubernetes controller")
         else:
             if is_calico_flavor(config["flavor"]):
                 info("Reusing existing certs for network-operator")
             else:
-                info("Reusing existing certs for kubernetes controller")
+                info("Reusing existing certs for calico based kubernetes controller")
         key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data

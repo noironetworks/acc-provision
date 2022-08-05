@@ -19,7 +19,7 @@ metadata:
   name: 2-100-101-201
 spec:
   peerIP: 2.100.101.201
-  asNumber: 64513
+  asNumber: 2
   nodeSelector: rack_id == "1"
   password:
     secretKeyRef:
@@ -33,7 +33,7 @@ metadata:
   name: 2-100-101-202
 spec:
   peerIP: 2.100.101.202
-  asNumber: 64513
+  asNumber: 2
   nodeSelector: rack_id == "1"
   password:
     secretKeyRef:
@@ -47,7 +47,7 @@ metadata:
   name: 2-100-101-203
 spec:
   peerIP: 2.100.101.203
-  asNumber: 64513
+  asNumber: 2
   nodeSelector: rack_id == "2"
   password:
     secretKeyRef:
