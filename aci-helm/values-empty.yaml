@@ -1,0 +1,103 @@
+# operator configuration
+
+aciConfig:
+  systemId: mykube             # Every opflex cluster must have a distinct ID
+  #apicRefreshtickerAdjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
+  #apicSubscriptionDelay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
+  #opflexDeviceDeleteTimeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
+  apicHosts:                   # List of APIC hosts to connect for APIC API
+  - 10.1.1.101
+  vmmDomain:                   # Kubernetes container domain configuration
+    encapType: vxlan           # Encap mode: vxlan or vlan
+    mcastRange:                # Every opflex VMM must use a distinct range
+      start: 225.20.1.1
+      end: 225.20.255.255
+    nestedInside:              # Include if nested inside a VMM;
+                                #   supported for Kubernetes
+    # type: vmware              # Specify the VMM vendor (supported: vmware)
+    # name: myvmware            # Specify the name of the VMM domain
+
+    # Mandatory field for Openshift on ESX flavor
+    # Loadbalancer IP used to create duplicate service file for
+    # router-default service in Openshift on ESX case. This has to be
+    # the same LB IP used during installation
+    # installerProvisionedLbIp: 192.168.18.201
+
+  # The following resources must already exist on the APIC.
+  # They are used, but not created, by the provisioning tool.
+  aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: mykube-vrf
+    tenant: common              # This can be system-id or common
+  l3out:
+    name: mykube_l3out          # Used to provision external IPs
+    externalNetworks:
+    - mykube_extepg             # Used for external contracts
+  syncLogin:
+    username: <system-id>
+    password: <password>
+    certfile: <user-%s.crt % system-id>
+    keyfile: <user-%s.key % system-id>
+
+flavor: <flavor>
+
+registry:
+  configurationVersion: <token>
+  imagePrefix: "noiro"
+  # aciCniOperatorVersion:
+
+#operatorManagedConfig: 
+# enableUpdates: True # Default is False
+
+#multus:
+ # disable:
+
+#istioConfig:
+  # installIstio: False         # default is True
+  # installProfile: "default"   # override if needed, default is "demo"
+
+#dropLogConfig:
+  # enable: False         # default is True
+
+#logging:
+ #  controllerLogLevel: "debug"
+ #  hostagentLogLevel: "debug"
+ #  opflexagentLogLevel: "debug"
+
+kubeConfig:
+  deploymentBase64: <some-formula>
+  # ovsMemoryLimit: "20Gi"            # override if needed, default is "1Gi"
+  # rebootOpflexWithOvs: "false"     # override if needed, default is "true"
+  # snatOperator:
+        # disablePeriodicSnatGlobalInfoSync: True 
+
+netConfig:
+  nodeSubnet: 10.1.0.1/16      # Subnet to use for nodes
+  podSubnet: 10.2.0.1/16       # Subnet to use for Kubernetes Pods
+  externDynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
+  externStatic: 10.4.0.1/24    # Subnet to use for static external IPs
+  nodeSvcSubnet: 10.5.0.1/24  # Subnet to use for service graph
+  kubeapiVlan: 4001            # The VLAN used by the physdom for nodes (Kubernetes only)
+  serviceVlan: 4003            # The VLAN used by LoadBalancer services
+  infraVlan: 4093              # The VLAN used by ACI infra
+  #interfaceMtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  #interfaceMtuHeadroom: 100  # MTU Headroom in bytes to be left for Header
+                                # Must be >= 50
+                                # Default value si set to 100
+  #serviceMonitorInterval: 5  # IPSLA interval probe time for PBR tracking
+                                # default is 5, set to 0 to disable, max: 65535
+  #pbrTrackingNonSnat: true  # Default is false, set to true for IPSLA to
+                                # be effective with non-snat services
+  #disableWaitForNetwork: true  # Default is false, set to true if the ACI
+                                   # CNI should not wait for datapath to be
+                                   # ready before returning success for pod
+                                   # interface creation
+ #durationWaitForNetwork: 210  # Duration in seconds that ACI should wait
+                                  # for datapath to be ready.
+                                  # Default is 210 seconds.
+                                  # Only enabled if disableWaitForNetwork
+                                  # is set to false.
+
+  
+  
+

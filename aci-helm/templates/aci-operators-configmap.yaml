@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-operator-config
+  namespace: {{ .Values.kubeConfig.systemNamespace }}
+  labels:
+    aci-containers-config-version: {{ .Values.registry.configurationVersion }}
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "flavor": {{ .Values.flavor }},
+        "config": {{ .Values.kubeConfig.deploymentBase64 }}
+    }
