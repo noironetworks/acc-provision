@@ -4,13 +4,13 @@ metadata:
   name: aci-containers-operator
   namespace: {{ default "aci-containers-system" (.Values.kubeConfig).systemNamespace }}
   labels:
-    aci-containers-config-version: "{{ .Values.registry.configurationVersion }}"
+    aci-containers-config-version: {{ .Values.registry.configurationVersion }}
 ---
 apiVersion: {{ default "rbac.authorization.k8s.io/v1" (.Values.kubeConfig).useRbacApi }}
 kind: ClusterRole
 metadata:
   labels:
-    aci-containers-config-version: "{{ .Values.registry.configurationVersion }}"
+    aci-containers-config-version: {{ .Values.registry.configurationVersion }}
     network-plugin: aci-containers
   name: aci-containers-operator
 rules:
@@ -108,7 +108,7 @@ rules:
   - list
   - watch
   - get
-{% if .Values.flavor == "cloud" %}
+{{ if eq .Values.flavor "cloud" }}
 - apiGroups:
   - "aci.aw"
   resources:
@@ -118,7 +118,7 @@ rules:
   - gbpsstates/status
   verbs:
   - "*"
-{% endif %}
+{{ end }}
 - apiGroups:
   - config.openshift.io
   - operator.openshift.io
