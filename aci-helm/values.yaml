@@ -35,7 +35,7 @@ aciConfig:
     - k8s12_net            # Used for external contracts
   syncLogin:
     username: "rke01"
-    password: "password"
+    password: ""
     certfile: "user-rke01.crt"
     keyfile: "user-rke01.key"
 
@@ -65,7 +65,7 @@ logging:
  #  opflexagentLogLevel: "debug"
 
 kubeConfig:
-  deploymentBase64: "some-formula"
+  deploymentBase64: ""
   # ovsMemoryLimit: "20Gi"            # override if needed, default is "1Gi"
   # rebootOpflexWithOvs: "false"     # override if needed, default is "true"
   # snatOperator:
