@@ -1,15 +1,62 @@
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13.json
 {
-    "l3extLNodeP": {
+    "l3extOut": {
         "attributes": {
-            "name": "sauto_l3out-1_node_prof",
+            "name": "calico-l3out-fsvi-vlan-13",
+            "enforceRtctrl": "export,import",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
-                "l3extLIfP": {
+                "l3extRsEctx": {
                     "attributes": {
-                        "name": "sauto_l3out-1_int_prof",
+                        "tnFvCtxName": "mykube_vrf",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extRsL3DomAtt": {
+                    "attributes": {
+                        "tDn": "uni/l3dom-calico-l3out-fsvi-vlan-13-L3-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extLNodeP": {
+                    "attributes": {
+                        "name": "calico-l3out-fsvi-vlan-13_node_prof",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "l3extLIfP": {
+                                "attributes": {
+                                    "name": "calico-l3out-fsvi-vlan-13_int_prof",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/l3dom-calico-l3out-fsvi-vlan-13-L3-dom.json
+{
+    "l3extDomP": {
+        "attributes": {
+            "dn": "uni/l3dom-calico-l3out-fsvi-vlan-13-L3-dom",
+            "name": "calico-l3out-fsvi-vlan-13-L3-dom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[calico-l3out-fsvi-vlan-13-pool]-static",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -17,11 +64,80 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
+/api/mo/uni/infra/vlanns-[calico-l3out-fsvi-vlan-13-pool]-static.json
+{
+    "fvnsVlanInstP": {
+        "attributes": {
+            "name": "calico-l3out-fsvi-vlan-13-pool",
+            "allocMode": "static",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvnsEncapBlk": {
+                    "attributes": {
+                        "allocMode": "static",
+                        "from": "vlan-13",
+                        "to": "vlan-13",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/phys-calico-l3out-fsvi-vlan-13-phys-dom.json
+{
+    "physDomP": {
+        "attributes": {
+            "dn": "uni/phys-calico-l3out-fsvi-vlan-13-phys-dom",
+            "name": "calico-l3out-fsvi-vlan-13-phys-dom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[calico-l3out-fsvi-vlan-13-pool]-static",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra.json
+{
+    "infraAttEntityP": {
+        "attributes": {
+            "name": "kube-cluster",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/phys-calico-l3out-fsvi-vlan-13-phys-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/l3dom-calico-l3out-fsvi-vlan-13-L3-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
+            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
             "addr": "2.100.101.201/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-101",
@@ -35,7 +151,7 @@
             {
                 "l3extRsDynPathAtt": {
                     "attributes": {
-                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "tDn": "uni/phys-calico-l3out-fsvi-vlan-13-phys-dom",
                         "floatingAddr": "2.100.101.100/24",
                         "forgedTransmit": "Disabled",
                         "promMode": "Disabled",
@@ -70,18 +186,9 @@
                             }
                         },
                         {
-                            "bgpLocalAsnP": {
-                                "attributes": {
-                                    "asnPropagate": "replace-as",
-                                    "localAsn": "64513",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "bgpRsPeerPfxPol": {
                                 "attributes": {
-                                    "tnBgpPeerPfxPolName": "sauto_l3out-1",
+                                    "tnBgpPeerPfxPolName": "calico-l3out-fsvi-vlan-13",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -92,11 +199,11 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
+            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
             "addr": "2.100.101.202/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-102",
@@ -110,7 +217,7 @@
             {
                 "l3extRsDynPathAtt": {
                     "attributes": {
-                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "tDn": "uni/phys-calico-l3out-fsvi-vlan-13-phys-dom",
                         "floatingAddr": "2.100.101.100/24",
                         "forgedTransmit": "Disabled",
                         "promMode": "Disabled",
@@ -145,18 +252,9 @@
                             }
                         },
                         {
-                            "bgpLocalAsnP": {
-                                "attributes": {
-                                    "asnPropagate": "replace-as",
-                                    "localAsn": "64513",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "bgpRsPeerPfxPol": {
                                 "attributes": {
-                                    "tnBgpPeerPfxPolName": "sauto_l3out-1",
+                                    "tnBgpPeerPfxPolName": "calico-l3out-fsvi-vlan-13",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -167,11 +265,11 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13].json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/lifp-sauto_l3out-1_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13]",
+            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13]",
             "addr": "2.100.101.203/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-103",
@@ -185,7 +283,7 @@
             {
                 "l3extRsDynPathAtt": {
                     "attributes": {
-                        "tDn": "uni/phys-bm-srvrs-calico-pd",
+                        "tDn": "uni/phys-calico-l3out-fsvi-vlan-13-phys-dom",
                         "floatingAddr": "2.100.101.100/24",
                         "forgedTransmit": "Disabled",
                         "promMode": "Disabled",
@@ -220,18 +318,9 @@
                             }
                         },
                         {
-                            "bgpLocalAsnP": {
-                                "attributes": {
-                                    "asnPropagate": "replace-as",
-                                    "localAsn": "64513",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "bgpRsPeerPfxPol": {
                                 "attributes": {
-                                    "tnBgpPeerPfxPolName": "sauto_l3out-1",
+                                    "tnBgpPeerPfxPolName": "calico-l3out-fsvi-vlan-13",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -242,7 +331,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-103].json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-103].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -252,7 +341,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-104].json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-104].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -262,18 +351,68 @@
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/instP-sauto_l3out-1_svc_epg.json
+/api/mo/uni/tn-test/flt-calico-l3out-fsvi-vl-allow-all-filter.json
 {
-    "l3extInstP": {
+    "vzFilter": {
         "attributes": {
-            "name": "sauto_l3out-1_svc_epg",
+            "name": "calico-l3out-fsvi-vl-allow-all-filter",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
-                "fvRsProv": {
+                "vzEntry": {
                     "attributes": {
-                        "tnVzBrCPName": "common-l3out-allow-all",
+                        "name": "allow-all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/brc-calico-l3out-fsvi-vl-l3out-allow-all.json
+{
+    "vzBrCP": {
+        "attributes": {
+            "name": "calico-l3out-fsvi-vl-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "vzSubj": {
+                    "attributes": {
+                        "name": "allow-all-subj",
+                        "consMatchT": "AtleastOne",
+                        "provMatchT": "AtleastOne",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzRsSubjFiltAtt": {
+                                "attributes": {
+                                    "tnVzFilterName": "calico-l3out-fsvi-vl-allow-all-filter",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_svc_epg.json
+{
+    "l3extInstP": {
+        "attributes": {
+            "name": "calico-l3out-fsvi-vlan-13_svc_epg",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvRsCons": {
+                    "attributes": {
+                        "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -291,18 +430,18 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/instP-sauto_l3out-1_int_epg.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_int_epg.json
 {
     "l3extInstP": {
         "attributes": {
-            "name": "sauto_l3out-1_int_epg",
+            "name": "calico-l3out-fsvi-vlan-13_int_epg",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "fvRsCons": {
                     "attributes": {
-                        "tnVzBrCPName": "common-l3out-allow-all",
+                        "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -339,7 +478,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/bgpExtP.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/bgpExtP.json
 {
     "bgpExtP": {
         "attributes": {
@@ -347,7 +486,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13.json
 {
     "l3extOut": {
         "attributes": {
@@ -356,7 +495,7 @@
         }
     }
 }
-/api/mo/uni/tn-common/bgpCtxP-sauto_l3out-1-Timers.json
+/api/mo/uni/tn-test/bgpCtxP-calico-l3out-fsvi-vlan-13-Timers.json
 {
     "bgpCtxPol": {
         "attributes": {
@@ -364,23 +503,23 @@
             "staleIntvl": "6",
             "kaIntvl": "1",
             "maxAsLimit": "1",
-            "name": "sauto_l3out-1-Timers",
+            "name": "calico-l3out-fsvi-vlan-13-Timers",
             "grCtrl": "helper",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/bestpath-sauto_l3out-1-Relax-AS.json
+/api/mo/uni/tn-test/bestpath-calico-l3out-fsvi-vlan-13-Relax-AS.json
 {
     "bgpBestPathCtrlPol": {
         "attributes": {
-            "name": "sauto_l3out-1-Relax-AS",
+            "name": "calico-l3out-fsvi-vlan-13-Relax-AS",
             "ctrl": "asPathMultipathRelax",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/lnodep-sauto_l3out-1_node_prof/protp.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/protp.json
 {
     "bgpProtP": {
         "attributes": {
@@ -391,7 +530,7 @@
             {
                 "bgpRsBgpNodeCtxPol": {
                     "attributes": {
-                        "tnBgpCtxPolName": "sauto_l3out-1-Timers",
+                        "tnBgpCtxPolName": "calico-l3out-fsvi-vlan-13-Timers",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -399,7 +538,7 @@
             {
                 "bgpRsBestPathCtrlPol": {
                     "attributes": {
-                        "tnBgpBestPathCtrlPolName": "sauto_l3out-1-Relax-AS",
+                        "tnBgpBestPathCtrlPolName": "calico-l3out-fsvi-vlan-13-Relax-AS",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -407,42 +546,42 @@
         ]
     }
 }
-/api/mo/uni/tn-common/bgpCtxAfP-sauto_l3out-1.json
+/api/mo/uni/tn-test/bgpCtxAfP-calico-l3out-fsvi-vlan-13.json
 {
     "bgpCtxAfPol": {
         "attributes": {
-            "name": "sauto_l3out-1",
+            "name": "calico-l3out-fsvi-vlan-13",
             "maxEcmpIbgp": "64",
             "maxEcmp": "64",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/ctx-sauto_l3out-1_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv4-ucast.json
+/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv4-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {
-            "tnBgpCtxAfPolName": "sauto_l3out-1",
+            "tnBgpCtxAfPolName": "calico-l3out-fsvi-vlan-13",
             "af": "ipv4-ucast",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/ctx-sauto_l3out-1_vrf/rsctxToBgpCtxAfPol-[sauto_l3out-1]-ipv6-ucast.json
+/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv6-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {
-            "tnBgpCtxAfPolName": "sauto_l3out-1",
+            "tnBgpCtxAfPolName": "calico-l3out-fsvi-vlan-13",
             "af": "ipv6-ucast",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-common/subj-sauto_l3out-1-export-match.json
+/api/mo/uni/tn-test/subj-calico-l3out-fsvi-vlan-13-export-match.json
 {
     "rtctrlSubjP": {
         "attributes": {
-            "name": "sauto_l3out-1-export-match",
+            "name": "calico-l3out-fsvi-vlan-13-export-match",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -458,7 +597,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/prof-default-export.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/prof-default-export.json
 {
     "rtctrlProfile": {
         "attributes": {
@@ -478,7 +617,7 @@
                         {
                             "rtctrlRsCtxPToSubjP": {
                                 "attributes": {
-                                    "tnRtctrlSubjPName": "sauto_l3out-1-export-match",
+                                    "tnRtctrlSubjPName": "calico-l3out-fsvi-vlan-13-export-match",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -489,11 +628,11 @@
         ]
     }
 }
-/api/mo/uni/tn-common/subj-sauto_l3out-1-import-match.json
+/api/mo/uni/tn-test/subj-calico-l3out-fsvi-vlan-13-import-match.json
 {
     "rtctrlSubjP": {
         "attributes": {
-            "name": "sauto_l3out-1-import-match",
+            "name": "calico-l3out-fsvi-vlan-13-import-match",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -536,7 +675,7 @@
         ]
     }
 }
-/api/mo/uni/tn-common/out-sauto_l3out-1/prof-default-import.json
+/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/prof-default-import.json
 {
     "rtctrlProfile": {
         "attributes": {
@@ -556,7 +695,7 @@
                         {
                             "rtctrlRsCtxPToSubjP": {
                                 "attributes": {
-                                    "tnRtctrlSubjPName": "sauto_l3out-1-import-match",
+                                    "tnRtctrlSubjPName": "calico-l3out-fsvi-vlan-13-import-match",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -567,22 +706,34 @@
         ]
     }
 }
-/api/mo/uni/tn-common/bgpPfxP-sauto_l3out-1.json
+/api/mo/uni/tn-test/bgpPfxP-calico-l3out-fsvi-vlan-13.json
 {
     "bgpPeerPfxPol": {
         "attributes": {
             "action": "reject",
             "maxPfx": "500",
-            "name": "sauto_l3out-1",
+            "name": "calico-l3out-fsvi-vlan-13",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/node/mo/uni/userext/user-mykube.json
+/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg.json
+{
+    "fvRsProv": {
+        "attributes": {
+            "matchT": "AtleastOne",
+            "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg/rsprov-calico-l3out-fsvi-vl-l3out-allow-all.json
+None
+/api/node/mo/uni/userext/user-calico-l3out-fsvi-vl.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "mykube",
+            "name": "calico-l3out-fsvi-vl",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -610,19 +761,19 @@
         ]
     }
 }
-/api/node/mo/uni/userext/user-mykube.json
+/api/node/mo/uni/userext/user-calico-l3out-fsvi-vl.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "mykube",
+            "name": "calico-l3out-fsvi-vl",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "mykube.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB5jCCAU8CAgPoMA0GCSqGSIb3DQEBBQUAMDsxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRQwEgYDVQQDDAtVc2VyIG15a3ViZTAeFw0xNzA2\nMDIwNjI1MjRaFw0yNzA1MzEwNjI1MjRaMDsxCzAJBgNVBAYTAlVTMRYwFAYDVQQK\nDA1DaXNjbyBTeXN0ZW1zMRQwEgYDVQQDDAtVc2VyIG15a3ViZTCBnzANBgkqhkiG\n9w0BAQEFAAOBjQAwgYkCgYEA02LdQWiaGYHaRVVks24/CGelCgqh13NnkGXpsqV/\n0XQA0FyTlhNeFCq+6mTMdRNSUGadQpZl210GP+iYCenpVTp5TpfpaJxjaYfGrwzf\nm5erDrbiElOTsGp7zMYnnngTGVLy0ivRRPd2bxY1SisR9229Ba4ShMJhvPRA9ZAn\nHZcCAwEAATANBgkqhkiG9w0BAQUFAAOBgQAoMYalsZL8YLsA8ZpBuvxP2tl2ZTga\nxZqn7XceITFRzRDw3yX8vnwL1VJ/IRczJ+pe/70y4/t1PizLE3xtVzcHU4KZ3X33\nh4dagfgVxuUDUu5cccWUU5U6qMJADrPLixwwqYPLJ5tTMAmrOJen04KuV+XwC9MZ\nP16UsJfdDNghvg==\n-----END CERTIFICATE-----\n",
+                        "name": "calico-l3out-fsvi-vl.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIICAjCCAWsCAgPoMA0GCSqGSIb3DQEBBQUAMEkxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMSIwIAYDVQQDDBlVc2VyIGNhbGljby1sM291dC1m\nc3ZpLXZsMB4XDTIyMDgxMTEzMjMyOFoXDTMyMDgwOTAxMjMyOFowSTELMAkGA1UE\nBhMCVVMxFjAUBgNVBAoMDUNpc2NvIFN5c3RlbXMxIjAgBgNVBAMMGVVzZXIgY2Fs\naWNvLWwzb3V0LWZzdmktdmwwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKFH\nARTnEU1pLH5ozx5uLhfn/p10NoFzSx1KsP0zXXF4pEdM49rTXHnHbGVurvJq/4EU\nHmxBT6B99uW32HegHHvNgtb9fElI/Ph3YeLZKv6rA5+aFUniCkCf5nmb+CQ6i1cl\n/w3qwldB1V9ecH9ftgxaW8T7+406ETsIObiOXqjpAgMBAAEwDQYJKoZIhvcNAQEF\nBQADgYEAd9/4LkCXZOIjBOFdyRKgiFBx4iuTZTrhGJ6ZXKHLn9aeXACgTbVcE6Fm\ncAin65vsUnuwWfiVxCpq5M7d1Lx15ONkwbw97zCPuDuO4eOqIZMToXYdJZbHo9RU\ny7nZPWIqmgc3ByRxFvdffCZlNr3xByXP9pt9hGdAdxjLkIBrBPA=\n-----END CERTIFICATE-----\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
