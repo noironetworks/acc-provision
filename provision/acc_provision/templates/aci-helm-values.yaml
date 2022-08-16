@@ -1,0 +1,25 @@
+  aciConfig:
+    system_id: "{{ config.aci_config.system_id }}"
+    {% if config.aci_config.apic_hosts|length > 1 %}
+    apicHosts: [{%- for apic_host in config.aci_config.apic_hosts %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(apic_host) }}{% else %}{{ "\\\"%s\\\"\""|format(apic_host) }}{% endif %}{% endfor -%}]
+    {% else %}
+    apicHosts: [{% for apic_host in config.aci_config.apic_hosts %}{{ "\"\\\"%s\\\"\""|format(apic_host) }}{% endfor %}]
+    {% endif %}
+    vmmDomain:
+      encapType: "{{ config.node_config.encap_type }}"
+      mcastRange:
+        start: "{{ config.aci_config.vmm_domain.mcast_range.start }}"
+        end: "{{ config.aci_config.vmm_domain.mcast_range.end }}"
+    aep: "{{ config.aci_config.aep }}"
+    vrf:
+      name: "{{ config.aci_config.vrf.name }}"
+      tenant: "{{ config.aci_config.vrf.tenant }}"
+    l3out:
+      name: "{{ config.aci_config.l3out.name }}"
+      {% if config.aci_config.l3out.external_networks|length > 1 %}
+      externalNetworks: [{%- for ext_net in config.aci_config.l3out.external_networks %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor -%}]
+      {% else %}
+      externalNetworks: [{% for ext_net in config.aci_config.l3out.external_networks %}{{ "\"\\\"%s\\\"\""|format(ext_net) }}{% endfor %}]
+      {% endif %}
+    syncLogin:
+      username: "{{ config.aci_config.sync_login.username }}" 

@@ -279,6 +279,9 @@ def config_default():
         "lb_config": {
             "lb_type": "metallb",
         },
+        "helm_config": {
+            "helm_chart_values": False,
+        },
     }
     return default_config
 
@@ -1258,6 +1261,23 @@ def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator
         else:
             template.stream(config=config).dump(operator_output)
 
+def generate_helm_values_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-helm-values.yaml')
+        outname = operator_output
+        # If no output (-o) values file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing config values to %s" % outname)
+        info("Use this values for helm installation")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
 
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
@@ -1569,6 +1589,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
+    parser.add_argument(
+        '--helm-chart-values', action='store_true', default=False,
+        help='generate values file for aci-cni install using helm')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -1648,6 +1671,7 @@ def provision(args, apic_file, no_random):
     output_tar = args.output_tar
     operator_cr_output_file = args.aci_operator_cr
     upgrade_cluster = args.upgrade
+    helm_chart_values = args.helm-chart-values
 
     prov_apic = None
     if args.apic:
@@ -1699,6 +1723,9 @@ def provision(args, apic_file, no_random):
     if upgrade_cluster:
         output_tar = "/dev/null"
         config["provision"]["upgrade_cluster"] = True
+
+    if helm_chart_values:
+        config["helm_config"]["helm_chart_values"] = True
 
     # infra_vlan is not part of command line input, but we do
     # pass it as a command line arg in unit tests to pass in
@@ -1851,6 +1878,11 @@ def provision(args, apic_file, no_random):
             return False
         cloud_prov = CloudProvision(apic, config, args)
         return cloud_prov.Run(flavor_opts, generate_kube_yaml)
+    
+    #generate values.yaml file for helm
+    if helm_chart_values :
+        generate_helm_values_yaml(config, output_file, output_tar, operator_cr_output_file)
+        return True
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
