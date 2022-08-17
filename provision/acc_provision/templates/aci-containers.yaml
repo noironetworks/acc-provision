@@ -1365,6 +1365,9 @@ data:
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
+        {% if config.kube_config.add_external_subnets_to_rdconfig %}
+        "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
+        {% endif %}
         {% if config.kube_config.snat_operator.disable_periodic_snat_global_info_sync %}
         "disable-periodic-snat-global-info-sync": {{ config.kube_config.snat_operator.disable_periodic_snat_global_info_sync|json }},
         {% endif %}
@@ -1419,7 +1422,13 @@ data:
             }{% if not loop.last %},
             {% endif %}{% endfor %}
         },
-        "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }},
+        "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }}, 
+        {% if config.user_config.net_config.extern_static %}
+        "extern-static": {{config.net_config.extern_static|json}},
+        {% endif %}
+        {% if config.user_config.net_config.extern_dynamic %}
+        "extern-dynamic": {{config.net_config.extern_dynamic|json}},
+        {% endif %}
         "snat-contract-scope": {{ config.kube_config.snat_operator.contract_scope|json }},
         "static-service-ip-pool": {{ config.kube_config.static_service_ip_pool|json|indent(width=8) }},
         {% if config.kube_config.use_external_service_ip_allocator %}
