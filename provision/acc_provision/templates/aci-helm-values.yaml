@@ -1,25 +1,114 @@
+  aciOperatorConfig:
+    flavor: {{ config.flavor|json }}
+    config: {{ config.kube_config.deployment_base64|json }}
+
   aciConfig:
-    system_id: "{{ config.aci_config.system_id }}"
-    {% if config.aci_config.apic_hosts|length > 1 %}
-    apicHosts: [{%- for apic_host in config.aci_config.apic_hosts %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(apic_host) }}{% else %}{{ "\\\"%s\\\"\""|format(apic_host) }}{% endif %}{% endfor -%}]
-    {% else %}
-    apicHosts: [{% for apic_host in config.aci_config.apic_hosts %}{{ "\"\\\"%s\\\"\""|format(apic_host) }}{% endfor %}]
+    systemId: {{ config.aci_config.system_id }}
+    {% if config.user_config.aci_config.apic_hosts %}
+    apicHosts": {{config.aci_config.apic_hosts|json|indent(width=16)}},
     {% endif %}
-    vmmDomain:
-      encapType: "{{ config.node_config.encap_type }}"
-      mcastRange:
-        start: "{{ config.aci_config.vmm_domain.mcast_range.start }}"
-        end: "{{ config.aci_config.vmm_domain.mcast_range.end }}"
-    aep: "{{ config.aci_config.aep }}"
-    vrf:
-      name: "{{ config.aci_config.vrf.name }}"
-      tenant: "{{ config.aci_config.vrf.tenant }}"
-    l3out:
-      name: "{{ config.aci_config.l3out.name }}"
-      {% if config.aci_config.l3out.external_networks|length > 1 %}
-      externalNetworks: [{%- for ext_net in config.aci_config.l3out.external_networks %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor -%}]
-      {% else %}
-      externalNetworks: [{% for ext_net in config.aci_config.l3out.external_networks %}{{ "\"\\\"%s\\\"\""|format(ext_net) }}{% endfor %}]
-      {% endif %}
-    syncLogin:
-      username: "{{ config.aci_config.sync_login.username }}" 
+    {% if config.user_config.aci_config.aep %}
+    aep: {{config.aci_config.aep|json}},
+    {% endif %}
+    {% if config.aci_config.apic_subscription_delay %}
+    apicSubscriptionDelay: {{ config.aci_config.apic_subscription_delay|json }},
+    {% endif %}
+    {% if config.aci_config.apic_refreshticker_adjust %}
+    apicRefreshtickerAdjust": {{ config.aci_config.apic_refreshticker_adjust|json }},
+    {% endif %}
+    {% if config.aci_config.opflex_device_delete_timeout %}
+    opflexDeviceDeleteTimeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
+    {% endif %}
+    {% if config.user_config.aci_config.tenant %}
+     tenant:
+       name: {{config.user_config.aci_config.tenant.name|json}},
+     {% endif %}
+     vrf:
+       name: {{config.aci_config.vrf.name|json}}
+       tenant: {{config.aci_config.vrf.tenant|json}}
+     SyncLogin:
+       username: {{ config.aci_config.sync_login.username }}
+       password: {{ config.aci_config.sync_login.password }}
+       keyfile:  {{ config.aci_config.sync_login.key_data|base64enc }}
+       certfile: {{ config.aci_config.sync_login.cert_data|base64enc }}
+     {% if config.user_config.aci_config.client_ssl %}
+     clientSsl": {{ config.aci_config.client_ssl|json }},
+     {% endif %}
+      l3out:
+        name: {{config.aci_config.l3out.name|json}}
+        externalNetworks": {{ config.aci_config.l3out.external_networks|json }}
+    
+  {% if config.user_config.registry %}
+  registry:
+    imagePrefix: {{ config.user_config.registry.image_prefix}},
+    aciCniOperatorVersion: {{ config.user_config.registry.aci_cni_operator_version}},
+  {% endif %}
+  {% if config.user_config.multus %}
+  multus: 
+    disable: {{config.user_config.multus.disable}},
+  {% endif %}
+  {% if config.user_config.drop_log_config %}
+  dropLogConfig:
+    enable: {{ config.user_config.drop_log_config.enable }},
+  {% endif %}
+  {% if config.user_config.istio_config %}
+  istioConfig:
+    installIstio": {{ config.user_config.istio_config.install_istio}},
+    installProfile": {{ config.user_config.istio_config.install_profile }},
+    istioNs: {{ config.user_config.istio_config.istio_ns }},
+    istioOperatorNs": {{ config.user_config.istio_config.istio_operator_ns }},
+  {% endif %}
+
+  {% if config.user_config.logging %}
+  logging:
+    size: {{ config.user_config.logging.size}},
+    controllerLogLevel: {{ config.user_config.logging.controller_log_level }},
+    hostagentLogLevel: {{ config.user_config.logging.hostagent_log_level }},
+    opflexagentLogLevel: {{ config.user_config.logging.opflexagent_log_level }} 
+  {% endif %}
+
+  netConfig:
+    {% if config.user_config.net_config.infra_vlan %}
+    infraVlan": {{config.net_config.infra_vlan|json}},
+    {% endif %}
+    {% if config.user_config.net_config.service_vlan %}
+    serviceVlan: {{config.net_config.service_vlan|json}}, 
+    {% endif %}
+    {% if config.user_config.net_config.kubeapi_vlan %}
+    kubeapiVlan": {{config.net_config.kubeapi_vlan|json}},
+    {% endif %}
+    {% if config.user_config.net_config.extern_static %}
+    externStatic": {{config.net_config.extern_static|json}},
+    {% endif %}
+    {% if config.user_config.net_config.extern_dynamic %}
+    externDynamic: {{config.net_config.extern_dynamic|json}},
+    {% endif %}
+    {% if config.user_config.net_config.node_svc_subnet %}
+    nodeSvcSubnet": {{config.net_config.node_svc_subnet|json}},
+    {% endif %}
+    {% if config.user_config.net_config.interface_mtu %}
+    interfaceMtu: {{config.net_config.interface_mtu|json}},
+    {% endif %}
+    {% if config.user_config.interface_mtu_headroom %}
+    interfaceMtuHeadroom": {{ config.user_config.interface_mtu_headroom|json }},
+    {% endif %}
+    {% if config.user_config.net_config.service_monitor_interval %}
+    serviceMonitorInterval": {{config.net_config.service_monitor_interval|json}},
+    {% endif %}
+    {% if config.user_config.net_config.pbr_tracking_non_snat %}
+    pbrTrackingNonSnat": {{config.net_config.pbr_tracking_non_snat|json}},
+    {% endif %}
+    {% if config.user_config.net_config.pod_subnet_chunk_size %}
+    podSubnetChunkSize": {{config.net_config.pod_subnet_chunk_size|json}},
+    {% endif %}
+    {% if config.user_config.net_config.disable_wait_for_network %}
+    disableWaitForNetwork": {{config.net_config.disable_wait_for_network|json}},
+    {% endif %}
+    {% if config.user_config.net_config.duration_wait_for_network %}
+    durationWaitForNetwork": {{config.net_config.duration_wait_for_network|json}},
+    {% endif %}
+    nodeSubnet": {{config.net_config.node_subnet|json}},
+    podSubnet": {{config.net_config.pod_subnet|json}}
+ 
+  
+  
