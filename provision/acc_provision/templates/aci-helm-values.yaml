@@ -34,9 +34,20 @@
      {% if config.user_config.aci_config.client_ssl %}
      clientSsl": {{ config.aci_config.client_ssl|json }},
      {% endif %}
-      l3out:
-        name: {{config.aci_config.l3out.name|json}}
-        externalNetworks": {{ config.aci_config.l3out.external_networks|json }}
+     vmmDomain:
+       type: {{ config.user_config.aci_config.vmm_domain.type }}
+       encapType: {{ config.user_config.aci_config.vmm_domain.encap_type }}
+       mcastFabric: {{ config.user_config.aci_config.vmm_domain.mcast_fabric }}
+       mcastRange:
+         start: {{ config.user_config.aci_config.vmm_domain.mcast_range.start }}
+         end: {{ config.user_config.aci_config.vmm_domain.mcast_range.end }}
+       nestedInside:
+         type: {{ config.user_config.aci_config.vmm_domain.nested_inside.type }}
+         name: {{ config.user_config.aci_config.vmm_domain.nested_inside.name }}
+         installerProvisionedLbIp: {{ config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip }}
+     l3out:
+       name: {{config.aci_config.l3out.name|json}}
+       externalNetworks": {{ config.aci_config.l3out.external_networks|json }}
     
   {% if config.user_config.registry %}
   registry:
@@ -75,40 +86,74 @@
     serviceVlan: {{config.net_config.service_vlan|json}}, 
     {% endif %}
     {% if config.user_config.net_config.kubeapi_vlan %}
-    kubeapiVlan": {{config.net_config.kubeapi_vlan|json}},
+    kubeapiVlan: {{config.net_config.kubeapi_vlan|json}},
     {% endif %}
     {% if config.user_config.net_config.extern_static %}
-    externStatic": {{config.net_config.extern_static|json}},
+    externStatic: {{config.net_config.extern_static|json}},
     {% endif %}
     {% if config.user_config.net_config.extern_dynamic %}
     externDynamic: {{config.net_config.extern_dynamic|json}},
     {% endif %}
     {% if config.user_config.net_config.node_svc_subnet %}
-    nodeSvcSubnet": {{config.net_config.node_svc_subnet|json}},
+    nodeSvcSubnet: {{config.net_config.node_svc_subnet|json}},
     {% endif %}
     {% if config.user_config.net_config.interface_mtu %}
     interfaceMtu: {{config.net_config.interface_mtu|json}},
     {% endif %}
     {% if config.user_config.interface_mtu_headroom %}
-    interfaceMtuHeadroom": {{ config.user_config.interface_mtu_headroom|json }},
+    interfaceMtuHeadroom: {{ config.user_config.interface_mtu_headroom|json }},
     {% endif %}
     {% if config.user_config.net_config.service_monitor_interval %}
-    serviceMonitorInterval": {{config.net_config.service_monitor_interval|json}},
+    serviceMonitorInterval: {{config.net_config.service_monitor_interval|json}},
     {% endif %}
     {% if config.user_config.net_config.pbr_tracking_non_snat %}
-    pbrTrackingNonSnat": {{config.net_config.pbr_tracking_non_snat|json}},
+    pbrTrackingNonSnat: {{config.net_config.pbr_tracking_non_snat|json}},
     {% endif %}
     {% if config.user_config.net_config.pod_subnet_chunk_size %}
-    podSubnetChunkSize": {{config.net_config.pod_subnet_chunk_size|json}},
+    podSubnetChunkSize: {{config.net_config.pod_subnet_chunk_size|json}},
     {% endif %}
     {% if config.user_config.net_config.disable_wait_for_network %}
-    disableWaitForNetwork": {{config.net_config.disable_wait_for_network|json}},
+    disableWaitForNetwork: {{config.net_config.disable_wait_for_network|json}},
     {% endif %}
     {% if config.user_config.net_config.duration_wait_for_network %}
-    durationWaitForNetwork": {{config.net_config.duration_wait_for_network|json}},
+    durationWaitForNetwork: {{config.net_config.duration_wait_for_network|json}},
     {% endif %}
-    nodeSubnet": {{config.net_config.node_subnet|json}},
+    nodeSubnet: {{config.net_config.node_subnet|json}}
     podSubnet": {{config.net_config.pod_subnet|json}}
- 
-  
-  
+    
+   {% if config.user_config.kube_config %}
+   kubeConfig:
+    controller: {{ config.user_config.kube_config.controller }}
+    useRbacApi: {{ config.user_config.kube_config.use_rbac_api }}
+    useAppsApi: {{ config.user_config.kube_config.use_apps_api }}
+    useAppsApigroup: {{ config.user_config.kube_config.use_apps_apigroup }}
+    hostAgentOpenshiftResource: {{ config.user_config.kube_config.host_agent_openshift_resource }}
+    useNetpolApigroup: {{ config.user_config.kube_config.use_netpol_apigroup }}
+    useClusterRole: {{ config.user_config.kube_config.use_cluster_role }}
+    imagePullPolicy: {{ config.user_config.kube_config.image_pull_policy }}
+    kubectl: {{ config.user_config.kube_config.kubectl }}
+    systemNamespace: {{ config.user_config.kube_config.system_namespace }}
+    ovsMemoryLimit: {{ config.user_config.kube_config.ovs_memory_limit }}
+    rebootOpflexWithOvs: {{ config.user_config.kube_config.reboot_opflex_with_ovs }}
+    maxNodesSvcGraph: {{ config.user_config.kube_config.max_nodes_svc_graph }}
+    opflexMode: {{ config.user_config.kube_config.opflex_mode }}
+    hostAgentCniBinPath: {{ config.user_config.kube_config.host_agent_cni_bin_path }}
+    hostAgentCniConfPath: {{ config.user_config.kube_config.host_agent_cni_conf_path }}
+    generateInstallerFiles": {{ config.user_config.kube_config.generate_installer_files }}
+    generateCnetFile: {{ config.user_config.kube_config.generate_cnet_file }}
+    generateApicFile: {{ config.user_config.kube_config.generate_apic_file }}
+    useHostNetnsVolume: {{ config.user_config.kube_config.use_host_netns_volume }}
+    enableEndpointslice: {{ config.user_config.kube_config.enable_endpointslice }}
+    snatOperator:
+      name: {{ config.user_config.kube_config.snat_operator.name }}
+      watchNamespace: {{ config.user_config.kube_config.snat_operator.watch_namespace }}
+      globalinfoName: {{ config.user_config.kube_config.snat_operator.globalinfo_name }}
+      rdconfigName: {{ config.user_config.kube_config.snat_operator.rdconfig_name }}
+      port_range:
+        start: {{ config.user_config.kube_config.snat_operator.port_range.start }}
+        end: {{ config.user_config.kube_config.snat_operator.port_range.end }}
+        portsPerNode: {{ config.user_config.kube_config.snat_operator.port_range.ports_per_node }}
+      snatNamespace: {{ config.user_config.kube_config.snat_operator.snat_namespace }}
+      contractScope": {{ config.user_config.kube_config.snat_operator.contract_scope }}
+      disablePeriodicSnatGlobalInfoSync": {{ config.user_config.kube_config.snat_operator.disable_periodic_snat_global_info_sync }}
+  {% endif %}
