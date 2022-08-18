@@ -33,13 +33,13 @@ data:
     \n        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
     : \"kube\",\n            \"name\": \"kubernetes|kube-system\"\n        }     \
     \   },\n    \"service-ip-pool\": [\n        {\n            \"end\": \"10.3.0.254\"\
-    ,\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n    \"snat-contract-scope\"\
-    : \"global\",\n    \"static-service-ip-pool\": [],\n    \"pod-ip-pool\": [\n \
-    \       {\n            \"end\": \"10.2.255.254\",\n            \"start\": \"10.2.0.2\"\
-    \n        }\n    ],\n    \"pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\"\
-    : [\n        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"\
-    10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\
-    \n    ]\n}"
+    ,\n            \"start\": \"10.3.0.2\"\n        }\n    ], \n    \"extern-dynamic\"\
+    : \"10.3.0.1/24\",\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\"\
+    : [],\n    \"pod-ip-pool\": [\n        {\n            \"end\": \"10.2.255.254\"\
+    ,\n            \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"pod-subnet-chunk-size\"\
+    : 32,\n    \"node-service-ip-pool\": [\n        {\n            \"end\": \"10.5.0.254\"\
+    ,\n            \"start\": \"10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\"\
+    : [\n        \"10.5.0.1/24\"\n    ]\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-4.9-openstack\",\n    \"app-profile\"\
     : \"kubernetes\",\n    \"opflex-mode\": null,\n    \"log-level\": \"info\",\n\
     \    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\
