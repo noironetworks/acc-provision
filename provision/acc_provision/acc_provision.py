@@ -1261,6 +1261,7 @@ def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator
         else:
             template.stream(config=config).dump(operator_output)
 
+
 def generate_helm_values_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-helm-values.yaml')
@@ -1590,7 +1591,7 @@ def parse_args(show_help):
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
     parser.add_argument(
-        '--helm-chart-values', action='store_true', default=False,
+        '--helm', action='store_true', default=False,
         help='generate values file for aci-cni install using helm')
     # If the input has no arguments, show help output and exit
     if show_help:
@@ -1671,7 +1672,7 @@ def provision(args, apic_file, no_random):
     output_tar = args.output_tar
     operator_cr_output_file = args.aci_operator_cr
     upgrade_cluster = args.upgrade
-    helm_chart_values = args.helm-chart-values
+    helm_chart_values = args.helm
 
     prov_apic = None
     if args.apic:
@@ -1725,6 +1726,7 @@ def provision(args, apic_file, no_random):
         config["provision"]["upgrade_cluster"] = True
 
     if helm_chart_values:
+        output_tar = "/dev/null"
         config["helm_config"]["helm_chart_values"] = True
 
     # infra_vlan is not part of command line input, but we do
@@ -1878,9 +1880,9 @@ def provision(args, apic_file, no_random):
             return False
         cloud_prov = CloudProvision(apic, config, args)
         return cloud_prov.Run(flavor_opts, generate_kube_yaml)
-    
-    #generate values.yaml file for helm
-    if helm_chart_values :
+
+    # generate values.yaml file for helm
+    if helm_chart_values:
         generate_helm_values_yaml(config, output_file, output_tar, operator_cr_output_file)
         return True
 
