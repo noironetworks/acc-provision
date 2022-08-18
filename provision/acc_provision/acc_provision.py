@@ -218,6 +218,7 @@ def config_default():
             "use_netpol_apigroup": "networking.k8s.io",
             "use_cluster_role": True,
             "no_wait_for_service_ep_readiness": False,
+            "add_external_subnets_to_rdconfig": False,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "aci-containers-system",

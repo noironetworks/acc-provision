@@ -54,6 +54,7 @@ kube_config:
   use_openshift_security_context_constraints: true
   allow_kube_api_default_epg: true
   no_wait_for_service_ep_readiness: true
+  add_external_subnets_to_rdconfig: true
   snat_operator:
       disable_periodic_snat_global_info_sync: true
   image_pull_policy: IfNotPresent
