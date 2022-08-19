@@ -31,7 +31,7 @@ metadata:
 spec: {}
 {% if config.aci_config.cluster_l3out.bgp.secret %}
 ---
-#This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
+#This creates a secret to store the BGP Password. We also need to add a Role and RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
 apiVersion: v1
 kind: Secret
 metadata:
@@ -40,6 +40,7 @@ metadata:
 type: Opaque
 stringData:
   rr-password: {{ config.aci_config.cluster_l3out.bgp.secret }}
+<<<<<<< HEAD
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -67,3 +68,6 @@ subjects:
   namespace: calico-system
 {% endif %}
 ---
+=======
+{% endif %}
+>>>>>>> cko mvp1

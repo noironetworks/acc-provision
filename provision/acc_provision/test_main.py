@@ -1032,11 +1032,36 @@ def test_preexisting_kube_convention():
 def test_flavor_calico_3_23_2():
     run_provision(
         "flavor_calico-3.23.2.inp.yaml",
+        # "flavor_calico-3.23.2_output.yaml",
         None,
         "flavor_calico-3.23.2_tar",
         None,
         "flavor_calico-3.23.2.apic.txt",
         overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_cko_calico_3_23_2():
+    run_provision(
+        "flavor_cko_calico-3.23.2.inp.yaml",
+        "flavor_cko_calico-3.23.2_output.yaml",
+        None,
+        None,
+        "flavor_calico-3.23.2.apic.txt",
+        overrides={"flavor": "calico-3.23.2", "cko": True}
+    )
+
+
+@in_testdir
+def test_flavor_cko_kubernetes_1_22():
+    run_provision(
+        "flavor_cko_aci.inp.yaml",
+        "flavor_cko_aci.kube.yaml",
+        None,
+        None,
+        "flavor_cko_aci.apic.txt",
+        overrides={"flavor": "kubernetes-1.22", "cko": True}
     )
 
 
@@ -1070,6 +1095,9 @@ def get_args(**overrides):
         # the APIC
         "infra_vlan": None,
         "test_run": True,
+        "flavor_version": None,
+        "cko": False,
+        "netop_image_tag": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)

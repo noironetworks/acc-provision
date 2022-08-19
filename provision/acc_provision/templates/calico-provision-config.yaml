@@ -22,7 +22,7 @@ aci_config:
       peering:
         prefixes: 500               # Maximum number of prefixes to limit how many prefixes we can accept from a single K8s node. Default is 500
         remote_as_number: 64512     # By default, all Calico nodes use 64512 AS number
-        aci_as_number: 2            # Required field. This is derived frm APIC.
+        aci_as_number: 2            # Required field. This is derived from APIC> system> system settings
 
   l3out:
     name: mykube_l3out          # External l3Out
