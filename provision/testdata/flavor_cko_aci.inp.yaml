@@ -1,0 +1,46 @@
+aci_config:
+  system_id: bm2acicni
+  apic_hosts:                  
+    - 10.30.120.100
+  apic_login:
+    username: admin
+    password: test
+  aep: sauto_aep                   
+  vrf:                               
+    name: sauto_l3out-1_vrf      
+    tenant: common
+  l3out:                             
+    name: sauto_l3out-1
+    external_networks:
+        - sauto_l3out-1_epg
+
+net_config:
+  node_subnet: 2.100.101.1/24
+  pod_subnet: 20.2.0.1/16
+  extern_dynamic: 20.3.0.1/16
+  kubeapi_vlan: 2032                                
+  infra_vlan: 3801
+  node_svc_subnet: 10.5.0.1/24
+  service_vlan: 4003
+  extern_static: 10.4.0.1/24
+
+cko_git_config:
+  git_branch: test
+  git_dir: demo-cluster-manifests
+  git_email: test@cisco.com
+  git_repo: github.com/networkoperator/demo-cluster-manifests.git
+  git_token: Z2hwX2RwbWF2ODV4Y2NwQlJZdXhDSWNOc0hCRzQxeWViczNHNzlRUA==
+  git_user: networkoperator-gittest
+  sleep_duration: 5
+
+cko_proxy_config:
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
+
+control_cluster_websocket:
+  server_ip: 10.96.101.1
+  server_port: 1234
+
+registry:
+  image_prefix: quay.io/noirolabs
