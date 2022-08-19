@@ -1263,6 +1263,45 @@ def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator
 
 
 def generate_helm_values_yaml(config, operator_output, operator_tar, operator_cr_output):
+    kube_objects = [
+        "configmap", "secret", "serviceaccount",
+        "daemonset", "deployment",
+    ]
+    if config["kube_config"].get("use_openshift_security_context_constraints",
+                                 False):
+        kube_objects.append("securitycontextconstraints")
+    if config["kube_config"].get("use_cluster_role", False):
+        kube_objects.extend(["clusterrolebinding", "clusterrole"])
+
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-containers.yaml')
+        outname = operator_output
+        tar_path = operator_tar
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file and tar with the same name.
+        if operator_output == "-":
+            outname = "<stdout>"
+            applyname = "<filename>"
+            operator_output = sys.stdout
+        else:
+            applyname = os.path.basename(operator_output)
+            if not tar_path or tar_path == "-":
+                tar_path = operator_output + ".tar.gz"
+
+        temp = ''.join(template.stream(config=config))
+        parsed_temp = temp.split("---")
+
+        # Find the place where to put the acioperators configmap
+        for cmap_idx in range(len(parsed_temp)):
+            current_yaml = yaml.safe_load(parsed_temp[cmap_idx])
+            if current_yaml['kind'] == 'ConfigMap':
+                break
+
+        # Generate and convert containers deployment to base64 and add
+        # as configMap entry to the operator deployment.
+        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-helm-values.yaml')
         outname = operator_output
@@ -1727,7 +1766,7 @@ def provision(args, apic_file, no_random):
 
     if helm_chart_values:
         output_tar = "/dev/null"
-        config["helm_config"]["helm_chart_values"] = True
+        # config["helm_config"]["helm_chart_values"] = True
 
     # infra_vlan is not part of command line input, but we do
     # pass it as a command line arg in unit tests to pass in

@@ -78,6 +78,17 @@ def test_base_case_upgrade():
         overrides={"upgrade": True}
     )
 
+@in_testdir
+def test_helm_values():
+    run_provision(
+        "helm_values.inp.yaml",
+        None,
+        None,
+        None,
+        None,
+        overrides={"helm": True}
+    )
+
 
 @in_testdir
 def test_base_case_snat():
