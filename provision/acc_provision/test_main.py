@@ -80,6 +80,18 @@ def test_base_case_upgrade():
 
 
 @in_testdir
+def test_helm_values():
+    run_provision(
+        "helm_values.inp.yaml",
+        None,
+        None,
+        None,
+        None,
+        overrides={"helm": True}
+    )
+
+
+@in_testdir
 def test_base_case_snat():
     run_provision(
         "base_case_snat.inp.yaml",
@@ -1025,6 +1037,7 @@ def get_args(**overrides):
         # the APIC
         "infra_vlan": None,
         "test_run": True,
+        "helm": False,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
