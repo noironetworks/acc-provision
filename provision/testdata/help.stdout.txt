@@ -3,6 +3,8 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
                         [--upgrade] [--disable-multus disable_multus]
+                        [--flavor-version flavor_version] [--cko]
+                        [--netop-image-tag netop_image_tag]
 
 Provision an ACI/Kubernetes installation
 
@@ -37,3 +39,8 @@ optional arguments:
                         upgrade
   --disable-multus disable_multus
                         true/false to disable/enable multus in cluster
+  --flavor-version flavor_version
+                        CNI upgrade/downgrade
+  --cko                 generates deployment spec for CKO
+  --netop-image-tag netop_image_tag
+                        network operator image tag
