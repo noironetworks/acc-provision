@@ -1,0 +1,20 @@
+apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+kind: Installer
+metadata:
+  namespace: netop-manager-system
+  name: installer-calico-cni
+spec:
+  config:
+    connectivityCheck:
+      checkerCRDs: <base-encoded CRDS>
+      checkerCR: <base-encoded CR>
+      errorPodsReportingCR: <base-encoded CR>
+    networkFunctions:
+      cko-cni:
+        version: "{{ config.aci_config.cni_flavor_version }}"
+        type: cko-cni-calico
+        options:
+          calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
+          calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
+          calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
+          calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}

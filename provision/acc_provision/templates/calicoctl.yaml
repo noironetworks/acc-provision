@@ -1,39 +1,3 @@
-# This section includes base Calico installation configuration.
-# For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.Installation
-apiVersion: operator.tigera.io/v1
-kind: Installation
-metadata:
-  name: default
-spec:
-  # Configures Calico networking.
-  calicoNetwork:
-    # Note: The ipPools section cannot be modified post-install.
-    ipPools:
-    - blockSize: 26
-      cidr: 20.2.0.0/16
-      encapsulation: None
-      natOutgoing: Disabled
-      nodeSelector: all()
----
-# This section configures the Calico API server.
-# For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.APIServer
-apiVersion: operator.tigera.io/v1
-kind: APIServer 
-metadata: 
-  name: default 
-spec: {}
----
-#This creates a secret to store the BGP Password. We also need to add a Role and RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
-apiVersion: v1
-kind: Secret
-metadata:
-  name: bgp-secrets
-  namespace: kube-system
-type: Opaque
-stringData:
-  rr-password: test
-
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
