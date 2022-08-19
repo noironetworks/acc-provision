@@ -209,6 +209,14 @@ def config_default():
                 "nodeSelector": "all()",
             },
         },
+        "cko_git_config": {
+            "git_repo": "github.com/networkoperator/demo-clusters.git",
+            "git_dir": "demo-cluster-manifests",
+            "git_branch": "test",
+            "git_user": "networkoperator-gittest",
+            "git_email": "test@cisco.com",
+            "sleep_duration": 5,
+        },
         "kube_config": {
             "controller": "1.1.1.1",
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
@@ -1248,7 +1256,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
     tar.close()
 
 
-def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-network-provider-cluster.yaml')
         outname = operator_output
@@ -1271,7 +1279,7 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
             template.stream(config=config).dump(operator_output)
 
 
-def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-network-provider-cluster-1-3-13.yaml')
         outname = operator_output
@@ -1298,13 +1306,15 @@ def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
 
-def generate_calico_deployment_files(config, network_operator_output):
+def generate_calico_deployment_files(args, config, network_operator_output):
     filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
     if network_operator_output and network_operator_output != "/dev/null":
         calico_crds_template = get_jinja_template('tigera-operator.yaml')
         calico_crds_output = calico_crds_template.render(config=config)
         calico_crs_template = get_jinja_template('custom-resources-aci-calico.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
+        calicoctl_template = get_jinja_template('calicoctl.yaml')
+        calicoctl_output = calicoctl_template.render(config=config)
 
         bgp_peer = ''
         bgp_node = ''
@@ -1328,8 +1338,30 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
+
+        if args.cko:
+            network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+            network_operator_spec_output = network_operator_spec_template.render(config=config)
+            network_operator_CR_template = get_jinja_template('calico-installer-cr.yaml')
+            base64_encoded_cko_calico_crds = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
+            base64_encoded_cko_calico_crs = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
+            base64_encoded_cko_calico_bgp = base64.b64encode(custom_resources_calicoctl_yaml.encode('ascii')).decode('ascii')
+            base64_encoded_cko_calicoctl = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
+            netopConfig = dict(config)
+            netopConfig["calico_config"]["cni_flavor_version"] = config["registry"]["version"]
+            netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_cko_calico_crds
+            netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_cko_calico_crs
+            netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_cko_calico_bgp
+            netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_cko_calicoctl
+            network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
+            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+            print("writing the deployment file")
+            with open(network_operator_output, "w") as fh:
+                fh.write(network_operator_yaml)
+            return True
 
         with open("custom_resources_aci_calico.yaml", "w") as fh:
             fh.write(custom_resources_aci_calico_yaml)
@@ -1350,7 +1382,7 @@ def generate_calico_deployment_files(config, network_operator_output):
         print("Generated the deployment tar file")
 
 
-def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
         "configmap", "secret", "serviceaccount",
         "daemonset", "deployment",
@@ -1404,11 +1436,29 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
             acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
-            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + \
+                [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
 
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
+
+        if args.cko:
+            network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+            network_operator_spec_output = network_operator_spec_template.render(config=config)
+
+            network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
+            base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
+            netopConfig = dict(config)
+            netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
+            netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
+            network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
+            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+
+            print("writing the deployment file")
+            with open(operator_output, "w") as fh:
+                fh.write(network_operator_yaml)
+            return True
 
         if operator_output != sys.stdout:
             with open(operator_output, "w") as fh:
@@ -1598,7 +1648,15 @@ def parse_args(show_help):
     parser.add_argument(
         '--disable-multus', default='true', metavar='disable_multus',
         help='true/false to disable/enable multus in cluster')
-    # This argument is set to True and used internally by the acc-provision-operator when invoking acc-provision. It is not meant to be invoked directly by the user from stand-alone acc-provision and hence set to False by default here and suppressed as well.
+    parser.add_argument(
+        '--flavor-version', default=None, metavar='flavor_version', help='CNI upgrade/downgrade')
+    parser.add_argument(
+        '--cko', default=False, action='store_true', help='generates deployment spec for CKO')
+    parser.add_argument(
+        '--netop-image-tag', default=None, metavar='network operator image tag')
+    # This argument is set to True and used internally by the acc-provision-operator when invoking
+    # acc-provision. It is not meant to be invoked directly by the user from stand-alone acc-provision
+    # and hence set to False by default here and suppressed as well.
     parser.add_argument(
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
@@ -1776,6 +1834,10 @@ def provision(args, apic_file, no_random):
                     "version": FLAVORS[flavor]["default_version"]
                 }
             })
+            if args.flavor_version is not None:
+                config["registry"]["version"] = args.flavor_version
+            if args.netop_image_tag is not None:
+                config["registry"]["network_operator_version"] = args.netop_image_tag
     else:
         err("Unknown flavor %s" % flavor)
         return False
@@ -1845,14 +1907,20 @@ def provision(args, apic_file, no_random):
     if generate_cert_data:
         if not exists(certfile) or not exists(keyfile):
             if is_calico_flavor(config["flavor"]):
-                info("Generating certs for calico based kubernetes controller")
+                if args.cko:
+                    info("Generating certs for network-operator")
+                else:
+                    info("Generating certs for calico based kubernetes controller")
             else:
                 info("Generating certs for kubernetes controller")
         else:
             if is_calico_flavor(config["flavor"]):
-                info("Reusing existing certs for network-operator")
+                if args.cko:
+                    info("Reusing existing certs for network-operator")
+                else:
+                    info("Reusing existing certs for calico based kubernetes controller")
             else:
-                info("Reusing existing certs for calico based kubernetes controller")
+                info("Reusing existing certs for kubernetes controller")
         key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
@@ -1863,7 +1931,10 @@ def provision(args, apic_file, no_random):
         gen = flavor_opts.get("template_generator", generate_calico_deployment_files)
         if not callable(gen):
             gen = globals()[gen]
-        gen(config, output_tar)
+        if args.cko:
+            gen(args, config, output_file)
+        else:
+            gen(args, config, output_tar)
 
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
@@ -1889,7 +1960,7 @@ def provision(args, apic_file, no_random):
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
     if not callable(gen):
         gen = globals()[gen]
-    gen(config, output_file, output_tar, operator_cr_output_file)
+    gen(args, config, output_file, output_tar, operator_cr_output_file)
 
     if flavor == "k8s-overlay":
         return True
