@@ -1374,6 +1374,9 @@ data:
         {% if config.aci_config.opflex_device_delete_timeout %}
         "opflex-device-delete-timeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
         {% endif %}
+        {% if config.kube_config.snat_operator.sleep_time_snat_global_info_sync %}
+        "sleep-time-snat-global-info-sync": {{ config.kube_config.snat_operator.sleep_time_snat_global_info_sync|json }},
+        {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
