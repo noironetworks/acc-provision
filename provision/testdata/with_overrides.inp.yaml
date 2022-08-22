@@ -64,6 +64,7 @@ kube_config:
   add_external_subnets_to_rdconfig: true
   snat_operator:
       disable_periodic_snat_global_info_sync: true
+      sleep_time_snat_global_info_sync: 60
   image_pull_policy: IfNotPresent
   
 registry:
