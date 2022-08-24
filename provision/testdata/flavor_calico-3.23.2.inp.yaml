@@ -40,7 +40,6 @@ topology:
     leaf:
     - id: 103
       local_ip: 2.100.101.203
-    - id: 104
     node:  
     - name: k8s-node3
     - name: k8s-node4

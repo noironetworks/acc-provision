@@ -52,7 +52,7 @@ topology:
   rack:                         # Each rack has a pair of ToR leaf switches and Kubernetes nodes
   - id: 1                       # "id" of a ToR, and is user assigned.
     aci_pod_id: 1
-    leaf:
+    leaf:                       # User should only provide anchor nodes in the input file
     - id: 101                   # Node id of anchor nodes
       local_ip: 2.100.101.201   # The IP address of the peer
     - id: 102
@@ -65,7 +65,6 @@ topology:
     leaf:
     - id: 103
       local_ip: 2.100.101.203
-    - id: 104                   # non-anchor nodes
     node:  
     - name: k8s-node3
     - name: k8s-node4
