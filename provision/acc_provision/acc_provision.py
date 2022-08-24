@@ -1056,44 +1056,49 @@ def calico_config_validate_preexisting(config, prov_apic):
             apic = get_apic(config)
             if apic is None:
                 return False
-        aep_name = config["aci_config"]["cluster_l3out"]["aep"]
-        vrf_tenant = config["aci_config"]["vrf"]["tenant"]
-        vrf_name = config["aci_config"]["vrf"]["name"]
-        vrf_dn = config["aci_config"]["vrf"]["dn"]
-        l3out_name = config["aci_config"]["l3out"]["name"]
-        aep = apic.get_aep(aep_name)
-        if aep is None:
-            err("AEP %s not created on the APIC. Please create the AEP and try again" % aep_name)
-            return False
-        check_local_asn = apic.get_local_asn()
-        aci_as_number = config["aci_config"]["cluster_l3out"]["bgp"]["peering"]["aci_as_number"]
-        if str(aci_as_number) != check_local_asn:
-            err("aci_as_number %s provided in the input file does not match the BGP route reflector asn %s on the APIC. "
-                "This check is only made if -a option is used. Please ensure the flavor manifests that are generated from"
-                "this step with -a are used instead of previous ones you may have had." % (aci_as_number, check_local_asn))
-            return False
-        tenant = apic.get_tenant(vrf_tenant)
-        if tenant is None:
-            err("Tenant %s not created on the APIC. Please create the tenant and try again" % vrf_tenant)
-            return False
-        vrf = apic.get_vrf(vrf_dn)
-        if vrf is None:
-            err("VRF %s/%s not created on the APIC. Please create the vrf and try again" % (vrf_tenant, vrf_name))
-            return False
-        l3out = apic.get_l3out(vrf_tenant, l3out_name)
-        if l3out is None:
-            err("External l3Out %s/%s not created on the APIC. Please create the external l3out and try again " % (vrf_tenant, l3out_name))
-            return False
-        map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
-        if not map_l3out_vrf:
-            err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
-            return False
-        else:
-            check_ext_l3out_epg = apic.check_ext_l3out_epg(vrf_tenant, l3out_name)
-            if check_ext_l3out_epg is None:
-                err("External l3out %s/%s does not have an external EPG configured on the APIC. Please fix the configuration and try again" %
-                    (vrf_tenant, l3out_name))
+            for rack in config["topology"]["rack"]:
+                for leaf in rack["leaf"]:
+                    if "local_ip" not in leaf:
+                        err("Please provide only anchor leaf nodes in the input file. Non-anchor leaf node provided is %s" % leaf["id"])
+                        return False
+            aep_name = config["aci_config"]["cluster_l3out"]["aep"]
+            vrf_tenant = config["aci_config"]["vrf"]["tenant"]
+            vrf_name = config["aci_config"]["vrf"]["name"]
+            vrf_dn = config["aci_config"]["vrf"]["dn"]
+            l3out_name = config["aci_config"]["l3out"]["name"]
+            aep = apic.get_aep(aep_name)
+            if aep is None:
+                err("AEP %s not created on the APIC. Please create the AEP and try again" % aep_name)
                 return False
+            check_local_asn = apic.get_local_asn()
+            aci_as_number = config["aci_config"]["cluster_l3out"]["bgp"]["peering"]["aci_as_number"]
+            if str(aci_as_number) != check_local_asn:
+                err("aci_as_number %s provided in the input file does not match the BGP route reflector asn %s on the APIC. "
+                    "This check is only made if -a option is used. Please ensure the flavor manifests that are generated from"
+                    "this step with -a are used instead of previous ones you may have had." % (aci_as_number, check_local_asn))
+                return False
+            tenant = apic.get_tenant(vrf_tenant)
+            if tenant is None:
+                err("Tenant %s not created on the APIC. Please create the tenant and try again" % vrf_tenant)
+                return False
+            vrf = apic.get_vrf(vrf_dn)
+            if vrf is None:
+                err("VRF %s/%s not created on the APIC. Please create the vrf and try again" % (vrf_tenant, vrf_name))
+                return False
+            l3out = apic.get_l3out(vrf_tenant, l3out_name)
+            if l3out is None:
+                err("External l3Out %s/%s not created on the APIC. Please create the external l3out and try again " % (vrf_tenant, l3out_name))
+                return False
+            map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+            if not map_l3out_vrf:
+                err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
+                return False
+            else:
+                check_ext_l3out_epg = apic.check_ext_l3out_epg(vrf_tenant, l3out_name)
+                if check_ext_l3out_epg is None:
+                    err("External l3out %s/%s does not have an external EPG configured on the APIC. Please fix the configuration and try again" %
+                        (vrf_tenant, l3out_name))
+                    return False
     except Exception as e:
         warn("Unable to validate resources on APIC: {}".format(e))
     return True

@@ -341,16 +341,6 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-104].json
-{
-    "l3extRsNodeL3OutAtt": {
-        "attributes": {
-            "rtrId": "1.1.4.104",
-            "tDn": "topology/pod-1/node-104",
-            "annotation": "orchestrator:aci-containers-controller"
-        }
-    }
-}
 /api/mo/uni/tn-test/flt-calico-l3out-fsvi-vl-allow-all-filter.json
 {
     "vzFilter": {
