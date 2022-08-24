@@ -2,173 +2,86 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: acc-provision-config
-  namespace: {{ default "aci-containers-system" (.Values.kubeConfig).systemNamespace }}
+  namespace: {{ .Values.kubeConfig.systemNamespace | default "aci-containers-system" }}
   labels:
-    aci-containers-config-version: "{{ .Values.registry.configurationVersion }}"
+    {{- if (.Values.registry).configurationVersion }}
+    aci-containers-config-version: {{ .Values.registry.configurationVersion }}
+    {{- end }}
     network-plugin: aci-containers
 data:
   spec: |-
     {
         "acc_provision_input": {
             "operator_managed_config": {
-               "enable_updates": {{ default "False" (.Values.operatorManagedConfig).enableUpdates }}
+                {{- if (.Values.operatorManagedConfig).enableUpdates }}
+                "enable_updates": {{ .Values.operatorManagedConfig.enableUpdates | default "False" }}
+                {{- else }}
+                "enable_updates": False
+                {{- end }}
+
             },
-            "aci_config": {
-               "system_id": {{ .Values.aciConfig.systemId }},
-               "apic_hosts": {{ .Values.aciConfig.apicHosts}},
-               "aep": {{ .Values.aciConfig.aep }},
-               "apic-subscription-delay": {{ default "None" .Values.aciConfig.apicSubscriptionDelay }},
-               "apic_refreshticker_adjust": {{ default "None" .Values.aciConfig.apicRefreshtickerAdjust }},
-               "opflex-device-delete-timeout": {{ default "None" .Values.aciConfig.opflexDeviceDeleteTimeout }},
-               {% if .Values.aciConfig.tenant %}
-               "tenant": {
-                  {% if .Values.aciConfig.tenant.name %}
-                  "name": {{ default "None" (.Values.aciConfig.tenant).name}}
-                  {% endif %} 
-               },
-               {% endif %}
-               "vrf": {
-                  "name": {{ default "None" .Values.aciConfig.vrf.name}},
-                  "tenant": {{default "None" .Values.aciConfig.vrf.tenant}}
-               },
-               {% if .Values.aciConfig.syncLogin %}
-               "sync_login": {
-                  {% if .Values.aciConfig.username %}
-                  "username": {{ .Values.aciConfig.username }},
-                  {% endif %}
-                  {% if .Values.aciConfig.password %}
-                  "password": {{ .Values.aciConfig.password }},
-                  {% endif %}
-                  {% if .Values.aciConfig.certfile %}
+             "aci_config": {
+                 "system_id": {{ .Values.aciConfig.systemId }},
+                 {{- if (.Values.aciConfig).apicHosts }}
+                 "apic_hosts": {{ .Values.aciConfig.apicHosts}},
+                 {{- end }}
+                 {{- if (.Values.aciConfig).aep }}
+                 "aep": {{ .Values.aciConfig.aep }},
+                 {{- end }}
+                 {{- if (.Values.aciConfig).apicSubscriptionDelay }}
+                 "apic-subscription-delay": {{ .Values.aciConfig.apicSubscriptionDelay }},
+                 {{- end }}
+                 {{- if (.Values.aciConfig).apicRefreshtickerAdjust }}
+                 "apic_refreshticker_adjust": {{ .Values.aciConfig.apicRefreshtickerAdjust }},
+                 {{- end }}
+                 {{- if (.Values.aciConfig).opflexDeviceDeleteTimeout }}
+                 "opflex-device-delete-timeout": {{ .Values.aciConfig.opflexDeviceDeleteTimeout }},
+                 {{- end }}
+                 {{- if (.Values.aciConfig).tenant }}
+                 "tenant": {
+                  "name": {{ .Values.aciConfig.tenant.name }}
+                 },
+                 {{- end }}
+                 "vrf": {
+                  "name": {{ .Values.aciConfig.vrf.name }},
+                  "tenant": {{ .Values.aciConfig.vrf.tenant }}
+                 },
+                 {{- if (.Values.aciConfig).syncLogin }}
+                 "sync_login": {
+                  {{- if .Values.aciConfig.syncLogin.username }}
+                  "username": {{ .Values.aciConfig.syncLogin.username }},
+                  {{- end }}
+                  {{- if .Values.aciConfig.syncLogin.password }}
+                  "password": {{ .Values.aciConfig.syncLogin.password }},
+                  {{- end }}
+                  {{- if .Values.aciConfig.syncLogin.certfile }}
                   "certfile": {{ .Values.aciConfig.certfile }},
-                  {% endif %}
-                  {% if .Values.aciConfig.keyfile %}
+                  {{- end }}
+                  {{- if .Values.aciConfig.syncLogin.keyfile }}
                   "keyfile": {{ .Values.aciConfig.keyfile }},
-                  {% endif %}
-                  {% if .Values.aciConfig.certReused %}
+                  {{- end }}
+                  {{- if .Values.aciConfig.syncLogin.certReused }}
                   "cert_reused": {{ default "False" .Values.aciConfig.certReused }}
-                  {% endif %}
-               },
-               {% endif %}
-               {% if .Values.aciConfig.clientSsl %}
-               "client_ssl": {{ default "True" (.Values.aciConfig).clientSsl }},
-               {% endif %}
-               "vmm_domain": {
-                  "type": {{ default "Kubernetes" .Values.aciConfig.vmmDomain.type }},
-                  "encap_type": {{ default "vxlan" .Values.aciConfig.vmmDomain.encapType }},
-                  "mcast_fabric": {{ default "225.1.2.3" .Values.aciConfig.vmmDomain.mcastFabric }},
-                  "mcast_range": {
-                     "start": {{ default "225.20.1.1" .Values.aciConfig.vmmDomain.mcastRange.start }},
-                     "end": {{ default "225.20.255.255" .Values.aciConfig.vmmDomain.mcastRange.end  }}
-                  },
-                  {% if .Values.aciConfig.vmmDomain.nestedInside %}
+                  {{- end }}
+                },
+                {{- end }}
+                {{- if (.Values.aciConfig).clientSsl }}
+                "client_ssl": {{ default "True" .Values.aciConfig.clientSsl }},
+                {{- end }}
+                {{- if (.Values.aciConfig).vmmDomain }}
+                "vmm_domain": {
+                  {{- if (.Values.aciConfig).vmmDomain.nestedInside }}
                   "nested_inside": {
-                     {% if .Values.aciConfig.vmmDomain.nestedInside.type %}
-                     "type": {{ (.Values.aciConfig.vmmDomain.nestedInside).type }},
-                     {% endif %}
-                     {% if .Values.aciConfig.vmmDomain.nestedInside.name %}
-                     "name": {{ (.Values.aciConfig.vmmDomain.nestedInside).name }},
-                     {% endif %}
-                     {% if .Values.aciConfig.vmmDomain.nestedInside.installerProvisionedLbIp }
-                     "installer_provisioned_lb_ip": {{ (.Values.aciConfig.vmmDomain.nestedInside).installerProvisionedLbIp }}
-                     {% endif %}
+                    "installer_provisioned_lb_ip": {{ .Values.aciConfig.vmmDomain.nestedInside.installerProvisionedLbIp }}
                   }
-                  {% endif %}
-               },
-               "l3out": {
-                  "name": {{default "None" .Values.aciConfig.l3out.name }},
-                  "external_networks": {{ default "None" .Values.aciConfig.l3out.externalNetworks }}
-               }
-            },
-            {% if .Values.registry %}
-            "registry": {
-               "image_prefix": {{ default "noiro" (.Values.registry).imagePrefix }},
-               {% if .Values.registry.aciCniOperatorVersion %}
-               "aci_cni_operator_version": {{ default "None" (.Values.registry).aciCniOperatorVersion }}
-               {% endif %}
-            },
-            {% endif %}
-            {% if .Values.kubeConfig %}
-            "kube_config": {
-               "controller": {{ default "1.1.1.1" (.Values.kubeConfig).controller }},
-               "use_rbac_api": {{ default "rbac.authorization.k8s.io/v1" (.Values.kubeConfig).useRbacApi }},
-               "use_apps_api": {{ default "apps/v1" (.Values.kubeConfig).useAppsApi }},
-               "use_apps_apigroup": {{default "apps" (.Values.kubeConfig).useAppsApigroup }},
-               "host_agent_openshift_resource": {{default "False" (.Values.kubeConfig).hostAgentOpenshiftResource }},
-               "use_netpol_apigroup": {{ default "networking.k8s.io" (.Values.kubeConfig).useNetpolApigroup }},
-               "use_cluster_role": {{ default "True" (.Values.kubeConfig).useClusterRole }},
-               "image_pull_policy": {{ default "Always" (.Values.kubeConfig).imagePullPolicy }},
-               "kubectl": {{ default "kubectl" (.Values.kubeConfig).kubectl }},
-               "system_namespace": {{ default "aci-containers-system" (.Values.kubeConfig).systemNamespace }},
-               "ovs_memory_limit": {{ default "1Gi" (.Values.kubeConfig).ovsMemoryLimit }},
-               "reboot_opflex_with_ovs": {{default "true" (.Values.kubeConfig).rebootOpflexWithOvs }},
-               "snat_operator": {
-                  "name": {{ default "snat-operator" ((.Values.kubeConfig).snatOperator).name }},
-                  "watch_namespace": {{ default "" ((.Values.kubeConfig).snatOperator).watchNamespace}},
-                  "globalinfo_name": {{default "snatglobalinfo" ((.Values.kubeConfig).snatOperator).globalinfoName }},
-                  "rdconfig_name": {{default "routingdomain-config" ((.Values.kubeConfig).snatOperator).rdconfigName }},
-                  "port_range": {
-                     "start": {{default 5000 (((.Values.kubeConfig).snatOperator).portRange).start }},
-                     "end": {{default 65000 (((.Values.kubeConfig).snatOperator).portRange).end }},
-                     "ports_per_node": {{default 3000 (((.Values.kubeConfig).snatOperator).portRange).portsPerNode }}
-                  }
-                  "snat_namespace": {{default "aci-containers-system" ((.Values.kubeConfig).snatOperator).snatNamespace }},
-                  "contract_scope": {{default "global" ((.Values.kubeConfig).snatOperator).contractScope }},
-                  "disable_periodic_snat_global_info_sync": {{default "False" ((.Values.kubeConfig).snatOperator).disablePeriodicSnatGlobalInfoSync }}
-               },
-               "max_nodes_svc_graph": {{ default 32 (.Values.kubeConfig).maxNodesSvcGraph }},
-               "opflex_mode": {{ default "None" (.Values.kubeConfig).opflexMode }},
-               "host_agent_cni_bin_path": {{ default "/opt" (.Values.kubeConfig).hostAgentCniBinPath }},
-               "host_agent_cni_conf_path": {{default "/etc" (.Values.kubeConfig).hostAgentCniConfPath }},
-               "generate_installer_files": {{default "False" (.Values.kubeConfig).generateInstallerFiles }},
-               "generate_cnet_file": {{ default "False" (.Values.kubeConfig).generateCnetFile }},
-               "generate_apic_file": {{ default "False" (.Values.kubeConfig).generateApicFile }},
-               "use_host_netns_volume": {{ default "False" (.Values.kubeConfig).useHostNetnsVolume }},
-               "enable_endpointslice": {{ default "False" (.Values.kubeConfig).enableEndpointslice }}
-            },
-            {% endif %}
-            {% if .Values.multus %}
-            "multus": {
-               {% if .Values.multus.disable %}
-               "disable": {{ default "True" (.Values.multus).disable }}
-               {% endif %}
-            },
-            {% endif %}
-            "drop_log_config": {
-               "enable": {{ default "True" (.Values.dropLogConfig).enable }}
-            },
-            "istio_config": {
-               "install_istio": {{ default "False" (.Values.istioConfig).installIstio }},
-               "install_profile": {{ default "demo" (.Values.istioConfig).installProfile }},
-               "istio_ns": {{ default "istio-system" (.Values.istioConfig).istioNs }},
-               "istio_operator_ns": {{ default "istio-operator" (.Values.istioConfig).istioOperatorNs }}
-            },
-            "logging": {
-               "size": {{ default "None" (.Values.logging).size }},
-               "controller_log_level": {{ default "info" (.Values.logging).controllerLogLevel }},
-               "hostagent_log_level": {{ default "info" (.Values.logging).hostagentLogLevel }},
-               "opflexagent_log_level": {{ default "info" (.Values.logging).opflexagentLogLevel }}
-            },
-            "net_config": {
-               "infra_vlan": {{ .Values.netConfig.infraVlan }},
-               "service_vlan": {{ .Values.netConfig.serviceVlan}},
-               "kubeapi_vlan": {{ .Values.netConfig.kubeapiVlan}},
-               "extern_static": {{ .Values.netConfig.externStatic}},
-               "extern_dynamic": {{ .Values.netConfig.externDynamic}},
-               "node_svc_subnet": {{ .Values.netConfig.nodeSvcSubnet}},
-               {% if .Values.netConfig.interfaceMtu %}
-               "interface_mtu": {{ (.Values.netConfig).interfaceMtu}},
-               {% endif %}
-               {% if .Values.netConfig.interfaceMtuHeadroom %}
-               "interface-mtu-headroom": {{ (.Values.netConfig).interfaceMtuHeadroom }},
-               {% endif %}
-               "service_monitor_interval": {{ default 5 (.Values.netConfig).serviceMonitorInterval}},
-               "pbr_tracking_non_snat": {{ default "False" (.Values.netConfig).pbrTrackingNonSnat}},
-               "pod_subnet_chunk_size": {{ default 32 (.Values.netConfig).podSubnetChunkSize}},
-               "disable_wait_for_network": {{ default "False" (.Values.netConfig).disableWaitForNetwork}},
-               "duration_wait_for_network": {{ default 210 (.Values.netConfig).durationWaitForNetwork}},
-               "node_subnet": {{ .Values.netConfig.nodeSubnet}},
-               "pod_subnet": {{ .Values.netConfig.podSubnet}}
-            }
+                  {{- end }}
+                },
+                {{- end }}
+                "l3out": {
+                  "name": {{ (.Values.aciConfig).l3out.name }},
+                  "external_networks": {{ (.Values.aciConfig).l3out.externalNetworks }}
+                }
+             },
+             
          }
      }
