@@ -580,10 +580,10 @@ class ApicKubeConfig(object):
                 node_ids = ["topology/pod-1/node-101", "topology/pod-1/node-102"]
             for rack in self.config["topology"]["rack"]:
                 for leaf in rack["leaf"]:
-                    if "local_ip" in leaf:
+                    if "local_ip" in leaf and "id" in leaf:
                         update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"]))
-                    if "id" in leaf and ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
-                        update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
+                        if ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
+                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
 
             update(data, self.l3out_filter())
             update(data, self.l3out_brcp())
