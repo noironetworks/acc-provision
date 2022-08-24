@@ -1,0 +1,40 @@
+apiVersion: nettools.debug/v1alpha1
+kind: ConnectivityChecker
+metadata:
+ name: test-conn-check
+ namespace: nettools
+spec:
+ reachability_test_enable:
+  periodic_sync:
+   enable_updates: {{ config.connectivity_checker.reachability_test_enable.periodic_sync.enable_updates }}
+   interval: {{ config.connectivity_checker.reachability_test_enable.periodic_sync.interval }}
+  external_url:
+   url: {{ config.connectivity_checker.reachability_test_enable.external_url.url }}
+  proxy: {{ config.connectivity_checker.reachability_test_enable.proxy }}
+ reachability_tests:
+  pod_to_pod:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_pod.update_status }}
+  pod_to_node:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_node.update_status }}
+  pod_to_clusterIP:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_clusterIP.update_status }}
+  pod_to_service:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_service.update_status }}
+  pod_to_LB_VIP:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_LB_VIP.update_status }}
+  pod_to_NodePort:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_NodePort.update_status }}
+  pod_to_External:
+    update_status: {{ config.connectivity_checker.reachability_tests.pod_to_External.update_status }}
+  node_to_node:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_node.update_status }}
+  node_to_pod:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_pod.update_status }}
+  node_to_clusterIP:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_clusterIP.update_status }}
+  node_to_LB_VIP:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_LB_VIP.update_status }}
+  node_to_NodePort:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_NodePort.update_status }}
+  node_to_External:
+    update_status: {{ config.connectivity_checker.reachability_tests.node_to_External.update_status }}
