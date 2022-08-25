@@ -145,8 +145,8 @@ class CloudProvision(object):
         underlay_posts.append(self.setupCapicContractsInline)
 
         postGens = underlay_posts + \
-            [self.configurator.capic_kube_dom, self.configurator.capic_overlay_vrf, self.overlayCtx, \
-            self.configurator.capic_overlay_cloudApp, self.clusterInfo, self.configurator.capic_kafka_topic, self.prodAcl, self.consAcl]
+            [self.configurator.capic_kube_dom, self.configurator.capic_overlay_vrf, self.overlayCtx,
+                self.configurator.capic_overlay_cloudApp, self.clusterInfo, self.configurator.capic_kafka_topic, self.prodAcl, self.consAcl]
         for pGen in postGens:
             path, data = pGen()
             if not path:  # posted inline

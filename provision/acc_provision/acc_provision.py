@@ -265,6 +265,7 @@ def config_default():
         "registry": {
             "image_prefix": "noiro",
             "aci_cni_operator_version": None,
+            "network_operator_version": "cko-mvp-1",
         },
         "logging": {
             "size": None,
@@ -1356,7 +1357,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
                 netopConfig['connectivity_checker']['base64_encoded_nettools_crds'] = base64_encoded_nettools_crds
                 netopConfig['connectivity_checker']['base64_encoded_connectivity_checker_cr'] = base64_encoded_connectivity_checker_cr
                 netopConfig['connectivity_checker']['base64_encoded_errorPodReporting_cr'] = base64_encoded_errorPodReporting_cr
-            
+
             network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
             network_operator_CR_template = get_jinja_template('calico-installer-cr.yaml')
@@ -1473,13 +1474,13 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
                 netopConfig['connectivity_checker']['base64_encoded_nettools_crds'] = base64_encoded_nettools_crds
                 netopConfig['connectivity_checker']['base64_encoded_connectivity_checker_cr'] = base64_encoded_connectivity_checker_cr
                 netopConfig['connectivity_checker']['base64_encoded_errorPodReporting_cr'] = base64_encoded_errorPodReporting_cr
-            
+
             network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
 
             network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
-            
+
             netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)

@@ -90,3 +90,24 @@ net_config:
   pod_subnet: 20.2.0.0/16
   extern_dynamic: 20.3.0.0/16
   cluster_svc_subnet: 10.96.0.0/12
+
+cko_git_config:
+  git_branch: test
+  git_dir: demo-cluster-manifests
+  git_email: test@cisco.com
+  git_repo: github.com/networkoperator/demo-cluster-manifests.git
+  git_token: Z2hwX2RwbWF2ODV4Y2NwQlJZdXhDSWNOc0hCRzQxeWViczNHNzlRUA==
+  git_user: networkoperator-gittest
+  sleep_duration: 5
+
+cko_proxy_config:
+  http_proxy: http://proxy.esl.cisco.com:80
+  https_proxy: http://proxy.esl.cisco.com:80
+  no_proxy: 10.96.0.1
+
+control_cluster_websocket:
+  server_ip: 10.96.101.1
+  server_port: 1234
+
+registry:
+  image_prefix: quay.io/noirolabs
