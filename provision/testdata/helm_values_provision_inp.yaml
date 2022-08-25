@@ -1,0 +1,74 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: vl07
+  #apic-refreshtime: 1200       
+  apic_hosts:
+  - 10.30.120.180
+  vmm_domain:                   
+    encap_type: vxlan           
+    mcast_range:                # Every opflex VMM must use a distinct range
+      start: 225.26.1.1
+      end: 225.26.255.255
+    nested_inside:              
+      type: vmware              
+      name: hypflex-vswitch
+
+
+  # The following resources must already exist on the APIC.
+  # They are used, but not created, by the provisioning tool.
+  aep: hypf-aep
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: k8s16_vrf
+    tenant: common              
+  l3out:
+    name: k8s16
+    external_networks:
+    - k8s16_net
+
+#
+# Networks used by ACI containers
+#
+net_config:
+  node_subnet: 192.168.16.1/24
+  pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes
+                                #   Pods/CloudFoundry containers
+  
+  extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
+  extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
+  node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
+  kubeapi_vlan: 31
+  service_vlan: 32
+  infra_vlan: 3901
+  #interface_mtu: 1600          
+  #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
+                                # default is 0, set to > 0 to enable, max: 65535
+  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
+                                # be effective with non-snat services
+
+#
+# Configuration for container registry
+# Update if a custom container registry has been setup
+#
+kube_config:
+  image_pull_policy: Always
+  ovs_memory_limit: 1Gi
+
+registry:
+  image_prefix: 10.30.120.20/noiro
+  image_pull_secret: noiro-docker-registry-secret 
+  aci_containers_controller_version: 5.2.3.2.1d150da
+  aci_containers_host_version: 5.2.3.2.1d150da
+  cnideploy_version: 5.2.3.2.1d150da
+  opflex_agent_version: 5.2.3.2.1d150da
+  openvswitch_version: 5.2.3.2.1d150da
+  snat_operator_version: 5.2.3.2.1d150da
+
+logging:
+  controller_log_level: debug
+  hostagent_log_level: debug
+  opflexagent_log_level: debug
+#kube_config:
+  # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
+  # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"

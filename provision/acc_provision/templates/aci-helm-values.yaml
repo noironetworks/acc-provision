@@ -28,21 +28,9 @@
       tenant: {{config.aci_config.vrf.tenant|json}}
     {% if config.user_config.aci_config.sync_login %}
     SyncLogin:
-      {% if config.user_config.aci_config.sync_login.username %}
-      username: {{ config.user_config.aci_config.sync_login.username|json}}
-      {% endif %}
-      {% if config.user_config.aci_config.sync_login.password %}
-      password: {{ config.user_config.aci_config.sync_login.password|json }}
-      {% endif %}
-      {% if config.user_config.aci_config.sync_login.keyfile %}
-      keyfile:  {{ config.user_config.aci_config.sync_login.keyfile|json }}
-      {% endif %}
-      {% if config.user_config.aci_config.sync_login.certfile %}
-      certfile: {{ config.user_config.aci_config.sync_login.certfile|json }}
-      {% endif %}
-      {% if config.user_config.aci_config.sync_login.cert_reused %}
-      certReused: {{ config.user_config.aci_config.sync_login.cert_reused|json }}
-      {% endif %}
+       {% for key, value in config.user_config.aci_config.sync_login.items() %}
+       {{ key }}: {{ value|json }}
+       {% endfor %} 
     {% endif %}
     {% if config.user_config.aci_config.client_ssl %}
     clientSsl: {{ config.aci_config.client_ssl|json }}
@@ -55,53 +43,36 @@
     l3out:
       name: {{ config.aci_config.l3out.name|json}}
       externalNetworks: {{ config.aci_config.l3out.external_networks }}
-    
+  {% if config.user_config.registry %}  
   registry:
-    {% if config.user_config.registry.image_prefix %}
-    imagePrefix: {{ config.user_config.registry.image_prefix }}
-    {% endif %}
-    {% if config.user_config.registry.aci_cni_operator_version %}
-    aciCniOperatorVersion: {{ config.user_config.registry.aci_cni_operator_version }}
-    {% endif %}
-    configurationVersion: {{config.registry.configuration_version }}
+    {% for key, value in config.user_config.registry.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
   {% if config.user_config.multus %}
   multus: 
-    disable: {{config.user_config.multus.disable}}
+    {% for key, value in config.user_config.multus.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
   {% endif %}
   {% if config.user_config.drop_log_config %}
   dropLogConfig:
-    enable: {{ config.user_config.drop_log_config.enable }}
+    {% for key, value in config.user_config.drop_log_config.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
   {% endif %}
   {% if config.user_config.istio_config %}
   istioConfig:
-    {% if config.user_config.istio_config.install_istio %}
-    installIstio: {{ config.user_config.istio_config.install_istio}}
-    {% endif %}
-    {% if config.user_config.istio_config.install_profile %}
-    installProfile: {{ config.user_config.istio_config.install_profile }}
-    {% endif %}
-    {% if config.user_config.istio_config.istio_ns %}
-    istioNs: {{ config.user_config.istio_config.istio_ns }}
-    {% endif %}
-    {% if config.user_config.istio_config.istio_operator_ns %}
-    istioOperatorNs: {{ config.user_config.istio_config.istio_operator_ns }}
-    {% endif %}
+    {% for key, value in config.user_config.istio_config.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
   {% endif %}
 
   {% if config.user_config.logging %}
   logging:
-    {% if config.user_config.logging.size %}
-    size: {{ config.user_config.logging.size}}
-    {% endif %}
-    {% if config.user_config.logging.controller_log_level %}
-    controllerLogLevel: {{ config.user_config.logging.controller_log_level }}
-    {% endif %}
-    {% if config.user_config.logging.hostagent_log_level %}
-    hostagentLogLevel: {{ config.user_config.logging.hostagent_log_level }}
-    {% endif %}
-    {% if config.user_config.logging.opflexagent_log_level %}
-    opflexagentLogLevel: {{ config.user_config.logging.opflexagent_log_level }} 
-    {% endif %}
+    {% for key, value in config.user_config.logging.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
   {% endif %}
 
   netConfig:
@@ -147,107 +118,25 @@
     nodeSubnet: {{config.net_config.node_subnet|json}}
     podSubnet: {{config.net_config.pod_subnet|json}}
     
-   {% if config.user_config.kube_config %}
-   kubeConfig:
-    {% if config.user_config.kube_config.controller %}
-    controller: {{ config.user_config.kube_config.controller }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_rbac_api %}
-    useRbacApi: {{ config.user_config.kube_config.use_rbac_api }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_apps_api %}
-    useAppsApi: {{ config.user_config.kube_config.use_apps_api }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_apps_apigroup %}
-    useAppsApigroup: {{ config.user_config.kube_config.use_apps_apigroup }}
-    {% endif %}
-    {% if config.user_config.kube_config.host_agent_openshift_resource %}
-    hostAgentOpenshiftResource: {{ config.user_config.kube_config.host_agent_openshift_resource }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_netpol_apigroup %}
-    useNetpolApigroup: {{ config.user_config.kube_config.use_netpol_apigroup }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_cluster_role %}
-    useClusterRole: {{ config.user_config.kube_config.use_cluster_role }}
-    {% endif %}
-    {% if config.user_config.kube_config.image_pull_policy %}
-    imagePullPolicy: {{ config.user_config.kube_config.image_pull_policy }}
-    {% endif %}
-    {% if config.user_config.kube_config.kubectl %}
-    kubectl: {{ config.user_config.kube_config.kubectl }}
-    {% endif %}
-    {% if config.user_config.kube_config.system_namespace %}
-    systemNamespace: {{ config.user_config.kube_config.system_namespace }}
-    {% endif %}
-    {% if config.user_config.kube_config.ovs_memory_limit %}
-    ovsMemoryLimit: {{ config.user_config.kube_config.ovs_memory_limit }}
-    {% endif %}
-    {% if config.user_config.kube_config.reboot_opflex_with_ovs %}
-    rebootOpflexWithOvs: {{ config.user_config.kube_config.reboot_opflex_with_ovs }}
-    {% endif %}
-    {% if config.user_config.kube_config.max_nodes_svc_graph %}
-    maxNodesSvcGraph: {{ config.user_config.kube_config.max_nodes_svc_graph }}
-    {% endif %}
-    {% if config.user_config.kube_config.opflex_mode %}
-    opflexMode: {{ config.user_config.kube_config.opflex_mode }}
-    {% endif %}
-    {% if config.user_config.kube_config.host_agent_cni_bin_path %}
-    hostAgentCniBinPath: {{ config.user_config.kube_config.host_agent_cni_bin_path }}
-    {% endif %}
-    {% if config.user_config.kube_config.agent_cni_conf_path %}
-    hostAgentCniConfPath: {{ config.user_config.kube_config.host_agent_cni_conf_path }}
-    {% endif %}
-    {% if config.user_config.kube_config.generate_installer_files %}
-    generateInstallerFiles: {{ config.user_config.kube_config.generate_installer_files }}
-    {% endif %}
-    {% if config.user_config.kube_config.generate_cnet_file %}
-    generateCnetFile: {{ config.user_config.kube_config.generate_cnet_file }}
-    {% endif %}
-    {% if config.user_config.kube_config.generate_apic_file %}
-    generateApicFile: {{ config.user_config.kube_config.generate_apic_file }}
-    {% endif %}
-    {% if config.user_config.kube_config.use_host_netns_volume %}
-    useHostNetnsVolume: {{ config.user_config.kube_config.use_host_netns_volume }}
-    {% endif %}
-    {% if config.user_config.kube_config.enable_endpointslice %}
-    enableEndpointslice: {{ config.user_config.kube_config.enable_endpointslice }}
-    {% endif %}
-    {% if config.user_config.kube_config.snat_operator %}
-    snatOperator:
-      {% if config.user_config.kube_config.snat_operator.name %}
-      name: {{ config.user_config.kube_config.snat_operator.name }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.watch_namespace %}
-      watchNamespace: {{ config.user_config.kube_config.snat_operator.watch_namespace }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.globalinfo_name %}
-      globalinfoName: {{ config.user_config.kube_config.snat_operator.globalinfo_name }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.rdconfig_name %}
-      rdconfigName: {{ config.user_config.kube_config.snat_operator.rdconfig_name }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.port_range %}
+  {% if config.user_config.kube_config %}
+  kubeConfig:
+    {% for key, value in config.user_config.kube_config.items() %}
+    {% if key == 'snat_operator' %}
+    snat_operator:
+    {% for snatkey, snatvalue in config.user_config.kube_config.snat_operator.items() %}
+      {% if snatkey == 'port_range' %}
       port_range:
-        {% if config.user_config.kube_config.snat_operator.port_range.start %}
-        start: {{ config.user_config.kube_config.snat_operator.port_range.start }}
-        {% endif %}
-        {% if config.user_config.kube_config.snat_operator.port_range.end %}
-        end: {{ config.user_config.kube_config.snat_operator.port_range.end }}
-        {% endif %}
-        {% if config.user_config.kube_config.snat_operator.port_range.ports_per_node %}
-        portsPerNode: {{ config.user_config.kube_config.snat_operator.port_range.ports_per_node }}
-        {% endif %}
+        {% for snatportkey, snatportvalue in config.user_config.kube_config.snat_operator.port_range.items() %}
+        {{ snatportkey }}: {{ snatportvalue|json|indent(width=20) }}
+        {% endfor %}
+      {% else %}
+      {{ snatkey }}: {{ snatvalue|json|indent(width=20) }}
       {% endif %}
-      {% if config.user_config.kube_config.snat_operator.snat_namespace %}
-      snatNamespace: {{ config.user_config.kube_config.snat_operator.snat_namespace }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.contract_scope %}
-      contractScope: {{ config.user_config.kube_config.snat_operator.contract_scope }}
-      {% endif %}
-      {% if config.user_config.kube_config.snat_operator.disable_periodic_snat_global_info_sync %}       
-      disablePeriodicSnatGlobalInfoSync: {{ config.user_config.kube_config.snat_operator.disable_periodic_snat_global_info_sync }}
-      {% endif %}
-    {% endif %}  
+    {% endfor %}
+    {% else %}
+    {{ key }}: {{ value|json }}
+    {% endif %}
+    {% endfor %}    
   {% endif %}
   operatorManagedConfig:
     enableUpdates: {{config.operator_managed_config.enable_updates|json}}

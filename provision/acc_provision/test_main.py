@@ -82,8 +82,8 @@ def test_base_case_upgrade():
 @in_testdir
 def test_helm_values():
     run_provision(
-        "helm_values.inp.yaml",
-        None,
+        "helm_values_provision_inp.yaml",
+        "helm_values_provision_out.yaml",
         None,
         None,
         None,
