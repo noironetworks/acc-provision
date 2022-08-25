@@ -2,10 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: acc-provision-config
-  namespace: {{ .Values.kubeConfig.systemNamespace | default "aci-containers-system" }}
+  namespace: {{ .Values.kubeConfig.system_namespace | default "aci-containers-system" }}
   labels:
-    {{- if (.Values.registry).configurationVersion }}
-    aci-containers-config-version: {{ .Values.registry.configurationVersion }}
+    {{- if (.Values.registry).configuration_version }}
+    aci-containers-config-version: {{ .Values.registry.configuration_version }}
     {{- end }}
     network-plugin: aci-containers
 data:
@@ -20,49 +20,37 @@ data:
                 {{- end }}
 
             },
-             "aci_config": {
-                 "system_id": {{ .Values.aciConfig.systemId }},
-                 {{- if (.Values.aciConfig).apicHosts }}
-                 "apic_hosts": {{ .Values.aciConfig.apicHosts}},
-                 {{- end }}
-                 {{- if (.Values.aciConfig).aep }}
-                 "aep": {{ .Values.aciConfig.aep }},
-                 {{- end }}
-                 {{- if (.Values.aciConfig).apicSubscriptionDelay }}
-                 "apic-subscription-delay": {{ .Values.aciConfig.apicSubscriptionDelay }},
-                 {{- end }}
-                 {{- if (.Values.aciConfig).apicRefreshtickerAdjust }}
-                 "apic_refreshticker_adjust": {{ .Values.aciConfig.apicRefreshtickerAdjust }},
-                 {{- end }}
-                 {{- if (.Values.aciConfig).opflexDeviceDeleteTimeout }}
-                 "opflex-device-delete-timeout": {{ .Values.aciConfig.opflexDeviceDeleteTimeout }},
-                 {{- end }}
-                 {{- if (.Values.aciConfig).tenant }}
-                 "tenant": {
-                  "name": {{ .Values.aciConfig.tenant.name }}
-                 },
-                 {{- end }}
-                 "vrf": {
-                  "name": {{ .Values.aciConfig.vrf.name }},
-                  "tenant": {{ .Values.aciConfig.vrf.tenant }}
-                 },
-                 {{- if (.Values.aciConfig).syncLogin }}
-                 "sync_login": {
-                  {{- if .Values.aciConfig.syncLogin.username }}
-                  "username": {{ .Values.aciConfig.syncLogin.username }},
-                  {{- end }}
-                  {{- if .Values.aciConfig.syncLogin.password }}
-                  "password": {{ .Values.aciConfig.syncLogin.password }},
-                  {{- end }}
-                  {{- if .Values.aciConfig.syncLogin.certfile }}
-                  "certfile": {{ .Values.aciConfig.certfile }},
-                  {{- end }}
-                  {{- if .Values.aciConfig.syncLogin.keyfile }}
-                  "keyfile": {{ .Values.aciConfig.keyfile }},
-                  {{- end }}
-                  {{- if .Values.aciConfig.syncLogin.certReused }}
-                  "cert_reused": {{ default "False" .Values.aciConfig.certReused }}
-                  {{- end }}
+            "aci_config": {
+                "system_id": {{ .Values.aciConfig.systemId }},
+                {{- if (.Values.aciConfig).apicHosts }}
+                "apic_hosts": {{ .Values.aciConfig.apicHosts}},
+                {{- end }}
+                {{- if (.Values.aciConfig).aep }}
+                "aep": {{ .Values.aciConfig.aep }},
+                {{- end }}
+                {{- if (.Values.aciConfig).apicSubscriptionDelay }}
+                "apic-subscription-delay": {{ .Values.aciConfig.apicSubscriptionDelay }},
+                {{- end }}
+                {{- if (.Values.aciConfig).apicRefreshtickerAdjust }}
+                "apic_refreshticker_adjust": {{ .Values.aciConfig.apicRefreshtickerAdjust }},
+                {{- end }}
+                {{- if (.Values.aciConfig).opflexDeviceDeleteTimeout }}
+                "opflex-device-delete-timeout": {{ .Values.aciConfig.opflexDeviceDeleteTimeout }},
+                {{- end }}
+                {{- if (.Values.aciConfig).tenant }}
+                "tenant": {
+                    "name": {{ .Values.aciConfig.tenant.name }}
+                },
+                {{- end }}
+                "vrf": {
+                    "name": {{ .Values.aciConfig.vrf.name }},
+                    "tenant": {{ .Values.aciConfig.vrf.tenant }}
+                },
+                {{- if (.Values.aciConfig).syncLogin }}
+                "sync_login": {
+                {{- range $k, $v := .Values.aciConfig.syncLogin }}
+                    {{ $k | quote}} : {{ $v | quote }}{{ ", "}}
+                {{- end }}
                 },
                 {{- end }}
                 {{- if (.Values.aciConfig).clientSsl }}
@@ -82,6 +70,107 @@ data:
                   "external_networks": {{ (.Values.aciConfig).l3out.externalNetworks }}
                 }
              },
-             
-         }
-     }
+             {{- if .Values.registry }}
+             "registry": {
+             {{- range $k, $v := .Values.registry }}
+                 {{ $k | quote}} : {{ $v | quote }}{{ ", "}}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.kubeConfig }}
+             "kube_config": {
+                 {{- range $key, $value := .Values.kubeConfig }}
+                 {{- if eq $key "snat_operator" }}
+                 "snat_operator": {
+                 {{- range $snatkey, $snatvalue := .Values.kubeConfig.snat_operator }}
+                     {{- if eq $snatkey "port_range" }}
+                     "port_range": {
+                     {{- range $snatportkey, $snatportvalue := .Values.kubeConfig.snat_operator.port_range}}
+                         {{ $snatportkey|quote }}: {{ $snatportvalue|quote }}{{ ", "}}
+                     {{- end }}
+                     }{{ ", " }}
+                     {{- else }}
+                     {{ $snatkey|quote }}: {{ $snatvalue|quote }}{{ ", "}}
+                     {{- end }}
+                 {{- end }}
+                 }
+                 {{- else }}
+                 {{ $key|quote }}: {{ $value|quote }}{{ ", "}}
+                 {{- end }}
+                 {{- end }} 
+             },
+             {{- end }}
+             {{- if .Values.multus }}
+             "multus": {
+             {{- range $key, $value := .Values.multus }}
+                 {{ $key|quote }}: {{ $value|quote }}{{ ", "}}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.dropLogConfig }}
+             "drop_log_config": {
+             {{- range $key, $value := .Values.dropLogConfig }}
+                {{ $key|quote }}: {{ $value|quote }}{{ ", "}}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.istioConfig }}
+             "istio_config": {
+             {{- range $key, $value :=  .Values.istioConfig }}
+                {{ $key|quote }}: {{ $value|quote }}{{ ", "}}
+             {{- end }}
+             },
+             {{- if .Values.logging }}
+             "logging": {
+             {{- range $key, $value := .Values.logging }}
+                {{ $key|quote }}: {{ $value|quote }}{{ ", "}}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.netConfig }}
+             "net_config": {
+                 {{- if .Values.netConfig.infraVlan }}
+                 "infra_vlan": {{ .Values.netConfig.infraVlan }},
+                 {{- end }}
+                 {{- if .Values.netConfig.serviceVlan }}
+                 "service_vlan": {{ .Values.netConfig.serviceVlan }},
+                 {{- end }}
+                 {{- if .Values.netConfig.kubeapiVlan }}
+                 "kubeapi_vlan": {{ .Values.netConfig.kubeapiVlan }},
+                 {{- end }}
+                 {{- if .Values.netConfig.externStatic }}
+                 "extern_static": {{ .Values.netConfig.externStatic }},
+                 {{- end }}
+                 {{- if .Values.netConfig.externDynamic }}
+                 "extern_dynamic": {{ .Values.netConfig.externDynamic }},
+                 {{- end }}
+                 {{- if .Values.netConfig.nodeSvcSubnet }}
+                 "node_svc_subnet": {{ .Values.netConfig.nodeSvcSubnet }},
+                 {{- end }}
+                 {{- if .Values.netConfig.interfaceMtu }}
+                 "interface_mtu": {{ (.Values.netConfig).interfaceMtu }},
+                 {{- end }}
+                 {{- if .Values.netConfig.interfaceMtuHeadroom }}
+                 "interface-mtu-headroom": {{ (.Values.netConfig).interfaceMtuHeadroom }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).serviceMonitorInterval }}
+                 "service_monitor_interval": {{ .Values.netConfig.serviceMonitorInterval }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).pbrTrackingNonSnat }}
+                 "pbr_tracking_non_snat": {{ (.Values.netConfig).pbrTrackingNonSnat }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).podSubnetChunkSize }}
+                 "pod_subnet_chunk_size": {{ (.Values.netConfig).podSubnetChunkSize }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).disableWaitForNetwork }}
+                 "disable_wait_for_network": {{ (.Values.netConfig).disableWaitForNetwork }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).durationWaitForNetwork }}
+                 "duration_wait_for_network": {{ (.Values.netConfig).durationWaitForNetwork }},
+                 {{- end }}
+                 "node_subnet": {{ .Values.netConfig.nodeSubnet }},
+                 "pod_subnet": {{ .Values.netConfig.podSubnet }}
+             }
+             {{- end }}
+        }
+    }        
