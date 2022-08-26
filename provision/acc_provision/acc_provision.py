@@ -1345,6 +1345,21 @@ def generate_calico_deployment_files(args, config, network_operator_output):
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
 
         if args.cko:
+            netopConfig = dict(config)
+            if "connectivity_checker" in netopConfig.keys():
+                nettools_spec_template = get_jinja_template('nettools-manifests.yaml')
+                nettools_spec_output = nettools_spec_template.render(config=config)
+                connectivity_checker_CR_template = get_jinja_template('connectivity-checker-cr.yaml')
+                connectivity_checker_CR_outout = connectivity_checker_CR_template.render(config=config)
+                errorPodReporting_CR_template = get_jinja_template('error-pod-reporting-cr.yaml')
+                errorPodReporting_CR_output = errorPodReporting_CR_template.render(config=config)
+                base64_encoded_nettools_crds = base64.b64encode(nettools_spec_output.encode('ascii')).decode('ascii')
+                base64_encoded_connectivity_checker_cr = base64.b64encode(connectivity_checker_CR_outout.encode('ascii')).decode('ascii')
+                base64_encoded_errorPodReporting_cr = base64.b64encode(errorPodReporting_CR_output.encode('ascii')).decode('ascii')
+                netopConfig['connectivity_checker']['base64_encoded_nettools_crds'] = base64_encoded_nettools_crds
+                netopConfig['connectivity_checker']['base64_encoded_connectivity_checker_cr'] = base64_encoded_connectivity_checker_cr
+                netopConfig['connectivity_checker']['base64_encoded_errorPodReporting_cr'] = base64_encoded_errorPodReporting_cr
+            
             network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
             network_operator_CR_template = get_jinja_template('calico-installer-cr.yaml')
@@ -1352,7 +1367,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             base64_encoded_cko_calico_crs = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
             base64_encoded_cko_calico_bgp = base64.b64encode(custom_resources_calicoctl_yaml.encode('ascii')).decode('ascii')
             base64_encoded_cko_calicoctl = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
-            netopConfig = dict(config)
+
             netopConfig["calico_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_cko_calico_crds
             netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_cko_calico_crs
@@ -1447,12 +1462,27 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             new_deployment_file = temp
 
         if args.cko:
+            netopConfig = dict(config)
+            if "connectivity_checker" in netopConfig.keys():
+                nettools_spec_template = get_jinja_template('nettools-manifests.yaml')
+                nettools_spec_output = nettools_spec_template.render(config=config)
+                connectivity_checker_CR_template = get_jinja_template('connectivity-checker-cr.yaml')
+                connectivity_checker_CR_outout = connectivity_checker_CR_template.render(config=config)
+                errorPodReporting_CR_template = get_jinja_template('error-pod-reporting-cr.yaml')
+                errorPodReporting_CR_output = errorPodReporting_CR_template.render(config=config)
+                base64_encoded_nettools_crds = base64.b64encode(nettools_spec_output.encode('ascii')).decode('ascii')
+                base64_encoded_connectivity_checker_cr = base64.b64encode(connectivity_checker_CR_outout.encode('ascii')).decode('ascii')
+                base64_encoded_errorPodReporting_cr = base64.b64encode(errorPodReporting_CR_output.encode('ascii')).decode('ascii')
+                netopConfig['connectivity_checker']['base64_encoded_nettools_crds'] = base64_encoded_nettools_crds
+                netopConfig['connectivity_checker']['base64_encoded_connectivity_checker_cr'] = base64_encoded_connectivity_checker_cr
+                netopConfig['connectivity_checker']['base64_encoded_errorPodReporting_cr'] = base64_encoded_errorPodReporting_cr
+            
             network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
 
             network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
-            netopConfig = dict(config)
+            
             netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)

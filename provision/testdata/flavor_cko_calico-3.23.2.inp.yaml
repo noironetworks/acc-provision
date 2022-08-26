@@ -24,7 +24,26 @@ aci_config:
     - mykube_extepg
 
 connectivity_checker:
-
+ error_pods_reporting_enable: true
+ reachability_test_enable:
+  periodic_sync:
+   enable_updates: true
+   interval: 120
+  external_url:
+   url: 'google.com'
+  proxy: ""
+ reachability_tests:
+  - pod_to_pod
+  - pod_to_node
+  - pod_to_clusterIP
+  - pod_to_service
+  - pod_to_LB_VIP
+  - pod_to_NodePort
+  - pod_to_External
+  - node_to_node
+  - node_to_pod
+  - node_to_clusterIP
+  - node_to_LB_VIP
 
 topology:
   rack:

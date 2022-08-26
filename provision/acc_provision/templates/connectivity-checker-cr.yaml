@@ -1,0 +1,92 @@
+apiVersion: nettools.debug/v1alpha1
+kind: ConnectivityChecker
+metadata:
+ name: test-conn-check
+ namespace: nettools
+spec:
+ reachability_test_enable:
+  periodic_sync:
+   enable_updates: {{ config.connectivity_checker.reachability_test_enable.periodic_sync.enable_updates }}
+   interval: {{ config.connectivity_checker.reachability_test_enable.periodic_sync.interval }}
+  external_url:
+   url: {{ config.connectivity_checker.reachability_test_enable.external_url.url }}
+  proxy: {{ config.connectivity_checker.reachability_test_enable.proxy }}
+ reachability_tests:
+  pod_to_pod:
+  {% if "pod_to_pod" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_node:
+  {% if "pod_to_node" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_clusterIP:
+  {% if "pod_to_clusterIP" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_service:
+  {% if "pod_to_service" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_LB_VIP:
+  {% if "pod_to_LB_VIP" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_NodePort:
+  {% if "pod_to_NodePort" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  pod_to_External:
+  {% if "pod_to_External" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_node:
+  {% if "node_to_node" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_pod:
+  {% if "node_to_pod" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_clusterIP:
+  {% if "node_to_clusterIP" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_LB_VIP:
+  {% if "node_to_LB_VIP" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_NodePort:
+  {% if "node_to_NodePort" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}
+  node_to_External:
+  {% if "node_to_External" in config.connectivity_checker.reachability_tests %}
+    update_status: true
+  {% else %}
+    update_status: false
+  {% endif %}

@@ -6,9 +6,9 @@ metadata:
 spec:
   config:
     connectivityCheck:
-      checkerCRDs: <base-encoded CRDS>
-      checkerCR: <base-encoded CR>
-      errorPodsReportingCR: <base-encoded CR>
+      checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+      checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+      errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
     networkFunctions:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
