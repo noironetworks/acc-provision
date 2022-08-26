@@ -1,0 +1,46 @@
+  aciOperatorConfig:
+    flavor: ""
+    config: ""    
+  aciConfig:
+    systemId: ""
+    apicHosts: ""
+    aep: ""
+    vrf:
+      name: ""
+      tenant: ""
+    l3out:
+      name: ""
+      externalNetworks: ""
+  
+  registry:
+    configuration_version: ""
+    image_prefix: ""
+    image_pull_secret: ""
+    aci_containers_controller_version: ""
+    aci_containers_host_version: ""
+    cnideploy_version: ""
+    opflex_agent_version: ""
+    openvswitch_version: ""
+    snat_operator_version: ""
+
+  logging:
+    controller_log_level: ""
+    hostagent_log_level: ""
+    opflexagent_log_level: ""
+
+  netConfig:
+    infraVlan: ""
+    serviceVlan: "" 
+    kubeapiVlan: ""
+    externStatic: ""
+    externDynamic: ""
+    nodeSvcSubnet: ""
+    nodeSubnet: ""
+    podSubnet: ""
+    
+  kubeConfig:
+    image_pull_policy: ""
+    ovs_memory_limit: ""
+    
+  operatorManagedConfig:
+    enableUpdates: ""

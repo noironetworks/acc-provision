@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-operator-config
+  namespace: {{ .Values.kubeConfig.system_namespace | default "aci-containers-system" }}
+  labels:
+    aci-containers-config-version: {{ .Values.registry.configuration_version }}
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "flavor": {{ .Values.aciOperatorConfig.flavor|quote }},
+        "config": {{ .Values.aciOperatorConfig.config|quote }}
+    }
