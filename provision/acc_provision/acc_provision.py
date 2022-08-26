@@ -1109,6 +1109,8 @@ def generate_sample(filep, flavor):
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
     elif flavor == "aks":
         data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
+    elif flavor == "calico-3.23.2":
+        data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
