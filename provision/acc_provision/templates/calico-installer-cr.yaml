@@ -5,10 +5,6 @@ metadata:
   name: installer-calico-cni
 spec:
   config:
-    connectivityCheck:
-      checkerCRDs: <base-encoded CRDS>
-      checkerCR: <base-encoded CR>
-      errorPodsReportingCR: <base-encoded CR>
     networkFunctions:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
