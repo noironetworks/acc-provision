@@ -2613,7 +2613,7 @@ spec:
           value: "aks"
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: "accprovisioninput"
-        image: noirolabs/acc-provision-operator:6.0.0.0.179471b
+        image: noirolabs/acc-provision-operator:5.2.3.3.1d150da
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}
