@@ -26,11 +26,11 @@ net_config:
 
 cko_git_config:
   git_branch: test
-  git_dir: demo-cluster-manifests
+  git_dir: test_dir
   git_email: test@cisco.com
-  git_repo: github.com/networkoperator/demo-cluster-manifests.git
-  git_token: Z2hwX2RwbWF2ODV4Y2NwQlJZdXhDSWNOc0hCRzQxeWViczNHNzlRUA==
-  git_user: networkoperator-gittest
+  git_repo: github.com/test/test_repo.git
+  git_token: 7fspWC6rSV
+  git_user: test-user
   sleep_duration: 5
 
 cko_proxy_config:
