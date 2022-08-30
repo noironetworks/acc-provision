@@ -24,32 +24,17 @@ connectivity_checker:
    url: 'google.com'
   proxy: ""
  reachability_tests:
-  pod_to_pod:
-    update_status: true
-  pod_to_node:
-    update_status: true
-  pod_to_clusterIP:
-    update_status: true
-  pod_to_service:
-    update_status: true
-  pod_to_LB_VIP:
-    update_status: false
-  pod_to_NodePort:
-    update_status: true
-  pod_to_External:
-    update_status: true
-  node_to_node:
-    update_status: true
-  node_to_pod:
-    update_status: true
-  node_to_clusterIP:
-    update_status: true
-  node_to_LB_VIP:
-    update_status: true
-  node_to_NodePort:
-    update_status: true
-  node_to_External:
-    update_status: true
+  - pod_to_pod
+  - pod_to_node
+  - pod_to_clusterIP
+  - pod_to_service
+  - pod_to_LB_VIP
+  - pod_to_NodePort
+  - pod_to_External
+  - node_to_node
+  - node_to_pod
+  - node_to_clusterIP
+  - node_to_LB_VIP
 
 net_config:
   node_subnet: 2.100.101.1/24
