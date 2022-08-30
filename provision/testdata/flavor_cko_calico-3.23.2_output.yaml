@@ -996,11 +996,11 @@ data:
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
       resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
-      gitrepo="github.com/networkoperator/demo-cluster-manifests.git"
-      gitdir="demo-cluster-manifests"
+      gitrepo="github.com/test/test_repo.git"
+      gitdir="test_dir"
       gitbranch="test"
-      gittoken="Z2hwX2RwbWF2ODV4Y2NwQlJZdXhDSWNOc0hCRzQxeWViczNHNzlRUA=="
-      gituser="networkoperator-gittest"
+      gittoken="7fspWC6rSV"
+      gituser="test-user"
       gitemail="test@cisco.com"
       sleepduration=5s
 ---
