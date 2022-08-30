@@ -1,0 +1,13 @@
+apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+kind: Installer
+metadata:
+  namespace: netop-manager-system
+  name: installer-aci-cni
+spec:
+  config:
+    networkFunctions:
+      cko-cni:
+        version: "{{ config.aci_config.cni_flavor_version }}"
+        type: "cko-cni-aci"
+        options:
+          aci-cni-specs: {{ config.aci_config.base64_encoded_cko_aci_spec }}
