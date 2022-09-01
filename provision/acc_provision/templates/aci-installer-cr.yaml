@@ -5,6 +5,12 @@ metadata:
   name: installer-aci-cni
 spec:
   config:
+    {% if config.connectivity_checker %}
+    connectivityCheck:
+      checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+      checkerCR: {{ config.connectivity_checker.base64_encoded_connectivity_checker_cr }}
+      errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_errorPodReporting_cr }}
+    {% endif %}
     networkFunctions:
       cko-cni:
         version: "{{ config.aci_config.cni_flavor_version }}"
