@@ -23,6 +23,9 @@
     tenant:
       name: {{config.user_config.aci_config.tenant.name|json}}
     {% endif %}
+    {% if  config.registry.configuration_version %}
+    token: {{ config.registry.configuration_version|json }}
+    {% endif %}
     vrf:
       name: {{config.aci_config.vrf.name|json}}
       tenant: {{config.aci_config.vrf.tenant|json}}
