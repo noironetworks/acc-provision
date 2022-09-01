@@ -86,11 +86,11 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
- 
+
 #
 # Configuration for ACI CNI Operator
 #
-# operator_managed_config: 
+# operator_managed_config:
     #enable_updates: True # Default is False
 
 #istio_config:
@@ -108,6 +108,13 @@ registry:
   # device_info:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
+
+#dpu_config:
+ #  enable: True     # default is false
+ #  ip: "192.168.100.2"    # default is "192.168.100.2"
+ #  user: "opflex"         # default is "opflex"
+ #  ovsdb_socket_port: "6640" # default is "6640"
+ #  masterNodeIp: ""
 
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature

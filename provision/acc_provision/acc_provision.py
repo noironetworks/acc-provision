@@ -273,6 +273,9 @@ def config_default():
         "multus": {
             "disable": True,
         },
+        "dpu_config": {
+            "enable": False,
+        },
         "sriov_config": {
             "enable": False,
         },
@@ -608,6 +611,7 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["resourcePrefix"] = "mellanox.com"
         adj_config["resourceName"] = "cx5_sriov_switchdev"
         adj_config["devices"] = ""
+        adj_config["pfNames"] = "enp193s0f0np0#2-59"
         adj_config["isRdma"] = "false"
 
         if 'device_info' in config["sriov_config"]:
@@ -615,6 +619,22 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
+
+        if config["dpu_config"].get("enable"):
+            if config["dpu_config"]["ip"]:
+                adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
+            else:
+                adj_config["dpuIp"] = "192.168.100.2"
+
+            if config["dpu_config"]["user"]:
+                adj_config["dpuUser"] = str(config["dpu_config"]["user"])
+            else:
+                adj_config["dpuUser"] = "opflex"
+
+            if config["dpu_config"]["ovsdb_socket_port"]:
+                adj_config["dpu_ovsdb_socket"] = "tcp:" + str(config["dpu_config"]["ip"]) + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+            else:
+                adj_config["dpu_ovsdb_socket"] = "tcp:" + str(config["dpu_config"]["ip"]) + ":6640"
 
     return adj_config
 
