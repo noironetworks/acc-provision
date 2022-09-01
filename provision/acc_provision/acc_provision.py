@@ -1896,12 +1896,21 @@ def provision(args, apic_file, no_random):
     if flavor == "k8s-overlay":
         return True
 
-    if (config['net_config']['second_kubeapi_portgroup']):
-        if (prov_apic is not None or config['provision'].get('upgrade_cluster')):
+    if (config['net_config']['second_kubeapi_portgroup'] and
+            'vlan_pool' not in config['aci_config']['vmm_domain']['nested_inside']):
+        if (prov_apic is not None):
             apic = get_apic(config)
             nested_vswitch_vlanpool = \
                 apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
             config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
+        elif config['provision'].get('upgrade_cluster') is False:
+            # This is the case when neither -a, -d or --upgrade options are provided.
+            # This is with the assumption that if the user requires as to use a specific vlan_pool,
+            # it should be explicitly mentioned in the acc-provision input file, and if not,
+            # set default to naming convention: "<system-id>-pool".
+            nested_vswitch_vlanpool = config["aci_config"]["system_id"] + "-pool"
+            config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
+
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 

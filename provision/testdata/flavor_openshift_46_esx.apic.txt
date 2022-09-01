@@ -1752,19 +1752,6 @@ None
         ]
     }
 }
-/api/node/mo/vlan-pool-test/from-[vlan-4001]-to-[vlan-4001].json
-{
-    "fvnsEncapBlk": {
-        "attributes": {
-            "dn": "vlan-pool-test/from-[vlan-4001]-to-[vlan-4001]",
-            "allocMode": "static",
-            "from": "vlan-4001",
-            "to": "vlan-4001",
-            "rn": "from-[vlan-4001]-to-[vlan-4001]"
-        },
-        "children": []
-    }
-}
 /api/node/mo/uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes.json
 {
     "fvRsDomAtt": {

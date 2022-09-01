@@ -1853,7 +1853,11 @@ class ApicKubeConfig(object):
         nvmm_type = self.get_nested_domain_type()
         if nvmm_type != "VMware" or not self.config["net_config"]["second_kubeapi_portgroup"] or not self.config["net_config"]["kubeapi_vlan"]:
             return
-
+        # skip add_apivlan_to_vmm_vlanpool for --upgrade case and for case
+        # when neither -a, -d or --upgrade options are provided
+        if (self.config['provision'].get('prov_apic') is None and
+                self.config['provision'].get('upgrade_cluster') in [True, False]):
+            return
         path, data = self.add_apivlan_to_vmm_vlanpool()
         return path, data
 
