@@ -83,8 +83,8 @@ def test_base_case_upgrade():
 def test_helm_values():
     run_provision(
         "helm_values_provision_inp.yaml",
-        "helm_values_provision_out.yaml",
         None,
+        None,,
         None,
         None,
         overrides={"helm": True}
