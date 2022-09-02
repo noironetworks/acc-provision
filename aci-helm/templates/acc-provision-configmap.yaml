@@ -4,8 +4,8 @@ metadata:
   name: acc-provision-config
   namespace: {{ .Values.kubeConfig.system_namespace | default "aci-containers-system" }}
   labels:
-    {{- if (.Values.registry).configuration_version }}
-    aci-containers-config-version: {{ .Values.registry.configuration_version }}
+    {{- if (.Values.aciConfig).token }}
+    aci-containers-config-version: {{ (.Values.aciConfig).token }}
     {{- end }}
     network-plugin: aci-containers
 data:

@@ -5,7 +5,7 @@ metadata:
   name: aci-operator-config
   namespace: {{ .Values.kubeConfig.system_namespace | default "aci-containers-system" }}
   labels:
-    aci-containers-config-version: {{ .Values.registry.configuration_version }}
+    aci-containers-config-version: {{ (.Values.aciConfig).token }}
     network-plugin: aci-containers
 data:
   spec: |-
