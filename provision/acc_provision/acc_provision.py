@@ -1896,12 +1896,11 @@ def provision(args, apic_file, no_random):
     if flavor == "k8s-overlay":
         return True
 
-    if (config['net_config']['second_kubeapi_portgroup']):
-        if (prov_apic is not None or config['provision'].get('upgrade_cluster')):
-            apic = get_apic(config)
-            nested_vswitch_vlanpool = \
-                apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
-            config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
+    if (config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
+        apic = get_apic(config)
+        nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
+        config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
+
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 

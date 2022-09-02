@@ -1864,7 +1864,9 @@ class ApicKubeConfig(object):
         # nvmm_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["name"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         # vpath = apic.get_vmmdom_vlanpool_tDn(nvmm_name)
-        vpath = self.config['aci_config']['vmm_domain']['nested_inside']['vlan_pool']
+        vpath = ""
+        if 'vlan_pool' in self.config['aci_config']['vmm_domain']['nested_inside']:
+            vpath = self.config['aci_config']['vmm_domain']['nested_inside']['vlan_pool']
 
         path = "/api/node/mo/%s/from-[vlan-%s]-to-[vlan-%s].json" % (vpath, kubeapi_vlan, kubeapi_vlan)
         data = collections.OrderedDict(
