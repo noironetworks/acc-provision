@@ -386,12 +386,13 @@ def config_adjust(args, config, prov_apic, no_random):
             l3out_name = "calico-l3out-fsvi-vlan-%s" % vlan_id
             config["aci_config"]["cluster_l3out"]["name"] = l3out_name
         l3out_name = config["aci_config"]["cluster_l3out"]["name"]
-        system_id = "calico-%s" % l3out_name if "calico" not in l3out_name else l3out_name
-        system_id = system_id[:20]
-        config["aci_config"]["system_id"] = system_id
+        if not config["aci_config"].get("system_id"):
+            system_id = "calico-%s" % l3out_name if "calico" not in l3out_name else l3out_name
+            system_id = system_id[:30]
+            config["aci_config"]["system_id"] = system_id
     else:
         l3out_name = config["aci_config"]["l3out"]["name"]
-        system_id = config["aci_config"]["system_id"]
+    system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
     node_subnet = config["net_config"]["node_subnet"]
     pod_subnet = config["net_config"]["pod_subnet"]
