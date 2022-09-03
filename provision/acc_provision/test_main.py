@@ -984,38 +984,49 @@ def test_preexisting_kube_convention():
 
 
 @in_testdir
-def test_flavor_calico_3_23_2():
+def test_flavor_calico_3_23_2_base_case():
     run_provision(
-        "flavor_calico-3.23.2.inp.yaml",
-        # "flavor_calico-3.23.2_output.yaml",
+        "flavor_calico-3.23.2_base_case.inp.yaml",
         None,
         "flavor_calico-3.23.2_tar",
         None,
-        "flavor_calico-3.23.2.apic.txt",
+        "flavor_calico-3.23.2_base_case.apic.txt",
         overrides={"flavor": "calico-3.23.2"}
     )
 
 
 @in_testdir
-def test_flavor_cko_calico_3_23_2():
+def test_flavor_calico_3_23_2_overrides():
     run_provision(
-        "flavor_cko_calico-3.23.2.inp.yaml",
-        "flavor_cko_calico-3.23.2_output.yaml",
+        "flavor_calico-3.23.2_overrides.inp.yaml",
+        None,
+        "flavor_calico-3.23.2_tar",
+        None,
+        "flavor_calico-3.23.2_overrides.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_cko_calico_3_23_2():
+    run_provision(
+        "cko_calico.inp.yaml",
+        "cko_calico.kube.yaml",
         None,
         None,
-        "flavor_calico-3.23.2.apic.txt",
+        "cko_calico.apic.txt",
         overrides={"flavor": "calico-3.23.2", "cko": True}
     )
 
 
 @in_testdir
-def test_flavor_cko_kubernetes_1_22():
+def test_cko_kubernetes_1_22():
     run_provision(
-        "flavor_cko_aci.inp.yaml",
-        "flavor_cko_aci.kube.yaml",
+        "cko_aci.inp.yaml",
+        "cko_aci.kube.yaml",
         None,
         None,
-        "flavor_cko_aci.apic.txt",
+        "cko_aci.apic.txt",
         overrides={"flavor": "kubernetes-1.22", "cko": True}
     )
 
