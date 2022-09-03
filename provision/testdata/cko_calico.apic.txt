@@ -351,11 +351,11 @@
         }
     }
 }
-/api/mo/uni/tn-test/flt-calico-l3out-fsvi-vl-allow-all-filter.json
+/api/mo/uni/tn-test/flt-calico-cni-allow-all-filter.json
 {
     "vzFilter": {
         "attributes": {
-            "name": "calico-l3out-fsvi-vl-allow-all-filter",
+            "name": "calico-cni-allow-all-filter",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -370,11 +370,11 @@
         ]
     }
 }
-/api/mo/uni/tn-test/brc-calico-l3out-fsvi-vl-l3out-allow-all.json
+/api/mo/uni/tn-test/brc-calico-cni-l3out-allow-all.json
 {
     "vzBrCP": {
         "attributes": {
-            "name": "calico-l3out-fsvi-vl-l3out-allow-all",
+            "name": "calico-cni-l3out-allow-all",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -390,7 +390,7 @@
                         {
                             "vzRsSubjFiltAtt": {
                                 "attributes": {
-                                    "tnVzFilterName": "calico-l3out-fsvi-vl-allow-all-filter",
+                                    "tnVzFilterName": "calico-cni-allow-all-filter",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -412,7 +412,7 @@
             {
                 "fvRsCons": {
                     "attributes": {
-                        "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
+                        "tnVzBrCPName": "calico-cni-l3out-allow-all",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -441,7 +441,7 @@
             {
                 "fvRsCons": {
                     "attributes": {
-                        "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
+                        "tnVzBrCPName": "calico-cni-l3out-allow-all",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -722,18 +722,18 @@
     "fvRsProv": {
         "attributes": {
             "matchT": "AtleastOne",
-            "tnVzBrCPName": "calico-l3out-fsvi-vl-l3out-allow-all",
+            "tnVzBrCPName": "calico-cni-l3out-allow-all",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
 }
-/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg/rsprov-calico-l3out-fsvi-vl-l3out-allow-all.json
+/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg/rsprov-calico-cni-l3out-allow-all.json
 None
-/api/node/mo/uni/userext/user-calico-l3out-fsvi-vl.json
+/api/node/mo/uni/userext/user-calico-cni.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "calico-l3out-fsvi-vl",
+            "name": "calico-cni",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -761,19 +761,19 @@ None
         ]
     }
 }
-/api/node/mo/uni/userext/user-calico-l3out-fsvi-vl.json
+/api/node/mo/uni/userext/user-calico-cni.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "calico-l3out-fsvi-vl",
+            "name": "calico-cni",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "calico-l3out-fsvi-vl.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIICAjCCAWsCAgPoMA0GCSqGSIb3DQEBBQUAMEkxCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMSIwIAYDVQQDDBlVc2VyIGNhbGljby1sM291dC1m\nc3ZpLXZsMB4XDTIyMDgxMTEzMjMyOFoXDTMyMDgwOTAxMjMyOFowSTELMAkGA1UE\nBhMCVVMxFjAUBgNVBAoMDUNpc2NvIFN5c3RlbXMxIjAgBgNVBAMMGVVzZXIgY2Fs\naWNvLWwzb3V0LWZzdmktdmwwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKFH\nARTnEU1pLH5ozx5uLhfn/p10NoFzSx1KsP0zXXF4pEdM49rTXHnHbGVurvJq/4EU\nHmxBT6B99uW32HegHHvNgtb9fElI/Ph3YeLZKv6rA5+aFUniCkCf5nmb+CQ6i1cl\n/w3qwldB1V9ecH9ftgxaW8T7+406ETsIObiOXqjpAgMBAAEwDQYJKoZIhvcNAQEF\nBQADgYEAd9/4LkCXZOIjBOFdyRKgiFBx4iuTZTrhGJ6ZXKHLn9aeXACgTbVcE6Fm\ncAin65vsUnuwWfiVxCpq5M7d1Lx15ONkwbw97zCPuDuO4eOqIZMToXYdJZbHo9RU\ny7nZPWIqmgc3ByRxFvdffCZlNr3xByXP9pt9hGdAdxjLkIBrBPA=\n-----END CERTIFICATE-----\n",
+                        "name": "calico-cni.crt",
+                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7jCCAVcCAgPoMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRgwFgYDVQQDDA9Vc2VyIGNhbGljby1jbmkwHhcN\nMjIwOTAyMTE1OTUxWhcNMzIwODMwMjM1OTUxWjA/MQswCQYDVQQGEwJVUzEWMBQG\nA1UECgwNQ2lzY28gU3lzdGVtczEYMBYGA1UEAwwPVXNlciBjYWxpY28tY25pMIGf\nMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwQkRrD/1IVxlLpPs6JWDEwA5ObIfP\nRkW270o20gucamRP+ESZhi9O5PxS66S7rI6iO0Ey2e40RnQu7PjO0YOoqF/UjUer\nmhS2rARQB8lhNaCM3tLHLzSx4VX0KCBRxOmfGapBguoFVZJSy+HGxirgKV4bOw15\n2e6UdQ1nR7ee8QIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAEmoqepSRC64dCspCdsz\nGNfUW6WUPVK/ffcp934h7MOrveIO9Sx6fPHjFC3J/kSrAWqaQKoBQtbmfCXeM3E1\nDhbpIheIiHgDsOPj+5DPdWvKjk6LMzIQwhWR6IZC7U6kDRlUlIAPO6f/zuPbNMm+\nGKVf4pGW+NlPash9jK3lnwON\n-----END CERTIFICATE-----\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }

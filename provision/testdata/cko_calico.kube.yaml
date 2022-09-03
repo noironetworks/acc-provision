@@ -894,7 +894,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: SYSTEM_ID
-          value: calico-l3out-fsvi-vl
+          value: calico-cni
         - name: HTTP_PROXY
           value: http://proxy.esl.cisco.com:80
         - name: HTTPS_PROXY
