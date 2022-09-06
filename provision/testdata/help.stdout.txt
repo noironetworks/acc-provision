@@ -2,7 +2,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-o file] [-z file] [-r file] [-a] [-d] [-u name]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
-                        [--upgrade] [--disable-multus disable_multus]
+                        [--upgrade] [--disable-multus disable_multus] [--helm]
 
 Provision an ACI/Kubernetes installation
 
@@ -37,3 +37,4 @@ optional arguments:
                         upgrade
   --disable-multus disable_multus
                         true/false to disable/enable multus in cluster
+  --helm                generate values file for aci-cni install using helm

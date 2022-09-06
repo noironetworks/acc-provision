@@ -1296,6 +1296,42 @@ def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
+def generate_helm_values_yaml(config, operator_output, operator_tar, operator_cr_output):
+    kube_objects = [
+        "configmap", "secret", "serviceaccount",
+        "daemonset", "deployment",
+    ]
+    if config["kube_config"].get("use_openshift_security_context_constraints",
+                                 False):
+        kube_objects.append("securitycontextconstraints")
+    if config["kube_config"].get("use_cluster_role", False):
+        kube_objects.extend(["clusterrolebinding", "clusterrole"])
+
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-containers.yaml')
+        outname = operator_output
+
+        temp = ''.join(template.stream(config=config))
+        # Generate and convert containers deployment to base64 and add
+        # as configMap entry to the operator deployment.
+        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+
+        template = get_jinja_template('aci-helm-values.yaml')
+        outname = operator_output
+        # If no output (-o) values file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing aci operator config and acc provision config values to %s" % outname)
+        info("Use this values for helm installation")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
@@ -1604,6 +1640,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
+    parser.add_argument(
+        '--helm', action='store_true', default=False,
+        help='generate values file for aci-cni install using helm')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -1683,6 +1722,7 @@ def provision(args, apic_file, no_random):
     output_tar = args.output_tar
     operator_cr_output_file = args.aci_operator_cr
     upgrade_cluster = args.upgrade
+    helm_chart_values = args.helm
 
     prov_apic = None
     if args.apic:
@@ -1873,6 +1913,12 @@ def provision(args, apic_file, no_random):
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
         config["registry"]["acc_provision_operator_version"] = config["registry"]["aci_cni_operator_version"]
+
+    # generate values.yaml file for helm
+    if helm_chart_values:
+        config["kube_config"]["use_cnideploy_initcontainer"] = True
+        generate_helm_values_yaml(config, output_file, output_tar, operator_cr_output_file)
+        return True
 
     if flavor in ["cloud", "aks", "eks"]:
         if prov_apic is None:

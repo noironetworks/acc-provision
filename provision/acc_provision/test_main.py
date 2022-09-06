@@ -1025,6 +1025,7 @@ def get_args(**overrides):
         # the APIC
         "infra_vlan": None,
         "test_run": True,
+        "helm": False,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)

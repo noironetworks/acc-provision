@@ -1,0 +1,203 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acc-provision-config
+  namespace: {{ .Values.kubeConfig.system_namespace | default "aci-containers-system" }}
+  labels:
+    {{- if (.Values.aciConfig).token }}
+    aci-containers-config-version: {{ (.Values.aciConfig).token }}
+    {{- end }}
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "acc_provision_input": {
+            "operator_managed_config": {
+                {{- if (.Values.operatorManagedConfig).enableUpdates }}
+                "enable_updates": {{ .Values.operatorManagedConfig.enableUpdates|quote | default "False" }}
+                {{- else }}
+                "enable_updates": "False"
+                {{- end }}
+
+            },
+            "aci_config": {
+                "system_id": {{ .Values.aciConfig.systemId|quote }},
+                {{- if (.Values.aciConfig).apicHosts }}
+                "apic_hosts": {{ .Values.aciConfig.apicHosts|quote}},
+                {{- end }}
+                {{- if (.Values.aciConfig).aep }}
+                "aep": {{ .Values.aciConfig.aep|quote }},
+                {{- end }}
+                {{- if (.Values.aciConfig).apicSubscriptionDelay }}
+                "apic-subscription-delay": {{ .Values.aciConfig.apicSubscriptionDelay|quote }},
+                {{- end }}
+                {{- if (.Values.aciConfig).apicRefreshtickerAdjust }}
+                "apic_refreshticker_adjust": {{ .Values.aciConfig.apicRefreshtickerAdjust|quote }},
+                {{- end }}
+                {{- if (.Values.aciConfig).opflexDeviceDeleteTimeout }}
+                "opflex-device-delete-timeout": {{ .Values.aciConfig.opflexDeviceDeleteTimeout|quote }},
+                {{- end }}
+                {{- if (.Values.aciConfig).tenant }}
+                "tenant": {
+                    "name": {{ .Values.aciConfig.tenant.name|quote }}
+                },
+                {{- end }}
+                "vrf": {
+                    "name": {{ .Values.aciConfig.vrf.name|quote }},
+                    "tenant": {{ .Values.aciConfig.vrf.tenant|quote }}
+                },
+                {{- if (.Values.aciConfig).syncLogin }}
+                "sync_login": {
+                {{- $sLogLen := len .Values.aciConfig.syncLogin }}
+                {{- $sLogCount := 0 | int }}
+                {{- range $k, $v := .Values.aciConfig.syncLogin }}
+                    {{- $sLogCount = add1 $sLogCount }}
+                    {{ $k | quote}} : {{ $v | quote }}{{- if ne $sLogCount $sLogLen }},{{- end }}
+                {{- end }}
+                },
+                {{- end }}
+                {{- if (.Values.aciConfig).clientSsl }}
+                "client_ssl": {{ .Values.aciConfig.clientSsl | quote }},
+                {{- end }}
+                {{- if (.Values.aciConfig).vmmDomain }}
+                "vmm_domain": {
+                  {{- if (.Values.aciConfig).vmmDomain.nestedInside }}
+                  "nested_inside": {
+                    "installer_provisioned_lb_ip": {{ .Values.aciConfig.vmmDomain.nestedInside.installerProvisionedLbIp | quote }}
+                  }
+                  {{- end }}
+                },
+                {{- end }}
+                "l3out": {
+                  "name": {{ (.Values.aciConfig).l3out.name|quote }},
+                  "external_networks": {{ (.Values.aciConfig).l3out.externalNetworks|quote }}
+                }
+             },
+             {{- if .Values.registry }}
+             "registry": {
+             {{- $regLen := len .Values.registry }}
+             {{- $regCount := 0 | int }}
+             {{- range $k, $v := .Values.registry }}
+                 {{- $regCount = add1 $regCount }}
+                 {{ $k | quote}} : {{ $v | quote }}{{- if ne $regCount $regLen }},{{- end }}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.kubeConfig }}
+             "kube_config": {
+                 {{- $kubeLen := len .Values.kubeConfig }}
+                 {{- $kubeCount := 0 | int }}
+                 {{- range $key, $value := .Values.kubeConfig }}
+                 {{- $kubeCount = add1 $kubeCount }}
+                 {{- if eq $key "snat_operator" }}
+                 "snat_operator": {
+                 {{- $snatLen := len .Values.kubeConfig.snat_operator }}
+                 {{- $snatCount := 0 | int }}
+                 {{- range $snatkey, $snatvalue := .Values.kubeConfig.snat_operator }}
+                     {{- $snatCount = add1 $snatCount }}
+                     {{- if eq $snatkey "port_range" }}
+                     "port_range": {
+                     {{- $portLen := len .Values.kubeConfig.snat_operator.port_range }}
+                     {{- $portCount := 0 | int }}
+                     {{- range $snatportkey, $snatportvalue := .Values.kubeConfig.snat_operator.port_range}}
+                         {{- $portCount = add1 $portCount }}
+                         {{ $snatportkey|quote }}: {{ $snatportvalue|quote }}{{- if ne $portCount $portLen }},{{- end }}
+                     {{- end }}
+                     }{{- if ne $snatCount $snatLen }},{{- end }}
+                     {{- else }}
+                     {{ $snatkey|quote }}: {{ $snatvalue|quote }}{{- if ne $snatCount $snatLen }},{{- end }}
+                     {{- end }}
+                 {{- end }}
+                 }
+                 {{- else }}
+                 {{ $key|quote }}: {{ $value|quote }}{{- if ne $kubeCount $kubeLen }},{{- end }}
+                 {{- end }}
+                 {{- end }} 
+             },
+             {{- end }}
+             {{- if .Values.multus }}
+             "multus": {
+             {{- $mulLen := len .Values.multus }}
+             {{- $mulCount := 0 | int }}
+             {{- range $key, $value := .Values.multus }}
+                 {{- $mulCount = add1 $mulCount }}
+                 {{ $key|quote }}: {{ $value|quote }}{{- if ne $mulCount $mulLen }},{{- end }}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.dropLogConfig }}
+             "drop_log_config": {
+             {{- $dropLen := len .Values.dropLogConfig }}
+             {{- $dropCount := 0 | int }}
+             {{- range $key, $value := .Values.dropLogConfig }}
+                 {{- $dropCount = add1 $dropCount }}
+                {{ $key|quote }}: {{ $value|quote }}{{- if ne $dropCount $dropLen }},{{- end }}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.istioConfig }}
+             "istio_config": {
+             {{- $istLen := len .Values.istioConfig }}
+             {{- $istCount := 0 | int }}
+             {{- range $key, $value :=  .Values.istioConfig }}
+                {{ $key|quote }}: {{ $value|quote }}{{- if ne $istCount $istLen }},{{- end }}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.logging }}
+             "logging": {
+             {{- $logLen := len .Values.logging }}
+             {{- $logCount := 0 | int }} 
+             {{- range $key, $value := .Values.logging }}
+                {{- $logCount = add1 $logCount }}
+                {{ $key|quote }}: {{ $value|quote }} {{- if ne $logCount $logLen }},{{- end }}
+             {{- end }}
+             },
+             {{- end }}
+             {{- if .Values.netConfig }}
+             "net_config": {
+                 {{- if .Values.netConfig.infraVlan }}
+                 "infra_vlan": {{ .Values.netConfig.infraVlan|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.serviceVlan }}
+                 "service_vlan": {{ .Values.netConfig.serviceVlan|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.kubeapiVlan }}
+                 "kubeapi_vlan": {{ .Values.netConfig.kubeapiVlan|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.externStatic }}
+                 "extern_static": {{ .Values.netConfig.externStatic|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.externDynamic }}
+                 "extern_dynamic": {{ .Values.netConfig.externDynamic|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.nodeSvcSubnet }}
+                 "node_svc_subnet": {{ .Values.netConfig.nodeSvcSubnet|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.interfaceMtu }}
+                 "interface_mtu": {{ (.Values.netConfig).interfaceMtu|quote }},
+                 {{- end }}
+                 {{- if .Values.netConfig.interfaceMtuHeadroom }}
+                 "interface-mtu-headroom": {{ (.Values.netConfig).interfaceMtuHeadroom|quote }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).serviceMonitorInterval }}
+                 "service_monitor_interval": {{ .Values.netConfig.serviceMonitorInterval|quote }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).pbrTrackingNonSnat }}
+                 "pbr_tracking_non_snat": {{ (.Values.netConfig).pbrTrackingNonSnat|quote }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).podSubnetChunkSize }}
+                 "pod_subnet_chunk_size": {{ (.Values.netConfig).podSubnetChunkSize|quote }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).disableWaitForNetwork }}
+                 "disable_wait_for_network": {{ (.Values.netConfig).disableWaitForNetwork|quote }},
+                 {{- end }}
+                 {{- if (.Values.netConfig).durationWaitForNetwork }}
+                 "duration_wait_for_network": {{ (.Values.netConfig).durationWaitForNetwork|quote }},
+                 {{- end }}
+                 "node_subnet": {{ .Values.netConfig.nodeSubnet|quote }},
+                 "pod_subnet": {{ .Values.netConfig.podSubnet|quote }}
+             }
+             {{- end }} 
+        }
+    }        
