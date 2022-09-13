@@ -1516,11 +1516,15 @@ data:
         "enable-nodepodif": false,
         {% endif %}
         {% if config.sriov_config.enable %}
+        {% if config.dpu_config.enable %}
+        "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},
+        {% endif %}
         "enable-ovs-hw-offload": true
         {% else %}
         "enable-ovs-hw-offload": false
         {% endif %}
     }
+  {% if config.dpu_config.enable != True %}
   opflex-agent-config: |-
     {
         "log": {
@@ -1539,6 +1543,7 @@ data:
             "enabled": "false"
         }
     }
+  {% endif %}
   {% if config.kube_config.run_gbp_container %}
   gbp-server-config: |-
    {
@@ -2232,6 +2237,10 @@ spec:
             - name: multus-cni-conf
               mountPath: /mnt/multus-cni-conf
             {% endif %}
+            {% if config.dpu_config.enable == True %}
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            {% endif %}
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -2242,6 +2251,7 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 30
+        {% if config.dpu_config.enable != True %}
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
@@ -2270,6 +2280,7 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+        {% endif %}
         {% if config.kube_config.run_opflex_server_container %}
         - name: opflex-server
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
@@ -2294,6 +2305,7 @@ spec:
               mountPath: /usr/local/var
         {% endif %}
         {% if config.kube_config.opflex_mode != "overlay" %}
+        {% if config.dpu_config.enable != True %}
         - name: mcast-daemon
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           command: ["/bin/sh"]
@@ -2311,6 +2323,21 @@ spec:
             - name: hostrun
               mountPath: /usr/local/run
         {% endif %}
+        {% endif %}
+        {% if config.dpu_config.enable == True %}
+        - name: lsyncd-daemon
+          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-lsyncd.sh"]
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            - name: lsyncd-config-volume
+              mountPath: /etc/configmap
+          {% endif %}
       restartPolicy: Always
       volumes:
         - name: cni-bin
@@ -2334,12 +2361,14 @@ spec:
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
+        {% if config.dpu_config.enable != True %}
         - name: opflex-config-volume
           configMap:
             name: aci-containers-config
             items:
               - key: opflex-agent-config
                 path: local.conf
+        {% endif %}
         {% if config.kube_config.use_opflex_server_volume %}
         - name: opflex-server-config-volume
         {% endif %}
@@ -2353,6 +2382,18 @@ spec:
           hostPath:
             path: /var/run/multus/
         {% endif %}
+        {% if config.dpu_config.enable == True %}
+        - name: opflex-lsyncd-volume
+          hostPath:
+            path: /usr/local/etc/opflex-agent-ovs
+        - name: lsyncd-config-volume
+          configMap:
+            name: lsyncd-config
+            items:
+             - key: lsyncd.json
+               path: lsyncd.json
+        {% endif %}
+{% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
@@ -2446,6 +2487,7 @@ spec:
         - name: hostmodules
           hostPath:
             path: /lib/modules
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: Deployment
@@ -2817,6 +2859,9 @@ data:
                       "devices": [{{config.devices|json}}],
                       {% endif %}
                       "drivers": [{{config.drivers|json}}],
+                      {% if config.dpu_config.enable == True %}
+                      "pfNames": [{{config.pfNames|json}}],
+                      {% endif %}
                       "isRdma":  {{config.isRdma}}
                    }
                  }
@@ -2867,4 +2912,25 @@ spec:
                 config:
                   description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
                   type: string
+{% endif %}
+{% if config.dpu_config.enable == True %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lsyncd-config
+  {% if config.flavor != "k8s-overlay" %}
+  namespace: aci-containers-system
+  {% else %}
+  namespace: {{ config.kube_config.system_namespace }}
+  {% endif %}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+  lsyncd.json: |-
+    {
+       "dpuIp": {{config.dpuIp|json}},
+       "dpuUser": {{config.dpuUser|json}}
+    }
 {% endif %}
