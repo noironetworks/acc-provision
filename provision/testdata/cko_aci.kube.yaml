@@ -19,9 +19,25 @@ spec:
     listKind: CniOpsList
     plural: cniops
     singular: cniops
-  scope: Namespaced
+  scope: Cluster
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Date
+      type: date
+    - description: State/Phase of Installer
+      jsonPath: .status.operatorStatus
+      name: Phase
+      type: string
+    - description: Cni Type
+      jsonPath: .status.cniType
+      name: CNI-Type
+      type: string
+    - description: Cni Version
+      jsonPath: .status.cniVersion
+      name: CNI-Version
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: CniOps is the Schema for the cniops API
@@ -123,9 +139,17 @@ spec:
     listKind: InstallerList
     plural: installers
     singular: installer
-  scope: Namespaced
+  scope: Cluster
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Date
+      type: date
+    - description: State/Phase of Installer
+      jsonPath: .status.operatorStatus
+      name: Phase
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: Installer is the Schema for the installers API
@@ -144,7 +168,7 @@ spec:
               config:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run "make" to regenerate code after modifying this file'
                 properties:
-                  connectivityCheck:
+                  connectivityChecker:
                     properties:
                       checkerCR:
                         type: string
@@ -195,16 +219,12 @@ spec:
                     type:
                       type: string
                   type: object
-                description: Single String String
                 type: object
               observedGeneration:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 format: int64
                 type: integer
               operatorStatus:
-                type: string
-              state:
-                description: 'Todo: Store predefined keys for faster checking.'
                 type: string
             type: object
         type: object
@@ -889,10 +909,6 @@ spec:
         command:
         - /manager
         env:
-        - name: WATCH_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         - name: SYSTEM_ID
           value: bm2acicni
         - name: HTTP_PROXY
@@ -941,11 +957,19 @@ spec:
       securityContext:
         runAsNonRoot: false
       serviceAccountName: netop-manager-controller-manager
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 30
       tolerations:
-      - key: node.kubernetes.io/network-unavailable
-      - key: node.kubernetes.io/not-ready
-      - key: node.kubernetes.io/unreachable
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
       volumes:
       - hostPath:
           path: /opt
@@ -992,7 +1016,7 @@ metadata:
 data:
     variable.sh: |-
      #!/bin/bash
-      
+
       resourcelabelKey="netop-manager-resource"
       projectlabelKey="netop-manager"
       resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
