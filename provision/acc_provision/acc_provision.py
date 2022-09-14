@@ -1480,6 +1480,19 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
             network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
 
+            # The next few files are to generate tar file with each
+            # containers and operator yaml in separate file. This is needed
+            # by OpenShift >= 4.3. If tar_path is provided(-z), we save the tar
+            # with that filename, else we use the provided containers
+            # deployment filepath. If neither is provided, we don't generate
+            # the tar.
+            if "openshift" in config["flavor"]:
+                if tar_path == "-":
+                    tar_path = "/dev/null"
+                else:
+                    deployment_docs = yaml.load_all(network_operator_yaml, Loader=yaml.SafeLoader)
+                    generate_operator_tar(tar_path, deployment_docs, config)
+
             print("writing the deployment file")
             with open(operator_output, "w") as fh:
                 fh.write(network_operator_yaml)
