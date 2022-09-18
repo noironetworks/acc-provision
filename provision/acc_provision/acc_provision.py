@@ -236,7 +236,8 @@ def config_default():
                 },
                 "snat_namespace": "aci-containers-system",
                 "contract_scope": "global",
-                "disable_periodic_snat_global_info_sync": False
+                "disable_periodic_snat_global_info_sync": False,
+                "sleep_time_snat_global_info_sync": None,
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,
@@ -718,6 +719,22 @@ def is_valid_dev_del_timeout(xval):
     raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_sleep_time(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 1
+    xmax = 300
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_ipsla_interval(xval):
     if xval is None:
         # use default configured on this host
@@ -930,6 +947,9 @@ def config_validate(flavor_opts, config):
 
             "kube_config/snat_operator/contract_scope": (get(("kube_config", "snat_operator", "contract_scope")),
                                                          is_valid_contract_scope),
+
+            "kube_config/snat_operator/sleep_time_snat_global_info_sync": (get(("kube_config", "snat_operator", "sleep_time_snat_global_info_sync")),
+                                                                           is_valid_sleep_time),
 
             # Network Config
             "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
