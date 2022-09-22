@@ -111,5 +111,12 @@ registry:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
 
+#dpu_config:
+    # enable: True          # default is false
+    # ip: ""                # default is "192.168.200.2"
+    # user: ""              # default is "opflex"
+    # ovsdb_socket_port: "" # default is "6640"
+    # masterNodeIp: ""
+
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
