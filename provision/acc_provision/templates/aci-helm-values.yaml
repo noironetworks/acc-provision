@@ -1,0 +1,145 @@
+  aciOperatorConfig:
+    flavor: {{ config.flavor|json }}
+    config: {{ config.kube_config.deployment_base64|json }}
+
+  aciConfig:
+    systemId: {{ config.aci_config.system_id }}
+    {% if config.user_config.aci_config.apic_hosts %}
+    apicHosts: {{config.aci_config.apic_hosts|json|indent(width=16)}}
+    {% endif %}
+    {% if config.user_config.aci_config.aep %}
+    aep: {{config.aci_config.aep|json}}
+    {% endif %}
+    {% if config.aci_config.apic_subscription_delay %}
+    apicSubscriptionDelay: {{ config.aci_config.apic_subscription_delay|json }}
+    {% endif %}
+    {% if config.aci_config.apic_refreshticker_adjust %}
+    apicRefreshtickerAdjust: {{ config.aci_config.apic_refreshticker_adjust|json }}
+    {% endif %}
+    {% if config.aci_config.opflex_device_delete_timeout %}
+    opflexDeviceDeleteTimeout: {{ config.aci_config.opflex_device_delete_timeout|json }}
+    {% endif %}
+    {% if config.user_config.aci_config.tenant %}
+    tenant:
+      name: {{config.user_config.aci_config.tenant.name|json}}
+    {% endif %}
+    {% if  config.registry.configuration_version %}
+    token: {{ config.registry.configuration_version|json }}
+    {% endif %}
+    vrf:
+      name: {{config.aci_config.vrf.name|json}}
+      tenant: {{config.aci_config.vrf.tenant|json}}
+    {% if config.user_config.aci_config.sync_login %}
+    SyncLogin:
+       {% for key, value in config.user_config.aci_config.sync_login.items() %}
+       {{ key }}: {{ value|json }}
+       {% endfor %} 
+    {% endif %}
+    {% if config.user_config.aci_config.client_ssl %}
+    clientSsl: {{ config.aci_config.client_ssl|json }}
+    {% endif %}
+    {% if ((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
+    vmmDomain: 
+      nestedInside:
+        installerProvisionedLbIp: {{ config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20) }}
+    {% endif %}
+    l3out:
+      name: {{ config.aci_config.l3out.name|json}}
+      externalNetworks: {{ config.aci_config.l3out.external_networks }}
+  {% if config.user_config.registry %}  
+  registry:
+    {% for key, value in config.user_config.registry.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
+  {% if config.user_config.multus %}
+  multus: 
+    {% for key, value in config.user_config.multus.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
+  {% if config.user_config.drop_log_config %}
+  dropLogConfig:
+    {% for key, value in config.user_config.drop_log_config.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
+  {% if config.user_config.istio_config %}
+  istioConfig:
+    {% for key, value in config.user_config.istio_config.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
+
+  {% if config.user_config.logging %}
+  logging:
+    {% for key, value in config.user_config.logging.items() %}
+    {{ key }}: {{ value|json }}
+    {% endfor %}
+  {% endif %}
+
+  netConfig:
+    {% if config.user_config.net_config.infra_vlan %}
+    infraVlan: {{config.net_config.infra_vlan|json}}
+    {% endif %}
+    {% if config.user_config.net_config.service_vlan %}
+    serviceVlan: {{config.net_config.service_vlan|json}} 
+    {% endif %}
+    {% if config.user_config.net_config.kubeapi_vlan %}
+    kubeapiVlan: {{config.net_config.kubeapi_vlan|json}}
+    {% endif %}
+    {% if config.user_config.net_config.extern_static %}
+    externStatic: {{config.net_config.extern_static|json}}
+    {% endif %}
+    {% if config.user_config.net_config.extern_dynamic %}
+    externDynamic: {{config.net_config.extern_dynamic|json}}
+    {% endif %}
+    {% if config.user_config.net_config.node_svc_subnet %}
+    nodeSvcSubnet: {{config.net_config.node_svc_subnet|json}}
+    {% endif %}
+    {% if config.user_config.net_config.interface_mtu %}
+    interfaceMtu: {{config.net_config.interface_mtu|json}}
+    {% endif %}
+    {% if config.user_config.interface_mtu_headroom %}
+    interfaceMtuHeadroom: {{ config.user_config.interface_mtu_headroom|json }}
+    {% endif %}
+    {% if config.user_config.net_config.service_monitor_interval %}
+    serviceMonitorInterval: {{config.net_config.service_monitor_interval|json}}
+    {% endif %}
+    {% if config.user_config.net_config.pbr_tracking_non_snat %}
+    pbrTrackingNonSnat: {{config.net_config.pbr_tracking_non_snat|json}}
+    {% endif %}
+    {% if config.user_config.net_config.pod_subnet_chunk_size %}
+    podSubnetChunkSize: {{config.net_config.pod_subnet_chunk_size|json}}
+    {% endif %}
+    {% if config.user_config.net_config.disable_wait_for_network %}
+    disableWaitForNetwork: {{config.net_config.disable_wait_for_network|json}}
+    {% endif %}
+    {% if config.user_config.net_config.duration_wait_for_network %}
+    durationWaitForNetwork: {{config.net_config.duration_wait_for_network|json}}
+    {% endif %}
+    nodeSubnet: {{config.net_config.node_subnet|json}}
+    podSubnet: {{config.net_config.pod_subnet|json}}
+    
+  {% if config.user_config.kube_config %}
+  kubeConfig:
+    {% for key, value in config.user_config.kube_config.items() %}
+    {% if key == 'snat_operator' %}
+    snat_operator:
+    {% for snatkey, snatvalue in config.user_config.kube_config.snat_operator.items() %}
+      {% if snatkey == 'port_range' %}
+      port_range:
+        {% for snatportkey, snatportvalue in config.user_config.kube_config.snat_operator.port_range.items() %}
+        {{ snatportkey }}: {{ snatportvalue|json|indent(width=20) }}
+        {% endfor %}
+      {% else %}
+      {{ snatkey }}: {{ snatvalue|json|indent(width=20) }}
+      {% endif %}
+    {% endfor %}
+    {% else %}
+    {{ key }}: {{ value|json }}
+    {% endif %}
+    {% endfor %}    
+  {% endif %}
+  operatorManagedConfig:
+    enableUpdates: {{config.operator_managed_config.enable_updates|json}}
