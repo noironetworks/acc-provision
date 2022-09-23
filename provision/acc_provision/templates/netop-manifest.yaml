@@ -1038,19 +1038,32 @@ metadata:
   name: status-config
   namespace: netop-manager-system
 data:
-    variable.sh: |-
-     #!/bin/bash
-
-      resourcelabelKey="netop-manager-resource"
-      projectlabelKey="netop-manager"
-      resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
-      gitrepo="{{ config.cko_git_config.git_repo }}"
-      gitdir="{{ config.cko_git_config.git_dir }}"
-      gitbranch="{{ config.cko_git_config.git_branch }}"
-      gittoken="{{ config.cko_git_config.git_token }}"
-      gituser="{{ config.cko_git_config.git_user }}"
-      gitemail="{{ config.cko_git_config.git_email }}"
-      sleepduration={{ config.cko_git_config.sleep_duration }}s
+    config.yaml: |-
+      # pod_name: ""
+      status:
+        resourcelabelKey: "netop-manager-resource"
+        sleepduration: {{ config.cko_git_config.sleep_duration }}
+        systemId: "a-cluster"
+        resources:
+        - namespace: "nettools"
+          name: "connectivitychecker.nettools.debug"
+        - namespace: "netop-manager-system"
+          name: "cniops.cni-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "installer.netop-manager-cntrlr.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "loadbalancerop.lb-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "monitoringop.monitoring-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "servicemeshop.service-mesh.netop-manager.io"
+      git:
+        repo: "{{ config.cko_git_config.git_repo }}"
+        dir: "{{ config.cko_git_config.git_dir }}"
+        branch: "{{ config.cko_git_config.git_branch }}"
+        token: "{{ config.cko_git_config.git_token }}"
+        user: "{{ config.cko_git_config.git_user }}"
+        email: "{{ config.cko_git_config.git_email }}"
 {% if config.control_cluster_websocket %}
 ---
 apiVersion: v1

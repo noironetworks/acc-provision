@@ -1030,19 +1030,32 @@ metadata:
   name: status-config
   namespace: netop-manager-system
 data:
-    variable.sh: |-
-     #!/bin/bash
-
-      resourcelabelKey="netop-manager-resource"
-      projectlabelKey="netop-manager"
-      resources="nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io"
-      gitrepo="github.com/test/test_repo.git"
-      gitdir="test_dir"
-      gitbranch="test"
-      gittoken="7fspWC6rSV"
-      gituser="test-user"
-      gitemail="test@cisco.com"
-      sleepduration=5s
+    config.yaml: |-
+      # pod_name: ""
+      status:
+        resourcelabelKey: "netop-manager-resource"
+        sleepduration: 5
+        systemId: "a-cluster"
+        resources:
+        - namespace: "nettools"
+          name: "connectivitychecker.nettools.debug"
+        - namespace: "netop-manager-system"
+          name: "cniops.cni-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "installer.netop-manager-cntrlr.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "loadbalancerop.lb-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "monitoringop.monitoring-manager.netop-manager.io"
+        - namespace: "netop-manager-system"
+          name: "servicemeshop.service-mesh.netop-manager.io"
+      git:
+        repo: "github.com/test/test_repo.git"
+        dir: "test_dir"
+        branch: "test"
+        token: "7fspWC6rSV"
+        user: "test-user"
+        email: "test@cisco.com"
 ---
 apiVersion: v1
 kind: ConfigMap

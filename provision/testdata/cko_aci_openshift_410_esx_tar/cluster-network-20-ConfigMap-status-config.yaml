@@ -1,12 +1,15 @@
 apiVersion: v1
 data:
-  variable.sh: "#!/bin/bash\n\n resourcelabelKey=\"netop-manager-resource\"\n projectlabelKey=\"\
-    netop-manager\"\n resources=\"nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io\
-    \ netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io\
-    \ netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io\"\
-    \n gitrepo=\"github.com/test/test_repo.git\"\n gitdir=\"test_dir\"\n gitbranch=\"\
-    test\"\n gittoken=\"7fspWC6rSV\"\n gituser=\"test-user\"\n gitemail=\"test@cisco.com\"\
-    \n sleepduration=5s"
+  config.yaml: "# pod_name: \"\"\nstatus:\n  resourcelabelKey: \"netop-manager-resource\"\
+    \n  sleepduration: 5\n  systemId: \"a-cluster\"\n  resources:\n  - namespace:\
+    \ \"nettools\"\n    name: \"connectivitychecker.nettools.debug\"\n  - namespace:\
+    \ \"netop-manager-system\"\n    name: \"cniops.cni-manager.netop-manager.io\"\n\
+    \  - namespace: \"netop-manager-system\"\n    name: \"installer.netop-manager-cntrlr.netop-manager.io\"\
+    \n  - namespace: \"netop-manager-system\"\n    name: \"loadbalancerop.lb-manager.netop-manager.io\"\
+    \n  - namespace: \"netop-manager-system\"\n    name: \"monitoringop.monitoring-manager.netop-manager.io\"\
+    \n  - namespace: \"netop-manager-system\"\n    name: \"servicemeshop.service-mesh.netop-manager.io\"\
+    \ngit:\n  repo: \"github.com/test/test_repo.git\"\n  dir: \"test_dir\"\n  branch:\
+    \ \"test\"\n  token: \"7fspWC6rSV\"\n  user: \"test-user\"\n  email: \"test@cisco.com\""
 kind: ConfigMap
 metadata:
   name: status-config
