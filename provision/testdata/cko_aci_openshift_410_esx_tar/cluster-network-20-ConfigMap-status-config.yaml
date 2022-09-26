@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  variable.sh: "#!/bin/bash\n\n resourcelabelKey=\"netop-manager-resource\"\n projectlabelKey=\"\
+    netop-manager\"\n resources=\"nettools|connectivitycheckers.nettools.debug netop-manager-system|cniops.cni-manager.netop-manager.io\
+    \ netop-manager-system|installers.netop-manager-cntrlr.netop-manager.io netop-manager-system|loadbalancerops.lb-manager.netop-manager.io\
+    \ netop-manager-system|monitoringops.monitoring-manager.netop-manager.io netop-manager-system|servicemeshops.service-mesh.netop-manager.io\"\
+    \n gitrepo=\"github.com/test/test_repo.git\"\n gitdir=\"test_dir\"\n gitbranch=\"\
+    test\"\n gittoken=\"7fspWC6rSV\"\n gituser=\"test-user\"\n gitemail=\"test@cisco.com\"\
+    \n sleepduration=5s"
+kind: ConfigMap
+metadata:
+  name: status-config
+  namespace: netop-manager-system
