@@ -1031,6 +1031,18 @@ def test_cko_kubernetes_1_22():
     )
 
 
+@in_testdir
+def test_cko_openshift_410_esx():
+    run_provision(
+        "cko_aci_openshift_410_esx.inp.yaml",
+        "cko_aci_openshift_410_esx.kube.yaml",
+        "cko_aci_openshift_410_esx_tar",
+        None,
+        "cko_aci_openshift_410_esx.apic.txt",
+        overrides={"flavor": "openshift-4.10-esx", "cko": True}
+    )
+
+
 def get_args(**overrides):
     arg = {
         "config": None,

@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  cniconfig.yaml: "cniConfig:\n  cko-cni-calico:\n  - \"01-calico.conflist\"\n  -\
+    \ \"01-calico.conf\"\n  - \"10-calico.conflist\"\n  - \"10-calico.conf\"\n  cko-cni-aci:\n\
+    \  - \"01-opflex-cni.conf\"\n  - \"10-opflex-cni.conf\""
+kind: ConfigMap
+metadata:
+  name: netop-manager-cni-config
+  namespace: netop-manager-system
