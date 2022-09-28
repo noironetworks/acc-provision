@@ -1,0 +1,125 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: cniops.cni-manager.netop-manager.io
+spec:
+  group: cni-manager.netop-manager.io
+  names:
+    kind: CniOps
+    listKind: CniOpsList
+    plural: cniops
+    singular: cniops
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Date
+      type: date
+    - description: State/Phase of Installer
+      jsonPath: .status.operatorStatus
+      name: Phase
+      type: string
+    - description: Cni Type
+      jsonPath: .status.cniType
+      name: CNI-Type
+      type: string
+    - description: Cni Version
+      jsonPath: .status.cniVersion
+      name: CNI-Version
+      type: string
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: CniOps is the Schema for the cniops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsSpec defines the desired state of CniOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: CniOpsStatus defines the observed state of CniOps.
+            properties:
+              Multus:
+                type: boolean
+              cniStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              cniType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: string
+              cniVersion:
+                type: string
+              internalState:
+                type: string
+              ipam:
+                type: string
+              managedState:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              operatorStatus:
+                type: string
+              upgradeStatus:
+                properties:
+                  cniUpgradeState:
+                    type: string
+                  currentVersion:
+                    type: string
+                  previousVersion:
+                    type: string
+                type: object
+              workloadCheck:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ''
+    plural: ''
+  conditions: []
+  storedVersions: []

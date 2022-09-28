@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/node-selector: ''
+  labels:
+    control-plane: controller-manager
+    openshift.io/run-level: '0'
+  name: netop-manager-system
