@@ -1522,7 +1522,7 @@ data:
         "enable-nodepodif": false,
         {% endif %}
         {% if config.sriov_config.enable %}
-        {% if config.dpu_config.enable %}
+        {% if config.dpu_config.enable and config.kube_config.opflex_mode == "dpu" %}
         "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},
         {% endif %}
         "enable-ovs-hw-offload": true
@@ -2926,7 +2926,7 @@ spec:
                   description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
                   type: string
 {% endif %}
-{% if config.dpu_config.enable == True %}
+{% if config.dpu_config.enable == True and config.kube_config.opflex_mode == "dpu" %}
 ---
 apiVersion: v1
 kind: ConfigMap

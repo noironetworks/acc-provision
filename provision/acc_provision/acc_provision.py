@@ -623,20 +623,23 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["isRdma"] = "true"
 
         if config["dpu_config"].get("enable"):
-            if 'ip' in config["dpu_config"]:
-                adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
-            else:
-                adj_config["dpuIp"] = "192.168.200.2"
+            if opflex_mode == "dpu":
+                if 'ip' in config["dpu_config"] and config["dpu_config"].get("ip"):
+                    adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
+                else:
+                    adj_config["dpuIp"] = "192.168.200.2"
 
-            if 'user' in config["dpu_config"]:
-                adj_config["dpuUser"] = str(config["dpu_config"]["user"])
-            else:
-                adj_config["dpuUser"] = "opflex"
+                if 'user' in config["dpu_config"] and config["dpu_config"].get("user"):
+                    adj_config["dpuUser"] = str(config["dpu_config"]["user"])
+                else:
+                    adj_config["dpuUser"] = "opflex"
 
-            if 'ovsdb_socket_port' in config["dpu_config"]:
-                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+                if 'ovsdb_socket_port' in config["dpu_config"] and config["dpu_config"].get("ovsdb_socket_port"):
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+                else:
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
             else:
-                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
+                err("Opflex_mode is not set to dpu. Cannot generate dpu config")
 
     return adj_config
 
@@ -1442,6 +1445,14 @@ def generate_calico_deployment_files(config, network_operator_output):
         print("Generated the deployment tar file")
 
 
+def gendpu(config, dpu_output_file):
+    template = get_jinja_template('dpu-containers.yaml')
+    outname = dpu_output_file
+    info("Writing DPU kubernetes configuration to  %s" % outname)
+    with open(dpu_output_file, "w") as fh:
+        fh.write(template.render(config=config))
+
+
 def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output):
     kube_objects = [
         "configmap", "secret", "serviceaccount",
@@ -1694,6 +1705,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
+    parser.add_argument(
+        '-s', '--dpu', default=None, metavar='file',
+        help='output file for your dpu kubernetes deployment')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -1982,6 +1996,13 @@ def provision(args, apic_file, no_random):
     if not callable(gen):
         gen = globals()[gen]
     gen(config, output_file, output_tar, operator_cr_output_file)
+
+    if args.dpu:
+        if config["dpu_config"].get("enable"):
+            dpu_output_file = args.dpu
+            gendpu(config, dpu_output_file)
+        else:
+            err("Cannot generate DPU kubernetes Yaml file: dpu_config not enabled in acc_provision input file")
 
     if flavor == "k8s-overlay":
         return True
