@@ -95,4 +95,4 @@ control_cluster_websocket:
   server_port: 1234
 
 registry:
-  image_prefix: quay.io/noirolabs
+  image_prefix: quay.io/ckodev
