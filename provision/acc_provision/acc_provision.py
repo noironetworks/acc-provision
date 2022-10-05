@@ -57,6 +57,7 @@ VERSION_FIELDS = [
 
 FLAVORS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/flavors.yaml"
 VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/versions.yaml"
+CKO_VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/cko_versions.yaml"
 
 
 with open(VERSIONS_PATH, 'r') as stream:
@@ -65,6 +66,13 @@ with open(VERSIONS_PATH, 'r') as stream:
     except yaml.YAMLError as exc:
         print(exc)
     VERSIONS = doc['versions']
+
+with open(CKO_VERSIONS_PATH, 'r') as stream:
+    try:
+        doc = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+    CKO_VERSIONS = doc['cko_versions']
 
 with open(FLAVORS_PATH, 'r') as stream:
     try:
@@ -265,7 +273,6 @@ def config_default():
         "registry": {
             "image_prefix": "noiro",
             "aci_cni_operator_version": None,
-            "network_operator_version": "cko-mvp-1",
         },
         "logging": {
             "size": None,
@@ -1310,12 +1317,13 @@ def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
 
-def generate_nettools_deployment_files(netopConfig):
-    nettools_spec_template = get_jinja_template('nettools-manifests.yaml')
+def generate_nettools_deployment_files(args, netopConfig):
+    netop_version = args.cko_version
+    nettools_spec_template = get_jinja_template('cko/' + netop_version + '/nettools/nettools-manifests.yaml')
     nettools_spec_output = nettools_spec_template.render(config=netopConfig)
-    connectivity_checker_CR_template = get_jinja_template('connectivity-checker-cr.yaml')
+    connectivity_checker_CR_template = get_jinja_template('cko/' + netop_version + '/nettools/connectivity-checker-cr.yaml')
     connectivity_checker_CR_outout = connectivity_checker_CR_template.render(config=netopConfig)
-    errorPodReporting_CR_template = get_jinja_template('error-pod-reporting-cr.yaml')
+    errorPodReporting_CR_template = get_jinja_template('cko/' + netop_version + '/nettools/error-pod-reporting-cr.yaml')
     errorPodReporting_CR_output = errorPodReporting_CR_template.render(config=netopConfig)
     base64_encoded_nettools_crds = base64.b64encode(nettools_spec_output.encode('ascii')).decode('ascii')
     base64_encoded_connectivity_checker_cr = base64.b64encode(connectivity_checker_CR_outout.encode('ascii')).decode('ascii')
@@ -1362,10 +1370,12 @@ def generate_calico_deployment_files(args, config, network_operator_output):
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
 
         if args.cko:
+            netop_version = args.cko_version
+            print(netop_version)
             netopConfig = dict(config)
             if "connectivity_checker" in netopConfig.keys():
-                netopConfig = generate_nettools_deployment_files(netopConfig)
-            network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+                netopConfig = generate_nettools_deployment_files(args, netopConfig)
+            network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
             network_operator_CR_template = get_jinja_template('calico-installer-cr.yaml')
             base64_encoded_cko_calico_crds = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
@@ -1467,10 +1477,11 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             new_deployment_file = temp
 
         if args.cko:
+            netop_version = args.cko_version
             netopConfig = dict(config)
             if "connectivity_checker" in netopConfig.keys():
-                netopConfig = generate_nettools_deployment_files(netopConfig)
-            network_operator_spec_template = get_jinja_template('netop-manifest.yaml')
+                netopConfig = generate_nettools_deployment_files(args, netopConfig)
+            network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
 
             network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
@@ -1691,6 +1702,8 @@ def parse_args(show_help):
     parser.add_argument(
         '--cko', default=False, action='store_true', help='generates deployment spec for CKO')
     parser.add_argument(
+        '--cko-version', default="0.9.0", metavar='cko_version', help='netop-manager upgrade/downgrade')
+    parser.add_argument(
         '--netop-image-tag', default=None, metavar='netop_image_tag', help='network operator image tag')
     # This argument is set to True and used internally by the acc-provision-operator when invoking
     # acc-provision. It is not meant to be invoked directly by the user from stand-alone acc-provision
@@ -1889,6 +1902,10 @@ def provision(args, apic_file, no_random):
     if config["registry"]["version"] in VERSIONS:
         deep_merge(config,
                    {"registry": VERSIONS[config["registry"]["version"]]})
+
+    if args.cko and args.cko_version in CKO_VERSIONS:
+        deep_merge(config,
+                   {"registry": CKO_VERSIONS[args.cko_version]})
 
     # Discoverd state (e.g. infra-vlan) overrides the config file data
     if isOverlay(flavor):

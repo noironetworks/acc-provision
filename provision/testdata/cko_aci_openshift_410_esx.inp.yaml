@@ -45,7 +45,7 @@ kube_config:
   use_ds_rolling_update: true
 
 registry:
-  image_prefix: noiro
+  image_prefix: quay.io/ckodev
 
 logging:
   controller_log_level: info
