@@ -1,0 +1,7 @@
+apiVersion: nettools.debug/v1alpha1
+kind: ErrorPodsReporting
+metadata:
+ name: error-pods-report
+ namespace: nettools
+spec:
+ reporting_enable: {{ config.connectivity_checker.error_pods_reporting_enable }}

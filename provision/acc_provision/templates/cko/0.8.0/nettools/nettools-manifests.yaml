@@ -1,0 +1,319 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: connectivitycheckers.nettools.debug
+spec:
+  group: nettools.debug
+  names:
+    kind: ConnectivityChecker
+    listKind: ConnectivityCheckerList
+    plural: connectivitycheckers
+    singular: connectivitychecker
+    shortNames:
+    - conncheck
+    - reachcheck
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: ConnectivityChecker defines the reachability test results of all pods.
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConnectivityCheckerSpec defines the results of various reachability tests.
+            properties:
+              reachability_test_enable:
+                type: object
+                properties:
+                  periodic_sync:
+                    type: object
+                    properties:
+                      enable_updates:
+                        type: boolean
+                      interval:
+                        type: integer
+                        default: 120
+                  external_url:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        default: 'google.com'
+                  proxy:
+                    type: object
+                    properties:
+                      http_proxy:
+                        type: string
+                      https_proxy:
+                        type: string
+              reachability_tests:
+                type: object
+                properties:
+                  pod_to_pod:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to all the nginx pods.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_node:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to all the busybox ds pods that run in host network.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_clusterIP:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to nginx service's clusterIP.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_service:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to nginx service's name to verify reachability with dns resolution.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_LB_VIP:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to nginx service's LB VIP.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_NodePort:
+                    type: object
+                    description: From single busybox deployment pod, check reachability to :<nginx service's nodePort>.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  pod_to_External:
+                    type: object
+                    description: From each nginx pod, check connectivity to outside world.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_node:
+                    type: object
+                    description: Check connectivity between busybox ds pods that run in host network.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_pod:
+                    type: object
+                    description: From each busybox ds pod that run in host network, check reachability to the only busybox deployment pod.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_clusterIP:
+                    type: object
+                    description: From each busybox ds pod that run in host network, check reachability to nginx service's clusterIP.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_LB_VIP:
+                    type: object
+                    description: From each busybox ds pod that run in host network, check reachability to nginx service's LB VIP.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_NodePort:
+                    type: object
+                    description: From each busybox ds pod that run in host network, check reachability to :<nginx service's nodePort>
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+                  node_to_External:
+                    type: object
+                    description:  From each busybox ds pod that run in host network, check connectivity to outside world.
+                    properties:
+                      update_status:
+                        type: boolean
+                        default: true
+            type: object
+          status:
+            description: ConnectivityChecker Status defines the complete results of the external reachability.
+            properties:
+              updated_at:
+                type: string
+              result_count:
+                type: object
+                properties:
+                  passed:
+                    type: integer
+                  failed:
+                    type: integer
+                  skipped:
+                    type: integer
+              results:
+                type: object
+                properties:
+                  pod_to_pod:
+                    type: string
+                  pod_to_node:
+                    type: string
+                  pod_to_clusterIP:
+                    type: string
+                  pod_to_service:
+                    type: string
+                  pod_to_LB_VIP:
+                    type: string
+                  pod_to_NodePort:
+                    type: string
+                  pod_to_External:
+                    type: string
+                  node_to_node:
+                    type: string
+                  node_to_pod:
+                    type: string
+                  node_to_clusterIP:
+                    type: string
+                  node_to_LB_VIP:
+                    type: string
+                  node_to_NodePort:
+                    type: string
+                  node_to_External:
+                    type: string
+            type: object
+        required:
+        - spec
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: errorpodsreportings.nettools.debug
+spec:
+  group: nettools.debug
+  names:
+    kind: ErrorPodsReporting
+    listKind: ErrorPodsReportingList
+    plural: errorpodsreportings
+    singular: errorpodsreporting
+    shortNames:
+    - epr
+    - errorpods
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: ErrorPodsReporting defines all the pods which are in ERROR state
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ErrorPodsReportingSpec defines the flag to enable/disable the reporting
+            type: object
+            properties:
+              reporting_enable:
+                type: boolean
+          status:
+            description: ErrorPodsReporting Status defines the complete details of the pods which are in error state.
+            type: object
+            properties:
+              updated_at:
+                type: string
+              error_pods:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    pod_yaml:
+                      type: string
+                    events:
+                      type: string
+        required:
+        - spec
+        type: object
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nettools
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nettools-debug
+  namespace: nettools
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: nettools
+  name: nettools-debug
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - hostnetwork
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+- apiGroups: ["apps", "nettools.debug", ""]
+  resources: ["nodes", "pods", "deployments", "daemonsets", "services", "endpoints", "connectivitycheckers", "errorpodsreportings", "events", "pods/exec"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nettools-debug-rb
+  namespace: nettools
+subjects:
+- kind: ServiceAccount
+  name: nettools-debug
+  namespace: nettools
+roleRef:
+  kind: ClusterRole
+  name: nettools-debug
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nettools-debug
+  namespace: nettools
+spec:
+  selector:
+    matchLabels:
+      app: nettools
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nettools
+    spec:
+      serviceAccountName: nettools-debug
+      containers:
+      - name: nettools
+        image: {{ config.registry.image_prefix }}/nettools:{{ config.registry.nettools_version }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
