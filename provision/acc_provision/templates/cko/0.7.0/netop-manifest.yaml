@@ -950,7 +950,7 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
-        image: {{ config.registry.image_prefix }}/cni-manager:{{ config.registry.network_operator_version }}
+        image: {{ config.registry.image_prefix }}/netop-manager:{{ config.registry.network_operator_version }}
         imagePullPolicy: Always
         name: manager
         resources:

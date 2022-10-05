@@ -1120,6 +1120,7 @@ def get_args(**overrides):
         "test_run": True,
         "flavor_version": None,
         "cko": False,
+        "cko_version": "0.9.0",
         "netop_image_tag": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
