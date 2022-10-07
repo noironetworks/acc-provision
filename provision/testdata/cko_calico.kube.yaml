@@ -1127,23 +1127,26 @@ metadata:
 data:
     config.yaml: |-
       # pod_name: ""
+      system_id: "a-cluster"
+      namespace: "netop-manager-system"
       status:
         resourcelabelKey: "netop-manager-resource"
-        sleepduration: 5
-        systemId: calico-cni
+        sleepduration: 60
         resources:
         - namespace: "nettools"
-          name: "connectivitychecker.nettools.debug"
-        - namespace: ""
-          name: "cniops.network-function.netop-manager.io"
+          name: "connectivitycheckers.nettools.debug"
         - namespace: ""
           name: "installer.controller.netop-manager.io"
         - namespace: ""
-          name: "loadbalancerop.network-function.netop-manager.io"
+          name: "cniops.network-function.netop-manager.io"
         - namespace: ""
-          name: "monitoringop.network-function.netop-manager.io"
+          name: "gitops.network-function.netop-manager.io"
         - namespace: ""
-          name: "servicemeshop.network-function.netop-manager.io"
+          name: "loadbalancerops.network-function.netop-manager.io"
+        - namespace: ""
+          name: "monitoringops.network-function.netop-manager.io"
+        - namespace: ""
+          name: "servicemeshops.network-function.netop-manager.io"
       git:
         repo: "github.com/test/test_repo.git"
         dir: "test_dir"
