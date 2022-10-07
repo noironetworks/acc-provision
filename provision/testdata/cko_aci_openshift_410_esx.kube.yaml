@@ -12,11 +12,11 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: cniops.cni-manager.netop-manager.io
+  name: cniops.network-function.netop-manager.io
 spec:
-  group: cni-manager.netop-manager.io
+  group: network-function.netop-manager.io
   names:
     kind: CniOps
     listKind: CniOpsList
@@ -40,7 +40,7 @@ spec:
       jsonPath: .status.cniVersion
       name: CNI-Version
       type: string
-    name: v1
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: CniOps is the Schema for the cniops API
@@ -87,7 +87,6 @@ spec:
                   type: string
                 type: object
               cniType:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 type: string
               cniVersion:
                 type: string
@@ -121,22 +120,91 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: installers.netop-manager-cntrlr.netop-manager.io
+  name: gitops.network-function.netop-manager.io
 spec:
-  group: netop-manager-cntrlr.netop-manager.io
+  group: network-function.netop-manager.io
+  names:
+    kind: GitOps
+    listKind: GitOpsList
+    plural: gitops
+    singular: gitops
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: GitOps is the Schema for the gitops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GitOpsSpec defines the desired state of GitOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: GitOpsStatus defines the observed state of GitOps.
+            properties:
+              gStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              gType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: installers.controller.netop-manager.io
+spec:
+  group: controller.netop-manager.io
   names:
     kind: Installer
     listKind: InstallerList
@@ -152,7 +220,7 @@ spec:
       jsonPath: .status.operatorStatus
       name: Phase
       type: string
-    name: v1
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Installer is the Schema for the installers API
@@ -169,7 +237,6 @@ spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
               config:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run "make" to regenerate code after modifying this file'
                 properties:
                   connectivityChecker:
                     properties:
@@ -224,7 +291,6 @@ spec:
                   type: object
                 type: object
               observedGeneration:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 format: int64
                 type: integer
               operatorStatus:
@@ -235,12 +301,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -352,53 +412,25 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
   - update
   - watch
 - apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers/finalizers
   verbs:
   - update
 - apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers/status
   verbs:
@@ -428,6 +460,58 @@ rules:
   - nettools.debug
   resources:
   - connectivitycheckers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/status
   verbs:
   - get
   - patch
@@ -860,15 +944,16 @@ data:
     health:
       healthProbeBindAddress: :8081
     metrics:
-      bindAddress: 127.0.0.1:9999
+      bindAddress: 127.0.0.1:8080
     webhook:
       port: 9443
     leaderElection:
       leaderElect: true
       resourceName: 51681485.netop-manager.io
+    # leaderElectionReleaseOnCancel: true
 kind: ConfigMap
 metadata:
-  name: netop-manager-config
+  name: netop-manager-manager-config
   namespace: netop-manager-system
 ---
 apiVersion: v1
@@ -908,18 +993,31 @@ spec:
     spec:
       containers:
       - args:
-        - --secure-listen-address=0.0.0.0:8444
-        - --upstream=http://127.0.0.1:9999/
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
-        - --v=10
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+        - --v=0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
         name: kube-rbac-proxy
         ports:
-        - containerPort: 8444
+        - containerPort: 8443
           name: https
           protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
       - args:
-        - --metrics-bind-address=127.0.0.1:9999
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         command:
         - /manager
@@ -944,9 +1042,21 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
-        image: quay.io/ckodev/netop-manager:0.9.0
+        image: quay.io/noirolabs/netop-manager:latest
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
         name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
         resources:
           requests:
             cpu: 500m
@@ -966,8 +1076,9 @@ spec:
           name: cni-conf
         - mountPath: /mnt/cni-config
           name: cni-config-volume
-        - mountPath: /status
+        - mountPath: /config.yaml
           name: status-config-volume
+          subPath: config.yaml
       hostNetwork: true
       priorityClassName: netop-priority
       securityContext:
@@ -1035,20 +1146,20 @@ data:
       status:
         resourcelabelKey: "netop-manager-resource"
         sleepduration: 5
-        systemId: "a-cluster"
+        systemId: kube
         resources:
         - namespace: "nettools"
           name: "connectivitychecker.nettools.debug"
-        - namespace: "netop-manager-system"
-          name: "cniops.cni-manager.netop-manager.io"
-        - namespace: "netop-manager-system"
-          name: "installer.netop-manager-cntrlr.netop-manager.io"
-        - namespace: "netop-manager-system"
-          name: "loadbalancerop.lb-manager.netop-manager.io"
-        - namespace: "netop-manager-system"
-          name: "monitoringop.monitoring-manager.netop-manager.io"
-        - namespace: "netop-manager-system"
-          name: "servicemeshop.service-mesh.netop-manager.io"
+        - namespace: ""
+          name: "cniops.network-function.netop-manager.io"
+        - namespace: ""
+          name: "installer.controller.netop-manager.io"
+        - namespace: ""
+          name: "loadbalancerop.network-function.netop-manager.io"
+        - namespace: ""
+          name: "monitoringop.network-function.netop-manager.io"
+        - namespace: ""
+          name: "servicemeshop.network-function.netop-manager.io"
       git:
         repo: "github.com/test/test_repo.git"
         dir: "test_dir"
@@ -1075,10 +1186,9 @@ globalDefault: false
 description: "This priority class is used for netop-manager resources"
 
 ---
-apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+apiVersion: netop-manager.cntrlr.netop-manager.io/v1alpha1
 kind: Installer
 metadata:
-  namespace: netop-manager-system
   name: installer-aci-cni
 spec:
   config:

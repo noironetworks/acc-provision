@@ -64,53 +64,25 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - cni-manager.netop-manager.io
-  resources:
-  - cniops/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
   - update
   - watch
 - apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers/finalizers
   verbs:
   - update
 - apiGroups:
-  - netop-manager-cntrlr.netop-manager.io
+  - controller.netop-manager.io
   resources:
   - installers/status
   verbs:
@@ -140,6 +112,58 @@ rules:
   - nettools.debug
   resources:
   - connectivitycheckers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/status
   verbs:
   - get
   - patch
