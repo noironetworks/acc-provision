@@ -2,11 +2,11 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: installers.netop-manager-cntrlr.netop-manager.io
+  name: installers.controller.netop-manager.io
 spec:
-  group: netop-manager-cntrlr.netop-manager.io
+  group: controller.netop-manager.io
   names:
     kind: Installer
     listKind: InstallerList
@@ -22,7 +22,7 @@ spec:
       jsonPath: .status.operatorStatus
       name: Phase
       type: string
-    name: v1
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Installer is the Schema for the installers API
@@ -43,8 +43,6 @@ spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
               config:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file'
                 properties:
                   connectivityChecker:
                     properties:
@@ -99,9 +97,6 @@ spec:
                   type: object
                 type: object
               observedGeneration:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "make" to regenerate code after modifying
-                  this file'
                 format: int64
                 type: integer
               operatorStatus:
@@ -112,9 +107,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ''
-    plural: ''
-  conditions: []
-  storedVersions: []

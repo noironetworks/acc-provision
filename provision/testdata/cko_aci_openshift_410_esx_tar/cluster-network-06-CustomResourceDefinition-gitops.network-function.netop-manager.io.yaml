@@ -2,38 +2,22 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: cniops.cni-manager.netop-manager.io
+  name: gitops.network-function.netop-manager.io
 spec:
-  group: cni-manager.netop-manager.io
+  group: network-function.netop-manager.io
   names:
-    kind: CniOps
-    listKind: CniOpsList
-    plural: cniops
-    singular: cniops
+    kind: GitOps
+    listKind: GitOpsList
+    plural: gitops
+    singular: gitops
   scope: Cluster
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .metadata.creationTimestamp
-      name: Date
-      type: date
-    - description: State/Phase of Installer
-      jsonPath: .status.operatorStatus
-      name: Phase
-      type: string
-    - description: Cni Type
-      jsonPath: .status.cniType
-      name: CNI-Type
-      type: string
-    - description: Cni Version
-      jsonPath: .status.cniVersion
-      name: CNI-Version
-      type: string
-    name: v1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CniOps is the Schema for the cniops API
+        description: GitOps is the Schema for the gitops API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -48,7 +32,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: CniOpsSpec defines the desired state of CniOps.
+            description: GitOpsSpec defines the desired state of GitOps.
             properties:
               config:
                 properties:
@@ -72,54 +56,25 @@ spec:
                 type: object
             type: object
           status:
-            description: CniOpsStatus defines the observed state of CniOps.
+            description: GitOpsStatus defines the observed state of GitOps.
             properties:
-              Multus:
-                type: boolean
-              cniStatus:
+              gStatus:
                 additionalProperties:
                   type: string
                 type: object
-              cniType:
+              gType:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
                 type: string
-              cniVersion:
-                type: string
-              internalState:
-                type: string
-              ipam:
-                type: string
-              managedState:
-                type: string
               observedGeneration:
                 format: int64
                 type: integer
-              operatorStatus:
+              state:
                 type: string
-              upgradeStatus:
-                properties:
-                  cniUpgradeState:
-                    type: string
-                  currentVersion:
-                    type: string
-                  previousVersion:
-                    type: string
-                type: object
-              workloadCheck:
-                additionalProperties:
-                  type: string
-                type: object
             type: object
         type: object
     served: true
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ''
-    plural: ''
-  conditions: []
-  storedVersions: []
