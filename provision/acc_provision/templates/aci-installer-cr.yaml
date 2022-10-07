@@ -1,7 +1,6 @@
-apiVersion: netop-manager-cntrlr.netop-manager.io/v1
+apiVersion: netop-manager.cntrlr.netop-manager.io/v1alpha1
 kind: Installer
 metadata:
-  namespace: netop-manager-system
   name: installer-aci-cni
 spec:
   config:
