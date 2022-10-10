@@ -1425,7 +1425,7 @@ data:
             }{% if not loop.last %},
             {% endif %}{% endfor %}
         },
-        "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }}, 
+        "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }},
         {% if config.user_config.net_config.extern_static %}
         "extern-static": {{config.net_config.extern_static|json}},
         {% endif %}
