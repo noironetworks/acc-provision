@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  config.yaml: "# pod_name: \"\"\nsystem_id: \"a-cluster\"\nnamespace: \"netop-manager-system\"\
+    \nstatus:\n  resourcelabelKey: \"netop-manager-resource\"\n  sleepduration: 60\n\
+    \  resources:\n  - namespace: \"nettools\"\n    name: \"connectivitycheckers.nettools.debug\"\
+    \n  - namespace: \"\"\n    name: \"installer.controller.netop-manager.io\"\n \
+    \ - namespace: \"\"\n    name: \"cniops.network-function.netop-manager.io\"\n\
+    \  - namespace: \"\"\n    name: \"gitops.network-function.netop-manager.io\"\n\
+    \  - namespace: \"\"\n    name: \"loadbalancerops.network-function.netop-manager.io\"\
+    \n  - namespace: \"\"\n    name: \"monitoringops.network-function.netop-manager.io\"\
+    \n  - namespace: \"\"\n    name: \"servicemeshops.network-function.netop-manager.io\"\
+    \ngit:\n  repo: \"github.com/test/test_repo.git\"\n  dir: \"test_dir\"\n  branch:\
+    \ \"test\"\n  token: \"7fspWC6rSV\"\n  user: \"test-user\"\n  email: \"test@cisco.com\""
+kind: ConfigMap
+metadata:
+  name: status-config
+  namespace: netop-manager-system
