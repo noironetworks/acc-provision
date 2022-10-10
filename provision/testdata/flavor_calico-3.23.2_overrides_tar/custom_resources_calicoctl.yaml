@@ -1,0 +1,84 @@
+#This section disables BGP full mesh between the K8s nodes and set the serviceClusterIPs and serviceExternalIPs subnets so that they can be advertised by eBGP. These subnets are the Service and External Service subnets in Kubernetes.
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  logSeverityScreen: Info
+  nodeToNodeMeshEnabled: false
+  serviceClusterIPs:
+  - cidr: 10.96.0.0/12
+  serviceExternalIPs:
+  - cidr: 20.3.0.0/16
+  serviceLoadBalancerIPs:
+  - cidr: 20.3.0.0/16
+---
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata: 
+  name: 2-100-101-201
+spec:
+  peerIP: 2.100.101.201
+  asNumber: 2
+  nodeSelector: rack_id == "1"
+  password:
+    secretKeyRef:
+      name: bgp-secrets
+      key: test
+
+---
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata: 
+  name: 2-100-101-202
+spec:
+  peerIP: 2.100.101.202
+  asNumber: 2
+  nodeSelector: rack_id == "1"
+  password:
+    secretKeyRef:
+      name: bgp-secrets
+      key: test
+
+---
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata: 
+  name: 2-100-101-203
+spec:
+  peerIP: 2.100.101.203
+  asNumber: 2
+  nodeSelector: rack_id == "2"
+  password:
+    secretKeyRef:
+      name: bgp-secrets
+      key: test
+
+---
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  name: k8s-node1
+  labels:
+    rack_id: "1"
+---
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  name: k8s-node2
+  labels:
+    rack_id: "1"
+---
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  name: k8s-node3
+  labels:
+    rack_id: "2"
+---
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  name: k8s-node4
+  labels:
+    rack_id: "2"

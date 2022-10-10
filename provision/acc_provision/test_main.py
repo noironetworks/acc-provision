@@ -988,7 +988,7 @@ def test_flavor_calico_3_23_2_base_case():
     run_provision(
         "flavor_calico-3.23.2_base_case.inp.yaml",
         None,
-        "flavor_calico-3.23.2_tar",
+        "flavor_calico-3.23.2_base_case_tar",
         None,
         "flavor_calico-3.23.2_base_case.apic.txt",
         overrides={"flavor": "calico-3.23.2"}
@@ -1000,7 +1000,7 @@ def test_flavor_calico_3_23_2_overrides():
     run_provision(
         "flavor_calico-3.23.2_overrides.inp.yaml",
         None,
-        "flavor_calico-3.23.2_tar",
+        "flavor_calico-3.23.2_overrides_tar",
         None,
         "flavor_calico-3.23.2_overrides.apic.txt",
         overrides={"flavor": "calico-3.23.2"}
