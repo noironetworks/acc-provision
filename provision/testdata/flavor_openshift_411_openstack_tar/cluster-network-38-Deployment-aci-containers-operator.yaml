@@ -42,13 +42,8 @@ spec:
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
-<<<<<<< HEAD
           value: openshift-4.11-openstack
         image: noiro/aci-containers-operator:6.0.0.0.0ef4718
-=======
-          value: openshift-4.10-openstack
-        image: noiro/aci-containers-operator:5.2.3.3.1d150da
->>>>>>> Removal of extra space to avoid display issue in aci-containers-config configmap
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
@@ -67,17 +62,10 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: ACC_PROVISION_FLAVOR
-<<<<<<< HEAD
           value: openshift-4.11-openstack
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
         image: noiro/acc-provision-operator:6.0.0.0.179471b
-=======
-          value: openshift-4.10-openstack
-        - name: ACC_PROVISION_INPUT_CR_NAME
-          value: accprovisioninput
-        image: noiro/acc-provision-operator:5.2.3.3.1d150da
->>>>>>> Removal of extra space to avoid display issue in aci-containers-config configmap
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}
