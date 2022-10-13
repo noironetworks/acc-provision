@@ -39,6 +39,9 @@ network:
     {% if config.net_config.service_monitor_interval %}
     service_monitor_interval: "{{ config.net_config.service_monitor_interval }}" 
     {% endif %}
+    {% if config.net_config.pod_subnet_chunk_size != 32 %}
+    pod_subnet_chunk_size: "{{ config.net_config.pod_subnet_chunk_size }}"
+    {% endif %}
     {% if config.net_config.pbr_tracking_non_snat %}
     pbr_tracking_non_snat: "{{ config.net_config.pbr_tracking_non_snat|lower() }}"
     {% endif %}
