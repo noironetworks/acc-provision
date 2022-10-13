@@ -89,6 +89,7 @@ registry:
         # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
 
   #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
+  #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
 #
 # Configuration for ACI CNI Operator
 #
