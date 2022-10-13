@@ -4,6 +4,7 @@ kind: BGPConfiguration
 metadata:
   name: default
 spec:
+  asNumber: 64512
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
   serviceClusterIPs:
@@ -24,7 +25,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3
@@ -38,7 +39,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3
@@ -52,7 +53,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3
