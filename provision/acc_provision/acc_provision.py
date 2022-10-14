@@ -1893,8 +1893,11 @@ def provision(args, apic_file, no_random):
     if args.username:
         config["aci_config"]["apic_login"]["username"] = args.username
 
-    config["aci_config"]["apic_login"]["password"] = \
-        args.password if args.password else os.environ.get('ACC_PROVISION_PASS')
+    if args.password:
+        config["aci_config"]["apic_login"]["password"] = args.password
+    elif os.environ.get('ACC_PROVISION_PASS'):
+        config["aci_config"]["apic_login"]["password"] = os.environ.get('ACC_PROVISION_PASS')
+
     config["aci_config"]["apic_login"]["timeout"] = timeout
 
     # Create config
