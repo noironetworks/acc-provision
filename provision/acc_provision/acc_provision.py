@@ -241,6 +241,7 @@ def config_default():
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,
+            "opflex_agent_prometheus": "false",
             "host_agent_cni_bin_path": "/opt",
             "host_agent_cni_conf_path": "/etc",
             "generate_installer_files": False,
