@@ -1042,6 +1042,42 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
+        - name: GIT_REPO
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: repo
+              optional: true
+        - name: GIT_DIR
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: dir
+              optional: true
+        - name: GIT_BRANCH
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: branch
+              optional: true
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: token
+              optional: true
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: user
+              optional: true
+        - name: GIT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: git-config
+              key: email
+              optional: true
         image: quay.io/noirolabs/netop-manager:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -1076,9 +1112,6 @@ spec:
           name: cni-conf
         - mountPath: /mnt/cni-config
           name: cni-config-volume
-        - mountPath: /config.yaml
-          name: status-config-volume
-          subPath: config.yaml
       hostNetwork: true
       priorityClassName: netop-priority
       securityContext:
@@ -1108,10 +1141,6 @@ spec:
           name: netop-manager-cni-config
           optional: true
         name: cni-config-volume
-      - configMap:
-          name: status-config
-          optional: true
-        name: status-config-volume
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1134,42 +1163,6 @@ data:
       cko-cni-awsvpc:
       - "10-aws.conflist"
       - "10-aws.conf"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: status-config
-  namespace: netop-manager-system
-data:
-    config.yaml: |-
-      # pod_name: ""
-      system_id: "a-cluster"
-      namespace: "netop-manager-system"
-      status:
-        resourcelabelKey: "netop-manager-resource"
-        sleepduration: 60
-        resources:
-        - namespace: "nettools"
-          name: "connectivitycheckers.nettools.debug"
-        - namespace: ""
-          name: "installer.controller.netop-manager.io"
-        - namespace: ""
-          name: "cniops.network-function.netop-manager.io"
-        - namespace: ""
-          name: "gitops.network-function.netop-manager.io"
-        - namespace: ""
-          name: "loadbalancerops.network-function.netop-manager.io"
-        - namespace: ""
-          name: "monitoringops.network-function.netop-manager.io"
-        - namespace: ""
-          name: "servicemeshops.network-function.netop-manager.io"
-      git:
-        repo: "github.com/test/test_repo.git"
-        dir: "test_dir"
-        branch: "test"
-        token: "7fspWC6rSV"
-        user: "test-user"
-        email: "test@cisco.com"
 ---
 apiVersion: v1
 kind: ConfigMap

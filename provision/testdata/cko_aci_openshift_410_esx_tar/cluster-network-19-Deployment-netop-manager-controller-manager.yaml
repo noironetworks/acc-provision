@@ -68,6 +68,42 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
+        - name: GIT_REPO
+          valueFrom:
+            secretKeyRef:
+              key: repo
+              name: git-config
+              optional: true
+        - name: GIT_DIR
+          valueFrom:
+            secretKeyRef:
+              key: dir
+              name: git-config
+              optional: true
+        - name: GIT_BRANCH
+          valueFrom:
+            secretKeyRef:
+              key: branch
+              name: git-config
+              optional: true
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: git-config
+              optional: true
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: git-config
+              optional: true
+        - name: GIT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: git-config
+              optional: true
         image: quay.io/noirolabs/netop-manager:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -102,9 +138,6 @@ spec:
           name: cni-conf
         - mountPath: /mnt/cni-config
           name: cni-config-volume
-        - mountPath: /config.yaml
-          name: status-config-volume
-          subPath: config.yaml
       hostNetwork: true
       priorityClassName: netop-priority
       securityContext:
@@ -134,7 +167,3 @@ spec:
           name: netop-manager-cni-config
           optional: true
         name: cni-config-volume
-      - configMap:
-          name: status-config
-          optional: true
-        name: status-config-volume
