@@ -1892,6 +1892,8 @@ def provision(args, apic_file, no_random):
     flavor = args.flavor
     if args.username:
         config["aci_config"]["apic_login"]["username"] = args.username
+    elif os.environ.get('ACC_PROVISION_USERNAME'):
+        config["aci_config"]["apic_login"]["username"] = os.environ.get('ACC_PROVISION_USERNAME')
 
     if args.password:
         config["aci_config"]["apic_login"]["password"] = args.password
