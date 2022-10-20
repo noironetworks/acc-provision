@@ -14,7 +14,12 @@ spec:
     singular: gitops
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GitOps is the Schema for the gitops API.
