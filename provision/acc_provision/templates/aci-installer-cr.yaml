@@ -10,20 +10,20 @@ spec:
         type: "cko-cni-aci"
         options:
           aci-cni-specs: {{ config.aci_config.base64_encoded_cko_aci_spec }}
-  platform:
-    {% if config.connectivity_checker %}
-    cko-diagnostic:
-      type: "connectivity-checker"
-      version: "0.1"
-      options:
-        01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-        02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-        03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-    {% endif %}
-    {% if config.gitops %}
-    cko-gitops:
-      type: "argo"
-      version: "0.1"
-      options:
-        argo: {{ config.gitops.base64_encoded_argo_manifests }}
-    {% endif %}
+    platform:
+      {% if config.connectivity_checker %}
+      cko-diagnostic:
+        type: "connectivity-checker"
+        version: "0.1"
+        options:
+          01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+      {% endif %}
+      {% if config.gitops %}
+      cko-gitops:
+        type: "argo"
+        version: "0.1"
+        options:
+          argo: {{ config.gitops.base64_encoded_argo_manifests }}
+      {% endif %}
