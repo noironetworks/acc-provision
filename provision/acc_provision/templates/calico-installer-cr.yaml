@@ -1,21 +1,26 @@
-apiVersion: netop-manager.cntrlr.netop-manager.io/v1alpha1
+apiVersion: controller.netop-manager.io/v1alpha1
 kind: Installer
 metadata:
   name: installer-calico-cni
 spec:
-  config:
-    {% if config.connectivity_checker %}
-    connectivityCheck:
-      checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-      checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-      errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-    {% endif %}
-    networkFunctions:
+  networkFunctions:
+    networking:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
         type: "cko-cni-calico"
+        managedComponent: true
         options:
           calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
           calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
           calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}
+  platform:
+    {% if config.connectivity_checker %}
+    cko-diagnostic:
+      type: "connectivity-checker"
+      version: "0.1"
+      options:
+        01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+        02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+        03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+    {% endif %}

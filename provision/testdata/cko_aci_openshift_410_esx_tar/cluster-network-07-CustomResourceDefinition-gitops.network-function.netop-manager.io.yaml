@@ -12,7 +12,7 @@ spec:
     listKind: GitOpsList
     plural: gitops
     singular: gitops
-  scope: Cluster
+  scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
@@ -63,9 +63,8 @@ spec:
                   type: string
                 type: object
               gType:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "make" to regenerate code after modifying
-                  this file'
+                enum:
+                - cko-g-argo
                 type: string
               observedGeneration:
                 format: int64
