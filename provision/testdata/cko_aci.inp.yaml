@@ -65,3 +65,7 @@ control_cluster_websocket:
 
 registry:
   image_prefix: quay.io/ckodev
+
+gitops:
+  base64_encoded_argo_manifests:
+  
