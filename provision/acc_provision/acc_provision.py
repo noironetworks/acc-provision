@@ -1375,6 +1375,14 @@ def generate_nettools_deployment_files(args, netopConfig):
     return netopConfig
 
 
+def generate_argocd_deployment_files(args, netopConfig):
+    argocd_spec_template = get_jinja_template('argocd.yaml')
+    argocd_spec_output = argocd_spec_template.render(config=netopConfig)
+    base64_encoded_argocd_manifests = base64.b64encode(argocd_spec_output.encode('ascii')).decode('ascii')
+    netopConfig['gitops']['base64_encoded_argo_manifests'] = base64_encoded_argocd_manifests
+    return netopConfig
+
+
 def generate_calico_deployment_files(args, config, network_operator_output):
     filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
     if network_operator_output and network_operator_output != "/dev/null":
@@ -1416,6 +1424,8 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             netopConfig = dict(config)
             if "connectivity_checker" in netopConfig.keys():
                 netopConfig = generate_nettools_deployment_files(args, netopConfig)
+            if "gitops" in netopConfig.keys():
+                netopConfig = generate_argocd_deployment_files(args, netopConfig)
             network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
             network_operator_CR_template = get_jinja_template('calico-installer-cr.yaml')
@@ -1522,6 +1532,8 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             netopConfig = dict(config)
             if "connectivity_checker" in netopConfig.keys():
                 netopConfig = generate_nettools_deployment_files(args, netopConfig)
+            if "gitops" in netopConfig.keys():
+                netopConfig = generate_argocd_deployment_files(args, netopConfig)
             network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
 
