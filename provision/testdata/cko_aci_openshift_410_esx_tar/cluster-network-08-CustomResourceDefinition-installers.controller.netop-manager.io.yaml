@@ -42,18 +42,9 @@ spec:
           spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
-              config:
+              networkFunctions:
                 properties:
-                  connectivityChecker:
-                    properties:
-                      checkerCR:
-                        type: string
-                      checkerCRD:
-                        type: string
-                      errorPodsReportingCR:
-                        type: string
-                    type: object
-                  networkFunctions:
+                  networking:
                     additionalProperties:
                       properties:
                         arrayOptions:
@@ -62,6 +53,12 @@ spec:
                               type: string
                             type: array
                           type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform
+                            components and must be set to true to manage networking
+                            component.
+                          type: boolean
                         options:
                           additionalProperties:
                             type: string
@@ -72,7 +69,32 @@ spec:
                           type: string
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: NetworkFunctions/Operators
+                    type: object
+                  platform:
+                    additionalProperties:
+                      properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform
+                            components and must be set to true to manage networking
+                            component.
+                          type: boolean
+                        options:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     type: object
                 type: object
                 x-kubernetes-preserve-unknown-fields: true

@@ -28,7 +28,7 @@ spec:
   versions:
   - additionalPrinterColumns:
     - jsonPath: .metadata.creationTimestamp
-      name: Date
+      name: Age
       type: date
     - description: State/Phase of Installer
       jsonPath: .status.operatorStatus
@@ -82,8 +82,6 @@ spec:
           status:
             description: CniOpsStatus defines the observed state of CniOps.
             properties:
-              Multus:
-                type: boolean
               cniStatus:
                 additionalProperties:
                   type: string
@@ -129,6 +127,82 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
+  name: diagnosticops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: DiagnosticOps
+    listKind: DiagnosticOpsList
+    plural: diagnosticops
+    singular: diagnosticops
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: DiagnosticOps is the Schema for the diagnosticops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DiagnosticOpsSpec defines the desired state of DiagnosticOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      unmanaged:
+                        type: boolean
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: DiagnosticOpsStatus defines the observed state of DiagnosticOps.
+            properties:
+              gStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              gType:
+                enum:
+                - cko-connectivityChecker
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: gitops.network-function.netop-manager.io
 spec:
   group: network-function.netop-manager.io
@@ -137,7 +211,7 @@ spec:
     listKind: GitOpsList
     plural: gitops
     singular: gitops
-  scope: Cluster
+  scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
@@ -184,7 +258,8 @@ spec:
                   type: string
                 type: object
               gType:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                enum:
+                - cko-g-argo
                 type: string
               observedGeneration:
                 format: int64
@@ -238,18 +313,9 @@ spec:
           spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
-              config:
+              networkFunctions:
                 properties:
-                  connectivityChecker:
-                    properties:
-                      checkerCR:
-                        type: string
-                      checkerCRD:
-                        type: string
-                      errorPodsReportingCR:
-                        type: string
-                    type: object
-                  networkFunctions:
+                  networking:
                     additionalProperties:
                       properties:
                         arrayOptions:
@@ -258,6 +324,10 @@ spec:
                               type: string
                             type: array
                           type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform components and must be set to true to manage networking component.
+                          type: boolean
                         options:
                           additionalProperties:
                             type: string
@@ -268,7 +338,30 @@ spec:
                           type: string
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: NetworkFunctions/Operators
+                    type: object
+                  platform:
+                    additionalProperties:
+                      properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform components and must be set to true to manage networking component.
+                          type: boolean
+                        options:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     type: object
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
@@ -296,6 +389,67 @@ spec:
                 format: int64
                 type: integer
               operatorStatus:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: observedops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: ObservedOps
+    listKind: ObservedOpsList
+    plural: observedops
+    singular: observedops
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ObservedOps is the Schema for the observedops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ObservedOpsSpec defines the desired state of ObservedOps.
+            properties:
+              cniConfPath:
+                default:
+                - cni/net.d
+                - /kubernetes/cni/net.d
+                items:
+                  type: string
+                type: array
+              cniMountPath:
+                default: /mnt/cni-conf
+                type: string
+              forceReconcile:
+                type: integer
+            type: object
+          status:
+            description: ObservedOpsStatus defines the observed state of ObservedOps.
+            properties:
+              Multus:
+                type: boolean
+              cniType:
+                type: string
+              cniVersion:
                 type: string
             type: object
         type: object
@@ -440,6 +594,16 @@ rules:
   - patch
   - update
 - apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - nettools.debug
   resources:
   - connectivitycheckers
@@ -495,6 +659,32 @@ rules:
 - apiGroups:
   - network-function.netop-manager.io
   resources:
+  - diagnosticops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
   - gitops
   verbs:
   - create
@@ -518,6 +708,44 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - operator.tigera.io
   resources:
@@ -925,23 +1153,6 @@ subjects:
 ---
 apiVersion: v1
 data:
-  cniconfig.yaml: |-
-    cniConfig:
-      cko-cni-calico:
-      - "01-calico.conflist"
-      - "01-calico.conf"
-      - "10-calico.conflist"
-      - "10-calico.conf"
-      cko-cni-aci:
-      - "01-opflex-cni.conf"
-      - "10-opflex-cni.conf"
-kind: ConfigMap
-metadata:
-  name: netop-manager-cni-config
-  namespace: netop-manager-system
----
-apiVersion: v1
-data:
   controller_manager_config.yaml: |
     apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
     kind: ControllerManagerConfig
@@ -1026,6 +1237,22 @@ spec:
         command:
         - /manager
         env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: SYSTEM_ID
           value: {{config.aci_config.system_id}}
         {% if config.cko_proxy_config %}
@@ -1051,46 +1278,46 @@ spec:
         - name: GIT_REPO
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: repo
+              name: git-config
               optional: true
         - name: GIT_DIR
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: dir
+              name: git-config
               optional: true
         - name: GIT_BRANCH
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: branch
+              name: git-config
               optional: true
         - name: GIT_TOKEN
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: token
+              name: git-config
               optional: true
         - name: GIT_USER
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: user
+              name: git-config
               optional: true
         - name: GIT_EMAIL
           valueFrom:
             secretKeyRef:
-              name: git-config
               key: email
+              name: git-config
               optional: true
-        image: quay.io/noirolabs/netop-manager:latest
+        image: {{ config.registry.image_prefix }}/netop-manager:{{ config.registry.network_operator_version }}
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
             path: /healthz
             port: 8081
-          initialDelaySeconds: 15
+          initialDelaySeconds: 10
           periodSeconds: 20
         name: manager
         readinessProbe:
