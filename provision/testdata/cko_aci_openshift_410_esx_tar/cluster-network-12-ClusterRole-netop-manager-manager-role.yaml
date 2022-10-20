@@ -90,6 +90,16 @@ rules:
   - patch
   - update
 - apiGroups:
+  - ''
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - nettools.debug
   resources:
   - connectivitycheckers
@@ -145,6 +155,32 @@ rules:
 - apiGroups:
   - network-function.netop-manager.io
   resources:
+  - diagnosticops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
   - gitops
   verbs:
   - create
@@ -168,6 +204,44 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - operator.tigera.io
   resources:
