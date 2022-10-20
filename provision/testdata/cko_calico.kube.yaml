@@ -132,7 +132,12 @@ spec:
     singular: diagnosticops
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: DiagnosticOps is the Schema for the diagnosticops API.
@@ -176,14 +181,14 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              gType:
-                enum:
-                - cko-connectivityChecker
-                type: string
               observedGeneration:
                 format: int64
                 type: integer
               state:
+                type: string
+              type:
+                enum:
+                - connectivityChecker
                 type: string
             type: object
         type: object
@@ -208,7 +213,12 @@ spec:
     singular: gitops
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GitOps is the Schema for the gitops API.
@@ -408,7 +418,12 @@ spec:
     singular: observedops
   scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Type of CNI
+      jsonPath: .status.cniType
+      name: CNI-TYPE
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: ObservedOps is the Schema for the observedops API.
@@ -621,6 +636,33 @@ rules:
   - nettools.debug
   resources:
   - connectivitycheckers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/status
   verbs:
   - get
   - patch
@@ -981,18 +1023,6 @@ rules:
   - get
   - patch
   - update
-- apiGroups:
-  - policy
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - projectcalico.org
   resources:
@@ -1356,7 +1386,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cni-config
+  name: netop-manager-cni-config
   namespace: netop-manager-system
 data:
   cniconfig.yaml: |-
