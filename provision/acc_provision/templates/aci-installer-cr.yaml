@@ -20,3 +20,10 @@ spec:
         02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
         03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
     {% endif %}
+    {% if config.gitops %}
+    cko-gitops:
+      type: "argo"
+      version: "0.1"
+      options:
+        argo: {{ config.gitops.base64_encoded_argo_manifests }}
+    {% endif %}
