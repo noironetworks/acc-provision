@@ -127,6 +127,33 @@ rules:
   - patch
   - update
 - apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - network-function.netop-manager.io
   resources:
   - cniops
@@ -483,18 +510,6 @@ rules:
   - patch
   - update
 - apiGroups:
-  - policy
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - projectcalico.org
   resources:
   - bgpconfigurations
@@ -559,18 +574,6 @@ rules:
   - create
   - delete
   - escalate
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - scheduling.k8s.io
-  resources:
-  - priorityclasses
-  verbs:
-  - create
-  - delete
   - get
   - list
   - patch

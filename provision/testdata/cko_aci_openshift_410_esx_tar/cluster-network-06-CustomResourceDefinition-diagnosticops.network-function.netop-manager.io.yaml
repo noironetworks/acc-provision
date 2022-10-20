@@ -14,7 +14,12 @@ spec:
     singular: diagnosticops
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: DiagnosticOps is the Schema for the diagnosticops API.
@@ -62,14 +67,14 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              gType:
-                enum:
-                - cko-connectivityChecker
-                type: string
               observedGeneration:
                 format: int64
                 type: integer
               state:
+                type: string
+              type:
+                enum:
+                - connectivityChecker
                 type: string
             type: object
         type: object

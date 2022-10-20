@@ -14,7 +14,12 @@ spec:
     singular: observedops
   scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Type of CNI
+      jsonPath: .status.cniType
+      name: CNI-TYPE
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: ObservedOps is the Schema for the observedops API.
