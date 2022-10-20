@@ -14,13 +14,20 @@ spec:
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
           calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
           calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}
-  platform:
-    {% if config.connectivity_checker %}
-    cko-diagnostic:
-      type: "connectivity-checker"
-      version: "0.1"
-      options:
-        01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-        02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-        03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-    {% endif %}
+    platform:
+      {% if config.connectivity_checker %}
+      cko-diagnostic:
+        type: "connectivity-checker"
+        version: "0.1"
+        options:
+          01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+      {% endif %}
+      {% if config.gitops %}
+      cko-gitops:
+        type: "argo"
+        version: "0.1"
+        options:
+          argo: {{ config.gitops.base64_encoded_argo_manifests }}
+      {% endif %}
