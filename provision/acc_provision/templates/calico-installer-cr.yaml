@@ -7,7 +7,7 @@ spec:
     networking:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
-        type: "cko-cni-calico"
+        type: "calico"
         managedComponent: true
         options:
           calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
