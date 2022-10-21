@@ -3,6 +3,10 @@ kind: Installer
 metadata:
   name: installer-aci-cni
 spec:
+  platformConfiguration:
+    cko-gitops:
+      options:
+        "01-argo-app": <base-encoded specs>
   networkFunctions:
     networking:
       cko-cni:
