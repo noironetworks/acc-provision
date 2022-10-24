@@ -3,7 +3,7 @@ kind: Installer
 metadata:
   name: installer-aci-cni
 spec:
-  networkFunctions:
+  operatorConfigs:
     networking:
       cko-cni:
         managedComponent: true

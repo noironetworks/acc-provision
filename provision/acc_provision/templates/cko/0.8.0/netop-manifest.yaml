@@ -323,7 +323,7 @@ spec:
           spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
-              networkFunctions:
+              operatorConfigs:
                 properties:
                   networking:
                     additionalProperties:
@@ -1109,7 +1109,8 @@ rules:
   - list
   - patch
   - update
-  - watch--
+  - watch
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -1280,16 +1281,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        - name: SYSTEM_ID
-          value: {{config.aci_config.system_id}}
-        {% if config.cko_proxy_config %}
-        - name: HTTP_PROXY
-          value: {{config.cko_proxy_config.http_proxy}}
-        - name: HTTPS_PROXY
-          value: {{config.cko_proxy_config.https_proxy}}
-        - name: NO_PROXY
-          value: {{config.cko_proxy_config.no_proxy}}
-        {% endif %}
         - name: SERVER_IP
           valueFrom:
             configMapKeyRef:
@@ -1302,41 +1293,64 @@ spec:
               key: serverPort
               name: websocket-config
               optional: true
+        - name: SYSTEM_ID
+          valueFrom:
+            secretKeyRef:
+              key: systemid
+              name: cko-config
+        - name: HTTP_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: http_proxy
+              name: cko-config
+              optional: true
+        - name: HTTPS_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: https_proxy
+              name: cko-config
+              optional: true
+        - name: NO_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: no_proxy
+              name: cko-config
+              optional: true
         - name: GIT_REPO
           valueFrom:
             secretKeyRef:
               key: repo
-              name: git-config
+              name: cko-config
               optional: true
         - name: GIT_DIR
           valueFrom:
             secretKeyRef:
               key: dir
-              name: git-config
+              name: cko-config
               optional: true
         - name: GIT_BRANCH
           valueFrom:
             secretKeyRef:
               key: branch
-              name: git-config
+              name: cko-config
               optional: true
         - name: GIT_TOKEN
           valueFrom:
             secretKeyRef:
               key: token
-              name: git-config
+              name: cko-config
               optional: true
         - name: GIT_USER
           valueFrom:
             secretKeyRef:
               key: user
-              name: git-config
+              name: cko-config
               optional: true
         - name: GIT_EMAIL
           valueFrom:
             secretKeyRef:
               key: email
-              name: git-config
+              name: cko-config
               optional: true
         image: {{ config.registry.image_prefix }}/netop-manager:{{ config.registry.network_operator_version }}
         imagePullPolicy: Always
