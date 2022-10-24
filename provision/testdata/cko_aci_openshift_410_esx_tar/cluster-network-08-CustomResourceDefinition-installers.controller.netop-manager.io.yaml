@@ -42,7 +42,7 @@ spec:
           spec:
             description: InstallerSpec defines the desired state of Installer.
             properties:
-              networkFunctions:
+              operatorConfigs:
                 properties:
                   networking:
                     additionalProperties:

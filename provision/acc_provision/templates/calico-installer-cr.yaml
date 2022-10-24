@@ -3,7 +3,7 @@ kind: Installer
 metadata:
   name: installer-calico-cni
 spec:
-  networkFunctions:
+  operatorConfigs:
     networking:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
