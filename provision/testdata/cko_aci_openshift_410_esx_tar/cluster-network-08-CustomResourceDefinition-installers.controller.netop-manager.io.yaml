@@ -54,10 +54,10 @@ spec:
                             type: array
                           type: object
                         managedComponent:
-                          default: false
+                          default: true
                           description: ManagedComponent field is ignored for platform
-                            components and must be set to true to manage networking
-                            component.
+                            components and must be set to false to adopt networking
+                            components without managing them.
                           type: boolean
                         options:
                           additionalProperties:
@@ -80,10 +80,10 @@ spec:
                             type: array
                           type: object
                         managedComponent:
-                          default: false
+                          default: true
                           description: ManagedComponent field is ignored for platform
-                            components and must be set to true to manage networking
-                            component.
+                            components and must be set to false to adopt networking
+                            components without managing them.
                           type: boolean
                         options:
                           additionalProperties:
