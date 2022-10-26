@@ -1355,10 +1355,10 @@ def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, op
 
 
 def get_cko_mode(args, netopConfig):
-    if args.cko_mode == "unmanaged":
-        netopConfig["managedComponent"] = False
-    else:
+    if args.cko_mode == "managed":
         netopConfig["managedComponent"] = True
+    else:
+        netopConfig["managedComponent"] = False
     return netopConfig
 
 
@@ -1448,8 +1448,11 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_cko_calico_crs
             netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_cko_calico_bgp
             netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_cko_calicoctl
+
+            network_operator_platform_CR_template = get_jinja_template('platform-installer-cr.yaml')
+            network_operator_platform_CR = network_operator_platform_CR_template.render(config=netopConfig)
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
-            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output + "\n---\n" + network_operator_platform_CR
 
             print("writing the deployment file")
             with open(network_operator_output, "w") as fh:
@@ -1551,8 +1554,10 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
             netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
+            network_operator_platform_CR_template = get_jinja_template('platform-installer-cr.yaml')
+            network_operator_platform_CR = network_operator_platform_CR_template.render(config=netopConfig)
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
-            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output
+            network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output + "\n---\n" + network_operator_platform_CR
 
             # The next few files are to generate tar file with each
             # containers and operator yaml in separate file. This is needed
