@@ -1314,6 +1314,14 @@ def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, op
             template.stream(config=config).dump(operator_output)
 
 
+def get_cko_mode(args, netopConfig):
+    if args.cko_mode == "unmanaged":
+        netopConfig["managedComponent"] = False
+    else:
+        netopConfig["managedComponent"] = True
+    return netopConfig
+
+
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
@@ -1382,6 +1390,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             netop_version = args.cko_version
             print(netop_version)
             netopConfig = dict(config)
+            netopConfig = get_cko_mode(args, netopConfig)
             if "connectivity_checker" in netopConfig.keys():
                 netopConfig = generate_nettools_deployment_files(args, netopConfig)
             if "gitops" in netopConfig.keys():
@@ -1490,6 +1499,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         if args.cko:
             netop_version = args.cko_version
             netopConfig = dict(config)
+            netopConfig = get_cko_mode(args, netopConfig)
             if "connectivity_checker" in netopConfig.keys():
                 netopConfig = generate_nettools_deployment_files(args, netopConfig)
             if "gitops" in netopConfig.keys():
@@ -1715,7 +1725,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--cko', default=False, action='store_true', help='generates deployment spec for CKO')
     parser.add_argument(
-        '--cko-version', default="0.9.0", metavar='cko_version', help='netop-manager upgrade/downgrade')
+        '--cko-version', default="0.9.0", metavar='cko_version', help='netop-manager operator version')
+    parser.add_argument(
+        '--cko-mode', default="managed", metavar='cko_mode', help='netop-manager cni managed/unmanaged')
     parser.add_argument(
         '--netop-image-tag', default=None, metavar='netop_image_tag', help='network operator image tag')
     # This argument is set to True and used internally by the acc-provision-operator when invoking
