@@ -1461,3 +1461,4 @@ value: 1000000000
 globalDefault: false
 description: "This priority class is used for netop-manager resources"
 {% endif %}
+
