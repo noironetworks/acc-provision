@@ -1065,6 +1065,18 @@ def test_cko_calico_3_23_2():
 
 
 @in_testdir
+def test_cko_unmanaged():
+    run_provision(
+        "cko_aci_unmanaged.inp.yaml",
+        "cko_aci_unmanaged.kube.yaml",
+        None,
+        None,
+        "cko_aci_unmanaged.apic.txt",
+        overrides={"flavor": "kubernetes-1.22", "cko": True, "cko_mode": "unmanaged"}
+    )
+
+
+@in_testdir
 def test_cko_kubernetes_1_22():
     run_provision(
         "cko_aci.inp.yaml",
@@ -1072,7 +1084,7 @@ def test_cko_kubernetes_1_22():
         None,
         None,
         "cko_aci.apic.txt",
-        overrides={"flavor": "kubernetes-1.22", "cko": True}
+        overrides={"flavor": "kubernetes-1.22", "cko": True, "cko_mode": "managed"}
     )
 
 
@@ -1121,6 +1133,7 @@ def get_args(**overrides):
         "flavor_version": None,
         "cko": False,
         "cko_version": "0.9.0",
+        "cko_mode": "managed",
         "netop_image_tag": None,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))

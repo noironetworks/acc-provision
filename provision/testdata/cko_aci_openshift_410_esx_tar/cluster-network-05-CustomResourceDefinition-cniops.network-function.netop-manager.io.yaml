@@ -55,14 +55,15 @@ spec:
                   workload:
                     description: First key should be internal child api
                     properties:
+                      managedComponent:
+                        default: true
+                        type: boolean
                       options:
                         additionalProperties:
                           type: string
                         type: object
                       type:
                         type: string
-                      unmanaged:
-                        type: boolean
                       version:
                         type: string
                     required:
@@ -82,8 +83,6 @@ spec:
                 type: string
               cniVersion:
                 type: string
-              internalState:
-                type: string
               ipam:
                 type: string
               managedState:
@@ -91,7 +90,7 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
-              operatorStatus:
+              state:
                 type: string
               upgradeStatus:
                 properties:

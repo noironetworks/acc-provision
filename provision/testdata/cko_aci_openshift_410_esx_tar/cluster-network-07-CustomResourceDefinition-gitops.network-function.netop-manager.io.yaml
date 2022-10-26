@@ -44,14 +44,15 @@ spec:
                   workload:
                     description: First key should be internal child api
                     properties:
+                      managedComponent:
+                        default: true
+                        type: boolean
                       options:
                         additionalProperties:
                           type: string
                         type: object
                       type:
                         type: string
-                      unmanaged:
-                        type: boolean
                       version:
                         type: string
                     required:

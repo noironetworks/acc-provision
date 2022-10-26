@@ -8,7 +8,7 @@ spec:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
         type: "calico"
-        managedComponent: true
+        managedComponent: "{{ config.managedComponent }}"
         options:
           calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
           calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
