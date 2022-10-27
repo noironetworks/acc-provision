@@ -1315,10 +1315,10 @@ def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, op
 
 
 def get_cko_mode(args, netopConfig):
-    if args.cko_mode == "managed":
-        netopConfig["managedComponent"] = True
-    else:
-        netopConfig["managedComponent"] = False
+    cko_mode = "unamanged"
+    if args.cko_mode is not None:
+        cko_mode = args.cko_mode
+    netopConfig["managedComponent"] = cko_mode
     return netopConfig
 
 
