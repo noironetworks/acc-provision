@@ -3,11 +3,6 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
-  {% if "openshift" in config.flavor %}
-    openshift.io/run-level: "0"
-  annotations:
-    openshift.io/node-selector: ''
-  {% endif %}
   name: netop-manager-system
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -1353,7 +1348,7 @@ spec:
               key: email
               name: cko-config
               optional: true
-        image: {{ config.registry.image_prefix }}/netop-manager:{{ config.registry.network_operator_version }}
+        image: quay.io/ckodev/netop-manager:0.9.0.d04f56f
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -1388,9 +1383,6 @@ spec:
         - mountPath: /mnt/cni-config
           name: cni-config-volume
       hostNetwork: true
-      {% if "openshift" in config.flavor %}
-      priorityClassName: netop-priority
-      {% endif %}
       securityContext:
         runAsNonRoot: false
       serviceAccountName: netop-manager-controller-manager
@@ -1440,25 +1432,3 @@ data:
       cko-cni-awsvpc:
       - "10-aws.conflist"
       - "10-aws.conf"
-{% if config.control_cluster_websocket %}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: websocket-config
-  namespace: netop-manager-system
-data:
-  serverIP: "{{ config.control_cluster_websocket.server_ip }}"
-  serverPort: "{{ config.control_cluster_websocket.server_port }}"
-{% endif %}
-{% if "openshift" in config.flavor %}
----
-apiVersion: scheduling.k8s.io/v1
-kind: PriorityClass
-metadata:
-  name: netop-priority
-value: 1000000000
-globalDefault: false
-description: "This priority class is used for netop-manager resources"
-{% endif %}
-
