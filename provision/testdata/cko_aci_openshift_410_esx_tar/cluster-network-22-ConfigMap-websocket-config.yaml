@@ -1,8 +1,0 @@
-apiVersion: v1
-data:
-  serverIP: 10.96.101.1
-  serverPort: '1234'
-kind: ConfigMap
-metadata:
-  name: websocket-config
-  namespace: netop-manager-system

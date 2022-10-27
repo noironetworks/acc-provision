@@ -1433,17 +1433,6 @@ data:
       - "10-aws.conflist"
       - "10-aws.conf"
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: websocket-config
-  namespace: netop-manager-system
-data:
-  serverIP: "10.96.101.1"
-  serverPort: "1234"
-
-
----
 apiVersion: controller.netop-manager.io/v1alpha1
 kind: Installer
 metadata:

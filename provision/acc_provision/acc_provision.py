@@ -1548,7 +1548,9 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             if "gitops" in netopConfig.keys():
                 netopConfig = generate_argocd_deployment_files(args, netopConfig)
             network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
+            network_operator_openshift_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest-openshift.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
+            network_operator_openshift_spec_output = network_operator_openshift_spec_template.render(config=config)
 
             network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
@@ -1558,6 +1560,8 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             network_operator_platform_CR = network_operator_platform_CR_template.render(config=netopConfig)
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
             network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output + "\n---\n" + network_operator_platform_CR
+            network_operator_openshift_yaml = network_operator_openshift_spec_output + "\n---\n" + network_operator_CR_output + \
+                "\n---\n" + network_operator_platform_CR
 
             # The next few files are to generate tar file with each
             # containers and operator yaml in separate file. This is needed
@@ -1569,10 +1573,15 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
                 if tar_path == "-":
                     tar_path = "/dev/null"
                 else:
-                    deployment_docs = yaml.load_all(network_operator_yaml, Loader=yaml.SafeLoader)
+                    deployment_docs = yaml.load_all(network_operator_openshift_yaml, Loader=yaml.SafeLoader)
+                    print("writing the deployment tar file")
                     generate_operator_tar(tar_path, deployment_docs, config)
 
             print("writing the deployment file")
+            if "openshift" in config["flavor"]:
+                with open(operator_output, "w") as fh:
+                    fh.write(network_operator_openshift_yaml)
+                return True
             with open(operator_output, "w") as fh:
                 fh.write(network_operator_yaml)
             return True
