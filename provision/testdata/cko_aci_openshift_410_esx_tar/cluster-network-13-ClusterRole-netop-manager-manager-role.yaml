@@ -92,6 +92,14 @@ rules:
 - apiGroups:
   - ''
   resources:
+  - configmap
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
   - pods
   verbs:
   - get
@@ -269,6 +277,32 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - operator.tigera.io
   resources:
