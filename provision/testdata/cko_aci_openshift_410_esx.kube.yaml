@@ -29,7 +29,7 @@ spec:
       name: Age
       type: date
     - description: State/Phase of Installer
-      jsonPath: .status.operatorStatus
+      jsonPath: .status.state
       name: Phase
       type: string
     - description: Cni Type
@@ -62,7 +62,7 @@ spec:
                     description: First key should be internal child api
                     properties:
                       managedComponent:
-                        default: true
+                        default: false
                         type: boolean
                       options:
                         additionalProperties:
@@ -161,7 +161,7 @@ spec:
                     description: First key should be internal child api
                     properties:
                       managedComponent:
-                        default: true
+                        default: false
                         type: boolean
                       options:
                         additionalProperties:
@@ -243,7 +243,7 @@ spec:
                     description: First key should be internal child api
                     properties:
                       managedComponent:
-                        default: true
+                        default: false
                         type: boolean
                       options:
                         additionalProperties:
@@ -334,7 +334,7 @@ spec:
                             type: array
                           type: object
                         managedComponent:
-                          default: true
+                          default: false
                           description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
                           type: boolean
                         options:
@@ -358,7 +358,7 @@ spec:
                             type: array
                           type: object
                         managedComponent:
-                          default: true
+                          default: false
                           description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
                           type: boolean
                         options:
@@ -662,6 +662,42 @@ rules:
   - update
   - watch
 - apiGroups:
+  - argoproj.io
+  resources:
+  - applications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - controller.netop-manager.io
   resources:
   - installers
@@ -888,19 +924,19 @@ rules:
   - update
   - watch
 - apiGroups:
-    - notification-ctrlr.netop-types.io
+  - notification-ctrlr.netop-types.io
   resources:
-    - notifications/finalizers
+  - notifications/finalizers
   verbs:
-    - update
+  - update
 - apiGroups:
-    - notification-ctrlr.netop-types.io
+  - notification-ctrlr.netop-types.io
   resources:
-    - notifications/status
+  - notifications/status
   verbs:
-    - get
-    - patch
-    - update
+  - get
+  - patch
+  - update
 - apiGroups:
   - operator.tigera.io
   resources:
@@ -1141,6 +1177,18 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - projectcalico.org
   resources:
