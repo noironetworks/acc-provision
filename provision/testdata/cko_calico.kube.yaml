@@ -1556,7 +1556,7 @@ spec:
   operatorConfigs:
     networking:
       cko-cni:
-        version: "5.2.3.3"
+        version: "3.23"
         type: "calico"
         managedComponent: true
  
