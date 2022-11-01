@@ -19,7 +19,7 @@ spec:
       name: Age
       type: date
     - description: State/Phase of Installer
-      jsonPath: .status.operatorStatus
+      jsonPath: .status.state
       name: Phase
       type: string
     - description: Cni Type
@@ -56,7 +56,7 @@ spec:
                     description: First key should be internal child api
                     properties:
                       managedComponent:
-                        default: true
+                        default: false
                         type: boolean
                       options:
                         additionalProperties:
