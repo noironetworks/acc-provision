@@ -9405,7 +9405,7 @@ metadata:
   labels:
     app.kubernetes.io/component: application-controller
     app.kubernetes.io/name: argocd-application-controller
-    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/part-of: netop-manager-system
   name: argocd-application-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -9414,7 +9414,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-application-controller
-  namespace: argocd
+  namespace: netop-manager-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -9422,7 +9422,7 @@ metadata:
   labels:
     app.kubernetes.io/component: server
     app.kubernetes.io/name: argocd-server
-    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/part-of: netop-manager-system
   name: argocd-server
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -9431,7 +9431,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-server
-  namespace: argocd
+  namespace: netop-manager-system
 ---
 apiVersion: v1
 kind: ConfigMap
