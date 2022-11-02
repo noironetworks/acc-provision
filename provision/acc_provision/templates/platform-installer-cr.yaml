@@ -9,7 +9,7 @@ spec:
       {% if config.connectivity_checker %}
       cko-diagnostic:
         type: "connectivity-checker"
-        version: "0.1"
+        version: "0.9.0"
         options:
           01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
           02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
@@ -18,7 +18,7 @@ spec:
       {% if config.gitops %}
       cko-gitops:
         type: "argo"
-        version: "0.1"
+        version: "5.5.5"
         options:
           argo: {{ config.gitops.base64_encoded_argo_manifests }}
       {% endif %}
