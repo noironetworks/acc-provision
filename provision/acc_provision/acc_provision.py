@@ -1388,7 +1388,6 @@ def generate_calico_deployment_files(args, config, network_operator_output):
 
         if args.cko:
             netop_version = args.cko_version
-            print(netop_version)
             netopConfig = dict(config)
             netopConfig = get_cko_mode(args, netopConfig)
             if "connectivity_checker" in netopConfig.keys():
@@ -1403,6 +1402,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             base64_encoded_cko_calico_bgp = base64.b64encode(custom_resources_calicoctl_yaml.encode('ascii')).decode('ascii')
             base64_encoded_cko_calicoctl = base64.b64encode(calicoctl_output.encode('ascii')).decode('ascii')
 
+            netopConfig["aci_config"]["operator_version"] = netop_version
             netopConfig["calico_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["calico_config"]["base64_encoded_calico_crds_spec"] = base64_encoded_cko_calico_crds
             netopConfig["calico_config"]["base64_encoded_calico_crs_spec"] = base64_encoded_cko_calico_crs
@@ -1514,6 +1514,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
 
             network_operator_CR_template = get_jinja_template('aci-installer-cr.yaml')
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
+            netopConfig["aci_config"]["operator_version"] = netop_version
             netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
             network_operator_platform_CR_template = get_jinja_template('platform-installer-cr.yaml')

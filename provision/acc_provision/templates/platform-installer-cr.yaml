@@ -9,7 +9,7 @@ spec:
       {% if config.connectivity_checker %}
       cko-diagnostic:
         type: "connectivity-checker"
-        version: "0.9.0"
+        version: "{{ config.aci_config.operator_version }}"
         options:
           01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
           02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
