@@ -12,8 +12,8 @@ spec:
         version: "{{ config.aci_config.operator_version }}"
         options:
           01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-          02-checkerCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
-          03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          02-checkerCR: {{ config.connectivity_checker.base64_encoded_connectivity_checker_cr }}
+          03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_errorPodReporting_cr }}
       {% endif %}
       {% if config.gitops %}
       cko-gitops:
