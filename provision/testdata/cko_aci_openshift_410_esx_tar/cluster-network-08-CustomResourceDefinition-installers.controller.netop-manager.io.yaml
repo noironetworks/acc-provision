@@ -102,11 +102,6 @@ spec:
           status:
             description: InstallerStatus defines the observed state of Installer.
             properties:
-              clusterOverview:
-                additionalProperties:
-                  type: integer
-                description: store count of nodes, ns, pods & services
-                type: object
               componentStatus:
                 additionalProperties:
                   properties:
