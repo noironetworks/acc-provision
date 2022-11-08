@@ -4,6 +4,7 @@ kind: BGPConfiguration
 metadata:
   name: default
 spec:
+  asNumber: {{ config.aci_config.cluster_l3out.bgp.peering.remote_as_number }}
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
   serviceClusterIPs:

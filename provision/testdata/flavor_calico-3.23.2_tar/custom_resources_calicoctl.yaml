@@ -4,6 +4,7 @@ kind: BGPConfiguration
 metadata:
   name: default
 spec:
+  asNumber: 64512
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
   serviceClusterIPs:
