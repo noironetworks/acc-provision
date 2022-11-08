@@ -1329,9 +1329,16 @@ data:
                     "keyfile": "user.key"
                 },
                 "vmm_domain": {
-                  "nested_inside": {
-                    "installer_provisioned_lb_ip": "192.168.18.201"
-                  }
+                    "type": "OpenShift",
+                    "encap_type": "vxlan",
+                    "mcast_fabric": "225.1.2.3",
+                    "mcast_range": {
+                        "start": "225.2.1.1",
+                        "end": "225.2.255.255",
+                    }
+                    "nested_inside": {
+                        "installer_provisioned_lb_ip": "192.168.18.201"
+                    }
                 },
                 "l3out": {
                     "name": "l3out",
