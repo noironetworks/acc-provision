@@ -52,9 +52,16 @@ data:
                 {% endif %}
                 {% if ((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
                 "vmm_domain": {
-                  "nested_inside": {
-                    "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
-                  }
+                    "type": {{ config.aci_config.vmm_domain.type|json }},
+                    "encap_type": {{ config.aci_config.vmm_domain.encap_type|json }},
+                    "mcast_fabric": {{ config.aci_config.vmm_domain.mcast_fabric|json }},
+                    "mcast_range": {
+                        "start": {{ config.aci_config.vmm_domain.mcast_range.start|json }},
+                        "end": {{ config.aci_config.vmm_domain.mcast_range.end|json }},
+                    }
+                    "nested_inside": {
+                        "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
+                    }
                 },
                 {% endif %}
                 "l3out": {
