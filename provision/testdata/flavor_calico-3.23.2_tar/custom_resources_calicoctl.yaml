@@ -25,7 +25,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3
@@ -39,7 +39,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3
@@ -53,7 +53,7 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: test
+      key: rr-password
 
 ---
 apiVersion: projectcalico.org/v3

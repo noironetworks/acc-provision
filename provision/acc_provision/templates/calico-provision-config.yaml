@@ -42,7 +42,7 @@ net_config:
 # Configuration for calico networking
 #
 calico_config:
-  net_config:
+  net_config: {}
     # block_size: 20            # IPAM IPV4 block size. Valid values are 20-32(inclusive). Default value is 26.
                                 # Updating the block size on an already installed cluster is not supported.
 

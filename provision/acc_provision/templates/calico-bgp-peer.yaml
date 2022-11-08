@@ -10,5 +10,5 @@ spec:
   password:
     secretKeyRef:
       name: bgp-secrets
-      key: {{  config.aci_config.cluster_l3out.bgp.secret }}
+      key: rr-password
   {% endif %}
