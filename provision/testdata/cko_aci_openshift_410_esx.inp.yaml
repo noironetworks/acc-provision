@@ -52,8 +52,6 @@ logging:
   hostagent_log_level: info
   opflexagent_log_level: info
 
-#cko
-
 connectivity_checker:
  error_pods_reporting_enable: true
  reachability_test_enable:
@@ -74,15 +72,6 @@ connectivity_checker:
   - node_to_pod
   - node_to_clusterIP
   - node_to_LB_VIP
-
-cko_git_config:
-  git_branch: test
-  git_dir: test_dir
-  git_email: test@cisco.com
-  git_repo: github.com/test/test_repo.git
-  git_token: 7fspWC6rSV
-  git_user: test-user
-  sleep_duration: 5
 
 cko_proxy_config:
   http_proxy: http://proxy.esl.cisco.com:80
