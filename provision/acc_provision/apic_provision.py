@@ -296,6 +296,18 @@ class Apic(object):
             nodeid_dict[node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_ids["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
         return nodeid_dict
 
+    def get_mcast_pool(self, name):
+        path = "/api/node/mo/uni/infra/maddrns-%s.json?query-target=children&target-subtree-class=fvnsMcastAddrBlk" % (name)
+        mcast_pool = {}
+        mcast_range = self.get_path(path)
+        try:
+            mcast_pool["start"] = mcast_range["fvnsMcastAddrBlk"]["attributes"]["from"]
+            mcast_pool["end"] = mcast_range["fvnsMcastAddrBlk"]["attributes"]["to"]
+        except Exception as e:
+            err("Error in getting mcast_pool: %s" % (str(e)))
+        dbg("mcast pool configured on apic is, start: %s, end %s" % (mcast_pool["start"], mcast_pool["end"]))
+        return mcast_pool
+
     def provision(self, data, sync_login):
         ignore_list = []
         if self.get_user(sync_login):
