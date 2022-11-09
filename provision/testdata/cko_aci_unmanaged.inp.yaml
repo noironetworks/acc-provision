@@ -45,15 +45,6 @@ net_config:
   service_vlan: 4003
   extern_static: 10.4.0.1/24
 
-cko_git_config:
-  git_branch: test
-  git_dir: test_dir
-  git_email: test@cisco.com
-  git_repo: github.com/test/test_repo.git
-  git_token: 7fspWC6rSV
-  git_user: test-user
-  sleep_duration: 5
-
 cko_proxy_config:
   http_proxy: http://proxy.esl.cisco.com:80
   https_proxy: http://proxy.esl.cisco.com:80

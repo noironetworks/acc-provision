@@ -217,14 +217,6 @@ def config_default():
                 "nodeSelector": "all()",
             },
         },
-        "cko_git_config": {
-            "git_repo": "github.com/networkoperator/demo-clusters.git",
-            "git_dir": "demo-cluster-manifests",
-            "git_branch": "test",
-            "git_user": "networkoperator-gittest",
-            "git_email": "test@cisco.com",
-            "sleep_duration": 5,
-        },
         "kube_config": {
             "controller": "1.1.1.1",
             "use_rbac_api": "rbac.authorization.k8s.io/v1",
