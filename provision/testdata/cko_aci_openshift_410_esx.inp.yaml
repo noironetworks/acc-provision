@@ -73,11 +73,6 @@ connectivity_checker:
   - node_to_clusterIP
   - node_to_LB_VIP
 
-cko_proxy_config:
-  http_proxy: http://proxy.esl.cisco.com:80
-  https_proxy: http://proxy.esl.cisco.com:80
-  no_proxy: 10.96.0.1
-
 control_cluster_websocket:
   server_ip: 10.96.101.1
   server_port: 1234
