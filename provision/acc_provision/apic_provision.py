@@ -303,9 +303,9 @@ class Apic(object):
         try:
             mcast_pool["start"] = mcast_range["fvnsMcastAddrBlk"]["attributes"]["from"]
             mcast_pool["end"] = mcast_range["fvnsMcastAddrBlk"]["attributes"]["to"]
+            dbg("mcast pool configured on apic is, start: %s, end %s" % (mcast_pool["start"], mcast_pool["end"]))
         except Exception as e:
-            err("Error in getting mcast_pool: %s" % (str(e)))
-        dbg("mcast pool configured on apic is, start: %s, end %s" % (mcast_pool["start"], mcast_pool["end"]))
+            warn("Could not retrieve mcast_pool: %s, can be ignored in case of new cluster" % (str(e)))
         return mcast_pool
 
     def provision(self, data, sync_login):

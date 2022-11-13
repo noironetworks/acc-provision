@@ -2101,7 +2101,7 @@ def provision(args, apic_file, no_random):
         apic = get_apic(config)
         mcast_pool = config["aci_config"]["vmm_domain"]["mcast_range"]
         configured_mcast_pool = apic.get_mcast_pool(config["aci_config"]["vmm_domain"]["mcast_pool"])
-        if mcast_pool != configured_mcast_pool:
+        if configured_mcast_pool and (mcast_pool != configured_mcast_pool):
             info("Requested mcast_pool: %s does not match APIC configured: %s, using the latter" % (mcast_pool, configured_mcast_pool))
             config["aci_config"]["vmm_domain"]["mcast_range"] = configured_mcast_pool
 
