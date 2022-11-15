@@ -1307,6 +1307,8 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_crds_output = calico_crds_template.render(config=config)
         calico_crs_template = get_jinja_template('custom-resources-aci-calico.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
+        calicoctl_template = get_jinja_template('calicoctl.yaml')
+        calicoctl_output = calicoctl_template.render(config=config)
 
         bgp_peer = ''
         bgp_node = ''
@@ -1330,7 +1332,7 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
 
         with open("custom_resources_aci_calico.yaml", "w") as fh:
