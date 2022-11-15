@@ -132,7 +132,7 @@ spec:
     listKind: DiagnosticOpsList
     plural: diagnosticops
     singular: diagnosticops
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - description: State/Phase of CR

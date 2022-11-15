@@ -7,7 +7,7 @@ spec:
     networking:
       cko-cni:
         version: "{{ config.aci_config.cni_flavor_version }}"
-        type: "aci-cni"
+        type: "cko-cni-aci"
         {% if config.managedComponent == "managed" %}
         managedComponent: true
         {% else %}
