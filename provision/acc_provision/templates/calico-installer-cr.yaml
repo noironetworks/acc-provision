@@ -7,7 +7,7 @@ spec:
     networking:
       cko-cni:
         version: "{{ config.calico_config.cni_flavor_version }}"
-        type: "calico"
+        type: "cko-cni-calico"
         {% if config.managedComponent == "managed" %}
         managedComponent: true
         {% else %}

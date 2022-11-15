@@ -132,7 +132,7 @@ spec:
     listKind: DiagnosticOpsList
     plural: diagnosticops
     singular: diagnosticops
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - description: State/Phase of CR
@@ -1612,7 +1612,7 @@ spec:
     networking:
       cko-cni:
         version: "5.2.3.4"
-        type: "aci-cni"
+        type: "cko-cni-aci"
         managedComponent: true
         
         options:
