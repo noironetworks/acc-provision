@@ -37,11 +37,7 @@ spec:
           value: routingdomain-config
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
-<<<<<<< HEAD
         image: noiro/aci-containers-controller:6.0.0.0.0ef4718
-=======
-        image: noiro/aci-containers-controller:5.2.3.3.1d150da
->>>>>>> cko-mvp-1
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
