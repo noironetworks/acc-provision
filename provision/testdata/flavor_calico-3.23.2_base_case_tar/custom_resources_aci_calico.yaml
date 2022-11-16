@@ -30,7 +30,7 @@ metadata:
   name: default 
 spec: {}
 ---
-#This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
+#This creates a secret to store the BGP Password. We also need to add a Role and RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
 apiVersion: v1
 kind: Secret
 metadata:

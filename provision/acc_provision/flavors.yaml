@@ -781,9 +781,9 @@ flavors:
     status: null
     hidden: false
     order: 4
-  openshift-4.11-openstack:
-    desc: Red Hat OpenShift Container Platform 4.11 on OpenStack
-    default_version: 6.0
+  openshift-4.10-openstack:
+    desc: Red Hat OpenShift Container Platform 4.10 on OpenStack
+    default_version: 5.2.3.4
     config:
       kube_config:
         use_acicni_priority_class: True
