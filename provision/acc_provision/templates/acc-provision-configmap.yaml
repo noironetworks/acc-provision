@@ -63,10 +63,10 @@ data:
                     },
                     "nested_inside": {
                         {% if (config.user_config.aci_config.vmm_domain.nested_inside.type) %}
-                        "type": {{config.user_config.aci_config.vmm_domain.nested_inside.type|json|indent(width=20)}}
+                        "type": {{config.user_config.aci_config.vmm_domain.nested_inside.type|json|indent(width=20)}},
                         {% endif %}
                         {% if (config.user_config.aci_config.vmm_domain.nested_inside.name) %}
-                        "name": {{config.user_config.aci_config.vmm_domain.nested_inside.name|json|indent(width=20)}}
+                        "name": {{config.user_config.aci_config.vmm_domain.nested_inside.name|json|indent(width=20)}},
                         {% endif %}
                         "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
                     }

@@ -12,15 +12,15 @@ data:
     : \"225.1.2.3\",\n                \"mcast_range\": {\n                    \"start\"\
     : \"225.20.1.1\",\n                    \"end\": \"225.20.255.255\"\n         \
     \       },\n                \"nested_inside\": {\n                    \"type\"\
-    : \"vmware\"\n                    \"name\": \"myvmware\"\n                   \
-    \ \"installer_provisioned_lb_ip\": \"192.168.18.201\"\n                }\n   \
-    \         },\n            \"l3out\": {\n                \"name\": \"l3out\",\n\
-    \                \"external_networks\": [\n                    \"default\"\n \
-    \               ]\n            }\n        },\n        \"registry\": {\n      \
-    \      \"image_prefix\": \"noiro\"\n        },\n        \"kube_config\": {\n \
-    \           \"controller\": \"1.1.1.1\", \n            \"use_cluster_role\": true,\
-    \ \n            \"use_ds_rolling_update\": true\n\n        },\n        \"logging\"\
-    : {\n           \"controller_log_level\": \"info\", \n           \"hostagent_log_level\"\
+    : \"vmware\",\n                    \"name\": \"myvmware\",\n                 \
+    \   \"installer_provisioned_lb_ip\": \"192.168.18.201\"\n                }\n \
+    \           },\n            \"l3out\": {\n                \"name\": \"l3out\"\
+    ,\n                \"external_networks\": [\n                    \"default\"\n\
+    \                ]\n            }\n        },\n        \"registry\": {\n     \
+    \       \"image_prefix\": \"noiro\"\n        },\n        \"kube_config\": {\n\
+    \            \"controller\": \"1.1.1.1\", \n            \"use_cluster_role\":\
+    \ true, \n            \"use_ds_rolling_update\": true\n\n        },\n        \"\
+    logging\": {\n           \"controller_log_level\": \"info\", \n           \"hostagent_log_level\"\
     : \"info\", \n           \"opflexagent_log_level\": \"info\"\n        },\n   \
     \     \"net_config\": {\n            \"infra_vlan\": 4093,\n            \"service_vlan\"\
     : 4003, \n            \"kubeapi_vlan\": 4001,\n            \"extern_static\":\

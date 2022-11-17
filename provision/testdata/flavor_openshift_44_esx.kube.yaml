@@ -1337,8 +1337,8 @@ data:
                         "end": "225.20.255.255"
                     },
                     "nested_inside": {
-                        "type": "vmware"
-                        "name": "myvmware"
+                        "type": "vmware",
+                        "name": "myvmware",
                         "installer_provisioned_lb_ip": "192.168.18.201"
                     }
                 },
