@@ -10,8 +10,8 @@ data:
     \n            },\n            \"vmm_domain\": {\n                \"type\": \"\
     OpenShift\",\n                \"encap_type\": \"vlan\",\n                \"mcast_fabric\"\
     : \"225.1.2.3\",\n                \"mcast_range\": {\n                    \"start\"\
-    : \"225.20.1.1\",\n                    \"end\": \"225.20.255.255\",\n        \
-    \        }\n                \"nested_inside\": {\n                    \"type\"\
+    : \"225.20.1.1\",\n                    \"end\": \"225.20.255.255\"\n         \
+    \       },\n                \"nested_inside\": {\n                    \"type\"\
     : \"vmware\"\n                    \"name\": \"myvmware\"\n                   \
     \ \"installer_provisioned_lb_ip\": \"192.168.18.201\"\n                }\n   \
     \         },\n            \"l3out\": {\n                \"name\": \"l3out\",\n\
