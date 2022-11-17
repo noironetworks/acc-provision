@@ -1328,6 +1328,15 @@ data:
                     "certfile": "user.crt", 
                     "keyfile": "user.key"
                 },
+                "vmm_domain": {
+                    "type": "OpenShift",
+                    "encap_type": "vxlan",
+                    "mcast_fabric": "225.1.2.3",
+                    "mcast_range": {
+                        "start": "225.2.1.1",
+                        "end": "225.2.255.255"
+                    }
+                },
                 "l3out": {
                     "name": "l3out",
                     "external_networks": [
