@@ -398,6 +398,18 @@ def test_flavor_openshift_410_openstack():
 
 
 @in_testdir
+def test_flavor_openshift_411_openstack():
+    run_provision(
+        "flavor_openshift_411_openstack.inp.yaml",
+        "flavor_openshift_411_openstack.kube.yaml",
+        "flavor_openshift_411_openstack_tar",
+        None,
+        "flavor_openshift_411_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.11-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_47_esx():
     run_provision(
         "flavor_openshift_47_esx.inp.yaml",
@@ -805,6 +817,28 @@ def test_no_sriov_config():
     run_provision(
         "with_no_sriov_config_input.yaml",
         "with_no_sriov_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
+def test_no_dpu_config():
+    run_provision(
+        "with_no_dpu_config_input.yaml",
+        "with_no_dpu_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
+def test_dpu_config():
+    run_provision(
+        "with_dpu_config_input.yaml",
+        "with_dpu_config_kube.yaml",
         None,
         None,
         "base_case.apic.txt"

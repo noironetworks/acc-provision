@@ -25,13 +25,14 @@ aci_config:
   custom_epgs:
     - group1
     - group2
-  preexisting_kube_bd: neutron-bd-test
 
 net_config:
   node_subnet: 10.1.0.1/16
   pod_subnet: 10.2.0.1/16
   extern_dynamic: 10.3.0.1/24
+  extern_static: 10.4.0.1/24
   node_svc_subnet: 10.5.0.1/24
+  kubeapi_vlan: 4001
   service_vlan: 4003
   infra_vlan: 4093
 
@@ -39,6 +40,7 @@ kube_config:
   controller: 1.1.1.1
   use_cluster_role: true
   use_ds_rolling_update: true
+  opflex_mode: dpu
 
 registry:
   image_prefix: noiro
@@ -47,3 +49,18 @@ logging:
   controller_log_level: info
   hostagent_log_level: info
   opflexagent_log_level: info
+
+sriov_config:
+  enable: true
+  device_info:
+      isRdma: false
+      devices: "101e"
+
+dpu_config:
+  enable: true
+  ip: 192.168.200.2
+  user: "opflex"
+  ovsdb_socket_port: "6640"
+  masterNodeIp: ""
+
+

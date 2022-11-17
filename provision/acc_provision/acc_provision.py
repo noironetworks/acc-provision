@@ -244,7 +244,8 @@ def config_default():
                 },
                 "snat_namespace": "aci-containers-system",
                 "contract_scope": "global",
-                "disable_periodic_snat_global_info_sync": False
+                "disable_periodic_snat_global_info_sync": False,
+                "sleep_time_snat_global_info_sync": None,
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,
@@ -283,6 +284,9 @@ def config_default():
             "disable": True,
         },
         "sriov_config": {
+            "enable": False,
+        },
+        "dpu_config": {
             "enable": False,
         },
         "nodepodif_config": {
@@ -617,6 +621,7 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["drivers"] = "mlx5_core"
         adj_config["resourcePrefix"] = "mellanox.com"
         adj_config["resourceName"] = "cx5_sriov_switchdev"
+        adj_config["pfNames"] = "enp193s0f0np0#2-59"
         adj_config["devices"] = ""
         adj_config["isRdma"] = "false"
 
@@ -625,6 +630,22 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
+
+        if config["dpu_config"].get("enable"):
+            if 'ip' in config["dpu_config"]:
+                adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
+            else:
+                adj_config["dpuIp"] = "192.168.200.2"
+
+            if 'user' in config["dpu_config"]:
+                adj_config["dpuUser"] = str(config["dpu_config"]["user"])
+            else:
+                adj_config["dpuUser"] = "opflex"
+
+            if 'ovsdb_socket_port' in config["dpu_config"]:
+                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+            else:
+                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
 
     return adj_config
 
@@ -699,6 +720,22 @@ def is_valid_dev_del_timeout(xval):
 
     xmin = 1
     xmax = 65535
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
+def is_valid_sleep_time(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 1
+    xmax = 300
     try:
         x = int(xval)
         if xmin <= x <= xmax:
@@ -920,6 +957,9 @@ def config_validate(flavor_opts, config):
 
             "kube_config/snat_operator/contract_scope": (get(("kube_config", "snat_operator", "contract_scope")),
                                                          is_valid_contract_scope),
+
+            "kube_config/snat_operator/sleep_time_snat_global_info_sync": (get(("kube_config", "snat_operator", "sleep_time_snat_global_info_sync")),
+                                                                           is_valid_sleep_time),
 
             # Network Config
             "net_config/infra_vlan": (get(("net_config", "infra_vlan")),

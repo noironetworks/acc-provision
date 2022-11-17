@@ -9,7 +9,7 @@ aci_config:
     - 10.30.120.100
   apic_login:
     username: admin
-    password: noir0123
+    password: dummy
   apic_version: "5.0"
   aep: kube-aep
   apic_subscription_delay: 100
@@ -57,6 +57,7 @@ kube_config:
   add_external_subnets_to_rdconfig: true
   snat_operator:
       disable_periodic_snat_global_info_sync: true
+      sleep_time_snat_global_info_sync: 60
   image_pull_policy: IfNotPresent
   
 registry:
