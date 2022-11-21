@@ -1056,7 +1056,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.24",
+        "flavor": "kubernetes-1.25",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,
