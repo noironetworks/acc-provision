@@ -1365,6 +1365,9 @@ data:
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
+        {% if config.kube_config.service_graph_endpoint_add_delay %}
+        "service-graph-endpoint-add-delay": {{ config.kube_config.service_graph_endpoint_add_delay|json|indent(width=8) }},
+        {% endif %}
         {% if config.kube_config.add_external_subnets_to_rdconfig %}
         "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
         {% endif %}
