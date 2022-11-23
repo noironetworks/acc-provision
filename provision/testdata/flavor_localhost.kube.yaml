@@ -1252,6 +1252,15 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "lb-type": "None",
+        "service-graph-endpoint-add-delay": {
+            "delay": 30,
+            "services": [
+                {
+                    "name": "router-internal-default",
+                    "namespace": "openshift-ingress"
+                }
+            ]
+        },
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "default-endpoint-group": {
