@@ -13,6 +13,10 @@ metadata:
   name: default
 spec:
   # Configures Calico networking.
+  {% if config.registry.image_pull_secret %}
+  imagePullSecrets:
+    - name: {{ config.registry.image_pull_secret|yaml_quote }}
+  {% endif %}
   calicoNetwork:
     # Note: The ipPools section cannot be modified post-install.
     ipPools:
