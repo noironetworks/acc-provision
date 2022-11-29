@@ -1566,7 +1566,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
                 if tar_path == "-":
                     tar_path = "/dev/null"
                 else:
-                    deployment_docs = yaml.load_all(network_operator_openshift_yaml, Loader=yaml.SafeLoader)
+                    deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
                     print("writing the deployment tar file")
                     generate_operator_tar(tar_path, deployment_docs, config)
 

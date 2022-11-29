@@ -4,6 +4,7 @@ metadata:
   annotations:
     openshift.io/node-selector: ''
   labels:
-    control-plane: controller-manager
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
     openshift.io/run-level: '0'
-  name: netop-manager-system
+  name: aci-containers-system
