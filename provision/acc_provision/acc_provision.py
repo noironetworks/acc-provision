@@ -218,6 +218,15 @@ def config_default():
             "use_netpol_apigroup": "networking.k8s.io",
             "use_cluster_role": True,
             "no_wait_for_service_ep_readiness": False,
+            "service_graph_endpoint_add_delay": {
+                "delay": 30,
+                "services": [
+                    {
+                        "name": "router-internal-default",
+                        "namespace": "openshift-ingress",
+                    },
+                ],
+            },
             "add_external_subnets_to_rdconfig": False,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
@@ -241,6 +250,7 @@ def config_default():
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,
+            "opflex_agent_prometheus": "false",
             "host_agent_cni_bin_path": "/opt",
             "host_agent_cni_conf_path": "/etc",
             "generate_installer_files": False,
@@ -1370,6 +1380,8 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_crds_output = calico_crds_template.render(config=config)
         calico_crs_template = get_jinja_template('custom-resources-aci-calico.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
+        calicoctl_template = get_jinja_template('calicoctl.yaml')
+        calicoctl_output = calicoctl_template.render(config=config)
 
         bgp_peer = ''
         bgp_node = ''
@@ -1393,7 +1405,7 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
 
         with open("custom_resources_aci_calico.yaml", "w") as fh:

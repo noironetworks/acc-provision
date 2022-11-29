@@ -267,6 +267,17 @@ def test_pod_external_access():
 
 
 @in_testdir
+def test_enable_opflex_agent_prometheus():
+    run_provision(
+        "enable_opflex_agent_prometheus.inp.yaml",
+        "enable_opflex_agent_prometheus.kube.yaml",
+        None,
+        None,
+        "enable_opflex_agent_prometheus.apic.txt"
+    )
+
+
+@in_testdir
 def test_flavor_openshift_310():
     run_provision(
         "flavor_openshift.inp.yaml",
@@ -387,6 +398,18 @@ def test_flavor_openshift_410_openstack():
 
 
 @in_testdir
+def test_flavor_openshift_411_openstack():
+    run_provision(
+        "flavor_openshift_411_openstack.inp.yaml",
+        "flavor_openshift_411_openstack.kube.yaml",
+        "flavor_openshift_411_openstack_tar",
+        None,
+        "flavor_openshift_411_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.11-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_47_esx():
     run_provision(
         "flavor_openshift_47_esx.inp.yaml",
@@ -431,6 +454,30 @@ def test_flavor_openshift_410_esx():
         None,
         "flavor_openshift_410_esx.apic.txt",
         overrides={"flavor": "openshift-4.10-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_411_esx():
+    run_provision(
+        "flavor_openshift_411_esx.inp.yaml",
+        "flavor_openshift_411_esx.kube.yaml",
+        "flavor_openshift_411_esx_tar",
+        None,
+        "flavor_openshift_411_esx.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_411_baremetal():
+    run_provision(
+        "flavor_openshift_411_baremetal.inp.yaml",
+        "flavor_openshift_411_baremetal.kube.yaml",
+        "flavor_openshift_411_baremetal_tar",
+        None,
+        "flavor_openshift_411_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.11-baremetal"}
     )
 
 

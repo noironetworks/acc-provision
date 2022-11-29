@@ -1252,6 +1252,15 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "lb-type": "None",
+        "service-graph-endpoint-add-delay": {
+            "delay": 30,
+            "services": [
+                {
+                    "name": "router-internal-default",
+                    "namespace": "openshift-ingress"
+                }
+            ]
+        },
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "default-endpoint-group": {
@@ -1268,7 +1277,7 @@ data:
                 "end": "10.3.63.254",
                 "start": "10.3.56.2"
             }
-        ], 
+        ],
         "extern-static": "10.4.56.1/21",
         "extern-dynamic": "10.3.56.1/21",
         "snat-contract-scope": "global",
@@ -1761,8 +1770,6 @@ spec:
         network-plugin: aci-containers
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9612"
     spec:
       hostNetwork: true
       hostPID: true

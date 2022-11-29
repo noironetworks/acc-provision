@@ -7,7 +7,7 @@ aci_config:
     - 10.30.120.102
   apic_login:
     username: admin
-    password: noir0123
+    password: dummy
   apic_version: "5.1"
   aep: rke-aep
   vrf:
@@ -32,6 +32,7 @@ net_config:
   extern_dynamic: 10.3.0.1/24
   extern_static: 10.4.0.1/24
   node_svc_subnet: 10.5.0.1/24
+  pod_subnet_chunk_size: 256
   kubeapi_vlan: 4001
   service_vlan: 4003
   infra_vlan: 4093
