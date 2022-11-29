@@ -5,6 +5,7 @@ aci_config:
     name: mykube_vrf
     tenant: test
   cluster_l3out:
+    name: calico-l3out-fsvi-vlan-13
     aep: kube-cluster 
     svi:
       type: floating
