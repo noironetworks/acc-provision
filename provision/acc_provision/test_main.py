@@ -447,6 +447,30 @@ def test_flavor_openshift_410_esx():
 
 
 @in_testdir
+def test_flavor_openshift_411_esx():
+    run_provision(
+        "flavor_openshift_411_esx.inp.yaml",
+        "flavor_openshift_411_esx.kube.yaml",
+        "flavor_openshift_411_esx_tar",
+        None,
+        "flavor_openshift_411_esx.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_411_baremetal():
+    run_provision(
+        "flavor_openshift_411_baremetal.inp.yaml",
+        "flavor_openshift_411_baremetal.kube.yaml",
+        "flavor_openshift_411_baremetal_tar",
+        None,
+        "flavor_openshift_411_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.11-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_410_baremetal():
     run_provision(
         "flavor_openshift_410_baremetal.inp.yaml",
