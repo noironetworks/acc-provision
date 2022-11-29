@@ -41,6 +41,7 @@ net_config:
   disable_wait_for_network: True
   duration_wait_for_network: 200
   interface_mtu_headroom: 51
+  pod_subnet_chunk_size: 256
 
 kube_config:
   use_cluster_role: False

@@ -1,14 +1,17 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.11-baremetal:	Red Hat OpenShift Container Platform 4.11 on Baremetal
 INFO: openshift-4.10-baremetal:	Red Hat OpenShift Container Platform 4.10 on Baremetal
 INFO: openshift-4.9-baremetal:	Red Hat OpenShift Container Platform 4.9 on Baremetal
 INFO: openshift-4.8-baremetal:	Red Hat OpenShift Container Platform 4.8 on Baremetal
 INFO: openshift-4.7-baremetal:	Red Hat OpenShift Container Platform 4.7 on Baremetal
 INFO: openshift-4.6-baremetal:	Red Hat OpenShift Container Platform 4.6 on Baremetal
+INFO: openshift-4.11-openstack:	Red Hat OpenShift Container Platform 4.11 on OpenStack
 INFO: openshift-4.10-openstack:	Red Hat OpenShift Container Platform 4.10 on OpenStack
 INFO: openshift-4.9-openstack:	Red Hat OpenShift Container Platform 4.9 on OpenStack
 INFO: openshift-4.8-openstack:	Red Hat OpenShift Container Platform 4.8 on OpenStack
 INFO: openshift-4.7-openstack:	Red Hat OpenShift Container Platform 4.7 on OpenStack
 INFO: openshift-4.6-openstack:	Red Hat OpenShift Container Platform 4.6 on OpenStack
+INFO: openshift-4.11-esx:	Red Hat OpenShift Container Platform 4.11 on ESX
 INFO: openshift-4.10-esx:	Red Hat OpenShift Container Platform 4.10 on ESX
 INFO: openshift-4.9-esx:	Red Hat OpenShift Container Platform 4.9 on ESX
 INFO: openshift-4.8-esx:	Red Hat OpenShift Container Platform 4.8 on ESX

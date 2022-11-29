@@ -266,6 +266,10 @@ class Apic(object):
         path = "/api/mo/uni/tn-%s/ap-kubernetes.json" % tenant
         return self.get_path(path)
 
+    def get_ext_l3out_lnodep(self, tenant, l3out_name):
+        path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=children&target-subtree-class=l3extLNodeP" % (tenant, l3out_name)
+        return self.get_path(path)["l3extLNodeP"]["attributes"]["name"]
+
     def get_configured_node_dns(self, tenant, l3out, node_prof):
         path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (tenant, l3out, node_prof)
         configured_node_dns = []
@@ -278,6 +282,19 @@ class Apic(object):
         else:
             configured_node_dns.append(node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
         return configured_node_dns
+
+    def get_extl3out_configured_nodes_router_id(self, tenant, l3out, node_prof):
+        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (tenant, l3out, node_prof)
+        nodeid_dict = {}
+        node_ids = self.get_path(path, multi=True)
+        if node_ids is None:
+            return nodeid_dict
+        if type(node_ids) is list:
+            for node_id in node_ids:
+                nodeid_dict[node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_id["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
+        else:
+            nodeid_dict[node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_ids["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
+        return nodeid_dict
 
     def provision(self, data, sync_login):
         ignore_list = []
@@ -573,15 +590,31 @@ class ApicKubeConfig(object):
             update(data, self.associate_aep_to_phys_dom_and_l3_dom_calico())
             # update(data, self.logical_node_profile())
             node_ids = None
+            node_map = {}
             if self.apic is not None:
+                ext_l3out_lnodep = self.apic.get_ext_l3out_lnodep(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"])
                 node_ids = self.apic.get_configured_node_dns(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["cluster_l3out"]["name"], self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"])
+                node_map = self.apic.get_extl3out_configured_nodes_router_id(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"], ext_l3out_lnodep)
+
             else:
                 # For "calico" flavor based UT
-                node_ids = ["topology/pod-1/node-101", "topology/pod-1/node-102"]
+                node_ids = ["topology/pod-1/node-101"]
+                node_map = {"topology/pod-1/node-102": "2.2.2.2"}
             for rack in self.config["topology"]["rack"]:
                 for leaf in rack["leaf"]:
                     if "local_ip" in leaf and "id" in leaf:
                         update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"]))
+                        if len(node_map) == 0 and ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
+                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
+            # If the node already has a router_id in external l3out, then use the same router_id
+            if len(node_map) != 0:
+                for node_dn, router_id in node_map.items():
+                    update(data, self.add_configured_nodes_with_routerid(rack["aci_pod_id"], node_dn, router_id))
+                    if node_dn not in node_ids:
+                        node_ids.append(node_dn)
+                # Finally add all other nodes which arent added.
+                for rack in self.config["topology"]["rack"]:
+                    for leaf in rack["leaf"]:
                         if ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
                             update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
 
@@ -5816,6 +5849,34 @@ class ApicKubeConfig(object):
         node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
         router_id = "1.1.4." + str(node_id)
         path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, lnodep, node_dn)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extRsNodeL3OutAtt",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("rtrId", router_id),
+                                        ("tDn", node_dn),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def add_configured_nodes_with_routerid(self, pod_id, node_dn, router_id):
+        cluster_l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, cluster_l3out_name, lnodep, node_dn)
         data = collections.OrderedDict(
             [
                 (

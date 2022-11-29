@@ -5,7 +5,10 @@ data:
     apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
     ,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"\
     aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-policy-tenant\"\
-    : \"kube\",\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\",\n    \"aci-nodebd-dn\"\
+    : \"kube\",\n    \"service-graph-endpoint-add-delay\": {\n        \"delay\": 30,\n\
+    \        \"services\": [\n            {\n                \"name\": \"router-internal-default\"\
+    ,\n                \"namespace\": \"openshift-ingress\"\n            }\n     \
+    \   ]\n    },\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-kube-pod-bd\",\n    \"aci-nodebd-dn\"\
     : \"uni/tn-kube/BD-kube-node-bd\",\n    \"aci-service-phys-dom\": \"kube-pdom\"\
     ,\n    \"aci-service-encap\": \"vlan-4003\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"common\"\
@@ -19,8 +22,8 @@ data:
     ,\n            \"name\": \"kubernetes|kube-istio\"\n        },\n        \"kube-system\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
-    : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ], \n \
-    \   \"extern-static\": \"10.4.0.1/24\",\n    \"extern-dynamic\": \"10.3.0.1/24\"\
+    : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
+    \  \"extern-static\": \"10.4.0.1/24\",\n    \"extern-dynamic\": \"10.3.0.1/24\"\
     ,\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\": [\n\
     \        {\n            \"end\": \"10.4.0.254\",\n            \"start\": \"10.4.0.2\"\
     \n        }\n    ],\n    \"pod-ip-pool\": [\n        {\n            \"end\": \"\
