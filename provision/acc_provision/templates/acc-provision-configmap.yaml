@@ -1,3 +1,10 @@
+{% if config.user_config.aci_config.cluster_l3out %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ config.kube_config.system_namespace }}
+---
+{% endif %}
 
 apiVersion: v1
 kind: ConfigMap
@@ -40,6 +47,39 @@ data:
                     "name": {{config.aci_config.vrf.name|json}},
                     "tenant": {{config.aci_config.vrf.tenant|json}}
                 },
+                {% if config.user_config.aci_config.cluster_l3out %}
+                "cluster_l3out": {
+                    {% if config.user_config.aci_config.cluster_l3out.name %}
+                    "name": {{config.user_config.aci_config.cluster_l3out.name|json}},
+                    {% endif %}
+                    "aep": {{config.user_config.aci_config.cluster_l3out.aep|json}},
+                    "svi": {
+                        "type": "floating",
+                        "floating_ip": {{config.user_config.aci_config.cluster_l3out.svi.floating_ip|json}},
+                        "secondary_ip": {{config.user_config.aci_config.cluster_l3out.svi.secondary_ip|json}},
+                        {% if not config.user_config.aci_config.cluster_l3out.svi.mtu %}
+                        "vlan_id": {{config.user_config.aci_config.cluster_l3out.svi.vlan_id|json}}
+                        {% else %}
+                        "vlan_id": {{config.user_config.aci_config.cluster_l3out.svi.vlan_id|json}},
+                        "mtu": {{config.user_config.aci_config.cluster_l3out.svi.mtu|json}}
+                        {% endif %}
+                    },
+                    "bgp": {
+                        {% if config.user_config.aci_config.cluster_l3out.bgp.secret %}
+                        "secret": {{config.user_config.aci_config.cluster_l3out.bgp.secret|json}},
+                        {% endif %}
+                        "peering": {
+                        {% if config.user_config.aci_config.cluster_l3out.bgp.peering.prefixes %}
+                            "prefixes": {{config.user_config.aci_config.cluster_l3out.bgp.peering.prefixes|json}},
+                        {% endif %}
+                        {% if config.user_config.aci_config.cluster_l3out.bgp.peering.remote_as_number %}
+                            "remote_as_number": {{config.user_config.aci_config.cluster_l3out.bgp.peering.remote_as_number|json}},
+                        {% endif %}
+                            "aci_as_number": {{config.user_config.aci_config.cluster_l3out.bgp.peering.aci_as_number|json}}
+                        }
+                    }
+                },
+                {% endif %}
                 {% if config.user_config.aci_config.sync_login %}
                 "sync_login": {
                     {% for key, value in config.user_config.aci_config.sync_login.items() %}
@@ -199,7 +239,26 @@ data:
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
                 "node_subnet": {{config.net_config.node_subnet|json}},
+                {% if config.user_config.net_config.cluster_svc_subnet %}
+                "pod_subnet": {{config.net_config.pod_subnet|json}},
+                "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
+                {% else %}
                 "pod_subnet": {{config.net_config.pod_subnet|json}}
+                {% endif %}
+            {% if config.user_config.topology %}
+            },
+            {% if config.user_config.calico_config %}
+            "calico_config": {
+                {% if config.user_config.calico_config.net_config %}
+                "net_config": {{config.user_config.calico_config.net_config|json|indent(width=20)}}
+                {% endif %}
+            },
+            {% endif %}
+            "topology": {
+                "rack": {{config.user_config.topology.rack|json|indent(width=20)}}
             }
+            {% else %}
+            }
+            {% endif %}
         }
      }
