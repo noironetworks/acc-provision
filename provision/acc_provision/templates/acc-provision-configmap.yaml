@@ -256,7 +256,8 @@ data:
             {% endif %}
             "topology": {
                 "rack": {{config.user_config.topology.rack|json|indent(width=20)}}
-            }
+            },
+            "flavor": {{config.flavor|json}}
             {% else %}
             }
             {% endif %}
