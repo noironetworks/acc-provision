@@ -5861,6 +5861,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("rtrId", router_id),
                                         ("tDn", node_dn),
+                                        ("rtrIdLoopBack", "no"),
                                     ]
                                 ),
                             ),
@@ -5889,6 +5890,7 @@ class ApicKubeConfig(object):
                                     [
                                         ("rtrId", router_id),
                                         ("tDn", node_dn),
+                                        ("rtrIdLoopBack", "no"),
                                     ]
                                 ),
                             ),
