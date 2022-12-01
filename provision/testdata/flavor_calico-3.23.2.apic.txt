@@ -336,7 +336,7 @@
     "l3extRsNodeL3OutAtt": {
         "attributes": {
             "rtrId": "2.2.2.2",
-            "rtrIdLoopBack": "no"
+            "rtrIdLoopBack": "no",
             "tDn": "topology/pod-1/node-102",
             "annotation": "orchestrator:aci-containers-controller"
         }
@@ -347,7 +347,7 @@
     "l3extRsNodeL3OutAtt": {
         "attributes": {
             "rtrId": "1.1.4.103",
-            "rtrIdLoopBack": "no"
+            "rtrIdLoopBack": "no",
             "tDn": "topology/pod-1/node-103",
             "annotation": "orchestrator:aci-containers-controller"
         }
