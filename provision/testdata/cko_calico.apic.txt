@@ -337,6 +337,7 @@
         "attributes": {
             "rtrId": "2.2.2.2",
             "tDn": "topology/pod-1/node-102",
+            "rtrIdLoopBack": "no",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
@@ -347,6 +348,7 @@
         "attributes": {
             "rtrId": "1.1.4.103",
             "tDn": "topology/pod-1/node-103",
+            "rtrIdLoopBack": "no",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
@@ -357,6 +359,7 @@
         "attributes": {
             "rtrId": "1.1.4.104",
             "tDn": "topology/pod-1/node-104",
+            "rtrIdLoopBack": "no",
             "annotation": "orchestrator:aci-containers-controller"
         }
     }
