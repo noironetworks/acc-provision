@@ -775,15 +775,6 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.2.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "kube",

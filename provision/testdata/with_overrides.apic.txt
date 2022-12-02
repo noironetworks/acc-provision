@@ -650,17 +650,17 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
+                            "fvRsCtx": {
                                 "attributes": {
-                                    "ip": "10.2.0.1/16",
+                                    "tnFvCtxName": "kubernetes-vrf",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
                         },
                         {
-                            "fvRsCtx": {
+                            "fvSubnet": {
                                 "attributes": {
-                                    "tnFvCtxName": "kubernetes-vrf",
+                                    "ip": "10.2.0.1/16",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }

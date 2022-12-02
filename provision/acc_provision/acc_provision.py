@@ -310,6 +310,8 @@ def config_user(config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
+        if not isinstance(config["net_config"]["pod_subnet"], list):
+            config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
     if config is None:
         config = {}
     return config
@@ -390,7 +392,12 @@ def config_adjust(args, config, prov_apic, no_random):
         system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
     node_subnet = config["net_config"]["node_subnet"]
-    pod_subnet = config["net_config"]["pod_subnet"]
+    pod_subnets = []
+    if "openshift" in args.flavor or args.flavor == "cloud":
+        pod_subnets.append(config["net_config"]["pod_subnet"])
+    else:
+        for pod_subnet in config["net_config"]["pod_subnet"]:
+            pod_subnets.append(pod_subnet)
     extern_dynamic = config["net_config"]["extern_dynamic"]
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
@@ -492,10 +499,10 @@ def config_adjust(args, config, prov_apic, no_random):
         },
         "net_config": {
             "infra_vlan": infra_vlan,
-            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
+            # TODO: For overlay mode we are currently not supporting multiple subnets, hence the assumption that there is only one subnet.
+            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnets[0])[2], cidr_split(pod_subnets[0])[4]),
             "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
             "node_network_gateway": cidr_split(node_subnet)[5],
-            "pod_network": normalize_cidr(pod_subnet),
             "node_network": normalize_cidr(node_subnet),
             "disable_wait_for_network": disable_wait_for_network,
             "duration_wait_for_network": duration_wait_for_network,
@@ -529,24 +536,6 @@ def config_adjust(args, config, prov_apic, no_random):
                     "group": istio_epg,
                 },
             },
-            "pod_ip_pool": [
-                {
-                    "start": cidr_split(pod_subnet)[0],
-                    "end": cidr_split(pod_subnet)[1],
-                }
-            ],
-            "pod_network": [
-                {
-                    "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
-                    "gateway": cidr_split(pod_subnet)[2],
-                    "routes": [
-                        {
-                            "dst": config_set_dst(pod_subnet),
-                            "gw": cidr_split(pod_subnet)[2],
-                        }
-                    ],
-                },
-            ],
             "service_ip_pool": [
                 {
                     "start": cidr_split(extern_dynamic)[0],
@@ -565,6 +554,65 @@ def config_adjust(args, config, prov_apic, no_random):
             "configuration_version": token,
         }
     }
+
+    if "kube_config" in adj_config.keys():
+        kube_config_object = adj_config["kube_config"]
+        for pod_subnet in pod_subnets:
+            if "pod_ip_pool" not in kube_config_object:
+                kube_config_object["pod_ip_pool"] = [
+                    {
+                        "start": cidr_split(pod_subnet)[0],
+                        "end": cidr_split(pod_subnet)[1],
+                    }
+                ]
+            else:
+                kube_config_object["pod_ip_pool"].append(
+                    {
+                        "start": cidr_split(pod_subnet)[0],
+                        "end": cidr_split(pod_subnet)[1],
+                    }
+                )
+            if "pod_network" not in kube_config_object:
+                kube_config_object["pod_network"] = [
+                    {
+                        "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
+                        "gateway": cidr_split(pod_subnet)[2],
+                        "routes": [
+                            {
+                                "dst": config_set_dst(pod_subnet),
+                                "gw": cidr_split(pod_subnet)[2],
+                            }
+                        ]
+                    }
+                ]
+            else:
+                kube_config_object["pod_network"].append(
+                    {
+                        "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
+                        "gateway": cidr_split(pod_subnet)[2],
+                        "routes": [
+                            {
+                                "dst": config_set_dst(pod_subnet),
+                                "gw": cidr_split(pod_subnet)[2],
+                            }
+                        ]
+                    }
+                )
+
+    if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+        if "net_config" in adj_config.keys():
+            net_config_object = adj_config["net_config"]
+            net_config_object["pod_network"] = normalize_cidr(pod_subnets[0])
+    else:
+        if "net_config" in adj_config.keys():
+            net_config_object = adj_config["net_config"]
+            for pod_subnet in pod_subnets:
+                if "pod_network" not in net_config_object:
+                    net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
+                else:
+                    net_config_object["pod_network"].append(
+                        normalize_cidr(pod_subnet)
+                    )
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
@@ -1671,18 +1719,26 @@ def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
     if is_calico_flavor(config["flavor"]):
         subnet_info = {
-            "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
     else:
         subnet_info = {
-            "pod_subnet": config["net_config"]["pod_subnet"],
             "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
+    if not isinstance(config["net_config"]["pod_subnet"], list):
+        subnet_info[-1] = config["net_config"]["pod_subnet"]
+    else:
+        pod_subnets = []
+        for pod_subnet in config["net_config"]["pod_subnet"]:
+            pod_subnets.append(pod_subnet)
+        counter = 0
+        for pod_subnet in pod_subnets:
+            subnet_info[counter] = pod_subnet
+            counter += 1
 
     # Don't have extern_static field set for OpenShift flavors
     if not is_calico_flavor(config["flavor"]) and config["net_config"]["extern_static"]:
@@ -1692,9 +1748,11 @@ def check_overlapping_subnets(config):
         # Checking if sub1 and sub2 are IPv4 or IPv6
         rtr1, _ = sub1.split("/")
         ip1 = ipaddress.ip_address(rtr1)
-        if ip1.version == 4:
+        rtr2, _ = sub2.split("/")
+        ip2 = ipaddress.ip_address(rtr2)
+        if ip1.version == 4 and ip2.version == 4:
             net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
-        else:
+        elif ip1.version == 6 and ip2.version == 6:
             net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
         out = net1.overlaps(net2)
         if out:
@@ -1800,6 +1858,8 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     config['user_config'] = copy.deepcopy(user_config)
+    if "openshift" in flavor or flavor == "cloud":
+        user_config["net_config"]["pod_subnet"] = user_config["net_config"]["pod_subnet"][0]
     deep_merge(config, user_config)
 
     if flavor in FLAVORS:

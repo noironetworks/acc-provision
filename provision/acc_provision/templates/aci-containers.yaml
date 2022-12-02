@@ -1474,7 +1474,7 @@ data:
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
         {% endif %}
-        "pod-subnet": {{ config.net_config.pod_subnet|json }},
+        "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
         "node-subnet": {{ config.net_config.node_subnet|json }},
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},

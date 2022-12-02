@@ -209,10 +209,10 @@ data:
                 {% endif %}
                 "node_subnet": {{config.net_config.node_subnet|json}},
                 {% if config.user_config.net_config.cluster_svc_subnet %}
-                "pod_subnet": {{config.net_config.pod_subnet|json}},
+                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
                 {% else %}
-                "pod_subnet": {{config.net_config.pod_subnet|json}}
+                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}}
                 {% endif %}
             {% if config.user_config.topology %}
             },

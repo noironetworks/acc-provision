@@ -639,6 +639,14 @@ None
                     },
                     "children": [
                         {
+                            "fvRsCtx": {
+                                "attributes": {
+                                    "tnFvCtxName": "kube",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
                             "fvSubnet": {
                                 "attributes": {
                                     "ip": "1:2:1:1::1/64",
@@ -655,14 +663,6 @@ None
                                         }
                                     }
                                 ]
-                            }
-                        },
-                        {
-                            "fvRsCtx": {
-                                "attributes": {
-                                    "tnFvCtxName": "kube",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
                             }
                         }
                     ]

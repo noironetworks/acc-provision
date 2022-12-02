@@ -36,4 +36,4 @@ network:
     disable_periodic_snat_global_info_sync: "true"
 services:
   kube-controller:
-    cluster_cidr: "10.2.0.1/16"
+    cluster_cidr: "['10.2.0.1/16']"

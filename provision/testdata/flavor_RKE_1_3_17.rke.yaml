@@ -37,4 +37,4 @@ network:
     add_external_subnets_to_rdconfig: "true"
 services:
   kube-controller:
-    cluster_cidr: "10.2.0.1/16"
+    cluster_cidr: "['10.2.0.1/16']"

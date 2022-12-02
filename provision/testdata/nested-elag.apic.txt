@@ -715,17 +715,17 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
+                            "fvRsCtx": {
                                 "attributes": {
-                                    "ip": "10.2.0.1/16",
+                                    "tnFvCtxName": "kube",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
                         },
                         {
-                            "fvRsCtx": {
+                            "fvSubnet": {
                                 "attributes": {
-                                    "tnFvCtxName": "kube",
+                                    "ip": "10.2.0.1/16",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }

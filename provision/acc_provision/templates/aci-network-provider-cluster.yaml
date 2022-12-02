@@ -77,4 +77,8 @@ network:
   {% endif %}
 services:
   kube-controller:
-    cluster_cidr: "{{ config.net_config.pod_subnet }}"
+    {% if config.net_config.pod_subnet|length > 1 %}
+    cluster_cidr: [{%- for pod_subnet in config.net_config.pod_subnet %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(pod_subnet) }}{% else %}{{ "\\\"%s\\\"\""|format(pod_subnet) }}{% endif %}{% endfor -%}]
+    {% else %}
+    cluster_cidr: [{% for pod_subnet in config.net_config.pod_subnet %}{{ "\"\\\"%s\\\"\""|format(pod_subnet) }}{% endfor %}]
+    {% endif %}
