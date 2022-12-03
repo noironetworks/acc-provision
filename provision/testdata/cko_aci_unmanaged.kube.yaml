@@ -1506,6 +1506,8 @@ spec:
               key: email
               name: cko-config
               optional: true
+        - name: DISABLE_CANARY_INSTALLER
+          value: "false"
         image: quay.io/ckodev/netop-manager:0.9.0.d04f56f
         imagePullPolicy: Always
         livenessProbe:
@@ -1590,6 +1592,7 @@ data:
       cko-cni-awsvpc:
       - "10-aws.conflist"
       - "10-aws.conf"
+
 ---
 apiVersion: controller.netop-manager.io/v1alpha1
 kind: Installer
