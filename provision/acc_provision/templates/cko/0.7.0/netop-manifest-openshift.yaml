@@ -1509,6 +1509,8 @@ spec:
               key: email
               name: cko-config
               optional: true
+        - name: DISABLE_CANARY_INSTALLER
+          value: "false"
         image: quay.io/ckodev/netop-manager:0.7.0
         imagePullPolicy: Always
         livenessProbe:
