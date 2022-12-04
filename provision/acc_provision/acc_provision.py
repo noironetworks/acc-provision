@@ -1451,6 +1451,8 @@ def generate_calico_deployment_files(args, config, network_operator_output):
                 fh.write(network_operator_yaml)
             return True
 
+        acc_provision_yaml = get_jinja_template('acc-provision-configmap.yaml').render(config=config)
+        custom_resources_aci_calico_yaml += "\n---\n" + acc_provision_yaml
         with open("custom_resources_aci_calico.yaml", "w") as fh:
             fh.write(custom_resources_aci_calico_yaml)
         with open("custom_resources_calicoctl.yaml", "w") as fh:

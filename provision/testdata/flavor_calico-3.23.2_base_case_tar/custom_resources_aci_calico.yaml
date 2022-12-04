@@ -173,3 +173,114 @@ subjects:
 - kind: ServiceAccount
   name: calicoctl
   namespace: kube-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aci-containers-system
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acc-provision-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "acc_provision_input": {
+            "operator_managed_config": {
+                "enable_updates": false
+            },
+            "aci_config": {
+                "system_id": "calico-l3out-fsvi-vlan-13",
+                "apic_hosts": [
+                    "10.30.120.100"
+                ],
+                "vrf": {
+                    "name": "mykube_vrf",
+                    "tenant": "test"
+                },
+                "cluster_l3out": {
+                    "name": "calico-l3out-fsvi-vlan-13",
+                    "aep": "kube-cluster",
+                    "svi": {
+                        "type": "floating",
+                        "floating_ip": "2.100.101.100/24",
+                        "secondary_ip": "2.100.101.254/24",
+                        "vlan_id": 13,
+                        "mtu": 9000
+                    },
+                    "bgp": {
+                        "secret": "test",
+                        "peering": {
+                            "prefixes": 500,
+                            "remote_as_number": 64512,
+                            "aci_as_number": 2
+                        }
+                    }
+                },
+                "l3out": {
+                    "name": "ext-l3out",
+                    "external_networks": [
+                        "mykube_extepg"
+                    ]
+                }
+            },
+            "net_config": {
+                "extern_dynamic": "20.3.0.0/16",
+                "node_subnet": "2.100.101.0/24",
+                "pod_subnet": "20.2.0.0/16",
+                "cluster_svc_subnet": "10.96.0.0/12"
+            },
+            "calico_config": {
+            },
+            "topology": {
+                "rack": [
+                        {
+                            "aci_pod_id": 1,
+                            "id": 1,
+                            "leaf": [
+                                {
+                                    "id": 101,
+                                    "local_ip": "2.100.101.201"
+                                },
+                                {
+                                    "id": 102,
+                                    "local_ip": "2.100.101.202"
+                                }
+                            ],
+                            "node": [
+                                {
+                                    "name": "k8s-node1"
+                                },
+                                {
+                                    "name": "k8s-node2"
+                                }
+                            ]
+                        },
+                        {
+                            "aci_pod_id": 1,
+                            "id": 2,
+                            "leaf": [
+                                {
+                                    "id": 103,
+                                    "local_ip": "2.100.101.203"
+                                }
+                            ],
+                            "node": [
+                                {
+                                    "name": "k8s-node3"
+                                },
+                                {
+                                    "name": "k8s-node4"
+                                }
+                            ]
+                        }
+                    ]
+            }
+        }
+     }
