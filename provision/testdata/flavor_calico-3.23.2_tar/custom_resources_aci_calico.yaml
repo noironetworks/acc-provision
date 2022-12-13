@@ -196,7 +196,7 @@ data:
                 "enable_updates": false
             },
             "aci_config": {
-                "system_id": "calico-cni",
+                "system_id": "calico-l3out-fsvi-vlan-13",
                 "apic_hosts": [
                     "10.30.120.100"
                 ],
@@ -205,22 +205,22 @@ data:
                     "tenant": "test"
                 },
                 "cluster_l3out": {
-                    "name": "test-l3out",
                     "aep": "kube-cluster",
-                    "svi": {
-                        "type": "floating",
-                        "floating_ip": "2.100.101.100/24",
-                        "secondary_ip": "2.100.101.254/24",
-                        "vlan_id": 13,
-                        "mtu": 9000
-                    },
                     "bgp": {
-                        "secret": "test",
                         "peering": {
+                            "aci_as_number": 2,
                             "prefixes": 500,
-                            "remote_as_number": 64512,
-                            "aci_as_number": 2
-                        }
+                            "remote_as_number": 64512
+                        },
+                        "secret": "test"
+                    },
+                    "name": "calico-l3out-fsvi-vlan-13",
+                    "svi": {
+                        "floating_ip": "2.100.101.100/24",
+                        "mtu": 9000,
+                        "secondary_ip": "2.100.101.254/24",
+                        "type": "floating",
+                        "vlan_id": 13
                     }
                 },
                 "l3out": {
