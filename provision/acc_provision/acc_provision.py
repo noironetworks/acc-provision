@@ -1369,6 +1369,29 @@ def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
+def generate_rancher_1_3_18_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-network-provider-cluster-1-3-18.yaml')
+        outname = operator_output
+        # At this time, we do not use the aci-containers-operator with Rancher.
+        # The template to generate ACI CNI components is upstream in RKE code
+        # Here we generate the input file to feed into RKE, which looks almost
+        # the same as the acc-provision_input file
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing Rancher network provider portion of cluster.yml to %s" % outname)
+        info("Use this network provider section in the cluster.yml you use with RKE")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
