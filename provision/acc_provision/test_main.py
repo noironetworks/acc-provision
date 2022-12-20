@@ -908,6 +908,26 @@ def test_flavor_RKE_1_3_17_base():
 
 
 @in_testdir
+def test_flavor_RKE_1_3_18_base():
+    run_provision(
+        "flavor_RKE_1_3_18.inp.yaml",
+        "flavor_RKE_1_3_18.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_3_18.apic.txt",
+        overrides={"flavor": "RKE-1.3.18"}
+    )
+    run_provision(
+        "flavor_RKE_1_3_18.inp2.yaml",
+        "flavor_RKE_1_3_18.rke2.yaml",
+        None,
+        None,
+        "flavor_RKE_1_3_18.apic2.txt",
+        overrides={"flavor": "RKE-1.3.18"}
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
@@ -1099,6 +1119,9 @@ def compare_yaml(expectedyaml, output, debug, generated, cleanupFunc):
         with open(expectedyaml, "r") as expected:
             outputtxt = output.read()
             expectedtxt = expected.read()
+            f = open("temp.txt", "w")
+            f.write(outputtxt)
+            f.close()
             assert outputtxt == expectedtxt, cleanupFunc()
 
 
