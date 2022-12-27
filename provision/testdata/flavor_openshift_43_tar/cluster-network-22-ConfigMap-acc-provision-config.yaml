@@ -22,8 +22,8 @@ data:
     \     \"net_config\": {\n            \"infra_vlan\": 4093,\n            \"service_vlan\"\
     : 4003, \n            \"kubeapi_vlan\": 4001,\n            \"extern_dynamic\"\
     : \"10.3.0.1/24\",\n            \"node_svc_subnet\": \"10.5.0.1/24\",\n      \
-    \      \"node_subnet\": \"10.1.0.1/16\",\n            \"pod_subnet\": \"10.2.0.1/16\"\
-    \n        }\n    }\n }"
+    \      \"node_subnet\": \"10.1.0.1/16\",\n            \"pod_subnet\": [\n    \
+    \            \"10.2.0.1/16\"\n            ]\n        }\n    }\n }"
 kind: ConfigMap
 metadata:
   labels:

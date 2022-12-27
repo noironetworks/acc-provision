@@ -54,20 +54,20 @@ data:
     : \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"aci-vmm-controller\"\
     : \"clusterjj\",\n    \"aci-prefix\": \"clusterjj\",\n    \"aci-vrf\": \"clusterjj_overlay\"\
     ,\n    \"aci-vrf-tenant\": \"csrtest\",\n    \"service-vlan\": null,\n    \"kubeapi-vlan\"\
-    : null,\n    \"pod-subnet\": \"14.3.0.1/16\",\n    \"node-subnet\": \"31.0.1.0/24\"\
-    ,\n    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": null,\n    \"cni-netconfig\"\
-    : [\n        {\n            \"gateway\": \"14.3.0.1\",\n            \"routes\"\
-    : [\n                {\n                    \"dst\": \"0.0.0.0/0\",\n        \
-    \            \"gw\": \"14.3.0.1\"\n                }\n            ],\n       \
-    \     \"subnet\": \"14.3.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
-    : {\n        \"policy-space\": \"csrtest\",\n        \"name\": \"aci-containers-default\"\
-    \n    },\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
+    : null,\n    \"pod-subnet\": [\n        \"14.3.0.1/16\"\n    ],\n    \"node-subnet\"\
+    : \"31.0.1.0/24\",\n    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": null,\n\
+    \    \"cni-netconfig\": [\n        {\n            \"gateway\": \"14.3.0.1\",\n\
+    \            \"routes\": [\n                {\n                    \"dst\": \"\
+    0.0.0.0/0\",\n                    \"gw\": \"14.3.0.1\"\n                }\n  \
+    \          ],\n            \"subnet\": \"14.3.0.0/16\"\n        }\n    ],\n  \
+    \  \"default-endpoint-group\": {\n        \"policy-space\": \"csrtest\",\n   \
+    \     \"name\": \"aci-containers-default\"\n    },\n    \"namespace-default-endpoint-group\"\
+    : {\n        \"aci-containers-system\": {\n            \"policy-space\": \"csrtest\"\
+    ,\n        \"name\": \"aci-containers-default\"\n        },\n        \"istio-operator\"\
     : {\n            \"policy-space\": \"csrtest\",\n        \"name\": \"aci-containers-default\"\
-    \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
-    csrtest\",\n        \"name\": \"aci-containers-default\"\n        },\n       \
-    \ \"istio-system\": {\n            \"policy-space\": \"csrtest\",\n        \"\
-    name\": \"aci-containers-default\"\n        },\n        \"kube-system\": {\n \
-    \           \"policy-space\": \"csrtest\",\n        \"name\": \"aci-containers-default\"\
+    \n        },\n        \"istio-system\": {\n            \"policy-space\": \"csrtest\"\
+    ,\n        \"name\": \"aci-containers-default\"\n        },\n        \"kube-system\"\
+    : {\n            \"policy-space\": \"csrtest\",\n        \"name\": \"aci-containers-default\"\
     \n        }        },\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\"\
     : false,\n    \"enable-ovs-hw-offload\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \

@@ -393,11 +393,8 @@ def config_adjust(args, config, prov_apic, no_random):
     infra_vlan = config["net_config"]["infra_vlan"]
     node_subnet = config["net_config"]["node_subnet"]
     pod_subnets = []
-    if "openshift" in args.flavor or args.flavor == "cloud":
-        pod_subnets.append(config["net_config"]["pod_subnet"])
-    else:
-        for pod_subnet in config["net_config"]["pod_subnet"]:
-            pod_subnets.append(pod_subnet)
+    for pod_subnet in config["net_config"]["pod_subnet"]:
+        pod_subnets.append(pod_subnet)
     extern_dynamic = config["net_config"]["extern_dynamic"]
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
@@ -599,20 +596,13 @@ def config_adjust(args, config, prov_apic, no_random):
                     }
                 )
 
-    if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
-        if "net_config" in adj_config.keys():
-            net_config_object = adj_config["net_config"]
-            net_config_object["pod_network"] = normalize_cidr(pod_subnets[0])
-    else:
-        if "net_config" in adj_config.keys():
-            net_config_object = adj_config["net_config"]
-            for pod_subnet in pod_subnets:
-                if "pod_network" not in net_config_object:
-                    net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
-                else:
-                    net_config_object["pod_network"].append(
-                        normalize_cidr(pod_subnet)
-                    )
+    if "net_config" in adj_config.keys():
+        net_config_object = adj_config["net_config"]
+        for pod_subnet in pod_subnets:
+            if "pod_network" not in net_config_object:
+                net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
+            else:
+                net_config_object["pod_network"].append(normalize_cidr(pod_subnet))
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
@@ -1858,8 +1848,6 @@ def provision(args, apic_file, no_random):
             get_versions(versions_url)
 
     config['user_config'] = copy.deepcopy(user_config)
-    if "openshift" in flavor or flavor == "cloud":
-        user_config["net_config"]["pod_subnet"] = user_config["net_config"]["pod_subnet"][0]
     deep_merge(config, user_config)
 
     if flavor in FLAVORS:

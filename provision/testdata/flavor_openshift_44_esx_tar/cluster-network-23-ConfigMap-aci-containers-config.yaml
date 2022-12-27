@@ -52,13 +52,13 @@ data:
     : \"kube\",\n    \"installer-provisioned-lb-ip\": \"192.168.18.201\",\n    \"\
     aci-prefix\": \"kube\",\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\": \"\
     common\",\n    \"service-vlan\": 4003,\n    \"kubeapi-vlan\": 4001,\n    \"pod-subnet\"\
-    : \"10.2.0.1/16\",\n    \"node-subnet\": \"10.1.0.10/16\",\n    \"encap-type\"\
-    : \"vlan\",\n    \"aci-infra-vlan\": 4093,\n    \"cni-netconfig\": [\n       \
-    \ {\n            \"gateway\": \"10.2.0.1\",\n            \"routes\": [\n     \
-    \           {\n                    \"dst\": \"0.0.0.0/0\",\n                 \
-    \   \"gw\": \"10.2.0.1\"\n                }\n            ],\n            \"subnet\"\
-    : \"10.2.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\": {\n    \
-    \    \"policy-space\": \"kube\",\n        \"name\": \"kubernetes|kube-default\"\
+    : [\n        \"10.2.0.1/16\"\n    ],\n    \"node-subnet\": \"10.1.0.10/16\",\n\
+    \    \"encap-type\": \"vlan\",\n    \"aci-infra-vlan\": 4093,\n    \"cni-netconfig\"\
+    : [\n        {\n            \"gateway\": \"10.2.0.1\",\n            \"routes\"\
+    : [\n                {\n                    \"dst\": \"0.0.0.0/0\",\n        \
+    \            \"gw\": \"10.2.0.1\"\n                }\n            ],\n       \
+    \     \"subnet\": \"10.2.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
+    : {\n        \"policy-space\": \"kube\",\n        \"name\": \"kubernetes|kube-default\"\
     \n    },\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
