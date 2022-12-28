@@ -218,15 +218,6 @@ def config_default():
             "use_netpol_apigroup": "networking.k8s.io",
             "use_cluster_role": True,
             "no_wait_for_service_ep_readiness": False,
-            "service_graph_endpoint_add_delay": {
-                "delay": 30,
-                "services": [
-                    {
-                        "name": "router-internal-default",
-                        "namespace": "openshift-ingress",
-                    },
-                ],
-            },
             "add_external_subnets_to_rdconfig": False,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
