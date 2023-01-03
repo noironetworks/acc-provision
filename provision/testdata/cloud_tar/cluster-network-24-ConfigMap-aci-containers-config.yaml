@@ -6,10 +6,7 @@ data:
     /usr/local/etc/aci-cert/user.key\",\n    \"aci-prefix\": \"clusterjj\",\n    \"\
     aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"\
     aci-vmm-controller\": \"clusterjj\",\n    \"aci-policy-tenant\": \"csrtest\",\n\
-    \    \"lb-type\": \"None\",\n    \"service-graph-endpoint-add-delay\": {\n   \
-    \     \"delay\": 30,\n        \"services\": [\n            {\n               \
-    \ \"name\": \"router-internal-default\",\n                \"namespace\": \"openshift-ingress\"\
-    \n            }\n        ]\n    },\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
+    \    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
     ,\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-service-monitor-interval\"\
     : 5,\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\": \"csrtest\"\
     ,\n    \"aci-vrf-dn\": \"uni/tn-csrtest/ctx-ULjj\",\n    \"aci-l3out\": null,\n\
