@@ -1,0 +1,79 @@
+aci_config:
+  system_id: rke
+  use_legacy_kube_naming_convention: False
+  apic_hosts:
+    - 10.30.120.100
+    - 10.30.120.101
+    - 10.30.120.102
+  apic_login:
+    username: admin
+    password: dummy
+  apic_version: "5.1"
+  aep: rke-aep
+  vrf:
+    name: rke
+    tenant: common
+  l3out:
+    name: l3out
+    external_networks:
+    - default
+  sync_login:
+    certfile: user.crt
+    keyfile: user.key
+  vmm_domain:
+    encap_type: vxlan
+    mcast_range:
+        start: 225.2.1.1
+        end: 225.2.255.255
+  apic_refreshticker_adjust: 1
+  apic_subscription_delay: 1
+  opflex_device_delete_timeout: 1
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  pod_subnet: 10.2.0.1/16
+  extern_dynamic: 10.3.0.1/24
+  extern_static: 10.4.0.1/24
+  node_svc_subnet: 10.5.0.1/24
+  kubeapi_vlan: 4001
+  service_vlan: 4003
+  infra_vlan: 4093
+  disable_wait_for_network: True
+  duration_wait_for_network: 200
+  interface_mtu_headroom: 51
+
+kube_config:
+  use_cluster_role: False
+  no_wait_for_service_ep_readiness: True
+  service_graph_endpoint_add_delay:
+    delay: 30 
+    services:
+    - name: "service-name-1"
+      namespace: "service-ns-1"
+    - name: "service-name-2"
+      namespace: "service-ns-2"
+  add_external_subnets_to_rdconfig: True
+  snat_operator:
+    disable_periodic_snat_global_info_sync: True
+
+registry:
+  image_prefix: noirolabs
+  aci_containers_controller_version: jefferson-test
+  aci_containers_host_version: master-test
+  aci_containers_operator_version: jefferson-test
+  cnideploy_version: jefferson-test
+  openvswitch_version: jefferson-test
+  opflex_agent_version: jefferson-test
+  opflex_server_version: jefferson-test
+  gbp_version: jefferson-test
+
+logging:
+  controller_log_level: info
+  hostagent_log_level: info
+  opflexagent_log_level: info
+
+sriov_config:
+  enable: True
+        
+nodepodif_config:
+  enable: True
