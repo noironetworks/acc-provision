@@ -211,7 +211,7 @@ spec:
     listKind: GitOpsList
     plural: gitops
     singular: gitops
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - description: State/Phase of CR
@@ -378,9 +378,9 @@ spec:
               componentStatus:
                 additionalProperties:
                   properties:
-                    state:
+                    lastUpdated:
                       type: string
-                    status:
+                    mode:
                       type: string
                     type:
                       type: string
