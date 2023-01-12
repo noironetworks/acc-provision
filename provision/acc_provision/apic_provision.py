@@ -8680,5 +8680,20 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
             data['fvTenant']['children'].append(filt_entry)
 
 
+class ApicKubeConfig_5_2_3_3(ApicKubeConfig):
+
+    ACI_PREFIX = aci_prefix
+
+
+class ApicKubeConfig_5_2_3_4(ApicKubeConfig):
+
+    ACI_PREFIX = aci_prefix
+
+
+class ApicKubeConfig_5_2_3_5(ApicKubeConfig):
+
+    ACI_PREFIX = aci_prefix
+
+
 if __name__ == "__main__":
     pass

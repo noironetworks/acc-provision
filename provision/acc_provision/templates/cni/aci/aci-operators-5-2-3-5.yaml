@@ -1,0 +1,252 @@
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-operator
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: aci-containers-operator
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - namespaces
+  - configmaps
+  - secrets
+  - pods
+  - services
+  - serviceaccounts
+  - serviceaccounts/token
+  - endpoints
+  - events
+  verbs:
+  - '*'
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - acicontainersoperators
+  - acicontainersoperators/status
+  - acicontainersoperators/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.ctrl
+  resources:
+  - accprovisioninputs
+  - accprovisioninputs/status
+  - accprovisioninputs/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.snat
+  resources:
+  - snatpolicies
+  - snatglobalinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - aci.snat
+  resources:
+  - nodeinfos
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+{% if config.flavor == "cloud" %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  - gbpsstates
+  - gbpsstates/status
+  verbs:
+  - "*"
+{% endif %}
+- apiGroups:
+  - config.openshift.io
+  - operator.openshift.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers-operator
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers-operator
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-operator
+  namespace: {{ config.kube_config.system_namespace }}
+---
+apiVersion: {{ config.kube_config.use_apps_api }}
+kind: Deployment
+metadata:
+  name: aci-containers-operator
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    name: aci-containers-operator
+    network-plugin: aci-containers
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: aci-containers-operator
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: aci-containers-operator
+      namespace: {{ config.kube_config.system_namespace }}
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        name: aci-containers-operator
+        network-plugin: aci-containers
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: preferred-node
+                operator: In
+                values:
+                - aci-containers-operator-2577247291
+            weight: 1
+      containers:
+      - image: {{ config.registry.image_prefix }}/aci-containers-operator:{{ config.registry.aci_containers_operator_version }}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: aci-containers-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: aci-operator-config
+          mountPath: /usr/local/etc/aci-containers/
+        - name: acc-provision-config
+          mountPath: /usr/local/etc/acc-provision/
+        env:
+        - name: SYSTEM_NAMESPACE
+          value: "{{ config.kube_config.system_namespace}}"
+        - name: ACC_PROVISION_FLAVOR
+          value: "{{ config.flavor }}"
+      - env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ACC_PROVISION_FLAVOR
+          value: "{{ config.flavor }}"
+        - name: ACC_PROVISION_INPUT_CR_NAME
+          value: "accprovisioninput"
+        image: {{ config.registry.image_prefix }}/acc-provision-operator:{{ config.registry.acc_provision_operator_version }}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: acc-provision-operator
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: aci-containers-operator
+      serviceAccountName: aci-containers-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - name: aci-operator-config
+        configMap:
+          name: aci-operator-config
+          items:
+            - key: spec
+              path: aci-operator.conf
+      - name: acc-provision-config
+        configMap:
+          name: acc-provision-config
+          items:
+            - key: spec
+              path: acc-provision-operator.conf
