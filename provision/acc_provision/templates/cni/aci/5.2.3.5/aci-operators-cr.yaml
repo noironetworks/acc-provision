@@ -1,0 +1,8 @@
+apiVersion: aci.ctrl/v1alpha1
+kind: AciContainersOperator
+metadata:
+ name: acicnioperator
+ namespace: {{ config.kube_config.system_namespace }}
+spec:
+ flavor: {{ config.flavor }}
+ config: {{ config.kube_config.deployment_base64 }}

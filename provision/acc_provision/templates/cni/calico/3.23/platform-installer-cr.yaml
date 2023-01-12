@@ -1,0 +1,25 @@
+{% if (config.connectivity_checker or config.gitops) %}
+apiVersion: controller.netop-manager.io/v1alpha1
+kind: Installer
+metadata:
+  name: installer-platform
+spec:
+  operatorConfigs:
+    platform:
+      {% if config.connectivity_checker %}
+      cko-diagnostic:
+        type: "connectivity-checker"
+        version: "{{ config.aci_config.operator_version }}"
+        options:
+          01-checkerCRDs: {{ config.connectivity_checker.base64_encoded_nettools_crds }}
+          02-checkerCR: {{ config.connectivity_checker.base64_encoded_connectivity_checker_cr }}
+          03-errorPodsReportingCR: {{ config.connectivity_checker.base64_encoded_errorPodReporting_cr }}
+      {% endif %}
+      {% if config.gitops %}
+      cko-gitops:
+        type: "argo"
+        version: "5.5.5"
+        options:
+          argo: {{ config.gitops.base64_encoded_argo_manifests }}
+      {% endif %}
+{% endif %}
