@@ -11,10 +11,8 @@ import tempfile
 import tarfile
 import json
 
-
 from . import acc_provision
 from . import fake_apic
-
 
 debug = False
 
@@ -592,6 +590,7 @@ def test_flavor_localhost():
 
 @in_testdir
 def test_flavor_cloud_base():
+
     with open("apic_test_data.json") as data_file:
         data = json.loads(data_file.read())
     apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
@@ -1067,6 +1066,30 @@ def test_flavor_calico_3_23_2():
         "flavor_calico-3.23.2_tar",
         None,
         "flavor_calico-3.23.2.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_calico_3_23_2_diff_tenant_diff_vrf():
+    run_provision(
+        "flavor_calico_3.23.2_diff_tenant_diff_vrf.inp.yaml",
+        None,
+        "flavor_calico_3.23.2_diff_tenant_diff_vrf_tar",
+        None,
+        "flavor_calico_3.23.2_diff_tenant_diff_vrf.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_calico_3_23_2_same_tenant_diff_vrf():
+    run_provision(
+        "flavor_calico_3.23.2_same_tenant_diff_vrf.inp.yaml",
+        None,
+        "flavor_calico_3.23.2_same_tenant_diff_vrf_tar",
+        None,
+        "flavor_calico_3.23.2_same_tenant_diff_vrf.apic.txt",
         overrides={"flavor": "calico-3.23.2"}
     )
 

@@ -1,0 +1,58 @@
+aci_config:
+  apic_hosts:
+    - 10.30.120.100
+  vrf:
+    name: common_vrf
+    tenant: common
+  cluster_l3out:
+    vrf:
+      name: calico_vrf
+      tenant: calico_tenant
+    name: calico-l3out-fsvi-vlan-13
+    aep: kube-cluster 
+    svi:
+      type: floating
+      floating_ip: 2.100.101.100/24
+      secondary_ip: 2.100.101.254/24
+      vlan_id: 13
+      mtu: 9000
+    bgp:
+      secret: test
+      peering:
+        prefixes: 500
+        remote_as_number: 64512
+        aci_as_number: 2
+  l3out:
+    name: ext-l3out
+    external_networks:
+    - mykube_extepg
+
+topology:
+  rack:
+  - id: 1
+    aci_pod_id: 1
+    leaf:
+    - id: 101
+      local_ip: 2.100.101.201
+    - id: 102
+      local_ip: 2.100.101.202
+    node:  
+    - name: k8s-node1
+    - name: k8s-node2
+  - id: 2
+    aci_pod_id: 1
+    leaf:
+    - id: 103
+      local_ip: 2.100.101.203
+    node:  
+    - name: k8s-node3
+    - name: k8s-node4
+
+calico_config:
+  net_config: {}
+
+net_config:
+  node_subnet: 2.100.101.0/24
+  pod_subnet: 20.2.0.0/16
+  extern_dynamic: 20.3.0.0/16
+  cluster_svc_subnet: 10.96.0.0/12
