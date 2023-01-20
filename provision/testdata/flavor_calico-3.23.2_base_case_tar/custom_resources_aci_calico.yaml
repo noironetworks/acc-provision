@@ -219,7 +219,6 @@ data:
                         "floating_ip": "2.100.101.100/24",
                         "mtu": 9000,
                         "secondary_ip": "2.100.101.254/24",
-                        "type": "floating",
                         "vlan_id": 13
                     }
                 },
