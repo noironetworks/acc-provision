@@ -8,7 +8,6 @@ aci_config:
     name: calico-l3out-fsvi-vlan-13
     aep: kube-cluster 
     svi:
-      type: floating
       floating_ip: 2.100.101.100/24
       secondary_ip: 2.100.101.254/24
       vlan_id: 13

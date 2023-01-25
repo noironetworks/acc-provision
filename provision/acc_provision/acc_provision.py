@@ -152,7 +152,6 @@ def config_default():
             "cluster_l3out": {
                 "name": None,
                 "svi": {
-                    "type": "floating",
                     "mtu": 9000
                 },
                 "bgp": {
