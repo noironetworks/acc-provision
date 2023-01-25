@@ -1650,7 +1650,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers-controller
 rules:
 - apiGroups:
   - ""
@@ -1887,7 +1887,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ""
@@ -2038,13 +2038,13 @@ rules:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:controller
+  name: aci-containers-controller
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:controller
+  name: aci-containers-controller
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
@@ -2053,13 +2053,13 @@ subjects:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
