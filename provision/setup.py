@@ -3,6 +3,7 @@ import os, sys
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 from gitversion.gitversion import get_git_version
+os.chdir(os.path.abspath(file_dir))
 
 setup(
     name='acc_provision',
@@ -15,6 +16,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    data_files = [('bin', ['bin/acikubectl'])],
     entry_points={
         'console_scripts': [
             'acc-provision=acc_provision.acc_provision:main',
