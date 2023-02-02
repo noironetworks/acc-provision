@@ -1414,8 +1414,8 @@ def generate_calico_deployment_files(args, config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
-        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output + bgp_node
+        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer
 
         if args.cko:
             netop_version = args.cko_version
