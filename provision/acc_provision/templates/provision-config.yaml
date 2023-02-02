@@ -91,7 +91,7 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
- 
+        # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
 #
 # Configuration for ACI CNI Operator
 #
