@@ -61,6 +61,7 @@ kube_config:
         namespace: openshift-ingress
       - name: monitoring-service
         namespace: openshift-monitoring
+        delay: 60
   add_external_subnets_to_rdconfig: true
   snat_operator:
       disable_periodic_snat_global_info_sync: true
