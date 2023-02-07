@@ -3398,18 +3398,29 @@ class ApicKubeConfig(object):
         return path, data
 
     def hasV6(self):
-        pod_subnets = []
-        if not isinstance(self.config["net_config"]["pod_subnet"], list):
-            pod_subnets.append(self.config["net_config"]["pod_subnet"])
-        else:
-            for pod_subnet in self.config["net_config"]["pod_subnet"]:
-                pod_subnets.append(pod_subnet)
-        for pod_cidr in pod_subnets:
-            rtr, mask = pod_cidr.split("/")
+        subnet_fields = ["node_subnet", "pod_subnet"]
+        for subnet_field in subnet_fields:
+            subnets = self.config["net_config"].get(subnet_field, [])
+            if not isinstance(subnets, list):
+                subnets = [subnets]
+        for subnet in subnets:
+            rtr, mask = subnet.split("/")
             ip = ipaddress.ip_address(rtr)
             if ip.version == 6:
                 return True
         return False
+        # pod_subnets = []
+        # if not isinstance(self.config["net_config"]["pod_subnet"], list):
+        #     pod_subnets.append(self.config["net_config"]["pod_subnet"])
+        # else:
+        #     for pod_subnet in self.config["net_config"]["pod_subnet"]:
+        #         pod_subnets.append(pod_subnet)
+        # for pod_cidr in pod_subnets:
+        #     rtr, mask = pod_cidr.split("/")
+        #     ip = ipaddress.ip_address(rtr)
+        #     if ip.version == 6:
+        #         return True
+        # return False
 
     def isV6(self, cidr):
         rtr, mask = cidr.split("/")
@@ -3451,13 +3462,20 @@ class ApicKubeConfig(object):
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         kube_vrf = self.config["aci_config"]["vrf"]["name"]
         kube_l3out = self.config["aci_config"]["l3out"]["name"]
-        node_subnet = self.config["net_config"]["node_subnet"]
-        pod_subnets = []
-        if not isinstance(self.config["net_config"]["pod_subnet"], list):
-            pod_subnets.append(self.config["net_config"]["pod_subnet"])
-        else:
-            for pod_subnet in self.config["net_config"]["pod_subnet"]:
-                pod_subnets.append(pod_subnet)
+        # node_subnet = self.config["net_config"]["node_subnet"]
+        node_subnets = self.config["net_config"].get("node_subnet", [])
+        if not isinstance(node_subnets, list):
+            node_subnets = [node_subnets]
+        pod_subnets = self.config["net_config"].get("pod_subnet", [])
+        if not isinstance(pod_subnets, list):
+            pod_subnets = [pod_subnets]
+
+        # pod_subnets = []
+        # if not isinstance(self.config["net_config"]["pod_subnet"], list):
+        #     pod_subnets.append(self.config["net_config"]["pod_subnet"])
+        # else:
+        #     for pod_subnet in self.config["net_config"]["pod_subnet"]:
+        #         pod_subnets.append(pod_subnet)
         kade = self.config["kube_config"].get("allow_kube_api_default_epg") or \
             self.config["kube_config"].get("allow_pods_kube_api_access")
         eade = self.config["kube_config"].get("allow_pods_external_access")
@@ -3640,14 +3658,14 @@ class ApicKubeConfig(object):
                 )
             )
 
-        node_subnet_obj = collections.OrderedDict(
-            [
-                (
-                    "attributes",
-                    collections.OrderedDict([("ip", node_subnet), ("scope", "public")]),
-                )
-            ]
-        )
+        # node_subnet_obj = collections.OrderedDict(
+        #     [
+        #         (
+        #             "attributes",
+        #             collections.OrderedDict([("ip", node_subnet), ("scope", "public")]),
+        #         )
+        #     ]
+        # )
 
         if v6subnet:
             ipv6_nd_policy_rs = [
@@ -3670,9 +3688,9 @@ class ApicKubeConfig(object):
                 )
             ]
 
-        if self.isV6(self.config["net_config"]["node_subnet"]):
-            node_subnet_obj["attributes"]["ctrl"] = "nd"
-            node_subnet_obj["children"] = ipv6_nd_policy_rs
+        # if self.isV6(self.config["net_config"]["node_subnet"]):
+        #     node_subnet_obj["attributes"]["ctrl"] = "nd"
+        #     node_subnet_obj["children"] = ipv6_nd_policy_rs
 
         path = "/api/mo/uni/tn-%s.json" % tn_name
         data = collections.OrderedDict(
@@ -4335,14 +4353,14 @@ class ApicKubeConfig(object):
                                                         (
                                                             "children",
                                                             [
-                                                                collections.OrderedDict(
-                                                                    [
-                                                                        (
-                                                                            "fvSubnet",
-                                                                            node_subnet_obj,
-                                                                        )
-                                                                    ]
-                                                                ),
+                                                                # collections.OrderedDict(
+                                                                #     [
+                                                                #         (
+                                                                #             "fvSubnet",
+                                                                #             node_subnet_obj,
+                                                                #         )
+                                                                #     ]
+                                                                # ),
                                                                 collections.OrderedDict(
                                                                     [
                                                                         (
@@ -5692,6 +5710,27 @@ class ApicKubeConfig(object):
                                 epg_object = ap_child["fvAEPg"]["children"]
                                 epg_object.append(kubeapi_dom_obj)
             for i, child in enumerate(data["fvTenant"]["children"]):
+                if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
+                    bd_object = child["fvBD"]["children"]
+                    for node_subnet in node_subnets:
+                        node_subnet_obj = collections.OrderedDict(
+                            [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
+                        )
+                        if eade is True:
+                            node_subnet_obj["attributes"]["scope"] = "public"
+                        if self.isV6(node_subnet):
+                            node_subnet_obj["attributes"]["ctrl"] = "nd"
+                            node_subnet_obj["children"] = ipv6_nd_policy_rs
+                        bd_object.append(
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "fvSubnet",
+                                        node_subnet_obj
+                                    )
+                                ]
+                            )
+                        )
                 if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == pod_bd_name:
                     bd_object = child["fvBD"]["children"]
                     for pod_subnet in pod_subnets:
@@ -6328,7 +6367,7 @@ class ApicKubeConfig(object):
         vlan_id = self.config["aci_config"]["cluster_l3out"]["svi"]["vlan_id"]
         mtu = self.config["aci_config"]["cluster_l3out"]["svi"]["mtu"]
         node_subnet = self.config["net_config"]["node_subnet"]
-        primary_addr = primary_ip + "/" + node_subnet.split("/")[-1]
+        primary_addr = primary_ip + "/" + node_subnet[0].split("/")[-1]
         floating_ip = self.config["aci_config"]["cluster_l3out"]["svi"]["floating_ip"]
         secondary_ip = self.config["aci_config"]["cluster_l3out"]["svi"]["secondary_ip"]
         physical_domain_name = l3out_name + "-phys-dom"

@@ -749,18 +749,9 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.1.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
-                                    "tnFvCtxName": "kube",
+                                    "tnFvCtxName": "rke",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -768,7 +759,20 @@ None
                         {
                             "fvRsBDToOut": {
                                 "attributes": {
+<<<<<<< HEAD:provision/testdata/flavor_openshift_45_esx_vDS_6_6_above.apic.txt
+                                    "tnFvCtxName": "kube",
+=======
                                     "tnL3extOutName": "l3out",
+>>>>>>> 4b972b79... Add changes to handle ipv6 node subnet:provision/testdata/flavor_RKE_1_3_13.apic2.txt
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "10.1.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }

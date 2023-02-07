@@ -1309,7 +1309,9 @@ data:
         "pod-subnet": [
             "10.2.56.1/21"
         ],
-        "node-subnet": "1.100.202.1/24",
+        "node-subnet": [
+            "1.100.202.1/24"
+        ],
         "encap-type": "vxlan",
         "aci-infra-vlan": null,
         "interface-mtu": 1400,

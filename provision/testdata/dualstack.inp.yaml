@@ -27,7 +27,10 @@ aci_config:
     - group2
 
 net_config:
-  node_subnet: 10.1.0.1/16
+  node_subnet:
+    - 10.1.0.1/16
+    - 2:2:1:1::1/64
+
   pod_subnet:
     - 10.2.0.1/24
     - 1:2:1:1::1/64

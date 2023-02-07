@@ -593,26 +593,6 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "1:1:1:1::1/64",
-                                    "scope": "public",
-                                    "ctrl": "nd",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                },
-                                "children": [
-                                    {
-                                        "fvRsNdPfxPol": {
-                                            "attributes": {
-                                                "tnNdPfxPolName": "kube-nd-ra-policy",
-                                                "annotation": "orchestrator:aci-containers-controller"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "kube",
@@ -626,6 +606,25 @@ None
                                     "tnL3extOutName": "l3out",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "1:1:1:1::1/64",
+                                    "ctrl": "nd",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsNdPfxPol": {
+                                            "attributes": {
+                                                "tnNdPfxPolName": "kube-nd-ra-policy",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ]

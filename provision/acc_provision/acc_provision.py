@@ -307,6 +307,9 @@ def config_user(config_file):
         config["user_input"] = user_input
         if not isinstance(config["net_config"]["pod_subnet"], list):
             config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
+        # config["net_config"]["node_subnet"] = config["net_config"].get("node_subnet", [])
+        if not isinstance(config["net_config"]["node_subnet"], list):
+            config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
     if config is None:
         config = {}
     return config
@@ -386,7 +389,9 @@ def config_adjust(args, config, prov_apic, no_random):
         l3out_name = config["aci_config"]["l3out"]["name"]
         system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
-    node_subnet = config["net_config"]["node_subnet"]
+    node_subnets = []
+    for node_subnet in config["net_config"]["node_subnet"]:
+        node_subnets.append(node_subnet)
     pod_subnets = []
     for pod_subnet in config["net_config"]["pod_subnet"]:
         pod_subnets.append(pod_subnet)
@@ -493,9 +498,8 @@ def config_adjust(args, config, prov_apic, no_random):
             "infra_vlan": infra_vlan,
             # TODO: For overlay mode we are currently not supporting multiple subnets, hence the assumption that there is only one subnet.
             "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnets[0])[2], cidr_split(pod_subnets[0])[4]),
-            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
-            "node_network_gateway": cidr_split(node_subnet)[5],
-            "node_network": normalize_cidr(node_subnet),
+            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnets[0])[2], cidr_split(node_subnets[0])[4]),
+            "node_network_gateway": cidr_split(node_subnet)[0][5],
             "disable_wait_for_network": disable_wait_for_network,
             "duration_wait_for_network": duration_wait_for_network,
         },
@@ -598,6 +602,11 @@ def config_adjust(args, config, prov_apic, no_random):
                 net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
             else:
                 net_config_object["pod_network"].append(normalize_cidr(pod_subnet))
+        for node_subnet in node_subnets:
+            if "node_network" not in net_config_object:
+                net_config_object["node_network"] = [normalize_cidr(node_subnet)]
+            else:
+                net_config_object["node_network"].append(normalize_cidr(node_subnet))
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
@@ -1749,16 +1758,29 @@ def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
     if is_calico_flavor(config["flavor"]):
         subnet_info = {
-            "node_subnet": config["net_config"]["node_subnet"],
+            # "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
     else:
         subnet_info = {
-            "node_subnet": config["net_config"]["node_subnet"],
+            # "node_subnet": config["net_config"]["node_subnet"],
             "extern_dynamic": config["net_config"]["extern_dynamic"],
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
+
+    # if not isinstance(config["net_config"]["pod_subnet"], list):
+    #     subnet_info[-1] = config["net_config"]["pod_subnet"]
+    # else:
+    #     pod_subnets = []
+    #     for pod_subnet in config["net_config"]["pod_subnet"]:
+    #         pod_subnets.append(pod_subnet)
+    #     counter = 0
+    #     for pod_subnet in pod_subnets:
+    #         subnet_info[counter] = pod_subnet
+    #         counter += 1
+    # subnet_info.extend(config["net_config"].get("pod_subnet", []))
+    # subnet_info.extend(config["net_config"].get("node_subnet", []))
     if not isinstance(config["net_config"]["pod_subnet"], list):
         subnet_info[-1] = config["net_config"]["pod_subnet"]
     else:
@@ -1768,6 +1790,17 @@ def check_overlapping_subnets(config):
         counter = 0
         for pod_subnet in pod_subnets:
             subnet_info[counter] = pod_subnet
+            counter += 1
+
+    if not isinstance(config["net_config"]["node_subnet"], list):
+        subnet_info[-1] = config["net_config"]["node_subnet"]
+    else:
+        node_subnets = []
+        for node_subnet in config["net_config"]["node_subnet"]:
+            node_subnets.append(node_subnet)
+        # counter = 0
+        for node_subnet in node_subnets:
+            subnet_info[counter] = node_subnet
             counter += 1
 
     # Don't have extern_static field set for OpenShift flavors

@@ -209,7 +209,7 @@ data:
                 {% if config.user_config.net_config.duration_wait_for_network %}
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
-                "node_subnet": {{config.net_config.node_subnet|json}},
+                "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
                 {% if config.user_config.net_config.cluster_svc_subnet %}
                 "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}

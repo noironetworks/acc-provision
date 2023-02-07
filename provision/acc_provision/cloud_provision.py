@@ -18,7 +18,10 @@ else:
 
 
 def gwToSubnet(gw):
-    u_gw = '{}'.format(str(gw))
+    if not isinstance(gw, list):
+        u_gw = '{}'.format(str(gw))
+    else:
+        u_gw = '{}'.format('.'.join(gw))
     return str(ipaddress.ip_network(u_gw, strict=False))
 
 
@@ -299,6 +302,7 @@ class CloudProvision(object):
         adj_list = ["machine_cidr", "bootstrap_subnet", "node_subnet", "transit_subnet"]
         for nwKey in adj_list:
             if nwKey in self.config["net_config"]:
+
                 adjNw = gwToSubnet(self.config["net_config"][nwKey])
                 self.config["net_config"][nwKey] = adjNw
         if self.config["net_config"]["max_csr_tunnels"] == 0:

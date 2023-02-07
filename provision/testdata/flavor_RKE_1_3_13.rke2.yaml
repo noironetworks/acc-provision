@@ -14,7 +14,7 @@ network:
     vrf_name: "rke"
     vrf_tenant: "common" 
     l3out: "l3out"
-    node_subnet: "10.1.0.1/16"
+    node_subnet: "['10.1.0.1/16']"
     l3out_external_networks: ["\"default\",\"test_ext_net\""]
     extern_dynamic: "10.3.0.1/24"
     extern_static: "10.4.0.1/24"
