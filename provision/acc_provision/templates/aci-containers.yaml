@@ -1362,6 +1362,9 @@ data:
         {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
