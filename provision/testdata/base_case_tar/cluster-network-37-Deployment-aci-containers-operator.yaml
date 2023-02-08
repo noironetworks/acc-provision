@@ -42,7 +42,7 @@ spec:
         - name: SYSTEM_NAMESPACE
           value: kube-system
         - name: ACC_PROVISION_FLAVOR
-          value: kubernetes-1.24
+          value: kubernetes-1.25
         image: noiro/aci-containers-operator:6.0.0.0.0ef4718
         imagePullPolicy: Always
         name: aci-containers-operator
@@ -62,7 +62,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: ACC_PROVISION_FLAVOR
-          value: kubernetes-1.24
+          value: kubernetes-1.25
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
         image: noiro/acc-provision-operator:6.0.0.0.179471b
