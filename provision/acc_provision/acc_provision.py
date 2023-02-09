@@ -318,7 +318,7 @@ def config_user(config_file):
     return config
 
 
-def config_discover(config, prov_apic):
+def config_discover(config, args, prov_apic):
     apic = None
     if prov_apic is not None:
         apic = get_apic(config)
@@ -342,6 +342,8 @@ def config_discover(config, prov_apic):
             info("Using infra_vlan from ACI: %s" %
                  (infra_vlan,))
         ret["net_config"]["infra_vlan"] = infra_vlan
+        if args.cko:
+            info("Infra Vlan from ACI: %s" % (infra_vlan,))
 
     return ret
 
@@ -1989,7 +1991,7 @@ def provision(args, apic_file, no_random):
     if isOverlay(flavor):
         config["net_config"]["infra_vlan"] = None
     else:
-        config = deep_merge(config_discover(config, prov_apic), config)
+        config = deep_merge(config_discover(config, args, prov_apic), config)
 
     # Validate APIC access
     if prov_apic is not None:
