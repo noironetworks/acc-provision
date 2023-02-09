@@ -54,32 +54,3 @@ spec:
     secretKeyRef:
       name: bgp-secrets
       key: rr-password
-
----
-apiVersion: projectcalico.org/v3
-kind: Node
-metadata:
-  name: k8s-node1
-  labels:
-    rack_id: "1"
----
-apiVersion: projectcalico.org/v3
-kind: Node
-metadata:
-  name: k8s-node2
-  labels:
-    rack_id: "1"
----
-apiVersion: projectcalico.org/v3
-kind: Node
-metadata:
-  name: k8s-node3
-  labels:
-    rack_id: "2"
----
-apiVersion: projectcalico.org/v3
-kind: Node
-metadata:
-  name: k8s-node4
-  labels:
-    rack_id: "2"
