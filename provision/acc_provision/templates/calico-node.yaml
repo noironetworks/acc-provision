@@ -1,4 +1,4 @@
-apiVersion: projectcalico.org/v3
+apiVersion: v1
 kind: Node
 metadata:
   name: {{config.node_name}}
