@@ -8,3 +8,6 @@ cko_versions:
   0.9.0:
     network_operator_version: 0.9.0.d04f56f
     nettools_version: 0.9.0.d04f56f
+  0.9.1:
+    network_operator_version: 0.9.1.d04f56f
+    nettools_version: 0.9.1.d04f56f

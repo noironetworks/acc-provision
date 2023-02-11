@@ -1,0 +1,1604 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+    openshift.io/run-level: "0"
+  annotations:
+    openshift.io/node-selector: ''
+  name: netop-manager-system
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: cniops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: CniOps
+    listKind: CniOpsList
+    plural: cniops
+    singular: cniops
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: State/Phase of Installer
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    - description: Cni Type
+      jsonPath: .status.cniType
+      name: CNI-Type
+      type: string
+    - description: Cni Version
+      jsonPath: .status.cniVersion
+      name: CNI-Version
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CniOps is the Schema for the cniops API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CniOpsSpec defines the desired state of CniOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      managedComponent:
+                        default: false
+                        type: boolean
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: CniOpsStatus defines the observed state of CniOps.
+            properties:
+              cniStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              cniType:
+                type: string
+              cniVersion:
+                type: string
+              ipam:
+                type: string
+              managedState:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+              upgradeStatus:
+                properties:
+                  cniUpgradeState:
+                    type: string
+                  currentVersion:
+                    type: string
+                  previousVersion:
+                    type: string
+                type: object
+              workloadCheck:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: diagnosticops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: DiagnosticOps
+    listKind: DiagnosticOpsList
+    plural: diagnosticops
+    singular: diagnosticops
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: DiagnosticOps is the Schema for the diagnosticops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DiagnosticOpsSpec defines the desired state of DiagnosticOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      managedComponent:
+                        default: false
+                        type: boolean
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: DiagnosticOpsStatus defines the observed state of DiagnosticOps.
+            properties:
+              gStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+              type:
+                enum:
+                - connectivityChecker
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: gitops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: GitOps
+    listKind: GitOpsList
+    plural: gitops
+    singular: gitops
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: State/Phase of CR
+      jsonPath: .status.state
+      name: Phase
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: GitOps is the Schema for the gitops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GitOpsSpec defines the desired state of GitOps.
+            properties:
+              config:
+                properties:
+                  workload:
+                    description: First key should be internal child api
+                    properties:
+                      managedComponent:
+                        default: false
+                        type: boolean
+                      options:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      type:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                    - type
+                    - version
+                    type: object
+                type: object
+            type: object
+          status:
+            description: GitOpsStatus defines the observed state of GitOps.
+            properties:
+              gStatus:
+                additionalProperties:
+                  type: string
+                type: object
+              gType:
+                enum:
+                - cko-g-argo
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              state:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: installers.controller.netop-manager.io
+spec:
+  group: controller.netop-manager.io
+  names:
+    kind: Installer
+    listKind: InstallerList
+    plural: installers
+    singular: installer
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Date
+      type: date
+    - description: State/Phase of Installer
+      jsonPath: .status.operatorStatus
+      name: Phase
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Installer is the Schema for the installers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: InstallerSpec defines the desired state of Installer.
+            properties:
+              operatorConfigs:
+                properties:
+                  networking:
+                    additionalProperties:
+                      properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
+                          type: boolean
+                        options:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    type: object
+                  platform:
+                    additionalProperties:
+                      properties:
+                        arrayOptions:
+                          additionalProperties:
+                            items:
+                              type: string
+                            type: array
+                          type: object
+                        managedComponent:
+                          default: false
+                          description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
+                          type: boolean
+                        options:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          status:
+            description: InstallerStatus defines the observed state of Installer.
+            properties:
+              componentStatus:
+                additionalProperties:
+                  properties:
+                    lastUpdated:
+                      type: string
+                    mode:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: object
+              observedGeneration:
+                format: int64
+                type: integer
+              operatorStatus:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: notifications.notification-ctrlr.netop-types.io
+spec:
+  group: notification-ctrlr.netop-types.io
+  names:
+    kind: Notification
+    listKind: NotificationList
+    plural: notifications
+    singular: notification
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Notification is the Schema for the notifications API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NotificationSpec defines the desired state of Notification
+            properties:
+              clusterName:
+                description: Name of the cluster
+                type: string
+              objRef:
+                description: 'ObjectReference contains enough information to let you inspect or modify the referred object. --- New uses of this type are discouraged because of difficulty describing its usage when embedded in APIs. 1. Ignored fields.  It includes many fields which are not generally honored.  For instance, ResourceVersion and FieldPath are both very rarely valid in actual usage. 2. Invalid usage help.  It is impossible to add specific help for individual usage.  In most embedded usages, there are particular restrictions like, "must refer only to types A and B" or "UID not honored" or "name must be restricted". Those cannot be well described when embedded. 3. Inconsistent validation.  Because the usages are different, the validation rules are different by usage, which makes it hard for users to predict what will happen. 4. The fields are both imprecise and overly precise.  Kind is not a precise mapping to a URL. This can produce ambiguity during interpretation and require a REST mapping.  In most cases, the dependency is on the group,resource tuple and the version of the actual struct is irrelevant. 5. We cannot easily change it.  Because this type is embedded in many locations, updates to this type will affect numerous schemas.  Don''t make new APIs embed an underspecified API type they do not control. Instead of using this type, create a locally provided and used type that is well-focused on your reference. For example, ServiceReferences for admission registration: https://github.com/kubernetes/api/blob/release-1.17/admissionregistration/v1/types.go#L533 .'
+                properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: 'If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.'
+                    type: string
+                  kind:
+                    description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                  resourceVersion:
+                    description: 'Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                    type: string
+                  uid:
+                    description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              serializedObj:
+                description: Serialized version of referred Object
+                type: string
+            type: object
+          status:
+            description: NotificationStatus defines the observed state of Notification
+            properties:
+              state:
+                description: State of syncing this object, when syncing is enabled
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: observedops.network-function.netop-manager.io
+spec:
+  group: network-function.netop-manager.io
+  names:
+    kind: ObservedOps
+    listKind: ObservedOpsList
+    plural: observedops
+    singular: observedops
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: Type of CNI
+      jsonPath: .status.cniType
+      name: CNI-TYPE
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ObservedOps is the Schema for the observedops API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ObservedOpsSpec defines the desired state of ObservedOps.
+            properties:
+              cniConfPath:
+                default:
+                - cni/net.d
+                - /kubernetes/cni/net.d
+                items:
+                  type: string
+                type: array
+              cniMountPath:
+                default: /mnt/cni-conf
+                type: string
+              forceReconcile:
+                type: integer
+            type: object
+          status:
+            description: ObservedOpsStatus defines the observed state of ObservedOps.
+            properties:
+              Multus:
+                type: boolean
+              cniType:
+                type: string
+              cniVersion:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: netop-manager-leader-election-role
+  namespace: netop-manager-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: netop-manager-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - events
+  - namespaces
+  - nodes
+  - pods
+  - podtemplates
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  - deployments
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - controller.netop-manager.io
+  resources:
+  - installers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - controller.netop-manager.io
+  resources:
+  - installers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - controller.netop-manager.io
+  resources:
+  - installers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmap
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nettools.debug
+  resources:
+  - connectivitycheckers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nettools.debug
+  resources:
+  - connectivitycheckers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - connectivitycheckers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nettools.debug
+  resources:
+  - errorpodsreportings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - cniops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - diagnosticops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - gitops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network-function.netop-manager.io
+  resources:
+  - observedops/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - notification-ctrlr.netop-types.io
+  resources:
+  - notifications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - amazoncloudintegrations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - amazoncloudintegrations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - apiservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - apiservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - applicationlayers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - applicationlayers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - authentications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - authentications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - compliances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - compliances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - installations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - installations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - intrusiondetections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - intrusiondetections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logcollectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logcollectors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logstorages
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - logstorages/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managementclusterconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managementclusterconnections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - managers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - monitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.tigera.io
+  resources:
+  - monitors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgpconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgpconfigurations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgppeers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - projectcalico.org
+  resources:
+  - bgppeers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrole
+  - clusterrolebinding
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - bind
+  - create
+  - delete
+  - escalate
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - priorityclasses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: netop-manager-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: netop-manager-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: netop-manager-leader-election-rolebinding
+  namespace: netop-manager-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: netop-manager-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: netop-manager-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: netop-manager-manager-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: netop-manager-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: netop-manager-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+---
+apiVersion: v1
+data:
+  controller_manager_config.yaml: |
+    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+    kind: ControllerManagerConfig
+    health:
+      healthProbeBindAddress: :8081
+    metrics:
+      bindAddress: 127.0.0.1:9999
+    webhook:
+      port: 9443
+    leaderElection:
+      leaderElect: true
+      resourceName: 51681485.netop-manager.io
+    # leaderElectionReleaseOnCancel: true
+kind: ConfigMap
+metadata:
+  name: netop-manager-manager-config
+  namespace: netop-manager-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: netop-manager-controller-manager-metrics-service
+  namespace: netop-manager-system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: netop-manager-controller-manager
+  namespace: netop-manager-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:9999/
+        - --logtostderr=true
+        - --v=2
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      - args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:9999
+        - --leader-elect
+        - --zap-log-level=2
+        command:
+        - /manager
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              key: serverIP
+              name: websocket-config
+              optional: true
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: serverPort
+              name: websocket-config
+              optional: true
+        - name: SYSTEM_ID
+          valueFrom:
+            secretKeyRef:
+              key: systemid
+              name: cko-config
+        - name: HTTP_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: http_proxy
+              name: cko-config
+              optional: true
+        - name: HTTPS_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: https_proxy
+              name: cko-config
+              optional: true
+        - name: NO_PROXY
+          valueFrom:
+            secretKeyRef:
+              key: no_proxy
+              name: cko-config
+              optional: true
+        - name: GIT_REPO
+          valueFrom:
+            secretKeyRef:
+              key: repo
+              name: cko-config
+              optional: true
+        - name: GIT_DIR
+          valueFrom:
+            secretKeyRef:
+              key: dir
+              name: cko-config
+              optional: true
+        - name: GIT_BRANCH
+          valueFrom:
+            secretKeyRef:
+              key: branch
+              name: cko-config
+              optional: true
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: cko-config
+              optional: true
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: cko-config
+              optional: true
+        - name: GIT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: cko-config
+              optional: true
+        - name: DISABLE_CANARY_INSTALLER
+          value: "false"
+        image: quay.io/ckodev/netop-manager:0.9.1.d04f56f
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 500m
+            memory: 128Mi
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /mnt/cni-config
+          name: cni-config-volume
+      hostNetwork: true
+      priorityClassName: netop-priority
+      securityContext:
+        runAsNonRoot: false
+      serviceAccountName: netop-manager-controller-manager
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /opt
+        name: cni-bin
+      - hostPath:
+          path: /etc
+        name: cni-conf
+      - configMap:
+          name: netop-manager-cni-config
+          optional: true
+        name: cni-config-volume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netop-manager-cni-config
+  namespace: netop-manager-system
+data:
+  cniconfig.yaml: |-
+    cniConfig:
+      cko-cni-calico:
+      - "01-calico.conflist"
+      - "01-calico.conf"
+      - "10-calico.conflist"
+      - "10-calico.conf"
+      cko-cni-aci:
+      - "01-opflex-cni.conf"
+      - "10-opflex-cni.conf"
+      cko-cni-cilium:
+      - "05-cilium.conf"
+      cko-cni-awsvpc:
+      - "10-aws.conflist"
+      - "10-aws.conf"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: netop-priority
+value: 1000000000
+globalDefault: false
+description: "This priority class is used for netop-manager resources"
