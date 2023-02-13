@@ -203,6 +203,7 @@ def config_default():
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
+            "advertise_cluster_svc_subnet": False,
         },
         "topology": {
             "rack": {
