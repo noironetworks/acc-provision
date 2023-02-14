@@ -37,7 +37,7 @@ net_config:
   pod_subnet: 20.2.0.0/16           # Subnet to use for Kubernetes Pods
   extern_dynamic: 20.3.0.0/16       # Subnet to use for Service External IPs and Service LoadBalancer IPs to be advertised over BGP.
   cluster_svc_subnet: 10.96.0.0/12  # Subnet to use for Kubernetes Service Cluster IPs to be advertised over BGP
-
+  # advertise_cluster_svc_subnet: false # Do not advertise cluster ip subnet
 #
 # Configuration for calico networking
 #

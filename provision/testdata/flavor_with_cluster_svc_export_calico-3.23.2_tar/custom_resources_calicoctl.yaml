@@ -7,6 +7,8 @@ spec:
   asNumber: 64512
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
+  serviceClusterIPs:
+  - cidr: 10.96.0.0/12
   serviceExternalIPs:
   - cidr: 20.3.0.0/16
   serviceLoadBalancerIPs:

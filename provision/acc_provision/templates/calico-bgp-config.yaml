@@ -7,8 +7,10 @@ spec:
   asNumber: {{ config.aci_config.cluster_l3out.bgp.peering.remote_as_number }}
   logSeverityScreen: Info
   nodeToNodeMeshEnabled: false
+  {% if config.net_config.advertise_cluster_svc_subnet %}
   serviceClusterIPs:
   - cidr: {{ config.net_config.cluster_svc_subnet }}
+  {% endif %}
   serviceExternalIPs:
   - cidr: {{ config.net_config.extern_dynamic }}
   serviceLoadBalancerIPs:
