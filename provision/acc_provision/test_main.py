@@ -1041,6 +1041,18 @@ def test_flavor_calico_3_23_2_base_case():
 
 
 @in_testdir
+def test_flavor_with_cluster_svc_export_calico_3_23_2():
+    run_provision(
+        "flavor_with_cluster_svc_export_calico-3.23.2.inp.yaml",
+        None,
+        "flavor_with_cluster_svc_export_calico-3.23.2_tar",
+        None,
+        "flavor_with_cluster_svc_export_calico-3.23.2.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
 def test_flavor_calico_3_23_2_overrides():
     run_provision(
         "flavor_calico-3.23.2_overrides.inp.yaml",

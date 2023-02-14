@@ -466,16 +466,6 @@
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
-            },
-            {
-                "l3extSubnet": {
-                    "attributes": {
-                        "ip": "10.96.0.0/12",
-                        "aggregate": "shared-rtctrl",
-                        "scope": "export-rtctrl,import-rtctrl,import-security",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
             }
         ]
     }
@@ -651,15 +641,6 @@
                 "rtctrlMatchRtDest": {
                     "attributes": {
                         "ip": "2.100.101.0/24",
-                        "aggregate": "yes",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "rtctrlMatchRtDest": {
-                    "attributes": {
-                        "ip": "10.96.0.0/12",
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
