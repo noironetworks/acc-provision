@@ -941,6 +941,7 @@ def config_validate(flavor_opts, config):
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                               required),
         }
+
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -1654,15 +1655,17 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
             if prov_apic is False:
                 info("Unprovisioning configuration in APIC")
                 system_id = config["aci_config"]["system_id"]
-                tenant = config["aci_config"]["vrf"]["tenant"]
+                cluster_l3out_vrf_details = configurator.get_cluster_l3out_vrf_details()
+                cluster_l3out_tenant = cluster_l3out_vrf_details["tenant"]
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
                 if is_calico_flavor(config["flavor"]):
                     l3out_name = config["aci_config"]["cluster_l3out"]["name"]
-                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name=l3out_name)
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config,
+                                     l3out_name=l3out_name, cluster_l3out_vrf_details=cluster_l3out_vrf_details)
                 else:
-                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config)
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config)
             ret = False if apic.errors > 0 else True
     return ret
 
