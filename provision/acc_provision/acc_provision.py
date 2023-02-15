@@ -196,6 +196,7 @@ def config_default():
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
+            "advertise_cluster_svc_subnet": False,
         },
         "topology": {
             "rack": {
@@ -1420,8 +1421,8 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
-        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output + bgp_node
+        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer
         acc_provision_yaml = get_jinja_template('acc-provision-configmap.yaml').render(config=config)
         custom_resources_aci_calico_yaml += "\n---\n" + acc_provision_yaml
         with open("custom_resources_aci_calico.yaml", "w") as fh:

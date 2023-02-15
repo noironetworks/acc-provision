@@ -7034,6 +7034,8 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        if not self.config["net_config"]["advertise_cluster_svc_subnet"]:
+            del data["l3extInstP"]["children"][3]
         self.annotateApicObjects(data)
         return path, data
 
@@ -7528,6 +7530,8 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        if not self.config["net_config"]["advertise_cluster_svc_subnet"]:
+            del data["rtctrlSubjP"]["children"][2]
         self.annotateApicObjects(data)
         return path, data
 
