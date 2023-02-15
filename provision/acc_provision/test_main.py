@@ -1139,6 +1139,7 @@ def test_flavor_calico_3_23_2_multiple_vrf_uc3():
     )
 
 
+@in_testdir
 def test_flavor_with_cluster_svc_export_calico_3_23_2():
     run_provision(
         "flavor_with_cluster_svc_export_calico-3.23.2.inp.yaml",
