@@ -700,15 +700,6 @@
             {
                 "rtctrlMatchRtDest": {
                     "attributes": {
-                        "ip": "10.96.0.0/12",
-                        "aggregate": "yes",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "rtctrlMatchRtDest": {
-                    "attributes": {
                         "ip": "20.3.0.0/16",
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"

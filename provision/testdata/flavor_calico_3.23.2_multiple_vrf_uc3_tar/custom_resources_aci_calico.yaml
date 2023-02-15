@@ -175,6 +175,38 @@ subjects:
   namespace: kube-system
 ---
 apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node1
+  labels:
+    rack_id: "1"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node2
+  labels:
+    rack_id: "1"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node3
+  labels:
+    rack_id: "2"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node4
+  labels:
+    rack_id: "2"
+
+---
+apiVersion: v1
 kind: Namespace
 metadata:
   name: aci-containers-system
