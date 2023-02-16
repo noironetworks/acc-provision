@@ -2077,7 +2077,6 @@ class ApicKubeConfig(object):
     def add_vmm_domain_association(self):
         # url: https://10.30.120.180/api/node/mo/uni/tn-ocp4aci/ap-aci-containers-ocp4aci/epg-aci-containers-nodes.json
         # payload{"fvRsDomAtt":{"attributes":{"resImedcy":"immediate","tDn":"uni/vmmp-VMware/dom-hypflex-vswitch","instrImedcy":"immediate","encap":"vlan-35","status":"created"},"children":[{"vmmSecP":{"attributes":{"status":"created"},"children":[]}}]}}
-
         system_id = self.config["aci_config"]["system_id"]
         tn_name = self.config["aci_config"]["cluster_tenant"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
@@ -2115,6 +2114,58 @@ class ApicKubeConfig(object):
             ]
         )
         data["fvRsDomAtt"]["children"] = []
+
+        nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
+        if nvmm_elag_name:
+            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (nvmm_name, nvmm_elag_name)
+            data["fvRsDomAtt"]["children"].append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvAEPgLagPolAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("annotation", ""),
+                                                ("userdom", ":all:")
+                                            ]
+                                        )
+                                    ),
+                                    (
+                                        "children",
+                                        [
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "fvRsVmmVSwitchEnhancedLagPol",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "attributes",
+                                                                    collections.OrderedDict(
+                                                                        [
+                                                                            ("annotation", ""),
+                                                                            ("tDn", nvmm_elag_dn),
+                                                                            ("userdom", ":all:")
+                                                                        ]
+                                                                    )
+                                                                )
+                                                            ]
+                                                        )
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
 
         self.annotateApicObjects(data)
         return path, data
