@@ -1,0 +1,53 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 02-worker-kubelet
+spec:
+  config:
+    ignition:
+      version: 3.1.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Kubernetes Kubelet
+          Wants=rpc-statd.service network-online.target crio.service
+          After=network-online.target crio.service
+
+          [Service]
+          Type=notify
+          ExecStartPre=/bin/mkdir --parents /etc/kubernetes/manifests
+          ExecStartPre=/bin/rm -f /var/lib/kubelet/cpu_manager_state
+          ExecStartPre=/bin/bash -c "/bin/systemctl set-environment ip=$(/sbin/ip -o -4 addr list ens192 | awk '{print $4}' | cut -d/ -f1)"
+          Environment="KUBELET_LOG_LEVEL=4"
+          EnvironmentFile=/etc/os-release
+          EnvironmentFile=-/etc/kubernetes/kubelet-workaround
+          EnvironmentFile=-/etc/kubernetes/kubelet-env
+
+          ExecStart=/usr/bin/hyperkube \
+              kubelet \
+                --config=/etc/kubernetes/kubelet.conf \
+                --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
+                --kubeconfig=/var/lib/kubelet/kubeconfig \
+                --container-runtime=remote \
+                --container-runtime-endpoint=/var/run/crio/crio.sock \
+                --runtime-cgroups=/system.slice/crio.service \
+                --node-labels=node-role.kubernetes.io/worker,node.openshift.io/os_id=${ID} \
+                --address=${ip} \
+                --node-ip=${ip} \
+                --minimum-container-ttl-duration=6m0s \
+                --volume-plugin-dir=/etc/kubernetes/kubelet-plugins/volume/exec \
+                --cloud-provider=vsphere \
+                --cloud-config=/etc/kubernetes/cloud.conf \
+                --pod-infra-container-image=quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:bd7e5d50fe2bd9a217ef3e2f17fb9e2c65366d59f4444e16f899ba6b967ce3b4 \
+                --v=${KUBELET_LOG_LEVEL}
+
+          Restart=always
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+        enabled: true
+        name: kubelet.service
