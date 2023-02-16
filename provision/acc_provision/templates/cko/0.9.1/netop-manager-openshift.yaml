@@ -1453,6 +1453,7 @@ spec:
             secretKeyRef:
               key: systemid
               name: cko-config
+              optional: true
         - name: HTTP_PROXY
           valueFrom:
             secretKeyRef:
@@ -1477,7 +1478,7 @@ spec:
               key: repo
               name: cko-config
               optional: true
-        - name: GIT_DIR
+        - name: GIT_LOCAL_DIR
           valueFrom:
             secretKeyRef:
               key: dir
