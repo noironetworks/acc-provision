@@ -1,9 +1,11 @@
 {% if config.user_config.aci_config.cluster_l3out %}
+{% if config.user_config.aci_config.cluster_l3out.aep %}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ config.kube_config.system_namespace }}
 ---
+{% endif %}
 {% endif %}
 
 apiVersion: v1
