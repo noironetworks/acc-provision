@@ -1536,13 +1536,17 @@ data:
             "level": {{config.logging.opflexagent_log_level|json}}
         },
         "opflex": {
-            "notif" : { "enabled" : "false" }
+            "notif" : { "enabled" : "false" },
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
           {% if not config.aci_config.client_ssl %}
             ,"ssl": { "mode": "disabled" }
           {% endif %}
           {% if config.kube_config.run_gbp_container %}
             ,"statistics" : { "mode" : "off" }
           {% endif %}
+        },
+        "ovs": {
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
         },
         "prometheus": {
             "enabled": "false"
