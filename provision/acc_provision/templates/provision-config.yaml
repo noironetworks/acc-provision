@@ -90,6 +90,9 @@ registry:
 
   #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
   #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
+  # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
+  # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
+
 #
 # Configuration for ACI CNI Operator
 #
