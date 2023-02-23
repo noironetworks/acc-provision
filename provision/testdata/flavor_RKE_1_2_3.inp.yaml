@@ -17,6 +17,7 @@ aci_config:
     name: l3out
     external_networks:
     - default
+    - test_ext_net
   sync_login:
     certfile: user.crt
     keyfile: user.key

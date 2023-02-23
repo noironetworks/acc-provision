@@ -1349,7 +1349,7 @@ def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, op
             template.stream(config=config).dump(operator_output)
 
 
-def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_1_3_17_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-network-provider-cluster-1-3-17.yaml')
         outname = operator_output
@@ -1372,7 +1372,7 @@ def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
-def generate_rancher_1_3_18_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_1_3_18_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
         template = get_jinja_template('aci-network-provider-cluster-1-3-18.yaml')
         outname = operator_output
