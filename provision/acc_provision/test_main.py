@@ -1099,7 +1099,7 @@ def test_flavor_with_cluster_svc_export_calico_3_23_2():
 
 
 @in_testdir
-def test_flavor_openshift_44_esx_vDS_6_6_above():
+def test_flvr_openshift_44_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_44_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_44_esx_vDS_6_6_above.kube.yaml",
@@ -1111,7 +1111,7 @@ def test_flavor_openshift_44_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_45_esx_vDS_6_6_above():
+def test_flvr_openshift_45_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_45_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_45_esx_vDS_6_6_above.kube.yaml",
@@ -1123,7 +1123,7 @@ def test_flavor_openshift_45_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_46_esx_vDS_6_6_above():
+def test_flvr_openshift_46_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_46_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_46_esx_vDS_6_6_above.kube.yaml",
@@ -1135,7 +1135,7 @@ def test_flavor_openshift_46_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_47_esx_vDS_6_6_above():
+def test_flvr_openshift_47_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_47_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_47_esx_vDS_6_6_above.kube.yaml",
@@ -1147,7 +1147,7 @@ def test_flavor_openshift_47_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_48_esx_vDS_6_6_above():
+def test_flvr_openshift_48_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_48_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_48_esx_vDS_6_6_above.kube.yaml",
@@ -1159,7 +1159,7 @@ def test_flavor_openshift_48_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_49_esx_vDS_6_6_above():
+def test_flvr_openshift_49_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_49_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_49_esx_vDS_6_6_above.kube.yaml",
@@ -1171,7 +1171,7 @@ def test_flavor_openshift_49_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_410_esx_vDS_6_6_above():
+def test_flvr_openshift_410_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_410_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_410_esx_vDS_6_6_above.kube.yaml",
@@ -1183,7 +1183,7 @@ def test_flavor_openshift_410_esx_vDS_6_6_above():
 
 
 @in_testdir
-def test_flavor_openshift_411_esx_vDS_6_6_above():
+def test_flvr_openshift_411_esx_vDS_6_6_above():
     run_provision(
         "flavor_openshift_411_esx_vDS_6_6_above.inp.yaml",
         "flavor_openshift_411_esx_vDS_6_6_above.kube.yaml",
