@@ -1,0 +1,17 @@
+#This section disables BGP full mesh between the K8s nodes and set the serviceClusterIPs and serviceExternalIPs subnets so that they can be advertised by eBGP. These subnets are the Service and External Service subnets in Kubernetes.
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  asNumber: {{ config.aci_config.cluster_l3out.bgp.peering.remote_as_number }}
+  logSeverityScreen: Info
+  nodeToNodeMeshEnabled: false
+  {% if config.net_config.advertise_cluster_svc_subnet %}
+  serviceClusterIPs:
+  - cidr: {{ config.net_config.cluster_svc_subnet }}
+  {% endif %}
+  serviceExternalIPs:
+  - cidr: {{ config.net_config.extern_dynamic }}
+  serviceLoadBalancerIPs:
+  - cidr: {{ config.net_config.extern_dynamic }}

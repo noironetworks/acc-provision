@@ -1342,12 +1342,8 @@ data:
             "level": "debug"
         },
         "opflex": {
-            "notif" : { "enabled" : "false" },
-            "asyncjson": { "enabled" : "false" }
+            "notif" : { "enabled" : "false" }
             ,"statistics" : { "mode" : "off" }
-        },
-        "ovs": {
-            "asyncjson": { "enabled" : "false" }
         },
         "prometheus": {
             "enabled": "false"

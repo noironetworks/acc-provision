@@ -1,0 +1,167 @@
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: accprovisioninputs.aci.ctrl
+spec:
+  group: aci.ctrl
+  names:
+    kind: AccProvisionInput
+    listKind: AccProvisionInputList
+    plural: accprovisioninputs
+    singular: accprovisioninput
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        description: accprovisioninput defines the input configuration for ACI CNI
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AccProvisionInputSpec defines the desired spec for accprovisioninput object
+            properties:
+              acc_provision_input:
+                type: object
+                properties:
+                  operator_managed_config:
+                    type: object
+                    properties:
+                      enable_updates:
+                        type: boolean
+                  aci_config:
+                    type: object
+                    properties:
+                      sync_login:
+                        type: object
+                        properties:
+                          certfile:
+                            type: string
+                          keyfile:
+                            type: string
+                      client_ssl:
+                        type: boolean
+                  net_config:
+                    type: object
+                    properties:
+                      interface_mtu:
+                        type: integer
+                      service_monitor_interval:
+                        type: integer
+                      pbr_tracking_non_snat:
+                        type: boolean
+                      pod_subnet_chunk_size:
+                        type: integer
+                      disable_wait_for_network:
+                        type: boolean
+                      duration_wait_for_network:
+                        type: integer
+                  registry:
+                    type: object
+                    properties:
+                      image_prefix:
+                        type: string
+                      image_pull_secret:
+                        type: string
+                      aci_containers_operator_version:
+                        type: string
+                      aci_containers_controller_version:
+                        type: string
+                      aci_containers_host_version:
+                        type: string
+                      acc_provision_operator_version:
+                        type: string
+                      aci_cni_operator_version:
+                        type: string
+                      cnideploy_version:
+                        type: string
+                      opflex_agent_version:
+                        type: string
+                      openvswitch_version:
+                        type: string
+                      gbp_version:
+                        type: string
+                  logging:
+                    type: object
+                    properties:
+                      size:
+                        type: integer
+                      controller_log_level:
+                        type: string
+                      hostagent_log_level:
+                        type: string
+                      opflexagent_log_level:
+                        type: string
+                  istio_config:
+                    type: object
+                    properties:
+                      install_istio:
+                        type: boolean
+                      install_profile:
+                        type: string
+                  multus:
+                    type: object
+                    properties:
+                      disable:
+                        type: boolean
+                  drop_log_config:
+                    type: object
+                    properties:
+                      enable:
+                        type: boolean
+                  nodepodif_config:
+                    type: object
+                    properties:
+                      enable:
+                        type: boolean
+                  sriov_config:
+                    type: object
+                    properties:
+                      enable:
+                        type: boolean
+                  kube_config:
+                    type: object
+                    properties:
+                      ovs_memory_limit:
+                        type: string
+                      use_privileged_containers:
+                        type: boolean
+                      image_pull_policy:
+                        type: string
+                      reboot_opflex_with_ovs:
+                        type: string
+                      snat_operator:
+                        type: object
+                        properties:
+                          port_range:
+                            type: object
+                            properties:
+                              start:
+                                type: integer
+                              end:
+                                type: integer
+                              ports_per_node:
+                                type: integer
+                          contract_scope:
+                            type: string
+                          disable_periodic_snat_global_info_sync:
+                            type: boolean
+            type: object
+          status:
+            description: AccProvisionInputStatus defines the successful completion of AccProvisionInput
+            properties:
+              status:
+                type: boolean
+            type: object
+        required:
+        - spec
+        type: object
