@@ -50,17 +50,6 @@ kube_config:
   snat_operator:
     disable_periodic_snat_global_info_sync: True
 
-registry:
-  image_prefix: noirolabs
-  aci_containers_controller_version: jefferson-test
-  aci_containers_host_version: master-test
-  aci_containers_operator_version: jefferson-test
-  cnideploy_version: jefferson-test
-  openvswitch_version: jefferson-test
-  opflex_agent_version: jefferson-test
-  opflex_server_version: jefferson-test
-  gbp_version: jefferson-test
-
 logging:
   controller_log_level: info
   hostagent_log_level: info
