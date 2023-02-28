@@ -7,7 +7,6 @@ import base64
 import copy
 import functools
 import ipaddress
-from pathlib import Path
 import requests
 import json
 import os
@@ -1396,11 +1395,6 @@ def generate_calico_deployment_files(args, config, network_operator_output):
         ver = str(config["registry"]["version"])
 
     print("Target version is ", ver)
-    currentpath = Path().absolute()
-
-    if not os.path.exists(str(currentpath.parent.absolute()) + '/acc_provision/templates/cni/calico/' + ver):
-        err("Template not found at " + str(currentpath.parent.absolute()) + '/acc_provision/templates/cni/calico/' + ver)
-        return False
 
     if network_operator_output and network_operator_output != "/dev/null":
         calico_crds_template = get_jinja_template('cni/calico/' + ver + '/tigera-operator.yaml')
@@ -1501,12 +1495,6 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         ver = str(config["registry"]["version"])
 
     print("Target version is ", ver)
-
-    currentpath = Path().absolute()
-
-    if not os.path.exists(str(currentpath.parent.absolute()) + '/acc_provision/templates/cni/aci/' + ver):
-        err("Template not found at " + str(currentpath.parent.absolute()) + '/acc_provision/templates/cni/aci/' + ver)
-        return False
 
     if config["kube_config"].get("use_openshift_security_context_constraints",
                                  False):
