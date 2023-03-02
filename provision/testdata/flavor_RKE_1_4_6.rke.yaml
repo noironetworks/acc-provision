@@ -12,7 +12,7 @@ network:
     mcast_range_end: "225.2.255.255"
     aep: "rke-aep"
     vrf_name: "rke"
-    vrf_tenant: "common" 
+    vrf_tenant: "common"
     l3out: "l3out"
     node_subnet: "10.1.0.1/16,11.1.0.1/16"
     l3out_external_networks: ["\"default\",\"test_ext_net\""]
@@ -22,8 +22,8 @@ network:
     kube_api_vlan: "4001"
     service_vlan: "4003"
     infra_vlan: "4093"
-    tenant: "tenant-1" 
-    service_monitor_interval: "5" 
+    tenant: "tenant-1"
+    service_monitor_interval: "5"
     apic_refresh_ticker_adjust: "1"
     apic_subscription_delay: "1"
     opflex_device_delete_timeout: "1"
@@ -49,4 +49,4 @@ network:
     opflex_agent_policy_retry_delay_timer: "90"
 services:
   kube-controller:
-    cluster_cidr: "10.2.0.1/16,12.3.0.1/16"  
+    cluster_cidr: "10.2.0.1/16,12.3.0.1/16"

@@ -62,7 +62,7 @@ network:
     opflex_device_reconnect_wait_timeout: "10"
 services:
   kube-controller:
-    cluster_cidr: "10.2.0.1/16,12.3.0.1/16"  
+    cluster_cidr: "10.2.0.1/16,12.3.0.1/16"
 system_images:
   aci_cni_deploy_container: quay.io/noiro/cnideploy@sha256:96f1df66843660905fa2cb07b058d8ecc5cb956c4799d661459cc0bfdfd291d2
   aci_host_container: quay.io/noiro/aci-containers-host@sha256:d37de5ac9093dff471c0602a79064a7cbac85f6513785ed86eb037ef8740ceed

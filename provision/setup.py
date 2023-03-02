@@ -46,5 +46,6 @@ setup(
           'pyopenssl',
           'MarkupSafe',
           'boto3',
+          'ruamel.yaml'
     ],
 )
