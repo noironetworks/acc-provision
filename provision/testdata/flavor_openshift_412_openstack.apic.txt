@@ -20,28 +20,6 @@
         ]
     }
 }
-/api/mo/uni/infra/vlanns-[kube-vpool]-dynamic.json
-{
-    "fvnsVlanInstP": {
-        "attributes": {
-            "name": "kube-vpool",
-            "allocMode": "dynamic",
-            "annotation": "orchestrator:aci-containers-controller"
-        },
-        "children": [
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "allocMode": "dynamic",
-                        "from": "vlan-1000",
-                        "to": "vlan-2000",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            }
-        ]
-    }
-}
 /api/mo/uni/infra/maddrns-kube-mpool.json
 {
     "fvnsMcastAddrInstP": {
@@ -54,8 +32,8 @@
             {
                 "fvnsMcastAddrBlk": {
                     "attributes": {
-                        "from": "225.20.1.1",
-                        "to": "225.20.255.255",
+                        "from": "225.2.1.1",
+                        "to": "225.2.255.255",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -90,8 +68,8 @@
             "name": "kube",
             "mode": "openshift",
             "enfPref": "sw",
-            "encapMode": "vlan",
-            "prefEncapMode": "vlan",
+            "encapMode": "vxlan",
+            "prefEncapMode": "vxlan",
             "mcastAddr": "225.1.2.3",
             "annotation": "orchestrator:aci-containers-controller"
         },
@@ -111,62 +89,6 @@
                 "vmmRsDomMcastAddrNs": {
                     "attributes": {
                         "tDn": "uni/infra/maddrns-kube-mpool",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "infraRsVlanNs": {
-                    "attributes": {
-                        "tDn": "uni/infra/vlanns-[kube-vpool]-dynamic",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            }
-        ]
-    }
-}
-/api/mo/uni/vmmp-VMware/dom-myvmware/usrcustomaggr-kube-test.json
-{
-    "vmmUsrCustomAggr": {
-        "attributes": {
-            "name": "kube-test",
-            "promMode": "Enabled",
-            "annotation": "orchestrator:aci-containers-controller"
-        },
-        "children": [
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-4093",
-                        "to": "vlan-4093",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-4003",
-                        "to": "vlan-4003",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-4001",
-                        "to": "vlan-4001",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            },
-            {
-                "fvnsEncapBlk": {
-                    "attributes": {
-                        "from": "vlan-1000",
-                        "to": "vlan-2000",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -225,26 +147,6 @@
                         }
                     ]
                 }
-            },
-            {
-                "infraGeneric": {
-                    "attributes": {
-                        "name": "default",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    },
-                    "children": [
-                        {
-                            "infraRsFuncToEpg": {
-                                "attributes": {
-                                    "tDn": "uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes",
-                                    "encap": "vlan-4001",
-                                    "mode": "regular",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        }
-                    ]
-                }
             }
         ]
     }
@@ -253,7 +155,7 @@
 None
 /api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/phys-kube-pdom].json
 None
-/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes].json
+/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-kube/ap-kubernetes/epg-kube-nodes].json
 None
 /api/mo/uni/infra.json
 {
@@ -340,14 +242,14 @@ None
             {
                 "fvAp": {
                     "attributes": {
-                        "name": "aci-containers-kube",
+                        "name": "kubernetes",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "aci-containers-default",
+                                    "name": "kube-default",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 },
                                 "children": [
@@ -362,7 +264,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "tnVzBrCPName": "dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -370,7 +272,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-health-check",
+                                                "tnVzBrCPName": "health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -378,7 +280,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "tnVzBrCPName": "icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -386,7 +288,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-istio",
+                                                "tnVzBrCPName": "istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -394,7 +296,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-kube-pod-bd",
+                                                "tnFvBDName": "kube-pod-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -402,7 +304,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -418,7 +320,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -442,7 +344,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -453,14 +355,14 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "aci-containers-system",
+                                    "name": "kube-system",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 },
                                 "children": [
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "tnVzBrCPName": "dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -468,7 +370,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "tnVzBrCPName": "icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -476,7 +378,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-health-check",
+                                                "tnVzBrCPName": "health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -484,7 +386,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "tnVzBrCPName": "icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -492,7 +394,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -516,7 +418,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-kube-pod-bd",
+                                                "tnFvBDName": "kube-pod-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -524,7 +426,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -532,7 +434,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "tnVzBrCPName": "dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -564,7 +466,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -575,14 +477,14 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "aci-containers-nodes",
+                                    "name": "kube-nodes",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 },
                                 "children": [
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "tnVzBrCPName": "dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -590,7 +492,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -598,7 +500,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "tnVzBrCPName": "icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -606,7 +508,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-health-check",
+                                                "tnVzBrCPName": "health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -630,7 +532,7 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-kube-node-bd",
+                                                "tnFvBDName": "kube-node-bd",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -654,7 +556,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -665,14 +567,14 @@ None
                         {
                             "fvAEPg": {
                                 "attributes": {
-                                    "name": "aci-containers-istio",
+                                    "name": "kube-istio",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 },
                                 "children": [
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-istio",
+                                                "tnVzBrCPName": "istio",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -680,7 +582,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-api",
+                                                "tnVzBrCPName": "kube-api",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -688,7 +590,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-icmp",
+                                                "tnVzBrCPName": "icmp",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -696,7 +598,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-health-check",
+                                                "tnVzBrCPName": "health-check",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -704,7 +606,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "tnVzBrCPName": "dns",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -720,7 +622,219 @@ None
                                     {
                                         "fvRsBd": {
                                             "attributes": {
-                                                "tnFvBDName": "aci-containers-kube-pod-bd",
+                                                "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "group1",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-OpenShift/dom-kube",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "group2",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-OpenShift/dom-kube",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "kube-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "openshift-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -734,20 +848,11 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "aci-containers-kube-node-bd",
+                        "name": "kube-node-bd",
                         "arpFlood": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
-                        {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.1.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
                         {
                             "fvRsCtx": {
                                 "attributes": {
@@ -770,7 +875,7 @@ None
             {
                 "fvBD": {
                     "attributes": {
-                        "name": "aci-containers-kube-pod-bd",
+                        "name": "kube-pod-bd",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -805,7 +910,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-icmp-filter",
+                        "name": "icmp-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -835,7 +940,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-health-check-filter-in",
+                        "name": "health-check-filter-in",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -857,7 +962,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-health-check-filter-out",
+                        "name": "health-check-filter-out",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -879,7 +984,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-dns-filter",
+                        "name": "dns-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -971,14 +1076,14 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-api-filter",
+                        "name": "kube-api-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "aci-containers-api",
+                                    "name": "kube-api",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "6443",
@@ -992,7 +1097,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "aci-containers-api2",
+                                    "name": "kube-api2",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "8443",
@@ -1010,7 +1115,7 @@ None
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "2379",
-                                    "dToPort": "2379",
+                                    "dToPort": "2380",
                                     "stateful": "no",
                                     "tcpRules": "",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -1023,7 +1128,7 @@ None
                                     "name": "openshift-etcd2",
                                     "etherT": "ip",
                                     "prot": "tcp",
-                                    "dFromPort": "9979",
+                                    "dFromPort": "9978",
                                     "dToPort": "9979",
                                     "stateful": "no",
                                     "tcpRules": "",
@@ -1065,7 +1170,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-istio-filter",
+                        "name": "istio-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1145,14 +1250,14 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-api",
+                        "name": "kube-api",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
                         {
                             "vzSubj": {
                                 "attributes": {
-                                    "name": "aci-containers-api-subj",
+                                    "name": "kube-api-subj",
                                     "consMatchT": "AtleastOne",
                                     "provMatchT": "AtleastOne",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -1161,7 +1266,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-kube-api-filter",
+                                                "tnVzFilterName": "kube-api-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1175,7 +1280,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-health-check",
+                        "name": "health-check",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1199,7 +1304,7 @@ None
                                                 {
                                                     "vzRsFiltAtt": {
                                                         "attributes": {
-                                                            "tnVzFilterName": "aci-containers-kube-health-check-filter-out",
+                                                            "tnVzFilterName": "health-check-filter-out",
                                                             "annotation": "orchestrator:aci-containers-controller"
                                                         }
                                                     }
@@ -1217,7 +1322,7 @@ None
                                                 {
                                                     "vzRsFiltAtt": {
                                                         "attributes": {
-                                                            "tnVzFilterName": "aci-containers-kube-health-check-filter-in",
+                                                            "tnVzFilterName": "health-check-filter-in",
                                                             "annotation": "orchestrator:aci-containers-controller"
                                                         }
                                                     }
@@ -1234,7 +1339,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-dns",
+                        "name": "dns",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1250,7 +1355,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-kube-dns-filter",
+                                                "tnVzFilterName": "dns-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1264,7 +1369,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-icmp",
+                        "name": "icmp",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1280,7 +1385,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-kube-icmp-filter",
+                                                "tnVzFilterName": "icmp-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1294,7 +1399,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-istio",
+                        "name": "istio",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1310,7 +1415,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-kube-istio-filter",
+                                                "tnVzFilterName": "istio-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1698,7 +1803,7 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "aci-containers-kube-prometheus-opflex-agent-filter",
+                        "name": "prometheus-opflex-agent-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1722,7 +1827,7 @@ None
             {
                 "vzBrCP": {
                     "attributes": {
-                        "name": "aci-containers-kube-prometheus-opflex-agent",
+                        "name": "prometheus-opflex-agent",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
                     "children": [
@@ -1738,7 +1843,7 @@ None
                                     {
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
-                                                "tnVzFilterName": "aci-containers-kube-prometheus-opflex-agent-filter",
+                                                "tnVzFilterName": "prometheus-opflex-agent-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1750,33 +1855,6 @@ None
                 }
             }
         ]
-    }
-}
-/api/node/mo/vlan-pool-test/from-[vlan-4001]-to-[vlan-4001].json
-{
-    "fvnsEncapBlk": {
-        "attributes": {
-            "dn": "vlan-pool-test/from-[vlan-4001]-to-[vlan-4001]",
-            "allocMode": "static",
-            "from": "vlan-4001",
-            "to": "vlan-4001",
-            "rn": "from-[vlan-4001]-to-[vlan-4001]"
-        },
-        "children": []
-    }
-}
-/api/node/mo/uni/tn-kube/ap-aci-containers-kube/epg-aci-containers-nodes.json
-{
-    "fvRsDomAtt": {
-        "attributes": {
-            "resImedcy": "immediate",
-            "tDn": "uni/vmmp-VMware/dom-myvmware",
-            "instrImedcy": "immediate",
-            "customEpgName": "kube_vlan_4001",
-            "encap": "vlan-4001",
-            "annotation": "orchestrator:aci-containers-controller"
-        },
-        "children": []
     }
 }
 /api/mo/uni/tn-common/out-l3out/instP-default.json
