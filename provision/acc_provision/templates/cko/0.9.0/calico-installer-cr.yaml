@@ -1,0 +1,20 @@
+apiVersion: controller.netop-manager.io/v1alpha1
+kind: Installer
+metadata:
+  name: installer-calico-cni
+spec:
+  operatorConfigs:
+    networking:
+      cko-cni:
+        version: "{{ config.calico_config.cni_flavor_version }}"
+        type: "cko-cni-calico"
+        {% if config.managedComponent == "managed" %}
+        managedComponent: true
+        {% else %}
+        managedComponent: false
+        {% endif %} 
+        options:
+          calico-crds: {{ config.calico_config.base64_encoded_calico_crds_spec }}
+          calico-cr: {{ config.calico_config.base64_encoded_calico_crs_spec }}
+          calico-bgp: {{ config.calico_config.base64_encoded_calico_bgp_spec }}
+          calicoctl: {{ config.calico_config.base64_encoded_calicoctl_spec }}

@@ -912,7 +912,7 @@ def test_sample():
             acc_provision.main(args, no_random=True)
         finally:
             sys.stdout = sys.__stdout__
-        assert filecmp.cmp(tmpout.name, "../acc_provision/templates/provision-config.yaml", shallow=False)
+        assert filecmp.cmp(tmpout.name, "../acc_provision/templates/" + acc_provision.ACI_CNI_VERSIONS_PATH + "provision-config.yaml", shallow=False)
         run_provision(tmpout.name, "sample.kube.yaml", None)
 
 

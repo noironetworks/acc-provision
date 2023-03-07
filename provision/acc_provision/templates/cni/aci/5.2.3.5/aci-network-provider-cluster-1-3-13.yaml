@@ -1,0 +1,110 @@
+network:
+  plugin: "aci"
+  aci_network_provider:
+    system_id: "{{ config.aci_config.system_id }}"
+    {% if config.aci_config.apic_refreshtime %}
+    apic_refresh_time: "{{ config.aci_config.apic_refreshtime }}"
+    {% endif %}
+    {% if config.aci_config.apic_hosts|length > 1 %}
+    apic_hosts: [{%- for apic_host in config.aci_config.apic_hosts %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(apic_host) }}{% else %}{{ "\\\"%s\\\"\""|format(apic_host) }}{% endif %}{% endfor -%}]
+    {% else %}
+    apic_hosts: [{% for apic_host in config.aci_config.apic_hosts %}{{ "\"\\\"%s\\\"\""|format(apic_host) }}{% endfor %}]
+    {% endif %}
+    token: "{{ config.registry.configuration_version }}"
+    apic_user_name: "{{ config.aci_config.sync_login.username }}"
+    apic_user_key: "{{ config.aci_config.sync_login.key_data|base64enc }}"
+    apic_user_crt: "{{ config.aci_config.sync_login.cert_data|base64enc }}"
+    encap_type: "{{ config.node_config.encap_type }}"
+    mcast_range_start: "{{ config.aci_config.vmm_domain.mcast_range.start }}"
+    mcast_range_end: "{{ config.aci_config.vmm_domain.mcast_range.end }}"
+    aep: "{{ config.aci_config.aep }}"
+    vrf_name: "{{ config.aci_config.vrf.name }}"
+    vrf_tenant: "{{ config.aci_config.vrf.tenant }}" 
+    l3out: "{{ config.aci_config.l3out.name }}"
+    node_subnet: "{{ config.net_config.node_subnet }}"
+    {% if config.aci_config.l3out.external_networks|length > 1 %}
+    l3out_external_networks: [{%- for ext_net in config.aci_config.l3out.external_networks %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor -%}]
+    {% else %}
+    l3out_external_networks: [{% for ext_net in config.aci_config.l3out.external_networks %}{{ "\"\\\"%s\\\"\""|format(ext_net) }}{% endfor %}]
+    {% endif %}
+    extern_dynamic: "{{ config.net_config.extern_dynamic }}"
+    extern_static: "{{ config.net_config.extern_static }}"
+    node_svc_subnet: "{{ config.net_config.node_svc_subnet }}"
+    kube_api_vlan: "{{ config.net_config.kubeapi_vlan }}"
+    service_vlan: "{{ config.net_config.service_vlan }}"
+    infra_vlan: "{{ config.net_config.infra_vlan }}"
+    {% if config.aci_config.tenant.name %}
+    tenant: "{{ config.aci_config.tenant.name }}" 
+    {% endif %}
+    {% if config.net_config.service_monitor_interval %}
+    service_monitor_interval: "{{ config.net_config.service_monitor_interval }}" 
+    {% endif %}
+    {% if config.net_config.pod_subnet_chunk_size != 32 %}
+    pod_subnet_chunk_size: "{{ config.net_config.pod_subnet_chunk_size }}"
+    {% endif %}
+    {% if config.net_config.pbr_tracking_non_snat %}
+    pbr_tracking_non_snat: "{{ config.net_config.pbr_tracking_non_snat|lower() }}"
+    {% endif %}
+    {% if config.istio_config.install_istio != False %}
+    install_istio: "{{ config.istio_config.install_istio|lower() }}"
+    {% endif %}
+    {% if config.istio_config.istio_profile %}
+    istio_profile: "{{ config.istio_config.istio_profile }}"
+    {% endif %}
+    {% if config.drop_log_config.enable != True %}
+    drop_log_enable: "{{ config.drop_log_config.enable|lower() }}"
+    {% endif %}
+    {% if config.logging.size %}
+    size: {{ config.logging.size }}
+    {% endif %}
+    {% if config.logging.controller_log_level != "info" %}
+    controller_log_level: "{{ config.logging.controller_log_level }}"
+    {% endif %}
+    {% if config.logging.hostagent_log_level != "info" %}
+    hostagent_log_level: "{{ config.logging.hostagent_log_level }}"
+    {% endif %}
+    {% if config.logging.opflexagent_log_level != "info" %}
+    opflexagent_log_level: "{{ config.logging.opflexagent_log_level }}"
+    {% endif %}
+    {% if config.kube_config.ovs_memory_limit != "1Gi" %}
+    ovs_memory_limit: "{{ config.kube_config.ovs_memory_limit }}"
+    {% endif %}
+    {% if config.kube_config.image_pull_policy != "Always" %}
+    image_pull_policy: "{{ config.kube_config.image_pull_policy }}"
+    {% endif %}
+    {% if config.aci_config.apic_refreshticker_adjust %}
+    apic_refresh_ticker_adjust: "{{ config.aci_config.apic_refreshticker_adjust }}"
+    {% endif %}
+    {% if config.aci_config.apic_subscription_delay %}
+    apic_subscription_delay: "{{ config.aci_config.apic_subscription_delay }}"
+    {% endif %}
+    {% if config.aci_config.opflex_device_delete_timeout %}
+    opflex_device_delete_timeout: "{{ config.aci_config.opflex_device_delete_timeout }}"
+    {% endif %}
+    {% if config.net_config.disable_wait_for_network != False %}
+    disable_wait_for_network: "{{ config.net_config.disable_wait_for_network|lower() }}"
+    {% endif %}
+    {% if config.net_config.interface_mtu_headroom %}
+    mtu_head_room: "{{ config.net_config.interface_mtu_headroom }}"
+    {% endif %}
+    {% if config.net_config.duration_wait_for_network != 210 %}
+    duration_wait_for_network: "{{ config.net_config.duration_wait_for_network }}"
+    {% endif %}
+    {% if config.nodepodif_config.enable != False %}
+    node_pod_if_enable: "{{ config.nodepodif_config.enable|lower() }}"
+    {% endif %}
+    {% if config.sriov_config.enable != False %}
+    sriov_enable: "{{ config.sriov_config.enable|lower() }}"
+    {% endif %}
+    {% if config.kube_config.use_cluster_role != True %}
+    use_cluster_role: "{{ config.kube_config.use_cluster_role|lower() }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.disable_periodic_snat_global_info_sync != False %}
+    disable_periodic_snat_global_info_sync: "{{ config.kube_config.snat_operator.disable_periodic_snat_global_info_sync|lower() }}"
+    {% endif %}
+  {% if config.net_config.interface_mtu %}
+  mtu: {{ config.net_config.interface_mtu }}
+  {% endif %}
+services:
+  kube-controller:
+    cluster_cidr: "{{ config.net_config.pod_subnet }}"
