@@ -5787,6 +5787,10 @@ class ApicKubeConfig(object):
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
             elif flavor == "RKE-1.3.13":
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+            elif flavor == "RKE-1.3.17":
+                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+            elif flavor == "RKE-1.3.18":
+                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
 
         # Adding prometheus opflex-agent contract for all flavors
         add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)

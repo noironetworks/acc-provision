@@ -2,7 +2,7 @@ network:
   plugin: "aci"
   aci_network_provider:
     system_id: "rke"
-    apic_hosts: ["\"10.30.120.100\""]
+    apic_hosts: ["\"10.30.120.100\",\"10.30.120.101\",\"10.30.120.102\""]
     token: "dummy"
     apic_user_name: "rke"
     apic_user_key: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUNkZ0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQW1Bd2dnSmNBZ0VBQW9HQkFOcitBK2dPS2JBVlZySnMKYjMrWldiY25WWG8vZ2R1eElUa3ZtMDlrZWlGQ24rVXAvU0dkcXY2QWgramxKZkY3dXYrRmdDSnRDeEQ4N3FZdwowcTVEY0dWTEljZkY0WlViOUI4ckpXS0JJNndKZnh0TWZGdVVOWTI0Y2d3UXBKcXJNVXFBRHovTVcrd3JaZWhzClNuRnN5ZXdYUjM4OGVSN0VLakRXZWdkSnlQY1hBZ01CQUFFQ2dZQjlBWGIxWmZCQ0JVeEIrVWdFVEdNNys0WDkKakhieUUwQmx4bGtmanJsd2R2bVM5TTc3KzJaNmRLQWdQMzNUUk0vUHdFTU9ZN1JuZEJvK1g2eERzVmRjVEpJeQo1Vnc4eFVabHIrYXVFT2xzMlpuWngxMWU1emg3c1UzTmo1SzM1QldSOUdUWEo2UE1kcFQ0OWxCOWJsbE1qRHJMCjcrNWJDc2R1NjNPOEthTjlZUUpCQVBHTWJwSHBGc3RDMWNXR3BSUXgzaXdGK1pMWUFyQVViQ0tiV1FmYmlaVHAKQ1M4RGdPbXlVN3VLVFJLaUMrMlJZVFMzcHJMVjU3R3ZmZkZ4SmpUd0d5a0NRUURvR0J3ZjVpT3N5dU1RTno3SwpSaXJiRDBKN1I2WWVRa0paK3BDZUt3eStOeUlxeGgwTEJEbUJ5bVNLdlgwV0VLQ2l0T2dwaTMyRldCb3FIamYzCk1RZy9Ba0JMQkxScWVKdnRzT28zbUtPNGEreDJlN3lSVUtrMUNvS3pGTkJIMG5VZVhHblB3aVROYitiMWZmU0YKN3ZJSmJIZG1LZ3VKeTBsVU5BN0haNzdYL2lKUkFrQWpuYmVMS1p6bDRraVA3M3BpUGZ4TG0zN2ZQakoreURvNApacHdVdVpSK0NDWGxISHZPZWZwOU1WcldjNWVqY0MvR2FDNk1XWXlNanVXTSt4QXBqY3V2QWtFQXpZK3AxNDBDCnh3cHI5NWxpbm52V2NDN043MDhBSkZpbTMvRlUxMEdEbzc3eUlPSTVoKzUzN0piWWRtNTU1aE9lSC9LalNla2gKRUY0TW14UlBtaXQ5OXc9PQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg=="
@@ -23,6 +23,18 @@ network:
     service_vlan: "4003"
     infra_vlan: "4093"
     service_monitor_interval: "5" 
+    apic_refresh_ticker_adjust: "1"
+    apic_subscription_delay: "1"
+    opflex_device_delete_timeout: "1"
+    disable_wait_for_network: "true"
+    mtu_head_room: "51"
+    duration_wait_for_network: "200"
+    node_pod_if_enable: "true"
+    sriov_enable: "true"
+    use_cluster_role: "false"
+    disable_periodic_snat_global_info_sync: "true"
+    no_wait_for_service_ep_readiness: "true"
+    add_external_subnets_to_rdconfig: "true"
 services:
   kube-controller:
     cluster_cidr: "10.2.0.1/16"
