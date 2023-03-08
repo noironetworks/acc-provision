@@ -1362,6 +1362,9 @@ data:
         {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
@@ -1376,6 +1379,9 @@ data:
         {% endif %}
         {% if config.aci_config.opflex_device_delete_timeout %}
         "opflex-device-delete-timeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
+        {% endif %}
+        {% if config.kube_config.snat_operator.sleep_time_snat_global_info_sync %}
+        "sleep-time-snat-global-info-sync": {{ config.kube_config.snat_operator.sleep_time_snat_global_info_sync|json }},
         {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
@@ -1530,13 +1536,17 @@ data:
             "level": {{config.logging.opflexagent_log_level|json}}
         },
         "opflex": {
-            "notif" : { "enabled" : "false" }
+            "notif" : { "enabled" : "false" },
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
           {% if not config.aci_config.client_ssl %}
             ,"ssl": { "mode": "disabled" }
           {% endif %}
           {% if config.kube_config.run_gbp_container %}
             ,"statistics" : { "mode" : "off" }
           {% endif %}
+        },
+        "ovs": {
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
         },
         "prometheus": {
             "enabled": "false"
@@ -1642,7 +1652,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers-controller
 rules:
 - apiGroups:
   - ""
@@ -1879,7 +1889,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ""
@@ -2030,13 +2040,13 @@ rules:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:controller
+  name: aci-containers-controller
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:controller
+  name: aci-containers-controller
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
@@ -2045,13 +2055,13 @@ subjects:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent

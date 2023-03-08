@@ -1252,15 +1252,6 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "lb-type": "None",
-        "service-graph-endpoint-add-delay": {
-            "delay": 30,
-            "services": [
-                {
-                    "name": "router-internal-default",
-                    "namespace": "openshift-ingress"
-                }
-            ]
-        },
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "default-endpoint-group": {
@@ -1353,8 +1344,12 @@ data:
             "level": "debug"
         },
         "opflex": {
-            "notif" : { "enabled" : "false" }
+            "notif" : { "enabled" : "false" },
+            "asyncjson": { "enabled" : "false" }
             ,"statistics" : { "mode" : "off" }
+        },
+        "ovs": {
+            "asyncjson": { "enabled" : "false" }
         },
         "prometheus": {
             "enabled": "false"
@@ -1403,7 +1398,7 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers-controller
 rules:
 - apiGroups:
   - ""
@@ -1599,7 +1594,7 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ""
@@ -1723,13 +1718,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:controller
+  name: aci-containers-controller
   labels:
     aci-containers-config-version: "dummy"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:controller
+  name: aci-containers-controller
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
@@ -1738,13 +1733,13 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
   labels:
     aci-containers-config-version: "dummy"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent

@@ -5,10 +5,7 @@ data:
     apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
     ,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"OpenShift\",\n    \"\
     aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-policy-tenant\"\
-    : \"kube\",\n    \"service-graph-endpoint-add-delay\": {\n        \"delay\": 30,\n\
-    \        \"services\": [\n            {\n                \"name\": \"router-internal-default\"\
-    ,\n                \"namespace\": \"openshift-ingress\"\n            }\n     \
-    \   ]\n    },\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-aci-containers-kube-pod-bd\"\
+    : \"kube\",\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-aci-containers-kube-pod-bd\"\
     ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-aci-containers-kube-node-bd\",\n  \
     \  \"aci-service-phys-dom\": \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\"\
     ,\n    \"aci-service-monitor-interval\": 5,\n    \"aci-pbr-tracking-non-snat\"\
@@ -87,8 +84,10 @@ data:
     \n        }        },\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\"\
     : false,\n    \"enable-ovs-hw-offload\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
-    \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" }\n    },\n \
-    \   \"prometheus\": {\n        \"enabled\": \"false\"\n    }\n}"
+    \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" },\n        \"\
+    asyncjson\": { \"enabled\" : \"false\" }\n    },\n    \"ovs\": {\n        \"asyncjson\"\
+    : { \"enabled\" : \"false\" }\n    },\n    \"prometheus\": {\n        \"enabled\"\
+    : \"false\"\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:

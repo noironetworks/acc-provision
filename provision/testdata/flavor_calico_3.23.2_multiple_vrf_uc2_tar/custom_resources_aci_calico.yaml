@@ -1,0 +1,325 @@
+# This section includes base Calico installation configuration.
+# For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.Installation
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: calico-system
+  labels:
+    name: calico-system
+---
+apiVersion: operator.tigera.io/v1
+kind: Installation
+metadata:
+  name: default
+spec:
+  # Configures Calico networking.
+  calicoNetwork:
+    # Note: The ipPools section cannot be modified post-install.
+    ipPools:
+    - blockSize: 26
+      cidr: ['20.2.0.0/16']
+      encapsulation: None
+      natOutgoing: Disabled
+      nodeSelector: all()
+---
+# This section configures the Calico API server.
+# For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.APIServer
+apiVersion: operator.tigera.io/v1
+kind: APIServer 
+metadata: 
+  name: default 
+spec: {}
+---
+#This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bgp-secrets
+  namespace: calico-system
+type: Opaque
+stringData:
+  rr-password: test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-access
+  namespace: calico-system
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["bgp-secrets"]
+  verbs: ["watch", "list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-access
+  namespace: calico-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-access
+subjects:
+- kind: ServiceAccount
+  name: calico-node
+  namespace: calico-system
+---
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: calicoctl
+  namespace: kube-system
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: calicoctl
+  namespace: kube-system
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  hostNetwork: true
+  serviceAccountName: calicoctl
+  containers:
+  - name: calicoctl
+    image: calico/ctl:v3.23.2
+    command:
+      - /calicoctl
+    args:
+      - version
+      - --poll=1m
+    env:
+    - name: DATASTORE_TYPE
+      value: kubernetes
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: calicoctl
+rules:
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - nodes
+    verbs:
+      - get
+      - list
+      - update
+  - apiGroups: [""]
+    resources:
+      - nodes/status
+    verbs:
+      - update
+  - apiGroups: [""]
+    resources:
+      - pods
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+  - apiGroups: [""]
+    resources:
+      - pods/status
+    verbs:
+      - update
+  - apiGroups: ["crd.projectcalico.org"]
+    resources:
+      - bgppeers
+      - bgpconfigurations
+      - clusterinformations
+      - felixconfigurations
+      - globalnetworkpolicies
+      - globalnetworksets
+      - ippools
+      - ipreservations
+      - kubecontrollersconfigurations
+      - networkpolicies
+      - networksets
+      - hostendpoints
+      - ipamblocks
+      - blockaffinities
+      - ipamhandles
+      - ipamconfigs
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - delete
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - networkpolicies
+    verbs:
+      - get
+      - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: calicoctl
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: calicoctl
+subjects:
+- kind: ServiceAccount
+  name: calicoctl
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node1
+  labels:
+    rack_id: "1"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node2
+  labels:
+    rack_id: "1"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node3
+  labels:
+    rack_id: "2"
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node4
+  labels:
+    rack_id: "2"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aci-containers-system
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acc-provision-config
+  namespace: aci-containers-system
+  labels:
+    aci-containers-config-version: "dummy"
+    network-plugin: aci-containers
+data:
+  spec: |-
+    {
+        "acc_provision_input": {
+            "operator_managed_config": {
+                "enable_updates": false
+            },
+            "aci_config": {
+                "system_id": "calico-l3out-fsvi-vl",
+                "apic_hosts": [
+                    "10.30.120.100"
+                ],
+                "vrf": {
+                    "name": "external_vrf",
+                    "tenant": "external_tenant"
+                },
+                "cluster_l3out": {
+                    "aep": "kube-cluster",
+                    "bgp": {
+                        "peering": {
+                            "aci_as_number": 2,
+                            "prefixes": 500,
+                            "remote_as_number": 64512
+                        },
+                        "secret": "test"
+                    },
+                    "name": "calico-l3out-fsvi-vlan-13",
+                    "svi": {
+                        "floating_ip": "2.100.101.100/24",
+                        "mtu": 9000,
+                        "secondary_ip": "2.100.101.254/24",
+                        "type": "floating",
+                        "vlan_id": 13
+                    },
+                    "vrf": {
+                        "name": "calico_vrf",
+                        "tenant": "calico_tenant"
+                    }
+                },
+                "l3out": {
+                    "name": "ext-l3out",
+                    "external_networks": [
+                        "mykube_extepg"
+                    ]
+                }
+            },
+            "net_config": {
+                "extern_dynamic": "20.3.0.0/16",
+                "node_subnet": "2.100.101.0/24",
+                "pod_subnet": [
+                    "20.2.0.0/16"
+                ],
+                "cluster_svc_subnet": "10.96.0.0/12"
+            },
+            "calico_config": {
+            },
+            "topology": {
+                "rack": [
+                        {
+                            "aci_pod_id": 1,
+                            "id": 1,
+                            "leaf": [
+                                {
+                                    "id": 101,
+                                    "local_ip": "2.100.101.201"
+                                },
+                                {
+                                    "id": 102,
+                                    "local_ip": "2.100.101.202"
+                                }
+                            ],
+                            "node": [
+                                {
+                                    "name": "k8s-node1"
+                                },
+                                {
+                                    "name": "k8s-node2"
+                                }
+                            ]
+                        },
+                        {
+                            "aci_pod_id": 1,
+                            "id": 2,
+                            "leaf": [
+                                {
+                                    "id": 103,
+                                    "local_ip": "2.100.101.203"
+                                }
+                            ],
+                            "node": [
+                                {
+                                    "name": "k8s-node3"
+                                },
+                                {
+                                    "name": "k8s-node4"
+                                }
+                            ]
+                        }
+                    ]
+            },
+            "flavor": "calico-3.23.2"
+        }
+     }

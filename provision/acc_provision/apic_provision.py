@@ -138,6 +138,7 @@ class Apic(object):
         args.update(timeout=self.timeout)
         if self.save_to:
             self.saved_deletes[path] = True
+        dbg("Deleting: {}".format(path))
         return requests.delete(self.url(path), **args)
 
     def login(self):
@@ -226,6 +227,10 @@ class Apic(object):
 
     def get_tenant(self, vrf_tn):
         path = "/api/mo/uni/tn-%s.json" % vrf_tn
+        return self.get_path(path)
+
+    def get_tenant_vrf(self, tn_name, vrf_name):
+        path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tn_name, vrf_name)
         return self.get_path(path)
 
     def get_l3out(self, tenant, name):
@@ -317,7 +322,7 @@ class Apic(object):
                 self.errors += 1
                 err("Error in provisioning %s: %s" % (path, str(e)))
 
-    def unprovision(self, data, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name=None):
+    def unprovision(self, data, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name=None, cluster_l3out_vrf_details=None):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
@@ -326,7 +331,7 @@ class Apic(object):
 
         try:
             if "calico" in cfg['flavor']:
-                cluster_l3out_path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=self" % (tenant, l3out_name)
+                cluster_l3out_path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=self" % (cluster_l3out_tenant, l3out_name)
                 resp = self.delete(cluster_l3out_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (cluster_l3out_path, resp.text))
@@ -342,7 +347,7 @@ class Apic(object):
                 resp = self.delete(vlan_pool_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (vlan_pool_path, resp.text))
-                bgp_res_path = "/api/node/mo/uni/tn-%s.json" % tenant
+                bgp_res_path = "/api/node/mo/uni/tn-%s.json" % cluster_l3out_tenant
                 bgp_res_path += "?query-target=children&target-subtree-class=bgpCtxPol,bgpCtxAfPol,bgpBestPathCtrlPol,bgpPeerPfxPol"
                 resp = self.get(bgp_res_path)
                 self.check_resp(resp)
@@ -393,13 +398,39 @@ class Apic(object):
             self.errors += 1
             err("Error in un-provisioning %s: %s" % (path, str(e)))
 
+        if "calico" in cfg['flavor']:
+            tenant_name = cluster_l3out_vrf_details["tenant"]
+            # Delete cluster_l3out vrf
+            if cluster_l3out_vrf_details["create_vrf"]:
+                vrf_name = cluster_l3out_vrf_details["name"]
+                cluster_l3out_vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tenant_name, vrf_name)
+                if self.check_valid_vrf_annotation(cluster_l3out_vrf_path):
+                    self.delete(cluster_l3out_vrf_path)
+
+                # Delete global scope contract
+                global_contract_path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+                self.delete(global_contract_path)
+
+                # Delete external l3out epg provided global scope contract
+                for l3out_instp in cfg["aci_config"]["l3out"]["external_networks"]:
+                    l3out = cfg["aci_config"]["l3out"]["name"]
+                    l3out_rsprov_name = "%s-l3out-allow-all" % system_id
+                    rsprov = "/api/mo/uni/tn-%s/out-%s/instP-%s/rsprov-%s.json" % (vrf_tenant, l3out, l3out_instp, l3out_rsprov_name)
+                    self.delete(rsprov)
+
+            # Delete cluster_l3out tenant
+            if cluster_l3out_vrf_details["create_tenant"]:
+                cluster_l3out_tenant_path = "/api/mo/uni/tn-%s.json" % tenant_name
+                if self.check_valid_annotation(cluster_l3out_tenant_path):
+                    self.delete(cluster_l3out_tenant_path)
+
         # Clean the cluster tenant iff it has our annotation and does
         # not have any application profiles
         if self.check_valid_annotation(cluster_tenant_path) and self.check_no_ap(cluster_tenant_path):
             self.delete(cluster_tenant_path)
 
         # Finally clean any stray resources in common
-        self.clean_tagged_resources(system_id, tenant)
+        self.clean_tagged_resources(system_id, vrf_tenant)
 
     def process_apic_version_string(self, raw):
         # Given the APIC version for example 5.2(3e), convert it to 5.2.3 for comparison
@@ -426,6 +457,15 @@ class Apic(object):
         try:
             data = self.get_path(path)
             if data['fvTenant']['attributes']['annotation'] == aciContainersOwnerAnnotation:
+                return True
+        except Exception as e:
+            dbg("Unable to find APIC object %s: %s" % (path, str(e)))
+        return False
+
+    def check_valid_vrf_annotation(self, path):
+        try:
+            data = self.get_path(path)
+            if data['fvCtx']['attributes']['annotation'] == aciContainersOwnerAnnotation:
                 return True
         except Exception as e:
             dbg("Unable to find APIC object %s: %s" % (path, str(e)))
@@ -583,7 +623,23 @@ class ApicKubeConfig(object):
             update(data, self.nested_dom_second_portgroup())
 
         else:
-            update(data, self.create_cluster_l3out())
+            cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()
+            cluster_l3out_tn = cluster_l3out_vrf_details["tenant"]
+            cluster_l3out_vrf = cluster_l3out_vrf_details["name"]
+            print("INFO: cluster_l3out is under tenant: %s, vrf: %s " % (cluster_l3out_tn, cluster_l3out_vrf))
+            if cluster_l3out_vrf_details["create_tenant"]:
+                if self.apic and not self.apic.get_tenant(cluster_l3out_tn):
+                    update(data, self.cluster_l3out_tenant(cluster_l3out_vrf_details))
+                else:
+                    # TODO: temp UT fix, use mock
+                    update(data, self.cluster_l3out_tenant(cluster_l3out_vrf_details))
+            if cluster_l3out_vrf_details["create_vrf"]:
+                if self.apic and not self.apic.get_tenant_vrf(cluster_l3out_tn, cluster_l3out_vrf):
+                    update(data, self.cluster_l3out_vrf(cluster_l3out_vrf_details))
+                else:
+                    # TODO: temp UT fix, use mock
+                    update(data, self.cluster_l3out_vrf(cluster_l3out_vrf_details))
+            update(data, self.create_cluster_l3out(cluster_l3out_vrf_details))
             update(data, self.l3_dom_calico())
             update(data, self.pdom_pool_calico())
             update(data, self.phys_dom_calico())
@@ -591,9 +647,10 @@ class ApicKubeConfig(object):
             # update(data, self.logical_node_profile())
             node_ids = None
             node_map = {}
+            tenant = cluster_l3out_vrf_details["tenant"]
             if self.apic is not None:
                 ext_l3out_lnodep = self.apic.get_ext_l3out_lnodep(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"])
-                node_ids = self.apic.get_configured_node_dns(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["cluster_l3out"]["name"], self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"])
+                node_ids = self.apic.get_configured_node_dns(tenant, self.config["aci_config"]["cluster_l3out"]["name"], self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"])
                 node_map = self.apic.get_extl3out_configured_nodes_router_id(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"], ext_l3out_lnodep)
 
             else:
@@ -603,25 +660,66 @@ class ApicKubeConfig(object):
             for rack in self.config["topology"]["rack"]:
                 for leaf in rack["leaf"]:
                     if "local_ip" in leaf and "id" in leaf:
-                        update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"]))
+                        update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"], tenant))
                         if len(node_map) == 0 and ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
-                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
+                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"], tenant))
             # If the node already has a router_id in external l3out, then use the same router_id
             if len(node_map) != 0:
                 for node_dn, router_id in node_map.items():
-                    update(data, self.add_configured_nodes_with_routerid(rack["aci_pod_id"], node_dn, router_id))
+                    update(data, self.add_configured_nodes_with_routerid(rack["aci_pod_id"], node_dn, router_id, tenant))
                     if node_dn not in node_ids:
                         node_ids.append(node_dn)
                 # Finally add all other nodes which arent added.
                 for rack in self.config["topology"]["rack"]:
                     for leaf in rack["leaf"]:
                         if ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
-                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"]))
+                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"], tenant))
 
             update(data, self.l3out_filter())
-            update(data, self.l3out_brcp())
-            update(data, self.ext_epg_svc())
-            update(data, self.ext_epg_int())
+
+            external_l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+            external_l3out_vrf = self.config["aci_config"]["vrf"]["name"]
+
+            if cluster_l3out_tn != external_l3out_tn and cluster_l3out_vrf != external_l3out_vrf:
+                # different tenant, different vrf
+                if external_l3out_tn != "common":
+                    """
+                    1. Create global scope contract under provider (vrf) tenant
+                    2. Export global scope contract under consumer(cluster_l3out) tenant
+                    3. Consumer tenant has the floating svi l3 out. The ext epgs under floating
+                       l3out consume the exported contract
+                    """
+                    update(data, self.l3out_brcp_global())
+                    update(data, self.cluster_l3out_cif_global())
+                    update(data, self.ext_epg_svc_contract_interface())
+                    update(data, self.ext_epg_int_contract_interface())
+                else:
+                    """
+                    1. Create global scope contract under provider(vrf) tenant
+                    2. The ext epgs under floating l3out consume this global scope contract
+                    """
+                    update(data, self.l3out_brcp_global())
+                    update(data, self.ext_epg_svc_global_scope_contract())
+                    update(data, self.ext_epg_int_global_scope_contract())
+            elif cluster_l3out_tn == external_l3out_tn and cluster_l3out_vrf != external_l3out_vrf:
+                """
+                same tenant, different vrf
+                1. Create global scope contract under provider(vrf) tenant
+                2. The ext epgs under floating l3out consume this global scope contract
+                """
+                update(data, self.l3out_brcp_global())
+                update(data, self.ext_epg_svc_global_scope_contract())
+                update(data, self.ext_epg_int_global_scope_contract())
+            else:
+                """
+                # same tenant, same vrf
+                1. Create local vrf scope contract
+                2. The ext epgs under floating l3out consume this local scope contract
+                """
+                update(data, self.l3out_brcp())
+                update(data, self.ext_epg_svc())
+                update(data, self.ext_epg_int())
+
             update(data, self.enable_bgp())
             update(data, self.bgp_route_control())
             update(data, self.bgp_timers())
@@ -1449,6 +1547,32 @@ class ApicKubeConfig(object):
         )
         return path, data
 
+    def cluster_l3out_vrf(self, cluster_l3out_vrf_details):
+        vrf_name = cluster_l3out_vrf_details["name"]
+        tn_name = cluster_l3out_vrf_details["tenant"]
+        path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tn_name, vrf_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvCtx",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vrf_name),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                ),
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
     def capic_overlay_vrf(self):
         overlay_vrf_name = self.get_overlay_vrf_name()
         return self.vrf_object(overlay_vrf_name)
@@ -1951,7 +2075,6 @@ class ApicKubeConfig(object):
     def add_vmm_domain_association(self):
         # url: https://10.30.120.180/api/node/mo/uni/tn-ocp4aci/ap-aci-containers-ocp4aci/epg-aci-containers-nodes.json
         # payload{"fvRsDomAtt":{"attributes":{"resImedcy":"immediate","tDn":"uni/vmmp-VMware/dom-hypflex-vswitch","instrImedcy":"immediate","encap":"vlan-35","status":"created"},"children":[{"vmmSecP":{"attributes":{"status":"created"},"children":[]}}]}}
-
         system_id = self.config["aci_config"]["system_id"]
         tn_name = self.config["aci_config"]["cluster_tenant"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
@@ -1989,6 +2112,58 @@ class ApicKubeConfig(object):
             ]
         )
         data["fvRsDomAtt"]["children"] = []
+
+        nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
+        if nvmm_elag_name:
+            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (nvmm_name, nvmm_elag_name)
+            data["fvRsDomAtt"]["children"].append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvAEPgLagPolAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("annotation", ""),
+                                                ("userdom", ":all:")
+                                            ]
+                                        )
+                                    ),
+                                    (
+                                        "children",
+                                        [
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "fvRsVmmVSwitchEnhancedLagPol",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "attributes",
+                                                                    collections.OrderedDict(
+                                                                        [
+                                                                            ("annotation", ""),
+                                                                            ("tDn", nvmm_elag_dn),
+                                                                            ("userdom", ":all:")
+                                                                        ]
+                                                                    )
+                                                                )
+                                                            ]
+                                                        )
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
 
         self.annotateApicObjects(data)
         return path, data
@@ -2532,6 +2707,33 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
+    def cluster_l3out_tenant(self, cluster_l3out_vrf_details):
+        tenant = cluster_l3out_vrf_details["tenant"]
+        path = "/api/mo/uni/tn-%s.json" % tenant
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvTenant",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", "%s" % tenant),
+                                        ("dn", "uni/tn-%s" % tenant),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        self.annotateApicObjects(data)
+        return path, data
+
     def l3out_tn(self):
         system_id = self.config["aci_config"]["system_id"]
         vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
@@ -2747,6 +2949,168 @@ class ApicKubeConfig(object):
                                                                 ]
                                                             ),
                                                         )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def cluster_l3out_cif_global(self):
+        system_id = self.config["aci_config"]["system_id"]
+        tenant = self.config["aci_config"]["cluster_l3out"]["vrf"]["tenant"]
+        vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
+
+        path = "/api/mo/uni/tn-%s/cif-%s-l3out-allow-all-export.json" % (tenant, system_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzCPIf",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "name",
+                                            "%s-l3out-allow-all-export"
+                                            % system_id,
+                                        ),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzRsIf",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "intent",
+                                                                        "install",
+                                                                    ),
+                                                                    (
+                                                                        "tDn",
+                                                                        "uni/tn-%s/brc-%s-l3out-allow-all"
+                                                                        % (vrf_tenant, system_id),
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def l3out_brcp_global(self):
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
+
+        path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzBrCP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "name",
+                                            "%s-l3out-allow-all"
+                                            % system_id,
+                                        ),
+                                        (
+                                            "scope",
+                                            "global",
+                                        ),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzSubj",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "name",
+                                                                        "allow-all-subj",
+                                                                    ),
+                                                                    (
+                                                                        "consMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    (
+                                                                        "provMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vzRsSubjFiltAtt",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "tnVzFilterName",
+                                                                                                    "%s-allow-all-filter"
+                                                                                                    % system_id,
+                                                                                                )
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                )
+                                                            ],
+                                                        ),
                                                     ]
                                                 ),
                                             )
@@ -5450,6 +5814,8 @@ class ApicKubeConfig(object):
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
             elif flavor == "RKE-1.3.17":
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+            elif flavor == "RKE-1.3.18":
+                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
 
         # Adding prometheus opflex-agent contract for all flavors
         add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)
@@ -5683,10 +6049,10 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def create_cluster_l3out(self):
+    def create_cluster_l3out(self, cluster_l3out_vrf_details):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
-        vrf_name = self.config["aci_config"]["vrf"]["name"]
+        l3out_tn = cluster_l3out_vrf_details["tenant"]
+        vrf_name = cluster_l3out_vrf_details["name"]
         l3_dom_name = l3out_name + "-L3-dom"
         lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         lifp = self.config["aci_config"]["cluster_l3out"]["svi"]["int_prof_name"]
@@ -5879,9 +6245,8 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def add_configured_nodes(self, pod_id, node_id):
+    def add_configured_nodes(self, pod_id, node_id, l3out_tn):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
         router_id = "1.1.4." + str(node_id)
@@ -5910,9 +6275,8 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def add_configured_nodes_with_routerid(self, pod_id, node_dn, router_id):
+    def add_configured_nodes_with_routerid(self, pod_id, node_dn, router_id, l3out_tn):
         cluster_l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, cluster_l3out_name, lnodep, node_dn)
         data = collections.OrderedDict(
@@ -5939,9 +6303,27 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def calico_floating_svi(self, pod_id, node_id, primary_ip):
+    def get_cluster_l3out_vrf_details(self):
+        cluster_l3out_vrf = {
+            "name": self.config["aci_config"]["vrf"]["name"],
+            "tenant": self.config["aci_config"]["vrf"]["tenant"],
+            "create_tenant": False,
+            "create_vrf": False,
+        }
+        if self.config["aci_config"]["cluster_l3out"].get("vrf"):
+            if self.config["aci_config"]["cluster_l3out"]["vrf"].get("tenant"):
+                cluster_l3out_vrf["tenant"] = self.config["aci_config"]["cluster_l3out"]["vrf"]["tenant"]
+                cluster_l3out_vrf["create_tenant"] = True
+
+            cluster_l3out_vrf["create_vrf"] = True
+            if self.config["aci_config"]["cluster_l3out"]["vrf"].get("name"):
+                cluster_l3out_vrf["name"] = self.config["aci_config"]["cluster_l3out"]["vrf"]["name"]
+            else:
+                cluster_l3out_vrf["name"] = cluster_l3out_vrf["tenant"] + "_vrf"
+        return cluster_l3out_vrf
+
+    def calico_floating_svi(self, pod_id, node_id, primary_ip, l3out_tn):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
         vlan_id = self.config["aci_config"]["cluster_l3out"]["svi"]["vlan_id"]
         mtu = self.config["aci_config"]["cluster_l3out"]["svi"]["mtu"]
@@ -6111,7 +6493,7 @@ class ApicKubeConfig(object):
     # Set BGP Route Control Enforcement to Import/Export
     def bgp_route_control(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         path = "/api/mo/uni/tn-%s/out-%s.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6135,10 +6517,168 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
+    def ext_epg_svc_contract_interface(self):
+        system_id = self.config["aci_config"]["system_id"]
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
+        ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
+        l3out_rsprov_name = "%s-l3out-allow-all-export" % system_id
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # consume l3out-allow-all-export contract
+                                                "fvRsConsIf",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzCPIfName", l3out_rsprov_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add external svc subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", external_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def ext_epg_svc_global_scope_contract(self):
+        system_id = self.config["aci_config"]["system_id"]
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get("tenant")
+        if not l3out_tn:
+            l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
+        external_svc_subnet = self.config["net_config"]["extern_dynamic"]
+        ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
+        l3out_rsprov_name = "%s-l3out-allow-all" % system_id
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # provide l3out-allow-all contract
+                                                "fvRsCons",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add external svc subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", external_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
     def ext_epg_svc(self):
         system_id = self.config["aci_config"]["system_id"]
-        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         external_svc_subnet = self.config["net_config"]["extern_dynamic"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
         l3out_rsprov_name = "%s-l3out-allow-all" % system_id
@@ -6194,6 +6734,256 @@ class ApicKubeConfig(object):
                                                                     ("ip", external_svc_subnet),
                                                                     ("aggregate", "shared-rtctrl"),
                                                                     ("scope", "export-rtctrl,import-rtctrl,import-security"),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def ext_epg_int_contract_interface(self):
+        system_id = self.config["aci_config"]["system_id"]
+        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"]["tenant"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network"]
+        l3out_rsprov_name = "%s-l3out-allow-all-export" % system_id
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # consume l3out-allow-all-export contract
+                                                "fvRsConsIf",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzCPIfName", l3out_rsprov_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add pod subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add node subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", node_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add cluster subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", cluster_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def ext_epg_int_global_scope_contract(self):
+        system_id = self.config["aci_config"]["system_id"]
+        l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get("tenant")
+        if not l3out_tn:
+            l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        pod_subnet = self.config["net_config"]["pod_subnet"]
+        node_subnet = self.config["net_config"]["node_subnet"]
+        cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
+        ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network"]
+        l3out_rsprov_name = "%s-l3out-allow-all" % system_id
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", ext_epg),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Consume l3out-allow-all contract provided by l3out ext EPG
+                                                "fvRsCons",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add pod subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", pod_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add node subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", node_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                # Add cluster subnet
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("ip", cluster_svc_subnet),
+                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("scope", scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -6332,12 +7122,14 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        if not self.config["net_config"]["advertise_cluster_svc_subnet"]:
+            del data["l3extInstP"]["children"][3]
         self.annotateApicObjects(data)
         return path, data
 
     def enable_bgp(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         path = "/api/mo/uni/tn-%s/out-%s/bgpExtP.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6362,7 +7154,7 @@ class ApicKubeConfig(object):
     # Create bgp timer
     def bgp_timers(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         path = "/api/mo/uni/tn-%s/bgpCtxP-%s-Timers.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6394,7 +7186,7 @@ class ApicKubeConfig(object):
     # Create BGP Best Path Policy
     def bgp_relax_as_policy(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         path = "/api/mo/uni/tn-%s/bestpath-%s-Relax-AS.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6422,7 +7214,7 @@ class ApicKubeConfig(object):
     # Create BGP Protocol Profile
     def bgp_prot_pfl(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         logical_node_profile = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (l3out_tn, l3out_name, logical_node_profile)
         data = collections.OrderedDict(
@@ -6492,7 +7284,7 @@ class ApicKubeConfig(object):
 
     # Create BGP Address Family Context Policy
     def bgp_addr_family_context(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         path = "/api/mo/uni/tn-%s/bgpCtxAfP-%s.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
@@ -6521,9 +7313,10 @@ class ApicKubeConfig(object):
 
     # Map BGP Address Family Context Policy to Calico VRF for V4
     def bgp_addr_family_context_to_vrf(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()
+        l3out_tn = cluster_l3out_vrf_details["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_vrf = self.config["aci_config"]["vrf"]["name"]
+        l3out_vrf = cluster_l3out_vrf_details["name"]
         path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv4-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6550,9 +7343,10 @@ class ApicKubeConfig(object):
 
     # Map BGP Address Family Context Policy to Calico VRF for V6
     def bgp_addr_family_context_to_vrf_v6(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()
+        l3out_tn = cluster_l3out_vrf_details["tenant"]
+        l3out_vrf = cluster_l3out_vrf_details["name"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_vrf = self.config["aci_config"]["vrf"]["name"]
         path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv6-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
         data = collections.OrderedDict(
             [
@@ -6578,7 +7372,7 @@ class ApicKubeConfig(object):
         return path, data
 
     def export_match_rule(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
         path = "/api/mo/uni/tn-%s/subj-%s-export-match.json" % (l3out_tn, l3out_name)
@@ -6631,7 +7425,7 @@ class ApicKubeConfig(object):
         return path, data
 
     def attach_rule_to_default_export_pol(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         path = "/api/mo/uni/tn-%s/out-%s/prof-default-export.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
@@ -6709,7 +7503,7 @@ class ApicKubeConfig(object):
         return path, data
 
     def import_match_rule(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
         node_subnet = self.config["net_config"]["node_subnet"]
@@ -6824,11 +7618,13 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        if not self.config["net_config"]["advertise_cluster_svc_subnet"]:
+            del data["rtctrlSubjP"]["children"][2]
         self.annotateApicObjects(data)
         return path, data
 
     def attach_rule_to_default_import_pol(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         path = "/api/mo/uni/tn-%s/out-%s/prof-default-import.json" % (l3out_tn, l3out_name)
         data = collections.OrderedDict(
@@ -6906,7 +7702,7 @@ class ApicKubeConfig(object):
         return path, data
 
     def bgp_peer_prefix(self):
-        l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
+        l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         prefixes = self.config["aci_config"]["cluster_l3out"]["bgp"]["peering"]["prefixes"]
         path = "/api/mo/uni/tn-%s/bgpPfxP-%s.json" % (l3out_tn, l3out_name)

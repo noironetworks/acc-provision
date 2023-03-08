@@ -1,0 +1,97 @@
+apiVersion: v1
+data:
+  controller-config: "{\n    \"flavor\": \"openshift-4.12-baremetal\",\n    \"log-level\"\
+    : \"info\",\n    \"apic-hosts\": [\n        \"10.30.120.100\"\n    ],\n    \"\
+    apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
+    ,\n    \"aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"OpenShift\",\n    \"\
+    aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-policy-tenant\"\
+    : \"kube\",\n    \"aci-podbd-dn\": \"uni/tn-kube/BD-aci-containers-kube-pod-bd\"\
+    ,\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-aci-containers-kube-node-bd\",\n  \
+    \  \"aci-service-phys-dom\": \"kube-pdom\",\n    \"aci-service-encap\": \"vlan-4003\"\
+    ,\n    \"aci-service-monitor-interval\": 5,\n    \"aci-pbr-tracking-non-snat\"\
+    : false,\n    \"aci-vrf-tenant\": \"common\",\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\"\
+    ,\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n        \"default\"\
+    \n    ],\n    \"aci-vrf\": \"kube\",\n    \"default-endpoint-group\": {\n    \
+    \    \"policy-space\": \"kube\",\n        \"name\": \"aci-containers-kube|aci-containers-default\"\
+    \n    },\n    \"max-nodes-svc-graph\": 32,\n    \"namespace-default-endpoint-group\"\
+    : {\n        \"aci-containers-system\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n     \
+    \   },\n        \"istio-operator\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-istio\"\n      \
+    \  },\n        \"istio-system\": {\n            \"policy-space\": \"kube\",\n\
+    \            \"name\": \"aci-containers-kube|aci-containers-istio\"\n        },\n\
+    \        \"kube-service-catalog\": {\n            \"policy-space\": \"kube\",\n\
+    \            \"name\": \"aci-containers-kube|aci-containers-system\"\n       \
+    \ },\n        \"kube-system\": {\n            \"policy-space\": \"kube\",\n  \
+    \          \"name\": \"aci-containers-kube|aci-containers-system\"\n        },\n\
+    \        \"openshift-authentication\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n     \
+    \   },\n        \"openshift-authentication-operator\": {\n            \"policy-space\"\
+    : \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        },\n        \"openshift-console\": {\n            \"policy-space\":\
+    \ \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n     \
+    \   },\n        \"openshift-monitoring\": {\n            \"policy-space\": \"\
+    kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n\
+    \        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
+    : \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
+    : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
+    \  \"extern-dynamic\": \"10.3.0.1/24\",\n    \"snat-contract-scope\": \"global\"\
+    ,\n    \"static-service-ip-pool\": [],\n    \"pod-ip-pool\": [\n        {\n  \
+    \          \"end\": \"10.2.255.254\",\n            \"start\": \"10.2.0.2\"\n \
+    \       }\n    ],\n    \"pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\"\
+    : [\n        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"\
+    10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\
+    \n    ]\n}"
+  host-agent-config: "{\n    \"flavor\": \"openshift-4.12-baremetal\",\n    \"app-profile\"\
+    : \"aci-containers-kube\",\n    \"opflex-mode\": null,\n    \"log-level\": \"\
+    info\",\n    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\
+    : \"OpenShift\",\n    \"aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\"\
+    : \"kube\",\n    \"installer-provisioned-lb-ip\": \"192.168.18.201\",\n    \"\
+    aci-prefix\": \"kube\",\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\": \"\
+    common\",\n    \"service-vlan\": 4003,\n    \"kubeapi-vlan\": 4001,\n    \"pod-subnet\"\
+    : [\n        \"10.2.0.1/16\"\n    ],\n    \"node-subnet\": \"10.1.0.1/16\",\n\
+    \    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": 4093,\n    \"cni-netconfig\"\
+    : [\n        {\n            \"gateway\": \"10.2.0.1\",\n            \"routes\"\
+    : [\n                {\n                    \"dst\": \"0.0.0.0/0\",\n        \
+    \            \"gw\": \"10.2.0.1\"\n                }\n            ],\n       \
+    \     \"subnet\": \"10.2.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
+    : {\n        \"policy-space\": \"kube\",\n        \"name\": \"aci-containers-kube|aci-containers-default\"\
+    \n    },\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
+    : {\n            \"policy-space\": \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        },\n        \"istio-operator\": {\n            \"policy-space\": \"\
+    kube\",\n            \"name\": \"aci-containers-kube|aci-containers-istio\"\n\
+    \        },\n        \"istio-system\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-istio\"\n      \
+    \  },\n        \"kube-service-catalog\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n     \
+    \   },\n        \"kube-system\": {\n            \"policy-space\": \"kube\",\n\
+    \            \"name\": \"aci-containers-kube|aci-containers-system\"\n       \
+    \ },\n        \"openshift-authentication\": {\n            \"policy-space\": \"\
+    kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n\
+    \        },\n        \"openshift-authentication-operator\": {\n            \"\
+    policy-space\": \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        },\n        \"openshift-console\": {\n            \"policy-space\":\
+    \ \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        },\n        \"openshift-dns\": {\n            \"policy-space\": \"kube\"\
+    ,\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n     \
+    \   },\n        \"openshift-monitoring\": {\n            \"policy-space\": \"\
+    kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\n\
+    \        },\n        \"openshift-web-console\": {\n            \"policy-space\"\
+    : \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
+    \n        }        },\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\"\
+    : false,\n    \"enable-ovs-hw-offload\": false\n}"
+  opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
+    \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" },\n        \"\
+    asyncjson\": { \"enabled\" : \"false\" }\n    },\n    \"ovs\": {\n        \"asyncjson\"\
+    : { \"enabled\" : \"false\" }\n    },\n    \"prometheus\": {\n        \"enabled\"\
+    : \"false\"\n    }\n}"
+kind: ConfigMap
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
+  name: aci-containers-config
+  namespace: aci-containers-system

@@ -11,10 +11,8 @@ import tempfile
 import tarfile
 import json
 
-
 from . import acc_provision
 from . import fake_apic
-
 
 debug = False
 
@@ -421,6 +419,18 @@ def test_flavor_openshift_411_openstack():
 
 
 @in_testdir
+def test_flavor_openshift_412_openstack():
+    run_provision(
+        "flavor_openshift_412_openstack.inp.yaml",
+        "flavor_openshift_412_openstack.kube.yaml",
+        "flavor_openshift_412_openstack_tar",
+        None,
+        "flavor_openshift_412_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.12-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_47_esx():
     run_provision(
         "flavor_openshift_47_esx.inp.yaml",
@@ -477,6 +487,30 @@ def test_flavor_openshift_411_esx():
         None,
         "flavor_openshift_411_esx.apic.txt",
         overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_412_esx():
+    run_provision(
+        "flavor_openshift_412_esx.inp.yaml",
+        "flavor_openshift_412_esx.kube.yaml",
+        "flavor_openshift_412_esx_tar",
+        None,
+        "flavor_openshift_412_esx.apic.txt",
+        overrides={"flavor": "openshift-4.12-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_412_baremetal():
+    run_provision(
+        "flavor_openshift_412_baremetal.inp.yaml",
+        "flavor_openshift_412_baremetal.kube.yaml",
+        "flavor_openshift_412_baremetal_tar",
+        None,
+        "flavor_openshift_412_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.12-baremetal"}
     )
 
 
@@ -614,6 +648,7 @@ def test_flavor_localhost():
 
 @in_testdir
 def test_flavor_cloud_base():
+
     with open("apic_test_data.json") as data_file:
         data = json.loads(data_file.read())
     apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
@@ -879,14 +914,6 @@ def test_flavor_RKE_1_2_3_base():
         "flavor_RKE_1_2_3.apic.txt",
         overrides={"flavor": "RKE-1.2.3"}
     )
-    run_provision(
-        "flavor_RKE_1_2_3.inp2.yaml",
-        "flavor_RKE_1_2_3.rke2.yaml",
-        None,
-        None,
-        "flavor_RKE_1_2_3.apic2.txt",
-        overrides={"flavor": "RKE-1.2.3"}
-    )
 
 
 @in_testdir
@@ -897,14 +924,6 @@ def test_flavor_RKE_1_3_13_base():
         None,
         None,
         "flavor_RKE_1_3_13.apic.txt",
-        overrides={"flavor": "RKE-1.3.13"}
-    )
-    run_provision(
-        "flavor_RKE_1_3_13.inp2.yaml",
-        "flavor_RKE_1_3_13.rke2.yaml",
-        None,
-        None,
-        "flavor_RKE_1_3_13.apic2.txt",
         overrides={"flavor": "RKE-1.3.13"}
     )
 
@@ -919,13 +938,17 @@ def test_flavor_RKE_1_3_17_base():
         "flavor_RKE_1_3_17.apic.txt",
         overrides={"flavor": "RKE-1.3.17"}
     )
+
+
+@in_testdir
+def test_flavor_RKE_1_3_18_base():
     run_provision(
-        "flavor_RKE_1_3_17.inp2.yaml",
-        "flavor_RKE_1_3_17.rke2.yaml",
+        "flavor_RKE_1_3_18.inp.yaml",
+        "flavor_RKE_1_3_18.rke.yaml",
         None,
         None,
-        "flavor_RKE_1_3_17.apic2.txt",
-        overrides={"flavor": "RKE-1.3.17"}
+        "flavor_RKE_1_3_18.apic.txt",
+        overrides={"flavor": "RKE-1.3.18"}
     )
 
 
@@ -1073,6 +1096,150 @@ def test_flavor_calico_3_23_2():
     )
 
 
+@in_testdir
+def test_flavor_calico_3_23_2_multiple_vrf_uc1():
+    run_provision(
+        "flavor_calico_3.23.2_multiple_vrf_uc1.inp.yaml",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc1_tar",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc1.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_calico_3_23_2_multiple_vrf_uc2():
+    run_provision(
+        "flavor_calico_3.23.2_multiple_vrf_uc2.inp.yaml",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc2_tar",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc2.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_calico_3_23_2_multiple_vrf_uc3():
+    run_provision(
+        "flavor_calico_3.23.2_multiple_vrf_uc3.inp.yaml",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc3_tar",
+        None,
+        "flavor_calico_3.23.2_multiple_vrf_uc3.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flavor_with_cluster_svc_export_calico_3_23_2():
+    run_provision(
+        "flavor_with_cluster_svc_export_calico-3.23.2.inp.yaml",
+        None,
+        "flavor_with_cluster_svc_export_calico-3.23.2_tar",
+        None,
+        "flavor_with_cluster_svc_export_calico-3.23.2.apic.txt",
+        overrides={"flavor": "calico-3.23.2"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_44_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_44_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_44_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_44_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_44_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.4-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_45_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_45_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_45_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_45_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_45_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.5-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_46_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_46_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_46_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_46_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_46_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.6-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_47_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_47_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_47_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_47_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_47_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.7-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_48_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_48_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_48_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_48_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_48_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.8-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_49_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_49_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_49_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_49_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_49_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.9-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_410_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_410_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_410_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_410_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_410_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.10-esx"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_411_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_411_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_411_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
@@ -1089,7 +1256,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.24",
+        "flavor": "kubernetes-1.25",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,

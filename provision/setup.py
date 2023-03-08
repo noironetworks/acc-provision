@@ -3,10 +3,11 @@ import os, sys
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 from gitversion.gitversion import get_git_version
+os.chdir(os.path.abspath(file_dir))
 
 setup(
     name='acc_provision',
-    version='5.2.3.5',
+    version='5.2.3.6',
     description='Tool to provision ACI for ACI Containers Controller  Build info: ' + get_git_version(),
     author="Cisco Systems, Inc.",
     author_email="apicapi@noironetworks.com",
@@ -15,6 +16,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    data_files = [('bin', ['bin/acikubectl'])],
     entry_points={
         'console_scripts': [
             'acc-provision=acc_provision.acc_provision:main',

@@ -17,6 +17,7 @@ aci_config:
     name: l3out
     external_networks:
     - default
+    - test_ext_net
   sync_login:
     certfile: user.crt
     keyfile: user.key
@@ -48,17 +49,6 @@ kube_config:
   add_external_subnets_to_rdconfig: True
   snat_operator:
     disable_periodic_snat_global_info_sync: True
-
-registry:
-  image_prefix: noirolabs
-  aci_containers_controller_version: jefferson-test
-  aci_containers_host_version: master-test
-  aci_containers_operator_version: jefferson-test
-  cnideploy_version: jefferson-test
-  openvswitch_version: jefferson-test
-  opflex_agent_version: jefferson-test
-  opflex_server_version: jefferson-test
-  gbp_version: jefferson-test
 
 logging:
   controller_log_level: info

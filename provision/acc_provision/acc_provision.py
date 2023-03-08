@@ -196,6 +196,7 @@ def config_default():
             "duration_wait_for_network": 210,
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
+            "advertise_cluster_svc_subnet": False,
         },
         "topology": {
             "rack": {
@@ -218,15 +219,6 @@ def config_default():
             "use_netpol_apigroup": "networking.k8s.io",
             "use_cluster_role": True,
             "no_wait_for_service_ep_readiness": False,
-            "service_graph_endpoint_add_delay": {
-                "delay": 30,
-                "services": [
-                    {
-                        "name": "router-internal-default",
-                        "namespace": "openshift-ingress",
-                    },
-                ],
-            },
             "add_external_subnets_to_rdconfig": False,
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
@@ -245,7 +237,8 @@ def config_default():
                 },
                 "snat_namespace": "aci-containers-system",
                 "contract_scope": "global",
-                "disable_periodic_snat_global_info_sync": False
+                "disable_periodic_snat_global_info_sync": False,
+                "sleep_time_snat_global_info_sync": None,
             },
             "max_nodes_svc_graph": 32,
             "opflex_mode": None,
@@ -256,6 +249,8 @@ def config_default():
             "generate_apic_file": False,
             "use_host_netns_volume": False,
             "enable_endpointslice": False,
+            "opflex_agent_opflex_asyncjson_enabled": "false",
+            "opflex_agent_ovs_asyncjson_enabled": "false"
         },
         "istio_config": {
             "install_istio": False,
@@ -745,6 +740,22 @@ def is_valid_dev_del_timeout(xval):
     raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_sleep_time(xval):
+    if xval is None:
+        # use default configured on this host
+        return True
+
+    xmin = 1
+    xmax = 300
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_ipsla_interval(xval):
     if xval is None:
         # use default configured on this host
@@ -941,6 +952,7 @@ def config_validate(flavor_opts, config):
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                               required),
         }
+
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -957,6 +969,9 @@ def config_validate(flavor_opts, config):
 
             "kube_config/snat_operator/contract_scope": (get(("kube_config", "snat_operator", "contract_scope")),
                                                          is_valid_contract_scope),
+
+            "kube_config/snat_operator/sleep_time_snat_global_info_sync": (get(("kube_config", "snat_operator", "sleep_time_snat_global_info_sync")),
+                                                                           is_valid_sleep_time),
 
             # Network Config
             "net_config/infra_vlan": (get(("net_config", "infra_vlan")),
@@ -1366,6 +1381,29 @@ def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
+def generate_rancher_1_3_18_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-network-provider-cluster-1-3-18.yaml')
+        outname = operator_output
+        # At this time, we do not use the aci-containers-operator with Rancher.
+        # The template to generate ACI CNI components is upstream in RKE code
+        # Here we generate the input file to feed into RKE, which looks almost
+        # the same as the acc-provision_input file
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing Rancher network provider portion of cluster.yml to %s" % outname)
+        info("Use this network provider section in the cluster.yml you use with RKE")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
@@ -1402,8 +1440,8 @@ def generate_calico_deployment_files(config, network_operator_output):
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output
-        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer + bgp_node
+        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output + bgp_node
+        custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer
         acc_provision_yaml = get_jinja_template('acc-provision-configmap.yaml').render(config=config)
         custom_resources_aci_calico_yaml += "\n---\n" + acc_provision_yaml
         with open("custom_resources_aci_calico.yaml", "w") as fh:
@@ -1558,15 +1596,17 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
             if prov_apic is False:
                 info("Unprovisioning configuration in APIC")
                 system_id = config["aci_config"]["system_id"]
-                tenant = config["aci_config"]["vrf"]["tenant"]
+                cluster_l3out_vrf_details = configurator.get_cluster_l3out_vrf_details()
+                cluster_l3out_tenant = cluster_l3out_vrf_details["tenant"]
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
                 if is_calico_flavor(config["flavor"]):
                     l3out_name = config["aci_config"]["cluster_l3out"]["name"]
-                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config, l3out_name=l3out_name)
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config,
+                                     l3out_name=l3out_name, cluster_l3out_vrf_details=cluster_l3out_vrf_details)
                 else:
-                    apic.unprovision(apic_config, system_id, tenant, vrf_tenant, cluster_tenant, old_naming, config)
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config)
             ret = False if apic.errors > 0 else True
     return ret
 
