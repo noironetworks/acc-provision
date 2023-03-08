@@ -1841,6 +1841,57 @@ def check_image_pull_secret(config):
         return False
     return True
 
+def is_dualstack_config(config):
+    if "net_config" not in config:
+        return False
+    subnet_info = []
+    if not isinstance(config["net_config"]["pod_subnet"], list):
+        subnet_info[-1] = config["net_config"]["pod_subnet"]
+    else:
+        pod_subnets = []
+        for pod_subnet in config["net_config"]["pod_subnet"]:
+            pod_subnets.append(pod_subnet)
+        for pod_subnet in pod_subnets:
+            subnet_info.append(pod_subnet)
+
+    if not isinstance(config["net_config"]["node_subnet"], list):
+        subnet_info[-1] = config["net_config"]["node_subnet"]
+    else:
+        node_subnets = []
+        for node_subnet in config["net_config"]["node_subnet"]:
+            node_subnets.append(node_subnet)
+        for node_subnet in node_subnets:
+            subnet_info.append(node_subnet)
+
+    if not isinstance(config["net_config"]["extern_dynamic"], list):
+        subnet_info[-1] = config["net_config"]["extern_dynamic"]
+    else:
+        extern_dynamics = []
+        for extern_dynamic in config["net_config"]["extern_dynamic"]:
+            extern_dynamics.append(extern_dynamic)
+
+        for extern_dynamic in extern_dynamics:
+            subnet_info.append(extern_dynamic)
+
+    for subnet in subnet_info:
+        rtr, _ = subnet.split("/")
+        ip = ipaddress.ip_address(rtr)
+        if ip.version == 6:
+            return True
+
+    return False
+
+def is_support_dualstack(flavor):
+    version = flavor.split("-")[1]
+    support_k8s_version = "1.21"
+    support_openshift_version = "4.8"
+    if version >= support_k8s_version:
+        return True
+
+    if version >= support_openshift_version:
+        return True
+
+    return False
 
 def provision(args, apic_file, no_random):
     config_file = args.config
@@ -1932,6 +1983,7 @@ def provision(args, apic_file, no_random):
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
 
+
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
@@ -1947,6 +1999,10 @@ def provision(args, apic_file, no_random):
         err("Unknown flavor %s" % flavor)
         return False
     flavor_opts = FLAVORS[flavor].get("options", DEFAULT_FLAVOR_OPTIONS)
+
+    if is_dualstack_config(config) and not is_support_dualstack(flavor):
+        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 4.21 or later or OpenShift version 4.8 or later.")
+        return False
 
     deep_merge(config, config_default())
 
