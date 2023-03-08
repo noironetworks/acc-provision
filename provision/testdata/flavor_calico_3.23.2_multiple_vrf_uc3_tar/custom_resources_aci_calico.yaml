@@ -266,8 +266,10 @@ data:
                 }
             },
             "net_config": {
-                "extern_dynamic": "20.3.0.0/16",
-                "node_subnet": "2.100.101.0/24",
+                "extern-dynamic": ["20.3.0.0/16"],
+                "node_subnet": [
+                    "2.100.101.0/24"
+                ],
                 "pod_subnet": [
                     "20.2.0.0/16"
                 ],

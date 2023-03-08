@@ -740,18 +740,6 @@ None
                     },
                     "children": [
                         {
-<<<<<<< HEAD
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.1.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
-=======
->>>>>>> 76abdff9... Add support for extern_dynamic with IPv6
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "kube",

@@ -38,7 +38,7 @@ data:
     : \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\
     \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
     : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
-    \  \"extern-dynamic\": \"10.3.0.1/24\",\n    \"snat-contract-scope\": \"global\"\
+    \  \"extern-dynamic\": [\"10.3.0.1/24\"],\n    \"snat-contract-scope\": \"global\"\
     ,\n    \"static-service-ip-pool\": [],\n    \"pod-ip-pool\": [\n        {\n  \
     \          \"end\": \"10.2.255.254\",\n            \"start\": \"10.2.0.2\"\n \
     \       }\n    ],\n    \"pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\"\
@@ -52,12 +52,12 @@ data:
     : \"kube\",\n    \"installer-provisioned-lb-ip\": \"192.168.18.201\",\n    \"\
     aci-prefix\": \"kube\",\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\": \"\
     common\",\n    \"service-vlan\": 4003,\n    \"kubeapi-vlan\": 4001,\n    \"pod-subnet\"\
-    : [\n        \"10.2.0.1/16\"\n    ],\n    \"node-subnet\": \"10.1.0.1/16\",\n\
-    \    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": 4093,\n    \"cni-netconfig\"\
-    : [\n        {\n            \"gateway\": \"10.2.0.1\",\n            \"routes\"\
-    : [\n                {\n                    \"dst\": \"0.0.0.0/0\",\n        \
-    \            \"gw\": \"10.2.0.1\"\n                }\n            ],\n       \
-    \     \"subnet\": \"10.2.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
+    : [\n        \"10.2.0.1/16\"\n    ],\n    \"node-subnet\": [\n        \"10.1.0.1/16\"\
+    \n    ],\n    \"encap-type\": \"vxlan\",\n    \"aci-infra-vlan\": 4093,\n    \"\
+    cni-netconfig\": [\n        {\n            \"gateway\": \"10.2.0.1\",\n      \
+    \      \"routes\": [\n                {\n                    \"dst\": \"0.0.0.0/0\"\
+    ,\n                    \"gw\": \"10.2.0.1\"\n                }\n            ],\n\
+    \            \"subnet\": \"10.2.0.0/16\"\n        }\n    ],\n    \"default-endpoint-group\"\
     : {\n        \"policy-space\": \"kube\",\n        \"name\": \"aci-containers-kube|aci-containers-default\"\
     \n    },\n    \"namespace-default-endpoint-group\": {\n        \"aci-containers-system\"\
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"aci-containers-kube|aci-containers-system\"\

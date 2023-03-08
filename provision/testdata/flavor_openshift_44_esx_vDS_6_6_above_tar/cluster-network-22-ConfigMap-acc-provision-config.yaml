@@ -24,10 +24,10 @@ data:
     : \"info\", \n           \"opflexagent_log_level\": \"info\"\n        },\n   \
     \     \"net_config\": {\n            \"infra_vlan\": 4093,\n            \"service_vlan\"\
     : 4003, \n            \"kubeapi_vlan\": 4001,\n            \"extern_static\":\
-    \ \"10.4.0.1/24\",\n            \"extern_dynamic\": \"10.3.0.1/24\",\n       \
-    \     \"node_svc_subnet\": \"10.5.0.1/24\",\n            \"node_subnet\": \"10.1.0.10/16\"\
-    ,\n            \"pod_subnet\": [\n                \"10.2.0.1/16\"\n          \
-    \  ]\n        }\n    }\n }"
+    \ \"10.4.0.1/24\",\n            \"extern-dynamic\": [\"10.3.0.1/24\"],\n     \
+    \       \"node_svc_subnet\": \"10.5.0.1/24\",\n            \"node_subnet\": [\n\
+    \                \"10.1.0.10/16\"\n            ],\n            \"pod_subnet\"\
+    : [\n                \"10.2.0.1/16\"\n            ]\n        }\n    }\n }"
 kind: ConfigMap
 metadata:
   labels:

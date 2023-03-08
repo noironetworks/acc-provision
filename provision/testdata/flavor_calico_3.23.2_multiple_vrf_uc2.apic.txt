@@ -190,7 +190,9 @@
             {
                 "bgpPeerP": {
                     "attributes": {
-                        "addr": "2.100.101.0/24",
+                        "addr": [
+                            "2.100.101.0/24"
+                        ],
                         "ctrl": "as-override,dis-peer-as-check",
                         "password": "test",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -256,7 +258,9 @@
             {
                 "bgpPeerP": {
                     "attributes": {
-                        "addr": "2.100.101.0/24",
+                        "addr": [
+                            "2.100.101.0/24"
+                        ],
                         "ctrl": "as-override,dis-peer-as-check",
                         "password": "test",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -322,7 +326,9 @@
             {
                 "bgpPeerP": {
                     "attributes": {
-                        "addr": "2.100.101.0/24",
+                        "addr": [
+                            "2.100.101.0/24"
+                        ],
                         "ctrl": "as-override,dis-peer-as-check",
                         "password": "test",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -462,7 +468,9 @@
             {
                 "l3extSubnet": {
                     "attributes": {
-                        "ip": "20.3.0.0/16",
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
                         "aggregate": "shared-rtctrl",
                         "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -503,7 +511,9 @@
             {
                 "l3extSubnet": {
                     "attributes": {
-                        "ip": "2.100.101.0/24",
+                        "ip": [
+                            "2.100.101.0/24"
+                        ],
                         "aggregate": "shared-rtctrl",
                         "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -697,7 +707,9 @@
             {
                 "rtctrlMatchRtDest": {
                     "attributes": {
-                        "ip": "2.100.101.0/24",
+                        "ip": [
+                            "2.100.101.0/24"
+                        ],
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
@@ -706,7 +718,9 @@
             {
                 "rtctrlMatchRtDest": {
                     "attributes": {
-                        "ip": "20.3.0.0/16",
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
