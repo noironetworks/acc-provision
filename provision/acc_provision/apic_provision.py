@@ -3409,18 +3409,6 @@ class ApicKubeConfig(object):
             if ip.version == 6:
                 return True
         return False
-        # pod_subnets = []
-        # if not isinstance(self.config["net_config"]["pod_subnet"], list):
-        #     pod_subnets.append(self.config["net_config"]["pod_subnet"])
-        # else:
-        #     for pod_subnet in self.config["net_config"]["pod_subnet"]:
-        #         pod_subnets.append(pod_subnet)
-        # for pod_cidr in pod_subnets:
-        #     rtr, mask = pod_cidr.split("/")
-        #     ip = ipaddress.ip_address(rtr)
-        #     if ip.version == 6:
-        #         return True
-        # return False
 
     def isV6(self, cidr):
         rtr, mask = cidr.split("/")
@@ -3462,7 +3450,6 @@ class ApicKubeConfig(object):
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         kube_vrf = self.config["aci_config"]["vrf"]["name"]
         kube_l3out = self.config["aci_config"]["l3out"]["name"]
-        # node_subnet = self.config["net_config"]["node_subnet"]
         node_subnets = self.config["net_config"].get("node_subnet", [])
         if not isinstance(node_subnets, list):
             node_subnets = [node_subnets]
@@ -3470,12 +3457,6 @@ class ApicKubeConfig(object):
         if not isinstance(pod_subnets, list):
             pod_subnets = [pod_subnets]
 
-        # pod_subnets = []
-        # if not isinstance(self.config["net_config"]["pod_subnet"], list):
-        #     pod_subnets.append(self.config["net_config"]["pod_subnet"])
-        # else:
-        #     for pod_subnet in self.config["net_config"]["pod_subnet"]:
-        #         pod_subnets.append(pod_subnet)
         kade = self.config["kube_config"].get("allow_kube_api_default_epg") or \
             self.config["kube_config"].get("allow_pods_kube_api_access")
         eade = self.config["kube_config"].get("allow_pods_external_access")
@@ -3657,15 +3638,6 @@ class ApicKubeConfig(object):
                     ]
                 )
             )
-
-        # node_subnet_obj = collections.OrderedDict(
-        #     [
-        #         (
-        #             "attributes",
-        #             collections.OrderedDict([("ip", node_subnet), ("scope", "public")]),
-        #         )
-        #     ]
-        # )
 
         if v6subnet:
             ipv6_nd_policy_rs = [
@@ -4353,14 +4325,6 @@ class ApicKubeConfig(object):
                                                         (
                                                             "children",
                                                             [
-                                                                # collections.OrderedDict(
-                                                                #     [
-                                                                #         (
-                                                                #             "fvSubnet",
-                                                                #             node_subnet_obj,
-                                                                #         )
-                                                                #     ]
-                                                                # ),
                                                                 collections.OrderedDict(
                                                                     [
                                                                         (

@@ -20,8 +20,12 @@ network:
 =======
     node_subnet: "['10.1.0.1/16']"
     l3out_external_networks: ["\"default\""]
+<<<<<<< HEAD
 >>>>>>> 4b972b79... Add changes to handle ipv6 node subnet
     extern_dynamic: "10.3.0.1/24"
+=======
+    extern_dynamic: "['10.3.0.1/24']"
+>>>>>>> 76abdff9... Add support for extern_dynamic with IPv6
     extern_static: "10.4.0.1/24"
     node_svc_subnet: "10.5.0.1/24"
     kube_api_vlan: "4001"

@@ -428,7 +428,9 @@
             {
                 "l3extSubnet": {
                     "attributes": {
-                        "ip": "20.3.0.0/16",
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
                         "aggregate": "shared-rtctrl",
                         "scope": "export-rtctrl,import-rtctrl,import-security",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -684,7 +686,9 @@
             {
                 "rtctrlMatchRtDest": {
                     "attributes": {
-                        "ip": "20.3.0.0/16",
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     }

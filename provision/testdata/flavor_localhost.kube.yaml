@@ -1270,7 +1270,7 @@ data:
             }
         ],
         "extern-static": "10.4.56.1/21",
-        "extern-dynamic": "10.3.56.1/21",
+        "extern-dynamic": ["10.3.56.1/21"],
         "snat-contract-scope": "global",
         "static-service-ip-pool": [
             {

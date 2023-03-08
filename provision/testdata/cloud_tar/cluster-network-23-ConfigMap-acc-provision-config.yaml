@@ -17,10 +17,10 @@ data:
     \ \n            \"run_gbp_container\": true, \n            \"ep_registry\": \"\
     k8s\", \n            \"opflex_mode\": \"overlay\"\n\n        },\n        \"istio_config\"\
     : {\n           \"install_istio\": false\n        },\n        \"net_config\":\
-    \ {\n            \"extern_static\": \"10.4.0.1/24\",\n            \"extern_dynamic\"\
-    : \"10.3.0.1/24\",\n            \"node_svc_subnet\": \"10.5.0.1/24\",\n      \
-    \      \"node_subnet\": \"31.0.1.0/24\",\n            \"pod_subnet\": [\n    \
-    \            \"14.3.0.1/16\"\n            ]\n        }\n    }\n }"
+    \ {\n            \"extern_static\": \"10.4.0.1/24\",\n            \"extern-dynamic\"\
+    : [\"10.3.0.1/24\"],\n            \"node_svc_subnet\": \"10.5.0.1/24\",\n    \
+    \        \"node_subnet\": \"31.0.1.0/24\",\n            \"pod_subnet\": [\n  \
+    \              \"14.3.0.1/16\"\n            ]\n        }\n    }\n }"
 kind: ConfigMap
 metadata:
   labels:

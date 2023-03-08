@@ -1436,7 +1436,7 @@ data:
         "extern-static": {{config.net_config.extern_static|json}},
         {% endif %}
         {% if config.user_config.net_config.extern_dynamic %}
-        "extern-dynamic": {{config.net_config.extern_dynamic|json}},
+        "extern-dynamic": {{config.user_config.net_config.extern_dynamic|tojson }},
         {% endif %}
         "snat-contract-scope": {{ config.kube_config.snat_operator.contract_scope|json }},
         "static-service-ip-pool": {{ config.kube_config.static_service_ip_pool|json|indent(width=8) }},

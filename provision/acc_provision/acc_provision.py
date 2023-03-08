@@ -307,9 +307,10 @@ def config_user(config_file):
         config["user_input"] = user_input
         if not isinstance(config["net_config"]["pod_subnet"], list):
             config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
-        # config["net_config"]["node_subnet"] = config["net_config"].get("node_subnet", [])
         if not isinstance(config["net_config"]["node_subnet"], list):
             config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
+        if not isinstance(config["net_config"]["extern_dynamic"], list):
+            config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
     if config is None:
         config = {}
     return config
@@ -395,7 +396,10 @@ def config_adjust(args, config, prov_apic, no_random):
     pod_subnets = []
     for pod_subnet in config["net_config"]["pod_subnet"]:
         pod_subnets.append(pod_subnet)
-    extern_dynamic = config["net_config"]["extern_dynamic"]
+    extern_dynamics = []
+    for extern_dynamic in config["net_config"]["extern_dynamic"]:
+        extern_dynamics.append(extern_dynamic)
+
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
@@ -532,12 +536,6 @@ def config_adjust(args, config, prov_apic, no_random):
                     "group": istio_epg,
                 },
             },
-            "service_ip_pool": [
-                {
-                    "start": cidr_split(extern_dynamic)[0],
-                    "end": cidr_split(extern_dynamic)[1],
-                },
-            ],
             "static_service_ip_pool": static_service_ip_pool,
             "node_service_ip_pool": node_service_ip_pool,
             "node_service_gw_subnets": [
@@ -592,6 +590,21 @@ def config_adjust(args, config, prov_apic, no_random):
                                 "gw": cidr_split(pod_subnet)[2],
                             }
                         ]
+                    }
+                )
+        for extern_dynamic in extern_dynamics:
+            if "service_ip_pool" not in kube_config_object:
+                kube_config_object["service_ip_pool"] = [
+                    {
+                        "start": cidr_split(extern_dynamic)[0],
+                        "end": cidr_split(extern_dynamic)[1],
+                    }
+                ]
+            else:
+                kube_config_object["service_ip_pool"].append(
+                    {
+                        "start": cidr_split(extern_dynamic)[0],
+                        "end": cidr_split(extern_dynamic)[1],
                     }
                 )
 
@@ -1501,9 +1514,9 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
         temp = ''.join(template.stream(config=config))
         parsed_temp = temp.split("---")
-
         # Find the place where to put the acioperators configmap
         for cmap_idx in range(len(parsed_temp)):
+            parsed_temp[cmap_idx]
             current_yaml = yaml.safe_load(parsed_temp[cmap_idx])
             if current_yaml['kind'] == 'ConfigMap':
                 break
@@ -1532,6 +1545,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         else:
             new_deployment_file = temp
 
+        # print(new_deployment_file)
         if operator_output != sys.stdout:
             with open(operator_output, "w") as fh:
                 fh.write(new_deployment_file)
@@ -1758,29 +1772,13 @@ def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
     if is_calico_flavor(config["flavor"]):
         subnet_info = {
-            # "node_subnet": config["net_config"]["node_subnet"],
-            "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
     else:
         subnet_info = {
-            # "node_subnet": config["net_config"]["node_subnet"],
-            "extern_dynamic": config["net_config"]["extern_dynamic"],
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
 
-    # if not isinstance(config["net_config"]["pod_subnet"], list):
-    #     subnet_info[-1] = config["net_config"]["pod_subnet"]
-    # else:
-    #     pod_subnets = []
-    #     for pod_subnet in config["net_config"]["pod_subnet"]:
-    #         pod_subnets.append(pod_subnet)
-    #     counter = 0
-    #     for pod_subnet in pod_subnets:
-    #         subnet_info[counter] = pod_subnet
-    #         counter += 1
-    # subnet_info.extend(config["net_config"].get("pod_subnet", []))
-    # subnet_info.extend(config["net_config"].get("node_subnet", []))
     if not isinstance(config["net_config"]["pod_subnet"], list):
         subnet_info[-1] = config["net_config"]["pod_subnet"]
     else:
@@ -1801,6 +1799,17 @@ def check_overlapping_subnets(config):
         # counter = 0
         for node_subnet in node_subnets:
             subnet_info[counter] = node_subnet
+            counter += 1
+
+    if not isinstance(config["net_config"]["extern_dynamic"], list):
+        subnet_info[-1] = config["net_config"]["extern_dynamic"]
+    else:
+        extern_dynamics = []
+        for extern_dynamic in config["net_config"]["extern_dynamic"]:
+            extern_dynamics.append(extern_dynamic)
+        # counter = 0
+        for extern_dynamic in extern_dynamics:
+            subnet_info[counter] = extern_dynamic
             counter += 1
 
     # Don't have extern_static field set for OpenShift flavors

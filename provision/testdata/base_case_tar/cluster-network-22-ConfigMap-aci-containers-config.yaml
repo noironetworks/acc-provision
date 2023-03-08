@@ -20,6 +20,7 @@ data:
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
     : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
+<<<<<<< HEAD
     \  \"extern-static\": \"10.4.0.1/24\",\n    \"extern-dynamic\": \"10.3.0.1/24\"\
     ,\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\": [\n\
     \        {\n            \"end\": \"10.4.0.254\",\n            \"start\": \"10.4.0.2\"\
@@ -30,6 +31,18 @@ data:
     \    }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n   \
     \ ]\n}"
   host-agent-config: "{\n    \"flavor\": \"kubernetes-1.25\",\n    \"app-profile\"\
+=======
+    \  \"extern-static\": \"10.4.0.1/24\",\n    \"extern-dynamic\": [\"10.3.0.1/24\"\
+    ],\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\":\
+    \ [\n        {\n            \"end\": \"10.4.0.254\",\n            \"start\": \"\
+    10.4.0.2\"\n        }\n    ],\n    \"pod-ip-pool\": [\n        {\n           \
+    \ \"end\": \"10.2.255.254\",\n            \"start\": \"10.2.0.2\"\n        }\n\
+    \    ],\n    \"pod-subnet-chunk-size\": 32,\n    \"node-service-ip-pool\": [\n\
+    \        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"10.5.0.2\"\
+    \n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n\
+    \    ]\n}"
+  host-agent-config: "{\n    \"flavor\": \"kubernetes-1.24\",\n    \"app-profile\"\
+>>>>>>> 76abdff9... Add support for extern_dynamic with IPv6
     : \"kubernetes\",\n    \"opflex-mode\": null,\n    \"log-level\": \"info\",\n\
     \    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\
     : \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\"\

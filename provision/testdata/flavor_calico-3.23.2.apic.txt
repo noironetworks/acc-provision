@@ -428,7 +428,9 @@
             {
                 "l3extSubnet": {
                     "attributes": {
-                        "ip": "20.3.0.0/16",
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
                         "aggregate": "shared-rtctrl",
                         "scope": "export-rtctrl,import-rtctrl,import-security",
                         "annotation": "orchestrator:aci-containers-controller"
@@ -665,7 +667,22 @@
             {
                 "rtctrlMatchRtDest": {
                     "attributes": {
+<<<<<<< HEAD
                         "ip": "20.3.0.0/16",
+=======
+                        "ip": "10.96.0.0/12",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": [
+                            "20.3.0.0/16"
+                        ],
+>>>>>>> 76abdff9... Add support for extern_dynamic with IPv6
                         "aggregate": "yes",
                         "annotation": "orchestrator:aci-containers-controller"
                     }

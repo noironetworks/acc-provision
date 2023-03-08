@@ -183,7 +183,7 @@ data:
                 "extern_static": {{config.net_config.extern_static|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_dynamic %}
-                "extern_dynamic": {{config.net_config.extern_dynamic|json}},
+                "extern-dynamic": {{config.user_config.net_config.extern_dynamic|tojson}},
                 {% endif %}
                 {% if config.user_config.net_config.node_svc_subnet %}
                 "node_svc_subnet": {{config.net_config.node_svc_subnet|json}},
