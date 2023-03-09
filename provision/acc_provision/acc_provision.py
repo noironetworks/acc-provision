@@ -58,7 +58,7 @@ VERSION_FIELDS = [
 FLAVORS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/flavors.yaml"
 VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/versions.yaml"
 CKO_VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/cko_versions.yaml"
-
+ACI_CNI_VERSIONS_PATH = ""
 
 with open(VERSIONS_PATH, 'r') as stream:
     try:
@@ -1157,15 +1157,15 @@ def calico_config_validate_preexisting(config, prov_apic):
     return True
 
 
-def generate_sample(filep, flavor):
+def generate_sample(filep, flavor, config):
     if flavor in ["cloud", "eks"]:
-        data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
+        data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + 'overlay-provision-config.yaml')
     elif flavor == "aks":
-        data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
+        data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + ' aks-provision-config.yaml')
     elif flavor == "calico-3.23.2":
-        data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
+        data = pkgutil.get_data('acc_provision', 'templates/' + config["calico_cni_versions_path"] + 'calico-provision-config.yaml')
     else:
-        data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
+        data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + 'provision-config.yaml')
     try:
         filep.write(data)
     except TypeError:
@@ -1291,7 +1291,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
         extra_files.append(apic_name)
 
     for x_file in extra_files:
-        x_template = get_jinja_template(x_file)
+        x_template = get_jinja_template(config["aci_cni_versions_path"] + x_file)
         x_template.stream(config=config).dump(x_file)
         filenames.append(x_file)
 
@@ -1305,7 +1305,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
 
 def generate_rancher_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1328,7 +1328,7 @@ def generate_rancher_yaml(args, config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-13.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-3-13.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1351,7 +1351,7 @@ def generate_rancher_1_3_13_yaml(args, config, operator_output, operator_tar, op
 
 def generate_rancher_1_3_17_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-17.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-3-17.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1374,7 +1374,7 @@ def generate_rancher_1_3_17_yaml(args, config, operator_output, operator_tar, op
 
 def generate_rancher_1_3_18_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-18.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-3-18.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1407,13 +1407,12 @@ def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
 
-def generate_nettools_deployment_files(args, netopConfig):
-    netop_version = args.cko_version
-    nettools_spec_template = get_jinja_template('cko/' + netop_version + '/nettools/nettools-manifests.yaml')
+def generate_nettools_deployment_files(netopConfig):
+    nettools_spec_template = get_jinja_template(netopConfig["cko_versions_path"] + '/nettools/nettools-manifests.yaml')
     nettools_spec_output = nettools_spec_template.render(config=netopConfig)
-    connectivity_checker_CR_template = get_jinja_template('cko/' + netop_version + '/nettools/connectivity-checker-cr.yaml')
+    connectivity_checker_CR_template = get_jinja_template(netopConfig["cko_versions_path"] + '/nettools/connectivity-checker-cr.yaml')
     connectivity_checker_CR_outout = connectivity_checker_CR_template.render(config=netopConfig)
-    errorPodReporting_CR_template = get_jinja_template('cko/' + netop_version + '/nettools/error-pod-reporting-cr.yaml')
+    errorPodReporting_CR_template = get_jinja_template(netopConfig["cko_versions_path"] + '/nettools/error-pod-reporting-cr.yaml')
     errorPodReporting_CR_output = errorPodReporting_CR_template.render(config=netopConfig)
     base64_encoded_nettools_crds = base64.b64encode(nettools_spec_output.encode('ascii')).decode('ascii')
     base64_encoded_connectivity_checker_cr = base64.b64encode(connectivity_checker_CR_outout.encode('ascii')).decode('ascii')
@@ -1424,8 +1423,8 @@ def generate_nettools_deployment_files(args, netopConfig):
     return netopConfig
 
 
-def generate_argocd_deployment_files(args, netopConfig):
-    argocd_spec_template = get_jinja_template('argocd.yaml')
+def generate_argocd_deployment_files(netopConfig):
+    argocd_spec_template = get_jinja_template(netopConfig["cko_versions_path"] + '/argocd.yaml')
     argocd_spec_output = argocd_spec_template.render(config=netopConfig)
     base64_encoded_argocd_manifests = base64.b64encode(argocd_spec_output.encode('ascii')).decode('ascii')
     netopConfig['gitops']['base64_encoded_argo_manifests'] = base64_encoded_argocd_manifests
@@ -1435,25 +1434,18 @@ def generate_argocd_deployment_files(args, netopConfig):
 def generate_calico_deployment_files(args, config, network_operator_output):
     filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
 
-    if config.get("target_version"):
-        ver = str(config["target_version"])
-    else:
-        ver = str(config["registry"]["version"])
-
-    print("Target version is ", ver)
-
     if network_operator_output and network_operator_output != "/dev/null":
-        calico_crds_template = get_jinja_template('cni/calico/' + ver + '/tigera-operator.yaml')
+        calico_crds_template = get_jinja_template(config["calico_cni_versions_path"] + 'tigera-operator.yaml')
         calico_crds_output = calico_crds_template.render(config=config)
-        calico_crs_template = get_jinja_template('cni/calico/' + ver + '/custom-resources-aci-calico.yaml')
+        calico_crs_template = get_jinja_template(config["calico_cni_versions_path"] + 'custom-resources-aci-calico.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
-        calicoctl_template = get_jinja_template('cni/calico/' + ver + '/calicoctl.yaml')
+        calicoctl_template = get_jinja_template(config["calico_cni_versions_path"] + 'calicoctl.yaml')
         calicoctl_output = calicoctl_template.render(config=config)
 
         bgp_peer = ''
         bgp_node = ''
-        calico_bgp_peer_template = get_jinja_template('cni/calico/' + ver + '/calico-bgp-peer.yaml')
-        calico_node_template = get_jinja_template('cni/calico/' + ver + '/calico-node.yaml')
+        calico_bgp_peer_template = get_jinja_template(config["calico_cni_versions_path"] + 'calico-bgp-peer.yaml')
+        calico_node_template = get_jinja_template(config["calico_cni_versions_path"] + 'calico-node.yaml')
         for item in config["topology"]["rack"]:
             for node_name in item["node"]:
                 configTemp = dict()
@@ -1468,7 +1460,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
                     configTemp["id"] = item["id"]
                     bgp_peer = bgp_peer + "\n---\n" + calico_bgp_peer_template.render(config=configTemp)
 
-        calico_bgp_config_template = get_jinja_template('cni/calico/' + ver + '/calico-bgp-config.yaml')
+        calico_bgp_config_template = get_jinja_template(config["calico_cni_versions_path"] + 'calico-bgp-config.yaml')
         calico_bgp_config_output = calico_bgp_config_template.render(config=config)
 
         tigera_operator_yaml = calico_crds_output
@@ -1479,13 +1471,14 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             netop_version = args.cko_version
             netopConfig = dict(config)
             netopConfig = get_cko_mode(args, netopConfig)
+            netopConfig["cko_versions_path"] = 'cko/' + netop_version
             if "connectivity_checker" in netopConfig.keys():
-                netopConfig = generate_nettools_deployment_files(args, netopConfig)
+                netopConfig = generate_nettools_deployment_files(netopConfig)
             if "gitops" in netopConfig.keys():
-                netopConfig = generate_argocd_deployment_files(args, netopConfig)
-            network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
+                netopConfig = generate_argocd_deployment_files(netopConfig)
+            network_operator_spec_template = get_jinja_template(netopConfig["cko_versions_path"] + '/netop-manifest.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
-            network_operator_CR_template = get_jinja_template('cni/calico/' + ver + '/calico-installer-cr.yaml')
+            network_operator_CR_template = get_jinja_template(netopConfig["cko_versions_path"] + '/calico-installer-cr.yaml')
             base64_encoded_cko_calico_crds = base64.b64encode(calico_crds_output.encode('ascii')).decode('ascii')
             base64_encoded_cko_calico_crs = base64.b64encode(calico_crs_output.encode('ascii')).decode('ascii')
             base64_encoded_cko_calico_bgp = base64.b64encode(custom_resources_calicoctl_yaml.encode('ascii')).decode('ascii')
@@ -1498,7 +1491,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             netopConfig["calico_config"]["base64_encoded_calico_bgp_spec"] = base64_encoded_cko_calico_bgp
             netopConfig["calico_config"]["base64_encoded_calicoctl_spec"] = base64_encoded_cko_calicoctl
 
-            network_operator_platform_CR_template = get_jinja_template('cni/calico/' + ver + '/platform-installer-cr.yaml')
+            network_operator_platform_CR_template = get_jinja_template(netopConfig["cko_versions_path"] + '/platform-installer-cr.yaml')
             network_operator_platform_CR = network_operator_platform_CR_template.render(config=netopConfig)
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
             network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output + "\n---\n" + network_operator_platform_CR
@@ -1508,7 +1501,7 @@ def generate_calico_deployment_files(args, config, network_operator_output):
                 fh.write(network_operator_yaml)
             return True
 
-        acc_provision_yaml = get_jinja_template('cni/calico/' + ver + '/acc-provision-configmap.yaml').render(config=config)
+        acc_provision_yaml = get_jinja_template(config["calico_cni_versions_path"] + 'acc-provision-configmap.yaml').render(config=config)
         custom_resources_aci_calico_yaml += "\n---\n" + acc_provision_yaml
         with open("custom_resources_aci_calico.yaml", "w") as fh:
             fh.write(custom_resources_aci_calico_yaml)
@@ -1535,13 +1528,6 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         "daemonset", "deployment",
     ]
 
-    if config.get("target_version"):
-        ver = str(config["target_version"])
-    else:
-        ver = str(config["registry"]["version"])
-
-    print("Target version is ", ver)
-
     if config["kube_config"].get("use_openshift_security_context_constraints",
                                  False):
         kube_objects.append("securitycontextconstraints")
@@ -1549,7 +1535,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         kube_objects.extend(["clusterrolebinding", "clusterrole"])
 
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('cni/aci/' + ver + '/aci-containers.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + '/aci-containers.yaml')
         outname = operator_output
         tar_path = operator_tar
 
@@ -1577,19 +1563,19 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         # as configMap entry to the operator deployment.
         config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
         if config["flavor"] != "k8s-overlay":
-            oper_cmap_template = get_jinja_template('cni/aci/' + ver + '/aci-operators-configmap.yaml')
+            oper_cmap_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators-configmap.yaml')
             cmap_temp = ''.join(oper_cmap_template.stream(config=config))
 
-            op_template = get_jinja_template('cni/aci/' + ver + '/aci-operators.yaml')
+            op_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators.yaml')
             output_from_parsed_template = op_template.render(config=config)
 
             # Generate acioperator CRD from template and add it to top
-            op_crd_template = get_jinja_template('cni/aci/' + ver + '/aci-operators-crd.yaml')
+            op_crd_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators-crd.yaml')
             op_crd_output = op_crd_template.render(config=config)
 
-            acc_provision_crd_template = get_jinja_template('cni/aci/' + ver + '/acc-provision-crd.yaml')
+            acc_provision_crd_template = get_jinja_template(config["aci_cni_versions_path"] + 'acc-provision-crd.yaml')
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
-            acc_provision_oper_cmap_template = get_jinja_template('cni/aci/' + ver + '/acc-provision-configmap.yaml')
+            acc_provision_oper_cmap_template = get_jinja_template(config["aci_cni_versions_path"] + 'acc-provision-configmap.yaml')
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
             new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + \
                 [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
@@ -1602,21 +1588,22 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             netop_version = args.cko_version
             netopConfig = dict(config)
             netopConfig = get_cko_mode(args, netopConfig)
+            netopConfig["cko_versions_path"] = 'cko/' + netop_version
             if "connectivity_checker" in netopConfig.keys():
-                netopConfig = generate_nettools_deployment_files(args, netopConfig)
+                netopConfig = generate_nettools_deployment_files(netopConfig)
             if "gitops" in netopConfig.keys():
-                netopConfig = generate_argocd_deployment_files(args, netopConfig)
-            network_operator_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest.yaml')
-            network_operator_openshift_spec_template = get_jinja_template('cko/' + netop_version + '/netop-manifest-openshift.yaml')
+                netopConfig = generate_argocd_deployment_files(netopConfig)
+            network_operator_spec_template = get_jinja_template(netopConfig["cko_versions_path"] + '/netop-manifest.yaml')
+            network_operator_openshift_spec_template = get_jinja_template(netopConfig["cko_versions_path"] + '/netop-manifest-openshift.yaml')
             network_operator_spec_output = network_operator_spec_template.render(config=config)
             network_operator_openshift_spec_output = network_operator_openshift_spec_template.render(config=config)
 
-            network_operator_CR_template = get_jinja_template('cni/aci/' + ver + '/aci-installer-cr.yaml')
+            network_operator_CR_template = get_jinja_template(config["aci_cni_versions_path"] + '/aci-installer-cr.yaml')
             base64_encoded_cko_aci_spec = base64.b64encode(new_deployment_file.encode('ascii')).decode('ascii')
             netopConfig["aci_config"]["operator_version"] = netop_version
             netopConfig["aci_config"]["cni_flavor_version"] = config["registry"]["version"]
             netopConfig["aci_config"]["base64_encoded_cko_aci_spec"] = base64_encoded_cko_aci_spec
-            network_operator_platform_CR_template = get_jinja_template('cni/aci/' + ver + '/platform-installer-cr.yaml')
+            network_operator_platform_CR_template = get_jinja_template(netopConfig["cko_versions_path"] + '/platform-installer-cr.yaml')
             network_operator_platform_CR = network_operator_platform_CR_template.render(config=netopConfig)
             network_operator_CR_output = network_operator_CR_template.render(config=netopConfig)
             network_operator_yaml = network_operator_spec_output + "\n---\n" + network_operator_CR_output + "\n---\n" + network_operator_platform_CR
@@ -1665,7 +1652,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
                 deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
                 generate_operator_tar(tar_path, deployment_docs, config)
 
-            op_cr_template = get_jinja_template('cni/aci/' + ver + '/aci-operators-cr.yaml')
+            op_cr_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators-cr.yaml')
             if operator_cr_output and operator_cr_output != "/dev/null":
                 if operator_cr_output == "-":
                     operator_cr_output = "/dev/null"
@@ -1957,11 +1944,6 @@ def provision(args, apic_file, no_random):
     if args.operator_mode:
         generate_cert_data = False
 
-    # Print sample, if needed
-    if args.sample:
-        generate_sample(sys.stdout, args.flavor)
-        return True
-
     # command line config
     config = {
         "aci_config": {
@@ -2058,6 +2040,25 @@ def provision(args, apic_file, no_random):
         config["net_config"]["infra_vlan"] = None
     else:
         config = deep_merge(config_discover(config, prov_apic), config)
+
+    if not is_calico_flavor(config["flavor"]):
+        if config.get("target_version"):
+            config["aci_cni_versions_path"] = "cni/aci/" + str(config["target_version"]) + "/"
+        else:
+            config["aci_cni_versions_path"] = "cni/aci/" + str(config["registry"]["version"]) + "/"
+        global ACI_CNI_VERSIONS_PATH
+        ACI_CNI_VERSIONS_PATH = config["aci_cni_versions_path"]
+
+    if is_calico_flavor(config["flavor"]):
+        if config.get("target_version"):
+            config["calico_cni_versions_path"] = "cni/calico/" + str(config["target_version"]) + "/"
+        else:
+            config["calico_cni_versions_path"] = "cni/calico/" + str(config["registry"]["version"]) + "/"
+
+    # Print sample, if needed
+    if args.sample:
+        generate_sample(sys.stdout, args.flavor, config)
+        return True
 
     # Validate APIC access
     if prov_apic is not None:
