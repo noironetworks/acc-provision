@@ -228,7 +228,7 @@ data:
                 "enable_updates": false
             },
             "aci_config": {
-                "system_id": "calico-l3out-fsvi-vlan-13",
+                "system_id": "calico-l3out-fsvi-vlan-13-7d2df3",
                 "apic_hosts": [
                     "10.30.120.100"
                 ],
