@@ -1,13 +1,7 @@
 include README.md
-include acc_provision/templates/*.yaml
-include acc_provision/templates/cko/0.7.0/*.yaml
-include acc_provision/templates/cko/0.8.0/*.yaml
-include acc_provision/templates/cko/0.9.0/*.yaml
-include acc_provision/templates/cko/0.7.0/nettools/*.yaml
-include acc_provision/templates/cko/0.8.0/nettools/*.yaml
-include acc_provision/templates/cko/0.9.0/nettools/*.yaml
-include acc_provision/templates/cni/*/*.yaml
-include acc_provision/templates/*.json
+include acc_provision/templates/cni/*
+include acc_provision/templates/legacy/*
+include acc_provision/templates/cko/*
 include acc_provision/*.yaml
 include bin/acikubectl
 include debian/*

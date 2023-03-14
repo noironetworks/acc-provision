@@ -1535,7 +1535,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         kube_objects.extend(["clusterrolebinding", "clusterrole"])
 
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template(config["aci_cni_versions_path"] + '/aci-containers.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-containers.yaml')
         outname = operator_output
         tar_path = operator_tar
 
