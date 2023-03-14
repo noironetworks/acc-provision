@@ -10,12 +10,8 @@ spec:
   serviceExternalIPs:
   - cidr: ['20.3.0.0/16']
   serviceLoadBalancerIPs:
-<<<<<<< HEAD
-  - cidr: 20.3.0.0/16
-
-=======
   - cidr: ['20.3.0.0/16']
->>>>>>> 76abdff9... Add support for extern_dynamic with IPv6
+
 ---
 apiVersion: projectcalico.org/v3
 kind: BGPPeer

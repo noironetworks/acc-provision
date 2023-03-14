@@ -17,7 +17,7 @@ spec:
     # Note: The ipPools section cannot be modified post-install.
     ipPools:
     - blockSize: 26
-      cidr: 20.2.0.0/16
+      cidr: ['20.2.0.0/16']
       encapsulation: None
       natOutgoing: Disabled
       nodeSelector: all()
@@ -263,9 +263,13 @@ data:
                 }
             },
             "net_config": {
-                "extern_dynamic": "20.3.0.0/16",
-                "node_subnet": "2.100.101.0/24",
-                "pod_subnet": "20.2.0.0/16",
+                "extern-dynamic": ["20.3.0.0/16"],
+                "node_subnet": [
+                    "2.100.101.0/24"
+                ],
+                "pod_subnet": [
+                    "20.2.0.0/16"
+                ],
                 "cluster_svc_subnet": "10.96.0.0/12"
             },
             "calico_config": {
