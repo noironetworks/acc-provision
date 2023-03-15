@@ -1,7 +1,7 @@
 include README.md
-include acc_provision/templates/cni/*
+recursive-include acc_provision/templates/cni *
 include acc_provision/templates/legacy/*
-include acc_provision/templates/cko/*
+recursive-include acc_provision/templates/cko *
 include acc_provision/*.yaml
 include bin/acikubectl
 include debian/*
