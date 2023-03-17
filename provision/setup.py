@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    data_files = [('bin', ['bin/acikubectl'])],
+    scripts=['bin/acikubectl'],
     entry_points={
         'console_scripts': [
             'acc-provision=acc_provision.acc_provision:main',
