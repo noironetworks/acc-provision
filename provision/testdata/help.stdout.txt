@@ -3,6 +3,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
                         [--upgrade] [--disable-multus disable_multus]
+                        [-s file]
 
 Provision an ACI/Kubernetes installation
 
@@ -37,3 +38,4 @@ optional arguments:
                         upgrade
   --disable-multus disable_multus
                         true/false to disable/enable multus in cluster
+  -s, --dpu file        output file for your dpu kubernetes deployment
