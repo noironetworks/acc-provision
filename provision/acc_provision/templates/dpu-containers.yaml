@@ -1,0 +1,181 @@
+{% if config.dpu_config.enable %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dpu-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: 
+  name: dpu-system-serviceaccount
+  namespace: dpu-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dpu-init
+  namespace: dpu-system
+  labels:
+    name: dpu-init-sys
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: dpu-init-sys
+  template:
+    metadata:
+      labels:
+        name: dpu-init-sys
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      nodeSelector:
+        beta.kubernetes.io/arch: arm64
+      serviceAccountName: dpu-system-serviceaccount
+      {% if config.registry.image_pull_secret %}
+      imagePullSecrets:
+        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      {% endif %}
+      restartPolicy: Always
+      containers:
+         - name: dpu-init
+           image: {{ config.registry.dpu_control_server }}/dpu:{{ config.registry.dpu_init_version }}
+           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+           args:
+             - {{config.dpuIp|json}}
+             - {{'"' ~config.net_config.infra_vlan|string~ '"'}}
+             - {{'"' ~config.net_config.kubeapi_vlan|string~ '"'}}
+           securityContext:
+             privileged: true
+             capabilities:
+               add:
+                 - NET_ADMIN
+           volumeMounts:
+             - name: dpu-fs
+               mountPath: /host
+      volumes:
+        - name: dpu-fs
+          hostPath:
+            path: /
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dpu-containers
+  namespace: dpu-system
+  labels:
+    name: dpu-systems
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: dpu-systems
+  template:
+    metadata:
+      labels:
+        name: dpu-systems
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      nodeSelector:
+        beta.kubernetes.io/arch: arm64
+      serviceAccountName: dpu-system-serviceaccount
+      {% if config.registry.image_pull_secret %}
+      imagePullSecrets:
+        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      {% endif %}
+      restartPolicy: Always
+      containers:
+         - name: dpu-opflex
+           image: {{ config.registry.dpu_control_server }}/opflex:{{ config.registry.opflex_agent_version }}
+           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+           securityContext:
+             privileged: true
+             capabilities:
+               add:
+                - SYS_ADMIN
+                - NET_ADMIN
+                - SYS_PTRACE
+                - NET_RAW
+           volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: opflex-config-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+         - name: dpu-mcast
+           image: {{ config.registry.dpu_control_server }}/opflex:{{ config.registry.opflex_agent_version }}
+           command: ["/bin/sh"]
+           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
+           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+           securityContext:
+             privileged: true
+             capabilities:
+               add:
+                - NET_ADMIN
+           volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: opflex-config-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+      volumes:
+        - name: dpu-fs
+          hostPath:
+            path: /
+        - name: hostvar
+          hostPath:
+            path: /var
+        - name: hostrun
+          hostPath:
+            path: /run
+        - name: opflex-hostconfig-volume
+          hostPath:
+            path: /usr/local/etc/opflex-agent-ovs/base-conf.d
+        - name: opflex-config-volume
+          configMap:
+            name: opflex-agent-config
+            items:
+              - key: opflex-agent-config
+                path: local.conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opflex-agent-config
+  namespace: dpu-system
+data:
+  opflex-agent-config: |-
+    {
+        "log": {
+            "level": {{config.logging.opflexagent_log_level|json}}
+        },
+        "opflex": {
+            "notif" : { "enabled" : "false" }
+          {% if not config.aci_config.client_ssl %}
+            ,"ssl": { "mode": "disabled" }
+          {% endif %}
+          {% if config.kube_config.run_gbp_container %}
+            ,"statistics" : { "mode" : "off" }
+          {% endif %}
+        },
+        "prometheus": {
+            "enabled": "false"
+        }
+    }
+---  
+{% endif %}  
