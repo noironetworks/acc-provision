@@ -1,8 +1,25 @@
+import os
+import sys
+import tokenize
+from gitversion.gitversion import get_git_version
 from setuptools import setup, find_packages
-import os, sys
+
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
-from gitversion.gitversion import get_git_version
+os.chdir(os.path.abspath(file_dir))
+
+try:
+    _detect_encoding = tokenize.detect_encoding
+except AttributeError:
+    pass
+else:
+    def detect_encoding(readline):
+        try:
+            return _detect_encoding(readline)
+        except SyntaxError:
+            return 'latin-1', []
+
+    tokenize.detect_encoding = detect_encoding
 
 setup(
     name='acc_provision',
@@ -15,6 +32,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    scripts=['bin/acikubectl'],
     entry_points={
         'console_scripts': [
             'acc-provision=acc_provision.acc_provision:main',
