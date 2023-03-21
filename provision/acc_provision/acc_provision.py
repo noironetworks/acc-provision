@@ -451,159 +451,206 @@ def config_adjust(args, config, prov_apic, no_random):
         config["aci_config"]["cluster_l3out"]["svi"]["external_network"] = l3out_name + "_int_epg"
         config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"] = l3out_name + "_svc_epg"
 
-    adj_config = {
-        "aci_config": {
-            "cluster_tenant": tenant,
-            "physical_domain": {
-                "domain": system_id + "-pdom",
-                "vlan_pool": system_id + "-pool",
-            },
-            "vmm_domain": {
-                "domain": system_id,
-                "controller": system_id,
-                "mcast_pool": system_id + "-mpool",
-                "vlan_pool": system_id + "-vpool",
-                "vlan_range": {
-                    "start": None,
-                    "end": None,
-                }
-            },
-            "vrf": {
-                "dn": aci_vrf_dn,
-            },
-            "sync_login": {
-                "username": system_id,
-                "password": generate_password(no_random),
-                "certfile": "user-%s.crt" % system_id,
-                "keyfile": "user-%s.key" % system_id,
-                "cert_reused": False,
-            },
-            "node_bd_dn": node_bd_dn,
-            "pod_bd_dn": pod_bd_dn,
-            "kafka": {
-            },
-            "subnet_dn": {
-            },
-            "vrf_dn": {
-            },
-            "overlay_vrf": {
-            },
-        },
-        "net_config": {
-            "infra_vlan": infra_vlan,
-            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
-            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
-            "node_network_gateway": cidr_split(node_subnet)[5],
-            "pod_network": normalize_cidr(pod_subnet),
-            "node_network": normalize_cidr(node_subnet),
-            "disable_wait_for_network": disable_wait_for_network,
-            "duration_wait_for_network": duration_wait_for_network,
-        },
-        "node_config": {
-            "encap_type": encap_type,
-        },
-        "istio_config": {
-            "install_profile": istio_profile,
-        },
-        "kube_config": {
-            "default_endpoint_group": {
-                "tenant": tenant,
-                "app_profile": app_profile,
-                "group": default_endpoint_group,
-            },
-            "namespace_default_endpoint_group": {
-                system_namespace: {
-                    "tenant": tenant,
-                    "app_profile": app_profile,
-                    "group": namespace_endpoint_group,
+    if is_l2_tenant(config["flavor"]):
+        adj_config = {
+            "aci_config": {
+                "cluster_tenant": tenant,
+                "physical_domain": {
+                    "domain": system_id + "-pdom",
+                    "vlan_pool": system_id + "-pool",
                 },
-                istio_namespace: {
-                    "tenant": tenant,
-                    "app_profile": app_profile,
-                    "group": istio_epg,
+                "vmm_domain": {
+                    "domain": system_id,
+                    "controller": system_id,
+                    "mcast_pool": system_id + "-mpool",
+                    "vlan_pool": system_id + "-vpool",
+                    "vlan_range": {
+                        "start": None,
+                        "end": None,
+                    }
                 },
-                istio_operator_ns: {
-                    "tenant": tenant,
-                    "app_profile": app_profile,
-                    "group": istio_epg,
+                "vrf": {
+                    "dn": aci_vrf_dn,
+                },
+                "sync_login": {
+                    "username": system_id,
+                    "password": generate_password(no_random),
+                    "certfile": "user-%s.crt" % system_id,
+                    "keyfile": "user-%s.key" % system_id,
+                    "cert_reused": False,
+                },
+                "node_bd_dn": node_bd_dn,
+                "kafka": {
+                },
+                "subnet_dn": {
+                },
+                "vrf_dn": {
+                },
+                "overlay_vrf": {
                 },
             },
-            "pod_ip_pool": [
-                {
-                    "start": cidr_split(pod_subnet)[0],
-                    "end": cidr_split(pod_subnet)[1],
-                }
-            ],
-            "pod_network": [
-                {
-                    "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
-                    "gateway": cidr_split(pod_subnet)[2],
-                    "routes": [
-                        {
-                            "dst": config_set_dst(pod_subnet),
-                            "gw": cidr_split(pod_subnet)[2],
-                        }
-                    ],
-                },
-            ],
-            "service_ip_pool": [
-                {
-                    "start": cidr_split(extern_dynamic)[0],
-                    "end": cidr_split(extern_dynamic)[1],
-                },
-            ],
-            "static_service_ip_pool": static_service_ip_pool,
-            "node_service_ip_pool": node_service_ip_pool,
-            "node_service_gw_subnets": [
-                node_svc_subnet,
-            ],
-            "opflex_mode": opflex_mode,
-            "enable_endpointslice": enable_endpointslice,
-        },
-        "registry": {
-            "configuration_version": token,
+            "net_config": {
+                "infra_vlan": infra_vlan,
+                "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
+                "node_network_gateway": cidr_split(node_subnet)[5],
+                "node_network": normalize_cidr(node_subnet),
+            }
         }
-    }
+    else:
+        adj_config = {
+            "aci_config": {
+                "cluster_tenant": tenant,
+                "physical_domain": {
+                    "domain": system_id + "-pdom",
+                    "vlan_pool": system_id + "-pool",
+                },
+                "vmm_domain": {
+                    "domain": system_id,
+                    "controller": system_id,
+                    "mcast_pool": system_id + "-mpool",
+                    "vlan_pool": system_id + "-vpool",
+                    "vlan_range": {
+                        "start": None,
+                        "end": None,
+                    }
+                },
+                "vrf": {
+                    "dn": aci_vrf_dn,
+                },
+                "sync_login": {
+                    "username": system_id,
+                    "password": generate_password(no_random),
+                    "certfile": "user-%s.crt" % system_id,
+                    "keyfile": "user-%s.key" % system_id,
+                    "cert_reused": False,
+                },
+                "node_bd_dn": node_bd_dn,
+                "pod_bd_dn": pod_bd_dn,
+                "kafka": {
+                },
+                "subnet_dn": {
+                },
+                "vrf_dn": {
+                },
+                "overlay_vrf": {
+                },
+            },
+            "net_config": {
+                "infra_vlan": infra_vlan,
+                "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
+                "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
+                "node_network_gateway": cidr_split(node_subnet)[5],
+                "pod_network": normalize_cidr(pod_subnet),
+                "node_network": normalize_cidr(node_subnet),
+                "disable_wait_for_network": disable_wait_for_network,
+                "duration_wait_for_network": duration_wait_for_network,
+            },
+            "node_config": {
+                "encap_type": encap_type,
+            },
+            "istio_config": {
+                "install_profile": istio_profile,
+            },
+            "kube_config": {
+                "default_endpoint_group": {
+                    "tenant": tenant,
+                    "app_profile": app_profile,
+                    "group": default_endpoint_group,
+                },
+                "namespace_default_endpoint_group": {
+                    system_namespace: {
+                        "tenant": tenant,
+                        "app_profile": app_profile,
+                        "group": namespace_endpoint_group,
+                    },
+                    istio_namespace: {
+                        "tenant": tenant,
+                        "app_profile": app_profile,
+                        "group": istio_epg,
+                    },
+                    istio_operator_ns: {
+                        "tenant": tenant,
+                        "app_profile": app_profile,
+                        "group": istio_epg,
+                    },
+                },
+                "pod_ip_pool": [
+                    {
+                        "start": cidr_split(pod_subnet)[0],
+                        "end": cidr_split(pod_subnet)[1],
+                    }
+                ],
+                "pod_network": [
+                    {
+                        "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
+                        "gateway": cidr_split(pod_subnet)[2],
+                        "routes": [
+                            {
+                                "dst": config_set_dst(pod_subnet),
+                                "gw": cidr_split(pod_subnet)[2],
+                            }
+                        ],
+                    },
+                ],
+                "service_ip_pool": [
+                    {
+                        "start": cidr_split(extern_dynamic)[0],
+                        "end": cidr_split(extern_dynamic)[1],
+                    },
+                ],
+                "static_service_ip_pool": static_service_ip_pool,
+                "node_service_ip_pool": node_service_ip_pool,
+                "node_service_gw_subnets": [
+                    node_svc_subnet,
+                ],
+                "opflex_mode": opflex_mode,
+                "enable_endpointslice": enable_endpointslice,
+            },
+            "registry": {
+                "configuration_version": token,
+            }
+        }
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
         adj_config["aci_config"]["apic_refreshtime"] = apic_refreshtime
 
-    if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
-        adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
+    if not is_l2_tenant(config["flavor"]):
+        if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
+            adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
-    if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
-        adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
+        if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+            adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
 
-    if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
-        adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
+        if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
+            adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
 
-    if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
-        adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]
+        if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
+            adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]
 
-    if config["net_config"].get("pbr_tracking_non_snat"):
-        adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
+        if config["net_config"].get("pbr_tracking_non_snat"):
+            adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
 
-    if config["net_config"].get("service_monitor_interval"):
-        adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
+        if config["net_config"].get("service_monitor_interval"):
+            adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
 
-    ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
+        ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
 
-    # To add kube-system namespace to ACI system EPG
-    adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
+        # To add kube-system namespace to ACI system EPG
+        adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
 
-    # Add openshift system namespaces to ACI system EPG
-    if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
-        ns_list = ["kube-service-catalog", "openshift-console", "openshift-dns", "openshift-authentication",
-                   "openshift-authentication-operator", "openshift-monitoring", "openshift-web-console"]
-        for ns in ns_list:
-            adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
+        # Add openshift system namespaces to ACI system EPG
+        if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+            ns_list = ["kube-service-catalog", "openshift-console", "openshift-dns", "openshift-authentication",
+                       "openshift-authentication-operator", "openshift-monitoring", "openshift-web-console"]
+            for ns in ns_list:
+                adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
-    if config["flavor"] == "k8s-overlay":
-        ns_list = ["kube-system"]
-        adj_config["kube_config"]["namespace_default_endpoint_group"].clear()
-        for ns in ns_list:
-            adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
+        if config["flavor"] == "k8s-overlay":
+            ns_list = ["kube-system"]
+            adj_config["kube_config"]["namespace_default_endpoint_group"].clear()
+            for ns in ns_list:
+                adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_type"):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
@@ -867,7 +914,16 @@ def config_validate(flavor_opts, config):
         if x else Raise(Exception("Invalid name"))
     get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
 
-    if is_calico_flavor(config["flavor"]):
+    if is_l2_tenant(config["flavor"]):
+        checks = {
+            # ACI config
+            "aci_config/system_id": (get(("aci_config", "system_id")),
+                                     lambda x: required(x) and isname(x, 32)),
+            "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
+            "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
+            "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")), required),
+        }
+    elif is_calico_flavor(config["flavor"]):
         checks = {
             # ACI config
             "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
@@ -938,7 +994,16 @@ def config_validate(flavor_opts, config):
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                               required),
         }
-
+    elif is_l2_tenant(config["flavor"]):
+        extra_checks = {
+            "net_config/node_subnet": (get(("net_config", "node_subnet")),
+                                       required),
+            "aci_config/aep": (get(("aci_config", "aep")), required),
+            "aci_config/l3out/name": (get(("aci_config", "l3out", "name")),
+                                      required),
+            "aci_config/l3out/external-networks":
+            (get(("aci_config", "l3out", "external_networks")), required),
+        }
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -991,7 +1056,7 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "system_id")), required)
 
     # Versions
-    if not is_calico_flavor(config["flavor"]):
+    if not is_calico_flavor(config["flavor"]) and not is_l2_tenant(config["flavor"]):
         for field in flavor_opts.get('version_fields', VERSION_FIELDS):
             checks[field] = (get(("registry", field)), required)
 
@@ -1159,6 +1224,8 @@ def generate_sample(filep, flavor):
         data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
     elif flavor == "calico-3.23.2":
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
+    elif flavor == "l2-tenant":
+        data = pkgutil.get_data('acc_provision', 'templates/l2-tenant-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
@@ -1447,6 +1514,14 @@ def generate_calico_deployment_files(config, network_operator_output):
             tar.close()
 
         print("Generated the deployment tar file")
+
+
+def is_l2_tenant(flavor):
+    return flavor == "l2-tenant"
+
+
+def generate_noop(config, output_file, output_tar, operator_cr_output_file):
+    info("No k8s manifest is produced for this flavor")
 
 
 def gendpu(config, dpu_output_file):
@@ -1926,9 +2001,10 @@ def provision(args, apic_file, no_random):
         print("%s") % ex
 
     # Verify if overlapping subnet present in config input file
-    if not check_overlapping_subnets(config):
-        err("overlapping subnets found in configuration input file")
-        return False
+    if not is_l2_tenant(flavor):
+        if not check_overlapping_subnets(config):
+            err("overlapping subnets found in configuration input file")
+            return False
 
     # Verify that image_pull_secret is a valid K8s secret name and not a YAML string
     if "registry" in config.keys() and "image_pull_secret" in config["registry"]:

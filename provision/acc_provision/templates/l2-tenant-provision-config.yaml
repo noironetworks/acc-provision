@@ -1,0 +1,94 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: ocpbm1
+  apic_hosts:                   # List of APIC hosts to connect for APIC API
+  - 10.1.1.101
+  aep: mykube-aep1
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: mykube-vrf
+    tenant: common              # This can be system-id or common
+  l3out:
+    name: mykube-l3out          # Used to provision external IPs
+    external_networks:
+    - mykube_extepg             # Used for external contracts
+net_config:
+  node_subnet: 10.1.0.1/16      # Subnet to use for nodes
+  net1: 10.1.0.1/16
+  net2: 192.168.128.1/24
+
+# Primary and secondary network static paths
+# First configure infraAccPortP/infraAccBndlGrp->infraHPorts(port ranges)->infraPortBlk
+topology:
+  aci_bindings:
+  - name: net1
+    aep: mykube-aep1
+    type: primary
+    interfaces:
+    - name: ocp-bm-1-master1-bond0
+      aci_pod_id: 1
+      vlan_encap: 100 
+      leaf:
+      - id: 101
+        port_group:
+          from: 1/3
+          to: 1/3
+      - id: 102
+        port_group:
+          from: 1/3
+          to: 1/3
+    - name: ocp-bm-1-master2-bond0
+      aci_pod_id: 1
+      vlan_encap: 100 
+      leaf:
+      - id: 101
+        port_group:
+          from: 1/7
+          to: 1/7
+      - id: 102
+        port_group:
+          from: 1/7
+          to: 1/7
+    - name: ocp-bm-1-master3-bond0
+      aci_pod_id: 1
+      vlan_encap: 100
+      leaf:
+      - id: 101
+        port_group:
+          from: 1/8
+          to: 1/8
+      - id: 102
+        port_group:
+          from: 1/8
+          to: 1/8
+  - name: net2
+    aep: mykube-aep2
+    type: additional
+    interfaces:
+    #subnet: 192.168.128.1/24 # Subnet to use for secondary network
+    - name: ocp-bm-1-worker1-bond1
+      aci_pod_id: 1
+      leaf:
+      - id: 101
+        port_group:
+          from: 1/23
+          to: 1/23
+      - id: 102
+        port_group:
+          from: 1/23
+          to: 1/23
+      vlan_encap: 102 
+    - name: ocp-bm-1-worker2-bond1
+      aci_pod_id: 1
+      leaf:
+      - id: 101
+        port_group:
+          from: 1/21
+          to: 1/21
+      - id: 102
+        port_group:
+          from: 1/21
+          to: 1/21
+      vlan_encap: 102
+

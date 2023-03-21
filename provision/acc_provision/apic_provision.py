@@ -605,22 +605,40 @@ class ApicKubeConfig(object):
 
         data = []
         if "calico" not in self.config['flavor']:
-            update(data, self.pdom_pool())
-            update(data, self.vdom_pool())
-            update(data, self.mcast_pool())
-            update(data, self.phys_dom())
-            update(data, self.kube_dom(apic_version))
-            update(data, self.nested_dom())
-            update(data, self.associate_aep())
-            update(data, self.opflex_cert(apic_version))
-            self.apic_version = apic_version
-            if self.is_newer_version(apic_version, "5.0"):
-                update(data, self.cluster_info())
+            if self.config['flavor'] == "l2-tenant":
+                update(data, self.pdom_pool())
+                update(data, self.vdom_pool())
+                update(data, self.phys_dom())
+                update(data, self.kube_dom(apic_version))
+                update(data, self.nested_dom())
+                update(data, self.add_l2_tenant_access_port_profiles())
+                update(data, self.add_l2_tenant_vpcs())
+                update(data, self.associate_aep())
+                self.apic_version = apic_version
+                if self.is_newer_version(apic_version, "5.0"):
+                    update(data, self.cluster_info())
+                update(data, self.l3out_tn())
+                update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
+                update(data, self.add_apivlan_for_second_portgroup())
+                update(data, self.nested_dom_second_portgroup())
+                # infraAccPortP
+            else:
+                update(data, self.pdom_pool())
+                update(data, self.vdom_pool())
+                update(data, self.mcast_pool())
+                update(data, self.phys_dom())
+                update(data, self.kube_dom(apic_version))
+                update(data, self.nested_dom())
+                update(data, self.associate_aep())
+                update(data, self.opflex_cert(apic_version))
+                self.apic_version = apic_version
+                if self.is_newer_version(apic_version, "5.0"):
+                    update(data, self.cluster_info())
 
-            update(data, self.l3out_tn())
-            update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
-            update(data, self.add_apivlan_for_second_portgroup())
-            update(data, self.nested_dom_second_portgroup())
+                update(data, self.l3out_tn())
+                update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
+                update(data, self.add_apivlan_for_second_portgroup())
+                update(data, self.nested_dom_second_portgroup())
 
         else:
             cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()
@@ -3389,6 +3407,9 @@ class ApicKubeConfig(object):
 
     def isV6(self):
         pod_cidr = self.config["net_config"]["pod_subnet"]
+        # TBD: Node addresses could also be v6
+        if pod_cidr is None:
+            return False
         rtr, mask = pod_cidr.split("/")
         ip = ipaddress.ip_address(rtr)
         if ip.version == 4:
@@ -8670,6 +8691,220 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
             )
             filt_entry['vzFilter']['children'].append(filt_child)
             data['fvTenant']['children'].append(filt_entry)
+
+
+def get_access_port_profile_name(self, leaf_id):
+    return ("Leaf" + leaf_id + "_" + self.config["aci_config"]["system_id"])
+
+
+def get_portgroup_name(portGrp):
+    portRange = ""
+    if portGrp["from"] == portGrp["to"]:
+        portRange = portGrp["port_group"]["from"]
+    else:
+        portRange = portGrp["port_group"]["from"] + "_to_" + portGrp["port_group"]["to"]
+    portRange.replace("/", "_")
+    return portRange
+
+
+def add_l2_tenant_vpcs(self):
+    path = "/api/node/mo/uni/infra/funcprof.json"
+    vpcs = []
+
+    for net in self.config["topology"]["aci_bindings"]:
+        aep_dn = "uni/infra/attentp-%s" % net["aep"]
+        for iface in net["interfaces"]:
+            vpc = collections.OrderedDict(
+                [
+                    (
+                        "infraAccBndlGrp",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                iface["name"],
+                                            ),
+                                            (
+                                                "lagT",
+                                                "node"
+                                            )
+                                        ]
+                                    ),
+
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "infraRsAttEntP",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "tDn",
+                                                                            aep_dn,
+                                                                        )
+                                                                    ]
+                                                                )
+                                                            )
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                    )
+                ])
+            for leaf in iface["leaf"]:
+                for port_group in leaf["port_group"]:
+                    infraHPortS_dn = "uni/infra/accportprof-%s/hports-%s-typ-range" % (self.get_access_port_profile_name(leaf["id"]), get_portgroup_name(port_group))
+                    vpc_pgs = collections.OrderedDict(
+                        [
+                            (
+                                "infraRtAccBaseGrp",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "tDn",
+                                                        infraHPortS_dn,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ])
+                    vpc["infraAccBndlGrp"]["children"].append(vpc_pgs)
+            vpcs.append(vpc)
+
+    self.annotateApicObjects(vpcs)
+    return path, vpcs
+
+
+def add_l2_tenant_access_port_profiles(self):
+
+    accPortProfiles = {}
+    accPortProfs = []
+    path = "/api/node/mo/uni/infra.json"
+
+    for net in self.config["topology"]["aci_bindings"]:
+        for iface in net["interfaces"]:
+            for leaf in iface["leaf"]:
+                if leaf["id"] not in accPortProfiles:
+                    accPortProf = collections.OrderedDict(
+                        [
+                            (
+                                "infraAccPortP",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "name",
+                                                        self.get_access_port_profile_name(leaf["id"]),
+                                                    ),
+                                                ]),
+                                        ),
+                                        (
+                                            "children",
+                                            []
+                                        )
+
+                                    ]),
+                            ),
+                        ])
+                    accPortProfiles.insert(leaf["id"], accPortProf)
+            fromElems = leaf["port_group"]["from"].split("/")
+            toElems = leaf["port_group"]["to"].split("/")
+            vpc_ports = collections.OrderedDict(
+                [
+                    (
+                        "infraHPortS",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                get_portgroup_name(leaf["port_group"]),
+                                            ),
+                                            (
+                                                "type",
+                                                "range",
+                                            ),
+                                            (
+                                                "descr",
+                                                iface["name"],
+                                            )
+                                        ]),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "infraPortBlk",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "name",
+                                                                "block" + get_portgroup_name(leaf["port_group"]),
+                                                            ),
+                                                            (
+                                                                "fromCard",
+                                                                fromElems[0]
+                                                            ),
+                                                            (
+                                                                "fromPort",
+                                                                fromElems[1]
+                                                            ),
+                                                            (
+                                                                "toCard",
+                                                                toElems[0]
+                                                            ),
+                                                            (
+                                                                "toPort",
+                                                                toElems[1]
+                                                            ),
+                                                        ]
+                                                    ),
+
+                                                ),
+                                            ]
+                                        ),
+                                    ]
+                                ),
+                            ]
+                        ),
+                    ),
+                ])
+            accPortProfiles[leaf["id"]]["infraAccPortP"]["children"].append(vpc_ports)
+    for leaf_id, infraAccPortP in accPortProfiles.items():
+        accPortProfs.append(infraAccPortP)
+    self.annotateApicObjects(accPortProfs)
+    return path, accPortProfs
 
 
 if __name__ == "__main__":

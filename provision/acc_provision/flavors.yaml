@@ -4333,3 +4333,12 @@ flavors:
     status: Experimental
     hidden: False
     order: 55
+  l2-tenant:
+    desc: l2-tenant
+    default_version: 5.2.3.3
+    aci_cni: False
+    options:
+      template_generator: generate_noop
+    status: Experimental
+    hidden: False
+    order: 56
