@@ -290,6 +290,10 @@ def config_default():
         "lb_config": {
             "lb_type": "metallb",
         },
+        "rke2_config": {
+            "logging_namespace": "cattle-logging",
+            "monitoring_namespace": "cattle-prometheus",
+        },
     }
     return default_config
 
@@ -609,6 +613,13 @@ def config_adjust(args, config, prov_apic, no_random):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
     if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
         adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
+
+    if config["aci_config"]["vmm_domain"].get("injected_cluster_type") == "RKE2":
+        ns_list = ["cattle-system"]
+        ns_list.append(config["rke2_config"]["logging_namespace"])
+        ns_list.append(config["rke2_config"]["monitoring_namespace"])
+        for ns in ns_list:
+            adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
 
     if config["sriov_config"].get("enable"):
         adj_config["vendors"] = "15b3"
