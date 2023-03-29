@@ -916,6 +916,18 @@ def test_sriov_with_no_deviceinfo():
 
 
 @in_testdir
+def test_flavor_RKE2_kubernetes_1_24_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_24.inp.yaml",
+        "flavor_RKE2_kubernetes_1_24.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_24.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.24"}
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_2_3_base():
     run_provision(
         "flavor_RKE_1_2_3.inp.yaml",

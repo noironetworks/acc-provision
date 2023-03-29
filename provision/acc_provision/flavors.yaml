@@ -3741,6 +3741,60 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 30
+  RKE2-kubernetes-1.24:
+    desc: Rancher Kubernetes Engine Government kubernetes version 1.24
+    default_version: 6.0
+    config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
+      kube_config:
+        allow_kube_api_default_epg: True
+        use_host_netns_volume: True
+        allow_pods_external_access: True
+        use_cnideploy_initcontainer: True
+      aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        vmm_domain:
+          type: Kubernetes
+          injected_cluster_type: RKE2
+          injected_cluster_provider: Rancher
+      istio_config:
+        install_istio: False
+    status: null
+    hidden: false
+    order: 47
   RKE-1.3.18:
     desc: Rancher Kubernetes Engine min version 1.3.18
     default_version: 6.0
@@ -3796,7 +3850,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 47
+    order: 48
   RKE-1.3.17:
     desc: Rancher Kubernetes Engine min version 1.3.17
     default_version: 6.0
@@ -3852,7 +3906,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 48
+    order: 49
   RKE-1.3.13:
     desc: Rancher Kubernetes Engine min version 1.3.13
     default_version: 6.0
@@ -3908,7 +3962,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 49
+    order: 50
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 6.0
@@ -3964,7 +4018,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 50
+    order: 51
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 6.0
@@ -4010,7 +4064,7 @@ flavors:
         enable: true
     status: Experimental
     hidden: true
-    order: 51
+    order: 52
   aks:
     desc: Azure Kubernetes Service
     default_version: 6.0
@@ -4069,7 +4123,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: true
-    order: 52
+    order: 53
   cloud:
     desc: Openshift IPI/AWS
     default_version: 6.0
@@ -4197,7 +4251,7 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 53
+    order: 54
   eks:
     desc: Elastic Kubernetes Service (aws)
     default_version: 6.0
@@ -4323,7 +4377,7 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 54
+    order: 55
   calico-3.23.2:
     desc: calico-3.23.2
     default_version: 5.2.3.3
@@ -4332,4 +4386,4 @@ flavors:
       template_generator: generate_calico_deployment_files
     status: Experimental
     hidden: False
-    order: 55
+    order: 56

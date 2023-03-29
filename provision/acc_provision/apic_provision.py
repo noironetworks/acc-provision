@@ -5771,13 +5771,7 @@ class ApicKubeConfig(object):
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
-            elif flavor == "RKE-1.2.3":
-                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
-            elif flavor == "RKE-1.3.13":
-                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
-            elif flavor == "RKE-1.3.17":
-                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
-            elif flavor == "RKE-1.3.18":
+            elif flavor.startswith("RKE"):
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
 
         # Adding prometheus opflex-agent contract for all flavors
