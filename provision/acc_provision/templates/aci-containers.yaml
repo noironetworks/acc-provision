@@ -1548,6 +1548,9 @@ data:
           {% if config.kube_config.run_gbp_container %}
             ,"statistics" : { "mode" : "off" }
           {% endif %}
+          {% if config.kube_config.opflex_agent_policy_retry_delay_timer %}
+            ,"timers" : { "policy-retry-delay" : {{ config.kube_config.opflex_agent_policy_retry_delay_timer|json }} }
+          {% endif %}
         },
         "ovs": {
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
