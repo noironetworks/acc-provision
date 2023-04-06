@@ -124,3 +124,9 @@ registry:
 
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
+
+# Configuration for RKE2 cluster
+
+#rke2_config:
+  # logging_namespace: "cattle-logging" #override if needed, default is "cattle-logging"
+  # monitoring_namespace: "cattle-prometheus" #override if needed, default is "cattle-prometheus"
