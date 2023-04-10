@@ -2622,7 +2622,7 @@ spec:
           value: "eks"
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: "accprovisioninput"
-        image: noirolabs/acc-provision-operator:5.2.3.6.1d150da
+        image: noirolabs/acc-provision-operator:5.2.3.7.1d150da
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}
