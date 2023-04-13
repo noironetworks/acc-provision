@@ -5,7 +5,7 @@
   "node_network": [
             "10.1.0.0/16"
         ],
-  "node_network_gateway": "0",
+  "node_network_gateway": "10.1.0.10",
   "pod_network": [
             "10.2.0.0/16"
         ],

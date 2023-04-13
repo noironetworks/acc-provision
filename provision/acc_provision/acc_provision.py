@@ -503,7 +503,7 @@ def config_adjust(args, config, prov_apic, no_random):
             # TODO: For overlay mode we are currently not supporting multiple subnets, hence the assumption that there is only one subnet.
             "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnets[0])[2], cidr_split(pod_subnets[0])[4]),
             "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnets[0])[2], cidr_split(node_subnets[0])[4]),
-            "node_network_gateway": cidr_split(node_subnet)[0][5],
+            "node_network_gateway": cidr_split(node_subnets[0])[5],
             "disable_wait_for_network": disable_wait_for_network,
             "duration_wait_for_network": duration_wait_for_network,
         },
