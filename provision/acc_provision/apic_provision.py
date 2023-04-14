@@ -5673,49 +5673,49 @@ class ApicKubeConfig(object):
                             if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
                                 epg_object = ap_child["fvAEPg"]["children"]
                                 epg_object.append(kubeapi_dom_obj)
-            for i, child in enumerate(data["fvTenant"]["children"]):
-                if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
-                    bd_object = child["fvBD"]["children"]
-                    for node_subnet in node_subnets:
-                        node_subnet_obj = collections.OrderedDict(
-                            [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
+        for i, child in enumerate(data["fvTenant"]["children"]):
+            if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
+                bd_object = child["fvBD"]["children"]
+                for node_subnet in node_subnets:
+                    node_subnet_obj = collections.OrderedDict(
+                        [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
+                    )
+                    if eade is True:
+                        node_subnet_obj["attributes"]["scope"] = "public"
+                    if self.isV6(node_subnet):
+                        node_subnet_obj["attributes"]["ctrl"] = "nd"
+                        node_subnet_obj["children"] = ipv6_nd_policy_rs
+                    bd_object.append(
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "fvSubnet",
+                                    node_subnet_obj
+                                )
+                            ]
                         )
-                        if eade is True:
-                            node_subnet_obj["attributes"]["scope"] = "public"
-                        if self.isV6(node_subnet):
-                            node_subnet_obj["attributes"]["ctrl"] = "nd"
-                            node_subnet_obj["children"] = ipv6_nd_policy_rs
-                        bd_object.append(
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "fvSubnet",
-                                        node_subnet_obj
-                                    )
-                                ]
-                            )
+                    )
+            if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == pod_bd_name:
+                bd_object = child["fvBD"]["children"]
+                for pod_subnet in pod_subnets:
+                    pod_subnet_obj = collections.OrderedDict(
+                        [("attributes", collections.OrderedDict([("ip", pod_subnet)]))]
+                    )
+                    if eade is True:
+                        pod_subnet_obj["attributes"]["scope"] = "public"
+                    if self.isV6(pod_subnet):
+                        pod_subnet_obj["attributes"]["ctrl"] = "nd"
+                        pod_subnet_obj["children"] = ipv6_nd_policy_rs
+                    bd_object.append(
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "fvSubnet",
+                                    pod_subnet_obj
+                                )
+                            ]
                         )
-                if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == pod_bd_name:
-                    bd_object = child["fvBD"]["children"]
-                    for pod_subnet in pod_subnets:
-                        pod_subnet_obj = collections.OrderedDict(
-                            [("attributes", collections.OrderedDict([("ip", pod_subnet)]))]
-                        )
-                        if eade is True:
-                            pod_subnet_obj["attributes"]["scope"] = "public"
-                        if self.isV6(pod_subnet):
-                            pod_subnet_obj["attributes"]["ctrl"] = "nd"
-                            pod_subnet_obj["children"] = ipv6_nd_policy_rs
-                        bd_object.append(
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "fvSubnet",
-                                        pod_subnet_obj
-                                    )
-                                ]
-                            )
-                        )
+                    )
 
         # If flavor requires not creating node subnet, remove it from
         # the data object
