@@ -13,5 +13,5 @@ spec:
         {% else %}
         managedComponent: false
         {% endif %}        
-        options:
+        manifests:
           aci-cni-specs: {{ config.aci_config.base64_encoded_cko_aci_spec }}

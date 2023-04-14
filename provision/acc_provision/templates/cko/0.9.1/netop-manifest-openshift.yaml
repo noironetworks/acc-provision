@@ -12,7 +12,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: cniops.network-function.netop-manager.io
 spec:
@@ -64,7 +64,7 @@ spec:
                       managedComponent:
                         default: false
                         type: boolean
-                      options:
+                      manifests:
                         additionalProperties:
                           type: string
                         type: object
@@ -122,7 +122,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: diagnosticops.network-function.netop-manager.io
 spec:
@@ -163,7 +163,7 @@ spec:
                       managedComponent:
                         default: false
                         type: boolean
-                      options:
+                      manifests:
                         additionalProperties:
                           type: string
                         type: object
@@ -204,7 +204,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: gitops.network-function.netop-manager.io
 spec:
@@ -245,7 +245,7 @@ spec:
                       managedComponent:
                         default: false
                         type: boolean
-                      options:
+                      manifests:
                         additionalProperties:
                           type: string
                         type: object
@@ -286,7 +286,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: installers.controller.netop-manager.io
 spec:
@@ -337,9 +337,10 @@ spec:
                           default: false
                           description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
                           type: boolean
-                        options:
+                        manifests:
                           additionalProperties:
                             type: string
+                          description: Manifests will contain base64 encoded specs of the operator to be managed by netop-manager.
                           type: object
                         type:
                           type: string
@@ -361,9 +362,10 @@ spec:
                           default: false
                           description: ManagedComponent field is ignored for platform components and must be set to false to adopt networking components without managing them.
                           type: boolean
-                        options:
+                        manifests:
                           additionalProperties:
                             type: string
+                          description: Manifests will contain base64 encoded specs of the operator to be managed by netop-manager.
                           type: object
                         type:
                           type: string
@@ -483,7 +485,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: observedops.network-function.netop-manager.io
 spec:
@@ -1394,7 +1396,7 @@ spec:
         - --upstream=http://127.0.0.1:9999/
         - --logtostderr=true
         - --v=2
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1
         name: kube-rbac-proxy
         ports:
         - containerPort: 8443
@@ -1508,6 +1510,8 @@ spec:
               key: email
               name: cko-config
               optional: true
+        - name: GIT_RESYNC_SLEEP_DURATION
+          value: "120"
         - name: DISABLE_CANARY_INSTALLER
           value: "false"
         image: quay.io/ckodev/netop-manager:0.9.1.d04f56f
