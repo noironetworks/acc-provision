@@ -1343,7 +1343,7 @@ def get_args(**overrides):
         "test_run": True,
         "flavor_version": None,
         "cko": False,
-        "cko_version": "0.9.0",
+        "cko_version": "0.9.1",
         "cko_mode": "managed",
         "netop_image_tag": None,
     }
