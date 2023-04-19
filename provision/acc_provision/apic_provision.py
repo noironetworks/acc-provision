@@ -5781,6 +5781,8 @@ class ApicKubeConfig(object):
             if vmm_type == "OpenShift":
                 openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, default_provide_api,
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
+                if flavor.startswith("openshift") and self.is_ocp_version_4_8_and_above(flavor):
+                    add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
             elif flavor.startswith("RKE"):
@@ -5791,6 +5793,14 @@ class ApicKubeConfig(object):
 
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
+
+    def is_ocp_version_4_8_and_above(self, flavor):
+        flavor_version = flavor.split('-')
+        major_version = int(flavor_version[1].split('.')[0])
+        minor_version = int(flavor_version[1].split('.')[1])
+        if (major_version >= 4 and minor_version >= 8):
+            return True
+        return False
 
     def epg(
         self, name, bd_name, provides=[], consumes=[], phy_domains=[], vmm_domains=[]
@@ -7913,6 +7923,36 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
         ]
     )
     data['fvTenant']['children'].append(contract)
+
+
+def add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix):
+    consumer_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsCons",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "%s-l3out-allow-all" % system_id,
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+    for epg in ["%sistio" % epg_prefix]:
+        for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+            if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                break
 
 
 def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_prefix, default_provide_api,
