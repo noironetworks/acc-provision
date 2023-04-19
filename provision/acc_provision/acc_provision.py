@@ -1839,7 +1839,7 @@ def parse_args(show_help):
     parser.add_argument(
         '--cko', default=False, action='store_true', help='generates deployment spec for CKO')
     parser.add_argument(
-        '--cko-version', default="0.9.0", metavar='cko_version', help='netop-manager operator version')
+        '--cko-version', default="0.9.1", metavar='cko_version', help='netop-manager operator version')
     parser.add_argument(
         '--cko-mode', default="managed", metavar='cko_mode', help='netop-manager cni managed/unmanaged')
     parser.add_argument(
