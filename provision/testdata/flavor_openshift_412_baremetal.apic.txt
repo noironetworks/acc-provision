@@ -665,6 +665,14 @@ None
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "kube-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
                                     }
                                 ]
                             }
