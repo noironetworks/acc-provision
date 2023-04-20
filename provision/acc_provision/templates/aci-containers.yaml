@@ -2555,6 +2555,11 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: Exists
+        {% if config.flavor == "RKE2-kubernetes-1.24" %}
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        {% endif %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
       {% endif %}
