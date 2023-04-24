@@ -315,6 +315,8 @@ def config_user(config_file):
             config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
         if not isinstance(config["net_config"]["extern_dynamic"], list):
             config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
+        if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
+            config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
     if config is None:
         config = {}
     return config
@@ -394,6 +396,7 @@ def config_adjust(args, config, prov_apic, no_random):
         l3out_name = config["aci_config"]["l3out"]["name"]
         system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
+
     node_subnets = []
     for node_subnet in config["net_config"]["node_subnet"]:
         node_subnets.append(node_subnet)
@@ -404,7 +407,14 @@ def config_adjust(args, config, prov_apic, no_random):
     for extern_dynamic in config["net_config"]["extern_dynamic"]:
         extern_dynamics.append(extern_dynamic)
 
-    extern_static = config["net_config"]["extern_static"]
+    extern_statics = []
+    extern_static = config["net_config"].get("extern_static", [])
+    if extern_static is not None and not isinstance(extern_static, list):
+        extern_statics = [extern_static]
+    if extern_static is not None and isinstance(extern_static, list):
+        for subnet in extern_static:
+            extern_statics.append(subnet)
+
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
     duration_wait_for_network = config["net_config"]["duration_wait_for_network"]
@@ -448,15 +458,14 @@ def config_adjust(args, config, prov_apic, no_random):
     if args.version_token:
         token = args.version_token
 
-    if not is_calico_flavor(config["flavor"]) and extern_static:
-        static_service_ip_pool = [{"start": cidr_split(extern_static)[0], "end": cidr_split(extern_static)[1]}]
-    else:
-        static_service_ip_pool = []
+    static_service_ip_pool = []
+    if (not is_calico_flavor(config["flavor"])) and (extern_static is not None):
+        for subnet in extern_statics:
+            static_service_ip_pool.append({"start": cidr_split(subnet)[0], "end": cidr_split(subnet)[1]})
 
+    node_service_ip_pool = []
     if not is_calico_flavor(config["flavor"]) and node_svc_subnet:
         node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
-    else:
-        node_service_ip_pool = []
 
     if is_calico_flavor(config["flavor"]):
         config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
@@ -1527,7 +1536,6 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         parsed_temp = temp.split("---")
         # Find the place where to put the acioperators configmap
         for cmap_idx in range(len(parsed_temp)):
-            parsed_temp[cmap_idx]
             current_yaml = yaml.safe_load(parsed_temp[cmap_idx])
             if current_yaml['kind'] == 'ConfigMap':
                 break
@@ -1825,7 +1833,16 @@ def check_overlapping_subnets(config):
 
     # Don't have extern_static field set for OpenShift flavors
     if not is_calico_flavor(config["flavor"]) and config["net_config"]["extern_static"]:
-        subnet_info["extern_static"] = config["net_config"]["extern_static"]
+        if not isinstance(config["net_config"]["extern_static"], list):
+            subnet_info[-1] = config["net_config"]["extern_static"]
+        else:
+            extern_statics = []
+            for subnet in config["net_config"]["extern_static"]:
+                extern_statics.append(subnet)
+            # counter = 0
+            for subnet in extern_statics:
+                subnet_info[counter] = subnet
+                counter += 1
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
         # Checking if sub1 and sub2 are IPv4 or IPv6
@@ -1851,6 +1868,7 @@ def check_image_pull_secret(config):
     if not re.fullmatch(pattern, str(image_pull_secret)):
         return False
     return True
+
 
 def is_dualstack_config(config):
     if "net_config" not in config:
@@ -1892,6 +1910,7 @@ def is_dualstack_config(config):
 
     return False
 
+
 def is_support_dualstack(flavor):
     version = flavor.split("-")[1]
     support_k8s_version = "1.21"
@@ -1903,6 +1922,7 @@ def is_support_dualstack(flavor):
         return True
 
     return False
+
 
 def provision(args, apic_file, no_random):
     config_file = args.config
@@ -1993,7 +2013,6 @@ def provision(args, apic_file, no_random):
 
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
-
 
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)

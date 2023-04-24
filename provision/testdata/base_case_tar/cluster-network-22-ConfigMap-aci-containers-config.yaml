@@ -20,7 +20,7 @@ data:
     : {\n            \"policy-space\": \"kube\",\n            \"name\": \"kubernetes|kube-system\"\
     \n        }        },\n    \"service-ip-pool\": [\n        {\n            \"end\"\
     : \"10.3.0.254\",\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n  \
-    \  \"extern-static\": \"10.4.0.1/24\",\n    \"extern-dynamic\": [\"10.3.0.1/24\"\
+    \  \"extern-static\": [\"10.4.0.1/24\"],\n    \"extern-dynamic\": [\"10.3.0.1/24\"\
     ],\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\":\
     \ [\n        {\n            \"end\": \"10.4.0.254\",\n            \"start\": \"\
     10.4.0.2\"\n        }\n    ],\n    \"pod-ip-pool\": [\n        {\n           \

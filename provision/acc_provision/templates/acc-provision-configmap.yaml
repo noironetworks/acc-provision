@@ -180,7 +180,7 @@ data:
                 "kubeapi_vlan": {{config.net_config.kubeapi_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_static %}
-                "extern_static": {{config.net_config.extern_static|json}},
+                "extern_static": {{config.net_config.extern_static|tojson}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_dynamic %}
                 "extern-dynamic": {{config.user_config.net_config.extern_dynamic|tojson}},

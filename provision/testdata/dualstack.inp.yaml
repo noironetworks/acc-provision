@@ -38,6 +38,8 @@ net_config:
     - 10.3.0.1/24
     - 1:5:1:1::1/64
   extern_static: 10.4.0.1/24
+    # - 10.4.0.1/24
+    # - 1:8:1:1::1/64
   node_svc_subnet: 10.5.0.1/24
   kubeapi_vlan: 4001
   service_vlan: 4003
