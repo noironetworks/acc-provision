@@ -8007,6 +8007,7 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
         ]
     )
     data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_dns_contract_os)
+    data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_dns_contract_os)
 
     # add new contract
     for item in items:
