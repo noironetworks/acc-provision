@@ -3638,7 +3638,7 @@ class ApicKubeConfig(object):
                     ]
                 )
             )
-
+        ipv6_nd_policy_rs = []
         if v6subnet:
             ipv6_nd_policy_rs = [
                 collections.OrderedDict(
