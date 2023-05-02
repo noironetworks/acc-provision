@@ -577,6 +577,14 @@ None
                                         }
                                     },
                                     {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-kube-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "fvRsProv": {
                                             "attributes": {
                                                 "tnVzBrCPName": "openshift-svc-catalog",
