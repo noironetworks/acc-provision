@@ -82,6 +82,9 @@ registry:
   # dpu_control_server: ip:port # e.g: 192.168.20.1:5000
 
 #kube_config:
+  # aci_multipod: True #override if multipod setup, default is False
+  # aci_multipod_ubuntu: True #override if multipod setup with ubuntu nodes, default is False (Used only for rke)
+  # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
   # hpp_optimization: True #override if needed, default is False
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
   # service_graph_endpoint_add_delay:
