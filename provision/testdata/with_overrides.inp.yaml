@@ -49,6 +49,8 @@ net_config:
   disable_wait_for_network: true
 
 kube_config:
+  aci_multipod: true
+  dhcp_renew_max_retry_count: 10
   use_external_service_ip_allocator: true
   use_privileged_containers: true
   use_openshift_security_context_constraints: true
