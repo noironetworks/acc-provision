@@ -1,4 +1,13 @@
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13.json
+/api/mo/uni/tn-common/ctx-calico_vrf.json
+{
+    "fvCtx": {
+        "attributes": {
+            "name": "calico_vrf",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13.json
 {
     "l3extOut": {
         "attributes": {
@@ -10,7 +19,7 @@
             {
                 "l3extRsEctx": {
                     "attributes": {
-                        "tnFvCtxName": "mykube_vrf",
+                        "tnFvCtxName": "calico_vrf",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -133,11 +142,11 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
+            "dn": "uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
             "addr": "2.100.101.201/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-101",
@@ -199,11 +208,11 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
+            "dn": "uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
             "addr": "2.100.101.202/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-102",
@@ -265,11 +274,11 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13].json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13].json
 {
     "l3extVirtualLIfP": {
         "attributes": {
-            "dn": "uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13]",
+            "dn": "uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/lifp-calico-l3out-fsvi-vlan-13_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13]",
             "addr": "2.100.101.203/24",
             "encap": "vlan-13",
             "nodeDn": "topology/pod-1/node-103",
@@ -331,7 +340,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -342,7 +351,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-103].json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-103].json
 {
     "l3extRsNodeL3OutAtt": {
         "attributes": {
@@ -353,7 +362,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/flt-calico-l3out-fsvi-vl-allow-all-filter.json
+/api/mo/uni/tn-common/flt-calico-l3out-fsvi-vl-allow-all-filter.json
 {
     "vzFilter": {
         "attributes": {
@@ -372,11 +381,12 @@
         ]
     }
 }
-/api/mo/uni/tn-test/brc-calico-l3out-fsvi-vl-l3out-allow-all.json
+/api/mo/uni/tn-common/brc-calico-l3out-fsvi-vl-l3out-allow-all.json
 {
     "vzBrCP": {
         "attributes": {
             "name": "calico-l3out-fsvi-vl-l3out-allow-all",
+            "scope": "global",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
@@ -403,7 +413,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_svc_epg.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_svc_epg.json
 {
     "l3extInstP": {
         "attributes": {
@@ -424,7 +434,7 @@
                     "attributes": {
                         "ip": "20.3.0.0/16",
                         "aggregate": "shared-rtctrl",
-                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -432,7 +442,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_int_epg.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/instP-calico-l3out-fsvi-vlan-13_int_epg.json
 {
     "l3extInstP": {
         "attributes": {
@@ -453,7 +463,7 @@
                     "attributes": {
                         "ip": "20.2.0.0/16",
                         "aggregate": "shared-rtctrl",
-                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -462,7 +472,18 @@
                 "l3extSubnet": {
                     "attributes": {
                         "ip": "2.100.101.0/24",
-                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "10.96.0.0/12",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
@@ -470,7 +491,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/bgpExtP.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/bgpExtP.json
 {
     "bgpExtP": {
         "attributes": {
@@ -478,7 +499,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13.json
 {
     "l3extOut": {
         "attributes": {
@@ -487,7 +508,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/bgpCtxP-calico-l3out-fsvi-vlan-13-Timers.json
+/api/mo/uni/tn-common/bgpCtxP-calico-l3out-fsvi-vlan-13-Timers.json
 {
     "bgpCtxPol": {
         "attributes": {
@@ -501,7 +522,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/bestpath-calico-l3out-fsvi-vlan-13-Relax-AS.json
+/api/mo/uni/tn-common/bestpath-calico-l3out-fsvi-vlan-13-Relax-AS.json
 {
     "bgpBestPathCtrlPol": {
         "attributes": {
@@ -511,7 +532,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/protp.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/lnodep-calico-l3out-fsvi-vlan-13_node_prof/protp.json
 {
     "bgpProtP": {
         "attributes": {
@@ -538,7 +559,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/bgpCtxAfP-calico-l3out-fsvi-vlan-13.json
+/api/mo/uni/tn-common/bgpCtxAfP-calico-l3out-fsvi-vlan-13.json
 {
     "bgpCtxAfPol": {
         "attributes": {
@@ -549,7 +570,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv4-ucast.json
+/api/mo/uni/tn-common/ctx-calico_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv4-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {
@@ -559,7 +580,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv6-ucast.json
+/api/mo/uni/tn-common/ctx-calico_vrf/rsctxToBgpCtxAfPol-[calico-l3out-fsvi-vlan-13]-ipv6-ucast.json
 {
     "fvRsCtxToBgpCtxAfPol": {
         "attributes": {
@@ -569,7 +590,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/subj-calico-l3out-fsvi-vlan-13-export-match.json
+/api/mo/uni/tn-common/subj-calico-l3out-fsvi-vlan-13-export-match.json
 {
     "rtctrlSubjP": {
         "attributes": {
@@ -589,7 +610,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/prof-default-export.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/prof-default-export.json
 {
     "rtctrlProfile": {
         "attributes": {
@@ -620,7 +641,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/subj-calico-l3out-fsvi-vlan-13-import-match.json
+/api/mo/uni/tn-common/subj-calico-l3out-fsvi-vlan-13-import-match.json
 {
     "rtctrlSubjP": {
         "attributes": {
@@ -658,7 +679,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/out-calico-l3out-fsvi-vlan-13/prof-default-import.json
+/api/mo/uni/tn-common/out-calico-l3out-fsvi-vlan-13/prof-default-import.json
 {
     "rtctrlProfile": {
         "attributes": {
@@ -689,7 +710,7 @@
         ]
     }
 }
-/api/mo/uni/tn-test/bgpPfxP-calico-l3out-fsvi-vlan-13.json
+/api/mo/uni/tn-common/bgpPfxP-calico-l3out-fsvi-vlan-13.json
 {
     "bgpPeerPfxPol": {
         "attributes": {
@@ -700,7 +721,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg.json
+/api/mo/uni/tn-common/out-ext-l3out/instP-mykube_extepg.json
 {
     "fvRsProv": {
         "attributes": {
@@ -710,7 +731,7 @@
         }
     }
 }
-/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg/rsprov-calico-l3out-fsvi-vl-l3out-allow-all.json
+/api/mo/uni/tn-common/out-ext-l3out/instP-mykube_extepg/rsprov-calico-l3out-fsvi-vl-l3out-allow-all.json
 None
 /api/node/mo/uni/userext/user-calico-l3out-fsvi-vl.json
 {

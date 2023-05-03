@@ -233,8 +233,8 @@ data:
                     "10.30.120.100"
                 ],
                 "vrf": {
-                    "name": "mykube_vrf",
-                    "tenant": "test"
+                    "name": "external_vrf",
+                    "tenant": "common"
                 },
                 "cluster_l3out": {
                     "aep": "kube-cluster",
@@ -253,6 +253,9 @@ data:
                         "secondary_ip": "2.100.101.254/24",
                         "type": "floating",
                         "vlan_id": 13
+                    },
+                    "vrf": {
+                        "name": "calico_vrf"
                     }
                 },
                 "l3out": {
