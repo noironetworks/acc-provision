@@ -402,6 +402,7 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
     enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     token = str(uuid.uuid4())
+    # Have tenant name in acc provision input file under aci_config section if tenant is manually created on the APIC before provisioning
     if (config["aci_config"]["tenant"]["name"]):
         config["aci_config"]["use_pre_existing_tenant"] = True
         tenant = config["aci_config"]["tenant"]["name"]
@@ -1597,12 +1598,13 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                 vrf_tenant = config["aci_config"]["vrf"]["tenant"]
                 cluster_tenant = config["aci_config"]["cluster_tenant"]
                 old_naming = config["aci_config"]["use_legacy_kube_naming_convention"]
+                pre_existing_tenant = config["aci_config"]["use_pre_existing_tenant"]
                 if is_calico_flavor(config["flavor"]):
                     l3out_name = config["aci_config"]["cluster_l3out"]["name"]
-                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config,
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant,
                                      l3out_name=l3out_name, cluster_l3out_vrf_details=cluster_l3out_vrf_details)
                 else:
-                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config)
+                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant)
             ret = False if apic.errors > 0 else True
     return ret
 
