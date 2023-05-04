@@ -334,7 +334,7 @@ class Apic(object):
                 self.errors += 1
                 err("Error in provisioning %s: %s" % (path, str(e)))
 
-    def unprovision(self, data, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, cfg, l3out_name=None, cluster_l3out_vrf_details=None):
+    def unprovision(self, data, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, cfg, pre_existing_tenant=False, l3out_name=None, cluster_l3out_vrf_details=None):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
@@ -438,8 +438,10 @@ class Apic(object):
 
         # Clean the cluster tenant iff it has our annotation and does
         # not have any application profiles
-        if self.check_valid_annotation(cluster_tenant_path) and self.check_no_ap(cluster_tenant_path):
-            self.delete(cluster_tenant_path)
+        # considering it's not a pre_existing_tenant which is manually created on the APIC
+        if not pre_existing_tenant:
+            if self.check_valid_annotation(cluster_tenant_path) and self.check_no_ap(cluster_tenant_path):
+                self.delete(cluster_tenant_path)
 
         # Finally clean any stray resources in common
         self.clean_tagged_resources(system_id, vrf_tenant)
