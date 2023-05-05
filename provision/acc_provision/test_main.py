@@ -1099,7 +1099,7 @@ def test_flavor_calico_3_23_2():
 
 
 @in_testdir
-def test_flavor_calico_3_23_2_multiple_vrf_uc1():
+def test_flvr_calico_3_23_2_multiple_vrf_uc1():
     run_provision(
         "flavor_calico_3.23.2_multiple_vrf_uc1.inp.yaml",
         None,
@@ -1111,7 +1111,7 @@ def test_flavor_calico_3_23_2_multiple_vrf_uc1():
 
 
 @in_testdir
-def test_flavor_calico_3_23_2_multiple_vrf_uc2():
+def test_flvr_calico_3_23_2_multiple_vrf_uc2():
     run_provision(
         "flavor_calico_3.23.2_multiple_vrf_uc2.inp.yaml",
         None,
@@ -1123,7 +1123,7 @@ def test_flavor_calico_3_23_2_multiple_vrf_uc2():
 
 
 @in_testdir
-def test_flavor_calico_3_23_2_multiple_vrf_uc3():
+def test_flvr_calico_3_23_2_multiple_vrf_uc3():
     run_provision(
         "flavor_calico_3.23.2_multiple_vrf_uc3.inp.yaml",
         None,
