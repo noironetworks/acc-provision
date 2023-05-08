@@ -1353,7 +1353,11 @@ data:
         {% endif %}
         "apic-username": {{config.aci_config.sync_login.username|json}},
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        {% if config.aci_config.tenant.name %}
+        "aci-prefix": {{config.aci_config.tenant.name|json}},
+        {% else %}
         "aci-prefix": {{config.aci_config.system_id|json}},
+        {% endif %}
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
