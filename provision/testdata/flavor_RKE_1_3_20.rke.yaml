@@ -14,10 +14,10 @@ network:
     vrf_name: "rke"
     vrf_tenant: "common" 
     l3out: "l3out"
-    node_subnet: "10.1.0.1/16"
+    node_subnet: "['10.1.0.1/16']"
     l3out_external_networks: ["\"default\",\"test_ext_net\""]
-    extern_dynamic: "10.3.0.1/24"
-    extern_static: "10.4.0.1/24"
+    extern_dynamic: "['10.3.0.1/24']"
+    extern_static: "['10.4.0.1/24']"
     node_svc_subnet: "10.5.0.1/24"
     kube_api_vlan: "4001"
     service_vlan: "4003"
@@ -43,4 +43,4 @@ network:
     hpp_optimization: "true"
 services:
   kube-controller:
-    cluster_cidr: "10.2.0.1/16"
+    cluster_cidr: "['10.2.0.1/16']"
