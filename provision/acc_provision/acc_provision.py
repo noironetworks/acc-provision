@@ -23,6 +23,7 @@ import tarfile
 import yaml
 from yaml import SafeLoader
 
+from jinja2 import Undefined
 from itertools import combinations
 from OpenSSL import crypto
 from jinja2 import Environment, PackageLoader
@@ -1283,6 +1284,34 @@ def generate_cert(username, cert_file, key_file):
     return key_data, cert_data, reused
 
 
+def is_ipv4_address(addr):
+    try:
+        ipaddress.IPv4Network(addr)
+        return True
+    except ValueError:
+        return False
+
+
+def is_ipv6_address(addr):
+    try:
+        ipaddress.IPv6Network(addr)
+        return True
+    except ValueError:
+        return False
+
+
+def regex_match_filter(string, pattern):
+    if string is Undefined:
+        return string
+    return re.match(pattern, string) is not None
+
+
+def enumerate_filter(iterable):
+    if iterable is Undefined:
+        return iterable
+    return enumerate(iterable)
+
+
 def get_jinja_template(file):
     env = Environment(
         loader=PackageLoader('acc_provision', 'templates'),
@@ -1295,6 +1324,9 @@ def get_jinja_template(file):
     env.filters['yaml'] = yaml_indent
     env.filters['yaml_quote'] = yaml_quote
     env.filters['list_unicode_strings'] = list_unicode_strings
+    env.filters['regex_match'] = regex_match_filter
+    env.filters['enumerate'] = enumerate_filter
+    env.globals['is_ipv6'] = is_ipv6_address
     template = env.get_template(file)
     return template
 
