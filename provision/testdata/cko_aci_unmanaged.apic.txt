@@ -593,15 +593,6 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "2.100.101.1/24",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "sauto_l3out-1_vrf",
@@ -613,6 +604,14 @@ None
                             "fvRsBDToOut": {
                                 "attributes": {
                                     "tnL3extOutName": "sauto_l3out-1",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "2.100.101.1/24",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -628,17 +627,17 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
+                            "fvRsCtx": {
                                 "attributes": {
-                                    "ip": "20.2.0.1/16",
+                                    "tnFvCtxName": "sauto_l3out-1_vrf",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
                         },
                         {
-                            "fvRsCtx": {
+                            "fvSubnet": {
                                 "attributes": {
-                                    "tnFvCtxName": "sauto_l3out-1_vrf",
+                                    "ip": "20.2.0.1/16",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }

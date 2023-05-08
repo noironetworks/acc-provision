@@ -10,6 +10,6 @@ metadata:
 data:
   spec: |-
     {
-        "flavor": {{ config.flavor|json }},
-        "config": {{ config.kube_config.deployment_base64|json }}
+        "flavor": {{ config.flavor|tojson }},
+        "config": {{ config.kube_config.deployment_base64|tojson }}
     }

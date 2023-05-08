@@ -6,7 +6,9 @@ metadata:
 spec:
   disableMultiNetwork: true
   clusterNetwork:
-  - cidr: "14.3.0.1/16"
+  - cidr: [
+    "14.3.0.1/16"
+]
     hostPrefix: 23
   defaultNetwork:
     type: CiscoACI

@@ -199,6 +199,28 @@ def test_with_wait_for_timer():
 
 
 @in_testdir
+def test_multiple_subnets():
+    run_provision(
+        "multiple_subnets.inp.yaml",
+        "multiple_subnets.kube.yaml",
+        None,
+        None,
+        "multiple_subnets.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack():
+    run_provision(
+        "dualstack.inp.yaml",
+        "dualstack.kube.yaml",
+        None,
+        None,
+        "dualstack.apic.txt",
+    )
+
+
+@in_testdir
 def test_with_tenant_l3out():
     run_provision(
         "with_tenant_l3out.inp.yaml",
