@@ -168,7 +168,7 @@
                         {
                             "infraRsFuncToEpg": {
                                 "attributes": {
-                                    "tDn": "uni/tn-old_tenant/ap-aci-containers-kube/epg-aci-containers-nodes",
+                                    "tDn": "uni/tn-pre_existing_tenant/ap-aci-containers-kube/epg-aci-containers-nodes",
                                     "encap": "vlan-4001",
                                     "mode": "regular",
                                     "annotation": "orchestrator:aci-containers-controller"
@@ -185,7 +185,7 @@
 None
 /api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/phys-kube-pdom].json
 None
-/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-old_tenant/ap-aci-containers-kube/epg-aci-containers-nodes].json
+/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-pre_existing_tenant/ap-aci-containers-kube/epg-aci-containers-nodes].json
 None
 /api/mo/uni/infra.json
 {
@@ -260,12 +260,12 @@ None
 None
 /api/mo/uni/tn-common/brc-kube-l3out-allow-all.json
 None
-/api/mo/uni/tn-old_tenant.json
+/api/mo/uni/tn-pre_existing_tenant.json
 {
     "fvTenant": {
         "attributes": {
-            "name": "old_tenant",
-            "dn": "uni/tn-old_tenant"
+            "name": "pre_existing_tenant",
+            "dn": "uni/tn-pre_existing_tenant"
         },
         "children": [
             {

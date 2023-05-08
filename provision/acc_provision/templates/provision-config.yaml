@@ -7,6 +7,8 @@ aci_config:
   #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
   #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
   #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
+  #tenant:
+    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
   apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101
   vmm_domain:                   # Kubernetes container domain configuration
