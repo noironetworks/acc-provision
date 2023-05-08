@@ -23,6 +23,7 @@ import tarfile
 import yaml
 from yaml import SafeLoader
 
+from jinja2 import Undefined
 from itertools import combinations
 from OpenSSL import crypto
 from jinja2 import Environment, PackageLoader
@@ -309,6 +310,14 @@ def config_user(config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
+        if not isinstance(config["net_config"]["pod_subnet"], list):
+            config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
+        if not isinstance(config["net_config"]["node_subnet"], list):
+            config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
+        if not isinstance(config["net_config"]["extern_dynamic"], list):
+            config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
+        if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
+            config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
     if config is None:
         config = {}
     return config
@@ -388,9 +397,23 @@ def config_adjust(args, config, prov_apic, no_random):
         l3out_name = config["aci_config"]["l3out"]["name"]
         system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
-    node_subnet = config["net_config"]["node_subnet"]
-    pod_subnet = config["net_config"]["pod_subnet"]
-    extern_dynamic = config["net_config"]["extern_dynamic"]
+    node_subnets = []
+    for node_subnet in config["net_config"]["node_subnet"]:
+        node_subnets.append(node_subnet)
+    pod_subnets = []
+    for pod_subnet in config["net_config"]["pod_subnet"]:
+        pod_subnets.append(pod_subnet)
+    extern_dynamics = []
+    for extern_dynamic in config["net_config"]["extern_dynamic"]:
+        extern_dynamics.append(extern_dynamic)
+    extern_statics = []
+    extern_static = config["net_config"].get("extern_static", [])
+    if extern_static is not None and not isinstance(extern_static, list):
+        extern_statics = [extern_static]
+    if extern_static is not None and isinstance(extern_static, list):
+        for subnet in extern_static:
+            extern_statics.append(subnet)
+
     extern_static = config["net_config"]["extern_static"]
     node_svc_subnet = config["net_config"]["node_svc_subnet"]
     disable_wait_for_network = config["net_config"]["disable_wait_for_network"]
@@ -436,15 +459,14 @@ def config_adjust(args, config, prov_apic, no_random):
     if args.version_token:
         token = args.version_token
 
-    if not is_calico_flavor(config["flavor"]) and extern_static:
-        static_service_ip_pool = [{"start": cidr_split(extern_static)[0], "end": cidr_split(extern_static)[1]}]
-    else:
-        static_service_ip_pool = []
+    static_service_ip_pool = []
+    if (not is_calico_flavor(config["flavor"])) and (extern_static is not None):
+        for subnet in extern_statics:
+            static_service_ip_pool.append({"start": cidr_split(subnet)[0], "end": cidr_split(subnet)[1]})
 
+    node_service_ip_pool = []
     if not is_calico_flavor(config["flavor"]) and node_svc_subnet:
         node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
-    else:
-        node_service_ip_pool = []
 
     if is_calico_flavor(config["flavor"]):
         config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
@@ -492,11 +514,10 @@ def config_adjust(args, config, prov_apic, no_random):
         },
         "net_config": {
             "infra_vlan": infra_vlan,
-            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnet)[2], cidr_split(pod_subnet)[4]),
-            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnet)[2], cidr_split(node_subnet)[4]),
-            "node_network_gateway": cidr_split(node_subnet)[5],
-            "pod_network": normalize_cidr(pod_subnet),
-            "node_network": normalize_cidr(node_subnet),
+            # TODO: For overlay mode we are currently not supporting multiple subnets, hence the assumption that there is only one subnet.
+            "gbp_pod_subnet": "%s/%s" % (cidr_split(pod_subnets[0])[2], cidr_split(pod_subnets[0])[4]),
+            "gbp_node_subnet": "%s/%s" % (cidr_split(node_subnets[0])[2], cidr_split(node_subnets[0])[4]),
+            "node_network_gateway": cidr_split(node_subnets[0])[5],
             "disable_wait_for_network": disable_wait_for_network,
             "duration_wait_for_network": duration_wait_for_network,
         },
@@ -529,30 +550,6 @@ def config_adjust(args, config, prov_apic, no_random):
                     "group": istio_epg,
                 },
             },
-            "pod_ip_pool": [
-                {
-                    "start": cidr_split(pod_subnet)[0],
-                    "end": cidr_split(pod_subnet)[1],
-                }
-            ],
-            "pod_network": [
-                {
-                    "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
-                    "gateway": cidr_split(pod_subnet)[2],
-                    "routes": [
-                        {
-                            "dst": config_set_dst(pod_subnet),
-                            "gw": cidr_split(pod_subnet)[2],
-                        }
-                    ],
-                },
-            ],
-            "service_ip_pool": [
-                {
-                    "start": cidr_split(extern_dynamic)[0],
-                    "end": cidr_split(extern_dynamic)[1],
-                },
-            ],
             "static_service_ip_pool": static_service_ip_pool,
             "node_service_ip_pool": node_service_ip_pool,
             "node_service_gw_subnets": [
@@ -565,6 +562,78 @@ def config_adjust(args, config, prov_apic, no_random):
             "configuration_version": token,
         }
     }
+
+    if "kube_config" in adj_config.keys():
+        kube_config_object = adj_config["kube_config"]
+        for pod_subnet in pod_subnets:
+            if "pod_ip_pool" not in kube_config_object:
+                kube_config_object["pod_ip_pool"] = [
+                    {
+                        "start": cidr_split(pod_subnet)[0],
+                        "end": cidr_split(pod_subnet)[1],
+                    }
+                ]
+            else:
+                kube_config_object["pod_ip_pool"].append(
+                    {
+                        "start": cidr_split(pod_subnet)[0],
+                        "end": cidr_split(pod_subnet)[1],
+                    }
+                )
+            if "pod_network" not in kube_config_object:
+                kube_config_object["pod_network"] = [
+                    {
+                        "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
+                        "gateway": cidr_split(pod_subnet)[2],
+                        "routes": [
+                            {
+                                "dst": config_set_dst(pod_subnet),
+                                "gw": cidr_split(pod_subnet)[2],
+                            }
+                        ]
+                    }
+                ]
+            else:
+                kube_config_object["pod_network"].append(
+                    {
+                        "subnet": "%s/%s" % cidr_split(pod_subnet)[3:5],
+                        "gateway": cidr_split(pod_subnet)[2],
+                        "routes": [
+                            {
+                                "dst": config_set_dst(pod_subnet),
+                                "gw": cidr_split(pod_subnet)[2],
+                            }
+                        ]
+                    }
+                )
+        for extern_dynamic in extern_dynamics:
+            if "service_ip_pool" not in kube_config_object:
+                kube_config_object["service_ip_pool"] = [
+                    {
+                        "start": cidr_split(extern_dynamic)[0],
+                        "end": cidr_split(extern_dynamic)[1],
+                    }
+                ]
+            else:
+                kube_config_object["service_ip_pool"].append(
+                    {
+                        "start": cidr_split(extern_dynamic)[0],
+                        "end": cidr_split(extern_dynamic)[1],
+                    }
+                )
+
+    if "net_config" in adj_config.keys():
+        net_config_object = adj_config["net_config"]
+        for pod_subnet in pod_subnets:
+            if "pod_network" not in net_config_object:
+                net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
+            else:
+                net_config_object["pod_network"].append(normalize_cidr(pod_subnet))
+        for node_subnet in node_subnets:
+            if "node_network" not in net_config_object:
+                net_config_object["node_network"] = [normalize_cidr(node_subnet)]
+            else:
+                net_config_object["node_network"].append(normalize_cidr(node_subnet))
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
@@ -1215,6 +1284,34 @@ def generate_cert(username, cert_file, key_file):
     return key_data, cert_data, reused
 
 
+def is_ipv4_address(addr):
+    try:
+        ipaddress.IPv4Network(addr)
+        return True
+    except ValueError:
+        return False
+
+
+def is_ipv6_address(addr):
+    try:
+        ipaddress.IPv6Network(addr)
+        return True
+    except ValueError:
+        return False
+
+
+def regex_match_filter(string, pattern):
+    if string is Undefined:
+        return string
+    return re.match(pattern, string) is not None
+
+
+def enumerate_filter(iterable):
+    if iterable is Undefined:
+        return iterable
+    return enumerate(iterable)
+
+
 def get_jinja_template(file):
     env = Environment(
         loader=PackageLoader('acc_provision', 'templates'),
@@ -1227,6 +1324,9 @@ def get_jinja_template(file):
     env.filters['yaml'] = yaml_indent
     env.filters['yaml_quote'] = yaml_quote
     env.filters['list_unicode_strings'] = list_unicode_strings
+    env.filters['regex_match'] = regex_match_filter
+    env.filters['enumerate'] = enumerate_filter
+    env.globals['is_ipv6'] = is_ipv6_address
     template = env.get_template(file)
     return template
 
@@ -1406,6 +1506,10 @@ def is_calico_flavor(flavor):
 
 
 def generate_calico_deployment_files(config, network_operator_output):
+    config['net_config']['node_subnet'] = config['net_config']['node_subnet'][0]
+    config['net_config']['pod_subnet'] = config['net_config']['pod_subnet'][0]
+    config['net_config']['extern_dynamic'] = config['net_config']['extern_dynamic'][0]
+
     filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
     if network_operator_output and network_operator_output != "/dev/null":
         calico_crds_template = get_jinja_template('tigera-operator.yaml')
@@ -1489,7 +1593,6 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
         temp = ''.join(template.stream(config=config))
         parsed_temp = temp.split("---")
-
         # Find the place where to put the acioperators configmap
         for cmap_idx in range(len(parsed_temp)):
             current_yaml = yaml.safe_load(parsed_temp[cmap_idx])
@@ -1520,6 +1623,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
         else:
             new_deployment_file = temp
 
+        # print(new_deployment_file)
         if operator_output != sys.stdout:
             with open(operator_output, "w") as fh:
                 fh.write(new_deployment_file)
@@ -1747,30 +1851,68 @@ def check_overlapping_subnets(config):
     """Check if subnets are overlapping."""
     if is_calico_flavor(config["flavor"]):
         subnet_info = {
-            "pod_subnet": config["net_config"]["pod_subnet"],
-            "node_subnet": config["net_config"]["node_subnet"],
-            "extern_dynamic": config["net_config"]["extern_dynamic"],
             "cluster_svc_subnet": config["net_config"]["cluster_svc_subnet"]
         }
     else:
         subnet_info = {
-            "pod_subnet": config["net_config"]["pod_subnet"],
-            "node_subnet": config["net_config"]["node_subnet"],
-            "extern_dynamic": config["net_config"]["extern_dynamic"],
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
 
+    if not isinstance(config["net_config"]["pod_subnet"], list):
+        subnet_info[-1] = config["net_config"]["pod_subnet"]
+    else:
+        pod_subnets = []
+        for pod_subnet in config["net_config"]["pod_subnet"]:
+            pod_subnets.append(pod_subnet)
+        counter = 0
+        for pod_subnet in pod_subnets:
+            subnet_info[counter] = pod_subnet
+            counter += 1
+
+    if not isinstance(config["net_config"]["node_subnet"], list):
+        subnet_info[-1] = config["net_config"]["node_subnet"]
+    else:
+        node_subnets = []
+        for node_subnet in config["net_config"]["node_subnet"]:
+            node_subnets.append(node_subnet)
+        # counter = 0
+        for node_subnet in node_subnets:
+            subnet_info[counter] = node_subnet
+            counter += 1
+
+    if not isinstance(config["net_config"]["extern_dynamic"], list):
+        subnet_info[-1] = config["net_config"]["extern_dynamic"]
+    else:
+        extern_dynamics = []
+        for extern_dynamic in config["net_config"]["extern_dynamic"]:
+            extern_dynamics.append(extern_dynamic)
+        # counter = 0
+        for extern_dynamic in extern_dynamics:
+            subnet_info[counter] = extern_dynamic
+            counter += 1
+
     # Don't have extern_static field set for OpenShift flavors
     if not is_calico_flavor(config["flavor"]) and config["net_config"]["extern_static"]:
-        subnet_info["extern_static"] = config["net_config"]["extern_static"]
+        if not isinstance(config["net_config"]["extern_static"], list):
+            subnet_info[-1] = config["net_config"]["extern_static"]
+        else:
+            extern_statics = []
+            for subnet in config["net_config"]["extern_static"]:
+                extern_statics.append(subnet)
+            # counter = 0
+            for subnet in extern_statics:
+                subnet_info[counter] = subnet
+                counter += 1
 
     for sub1, sub2 in combinations(subnet_info.values(), r=2):
         # Checking if sub1 and sub2 are IPv4 or IPv6
         rtr1, _ = sub1.split("/")
         ip1 = ipaddress.ip_address(rtr1)
-        if ip1.version == 4:
+        rtr2, _ = sub2.split("/")
+        ip2 = ipaddress.ip_address(rtr2)
+        if ip1.version == 4 and ip2.version == 4:
             net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
-        else:
+        elif ip1.version == 6 and ip2.version == 6:
             net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
         out = net1.overlaps(net2)
         if out:
@@ -1786,6 +1928,68 @@ def check_image_pull_secret(config):
     if not re.fullmatch(pattern, str(image_pull_secret)):
         return False
     return True
+
+
+def has_multi_subnet(config):
+    subnet_types = ["pod_subnet", "node_subnet", "extern_dynamic"]
+    for subnet_type in subnet_types:
+        if isinstance(config["net_config"][subnet_type], list):
+            return False
+    return True
+
+
+def is_dualstack_config(config):
+    if "net_config" not in config:
+        return False
+    subnet_info = []
+    if not isinstance(config["net_config"]["pod_subnet"], list):
+        subnet_info[-1] = config["net_config"]["pod_subnet"]
+    else:
+        pod_subnets = []
+        for pod_subnet in config["net_config"]["pod_subnet"]:
+            pod_subnets.append(pod_subnet)
+        for pod_subnet in pod_subnets:
+            subnet_info.append(pod_subnet)
+
+    if not isinstance(config["net_config"]["node_subnet"], list):
+        subnet_info[-1] = config["net_config"]["node_subnet"]
+    else:
+        node_subnets = []
+        for node_subnet in config["net_config"]["node_subnet"]:
+            node_subnets.append(node_subnet)
+        for node_subnet in node_subnets:
+            subnet_info.append(node_subnet)
+
+    if not isinstance(config["net_config"]["extern_dynamic"], list):
+        subnet_info[-1] = config["net_config"]["extern_dynamic"]
+    else:
+        extern_dynamics = []
+        for extern_dynamic in config["net_config"]["extern_dynamic"]:
+            extern_dynamics.append(extern_dynamic)
+
+        for extern_dynamic in extern_dynamics:
+            subnet_info.append(extern_dynamic)
+
+    for subnet in subnet_info:
+        rtr, _ = subnet.split("/")
+        ip = ipaddress.ip_address(rtr)
+        if ip.version == 6:
+            return True
+
+    return False
+
+
+def is_support_dualstack(flavor):
+    version = flavor.split("-")[1]
+    support_k8s_version = "1.21"
+    support_openshift_version = "4.8"
+    if version >= support_k8s_version:
+        return True
+
+    if version >= support_openshift_version:
+        return True
+
+    return False
 
 
 def provision(args, apic_file, no_random):
@@ -1893,6 +2097,15 @@ def provision(args, apic_file, no_random):
         err("Unknown flavor %s" % flavor)
         return False
     flavor_opts = FLAVORS[flavor].get("options", DEFAULT_FLAVOR_OPTIONS)
+
+    # Verify for Dualstack
+    if is_dualstack_config(config) and not is_support_dualstack(flavor):
+        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 4.21 or later or OpenShift version 4.8 or later.")
+        return False
+
+    if is_calico_flavor(config["flavor"]) and has_multi_subnet(config):
+        err(" Multisubnet feature is not supported in calico.")
+        return False
 
     deep_merge(config, config_default())
 

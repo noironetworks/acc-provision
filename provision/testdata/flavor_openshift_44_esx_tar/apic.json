@@ -2,9 +2,13 @@
   "system_id": "kube",
   "kubeapi_vlan": "4001",
   "infra_vlan": "4093",
-  "node_network": "10.1.0.0/16",
+  "node_network": [
+            "10.1.0.0/16"
+        ],
   "node_network_gateway": "10.1.0.10",
-  "pod_network": "10.2.0.0/16",
+  "pod_network": [
+            "10.2.0.0/16"
+        ],
   "apic_hosts": [
             "10.30.120.100"
         ]
