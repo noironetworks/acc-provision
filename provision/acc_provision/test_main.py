@@ -1010,6 +1010,18 @@ def test_flavor_RKE_1_3_20_base():
 
 
 @in_testdir
+def test_flavor_RKE_1_4_6_base():
+    run_provision(
+        "flavor_RKE_1_4_6.inp.yaml",
+        "flavor_RKE_1_4_6.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_4_6.apic.txt",
+        overrides={"flavor": "RKE-1.4.6"}
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
