@@ -21,14 +21,14 @@ network:
     vrf_name: "{{ config.aci_config.vrf.name }}"
     vrf_tenant: "{{ config.aci_config.vrf.tenant }}" 
     l3out: "{{ config.aci_config.l3out.name }}"
-    node_subnet: "{{ config.net_config.node_subnet }}"
+    node_subnet: "{%- for node_subnet in config.net_config.node_subnet %}{{ "%s"|format(node_subnet) }}{% endfor -%}"
     {% if config.aci_config.l3out.external_networks|length > 1 %}
     l3out_external_networks: [{%- for ext_net in config.aci_config.l3out.external_networks %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "\\\"%s\\\","|format(ext_net) }}{% else %}{{ "\\\"%s\\\"\""|format(ext_net) }}{% endif %}{% endfor -%}]
     {% else %}
     l3out_external_networks: [{% for ext_net in config.aci_config.l3out.external_networks %}{{ "\"\\\"%s\\\"\""|format(ext_net) }}{% endfor %}]
     {% endif %}
-    extern_dynamic: "{{ config.net_config.extern_dynamic }}"
-    extern_static: "{{ config.net_config.extern_static }}"
+    extern_dynamic: "{%- for extern_dynamic in config.net_config.extern_dynamic %}{{"%s"|format(extern_dynamic) }}{% endfor -%}"
+    extern_static: "{%- for extern_static in config.net_config.extern_static %}{{"%s"|format(extern_static) }}{% endfor -%}"
     node_svc_subnet: "{{ config.net_config.node_svc_subnet }}"
     kube_api_vlan: "{{ config.net_config.kubeapi_vlan }}"
     service_vlan: "{{ config.net_config.service_vlan }}"
@@ -120,4 +120,4 @@ network:
   {% endif %}
 services:
   kube-controller:
-    cluster_cidr: "{{ config.net_config.pod_subnet }}"
+    cluster_cidr: "{%- for pod_subnet in config.net_config.pod_subnet %}{{"%s"|format(pod_subnet) }}{% endfor -%}"
