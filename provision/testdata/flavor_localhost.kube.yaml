@@ -1269,8 +1269,8 @@ data:
                 "start": "10.3.56.2"
             }
         ],
-        "extern-static": "10.4.56.1/21",
-        "extern-dynamic": "10.3.56.1/21",
+        "extern-static": ["10.4.56.1/21"],
+        "extern-dynamic": ["10.3.56.1/21"],
         "snat-contract-scope": "global",
         "static-service-ip-pool": [
             {
@@ -1306,8 +1306,12 @@ data:
         "aci-prefix": "kube",
         "aci-vrf": "defaultVrf",
         "aci-vrf-tenant": "kube",
-        "pod-subnet": "10.2.56.1/21",
-        "node-subnet": "1.100.202.1/24",
+        "pod-subnet": [
+            "10.2.56.1/21"
+        ],
+        "node-subnet": [
+            "1.100.202.1/24"
+        ],
         "encap-type": "vxlan",
         "aci-infra-vlan": null,
         "interface-mtu": 1400,

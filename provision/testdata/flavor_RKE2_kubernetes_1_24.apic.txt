@@ -639,15 +639,6 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.1.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "rke2",
@@ -659,6 +650,15 @@ None
                             "fvRsBDToOut": {
                                 "attributes": {
                                     "tnL3extOutName": "l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "10.1.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
@@ -674,15 +674,6 @@ None
                     },
                     "children": [
                         {
-                            "fvSubnet": {
-                                "attributes": {
-                                    "ip": "10.2.0.1/16",
-                                    "scope": "public",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        },
-                        {
                             "fvRsCtx": {
                                 "attributes": {
                                     "tnFvCtxName": "rke2",
@@ -694,6 +685,15 @@ None
                             "fvRsBDToOut": {
                                 "attributes": {
                                     "tnL3extOutName": "l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "10.2.0.1/16",
+                                    "scope": "public",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
