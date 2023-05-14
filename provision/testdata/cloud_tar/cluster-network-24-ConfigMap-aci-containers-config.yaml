@@ -3,7 +3,7 @@ data:
   controller-config: "{\n    \"flavor\": \"cloud\",\n    \"log-level\": \"info\",\n\
     \    \"apic-hosts\": [\n        \"localhost:50000\"\n    ],\n    \"max-csr-tunnels\"\
     : 0,\n    \"apic-username\": \"clusterjj\",\n    \"apic-private-key-path\": \"\
-    /usr/local/etc/aci-cert/user.key\",\n    \"aci-prefix\": \"csrtest\",\n    \"\
+    /usr/local/etc/aci-cert/user.key\",\n    \"aci-prefix\": \"clusterjj\",\n    \"\
     aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"clusterjj\",\n    \"\
     aci-vmm-controller\": \"clusterjj\",\n    \"aci-policy-tenant\": \"csrtest\",\n\
     \    \"lb-type\": \"None\",\n    \"aci-service-phys-dom\": \"clusterjj-pdom\"\
