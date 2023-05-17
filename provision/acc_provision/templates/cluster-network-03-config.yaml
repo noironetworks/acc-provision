@@ -5,6 +5,7 @@ metadata:
   name: cluster
 spec:
   disableMultiNetwork: true
+  {% if config.flavor != "l2-tenant-chained-multus-openshift-4.12-baremetal" %}
   {% for i, subnet in config.net_config.pod_subnet|enumerate %}
   {% if is_ipv6(subnet) %}
   {% set hostPrefix = 64 %}
@@ -17,6 +18,7 @@ spec:
   - cidr: {{ subnet }}
     hostPrefix: {{ hostPrefix }}
   {% endfor %}
+  {% endif %}
   defaultNetwork:
     type: CiscoACI
   serviceNetwork:

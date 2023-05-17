@@ -1,0 +1,16 @@
+aci_config:
+  system_id: l2tenant1
+  apic_hosts:
+    - 10.30.120.100
+  aep: l2tenant-aep
+  secondary_physical_domain: l2-tenant-physdom-2
+  physical_domain:
+    domain: ocpbm1-domain # Override if needed.
+    # Otherwise <system_id>-physdom will be created.
+  sync_login:
+    certfile: user.crt
+    keyfile: user.key
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  kubeapi_vlan: 4001

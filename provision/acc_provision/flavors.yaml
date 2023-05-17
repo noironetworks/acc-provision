@@ -153,6 +153,145 @@ flavors:
     config:
       kube_config:
         no_priority_class: True
+  l2-tenant-chained-multus-openshift-4.12-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.12 on Baremetal
+    default_version: 6.0
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      cni_config:
+        mode: chained
+        primary_cni_path: "/etc/kubernetes/cni/net.d/"
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 0
   openshift-4.12-baremetal:
     desc: Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.0
