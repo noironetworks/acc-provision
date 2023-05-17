@@ -198,6 +198,7 @@ def config_default():
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
             "advertise_cluster_svc_subnet": False,
+            "secondary_vlans": None,
         },
         "topology": {
             "rack": {
@@ -305,11 +306,16 @@ def config_default():
             "logging_namespace": "cattle-logging",
             "monitoring_namespace": "cattle-prometheus",
         },
+        "chained_cni_config": {
+            "enable": False,
+            "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf",
+            "skip_node_network_provisioning": False,
+        }
     }
     return default_config
 
 
-def config_user(config_file):
+def config_user(flavor, config_file):
     config = {}
     if config_file:
         if config_file == "-":
@@ -324,14 +330,15 @@ def config_user(config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
-        if not isinstance(config["net_config"]["pod_subnet"], list):
-            config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
-        if not isinstance(config["net_config"]["node_subnet"], list):
+        if not config.get("chained_cni_config", {}).get("enable"):
+            if not isinstance(config["net_config"]["pod_subnet"], list):
+                config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
+            if not isinstance(config["net_config"]["extern_dynamic"], list):
+                config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
+            if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
+                config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
+        if config["net_config"].get("node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
             config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
-        if not isinstance(config["net_config"]["extern_dynamic"], list):
-            config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
-        if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
-            config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
     if config is None:
         config = {}
     return config
@@ -394,6 +401,152 @@ def normalize_cidr(cidr):
     else:
         n = ipaddress.IPv6Network(cidr, strict=False)
     return str(n)
+
+
+def normalize_vlans(secondary_vlans):
+    normalized_vlans = []
+    if not secondary_vlans:
+        return normalized_vlans
+    for vlan in secondary_vlans:
+        if isinstance(vlan, list):
+            normalized_vlans.extend(vlan)
+        elif ',' in str(vlan):
+            values = [int(val) for val in vlan.split(',')]
+            normalized_vlans.extend(values)
+        else:
+            normalized_vlans.append(vlan)
+    return normalized_vlans
+
+
+def config_adjust_chained_mode(args, config, no_random):
+    system_id = config["aci_config"]["system_id"]
+    infra_vlan = config["net_config"]["infra_vlan"]
+    token = str(uuid.uuid4())
+
+    # Have tenant name in acc provision input file under aci_config section if tenant is manually created on the APIC before provisioning
+    if (config["aci_config"]["tenant"]["name"]):
+        config["aci_config"]["use_pre_existing_tenant"] = True
+        tenant = config["aci_config"]["tenant"]["name"]
+    else:
+        tenant = system_id
+
+    if config["aci_config"].get("physical_domain"):
+        physical_domain = config["aci_config"]["physical_domain"]["domain"]
+    else:
+        physical_domain = system_id + "-physdom"
+
+    secondary_vlans = config["net_config"]["secondary_vlans"]
+
+    app_profile = Apic.ACI_CHAINED_PREFIX + system_id
+    default_endpoint_group = Apic.ACI_CHAINED_PREFIX + "default"
+    namespace_endpoint_group = Apic.ACI_CHAINED_PREFIX + "system"
+    config["aci_config"]["nodes_epg"] = Apic.ACI_CHAINED_PREFIX + "nodes"
+    bd_dn_prefix = "uni/tn-%s/BD-%snodes" % (tenant, Apic.ACI_CHAINED_PREFIX)
+
+    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
+    node_bd_dn = bd_dn_prefix
+
+    config["aci_config"]["app_profile"] = app_profile
+    system_namespace = config["kube_config"]["system_namespace"]
+    if args.version_token:
+        token = args.version_token
+
+    adj_config = {
+        "aci_config": {
+            "cluster_tenant": tenant,
+            "physical_domain": {
+                "domain": physical_domain,
+                "vlan_pool": system_id + "-pool",
+            },
+            "vrf": {
+                "dn": aci_vrf_dn,
+            },
+            "sync_login": {
+                "username": system_id,
+                "password": generate_password(no_random),
+                "certfile": "user-%s.crt" % system_id,
+                "keyfile": "user-%s.key" % system_id,
+                "cert_reused": False,
+            },
+            "node_bd_dn": node_bd_dn,
+            "kafka": {
+            },
+            "subnet_dn": {
+            },
+            "vrf_dn": {
+            },
+            "overlay_vrf": {
+            },
+        },
+        "net_config": {
+            "infra_vlan": infra_vlan,
+            "secondary_vlans": secondary_vlans,
+        },
+        "kube_config": {
+            "default_endpoint_group": {
+                "tenant": tenant,
+                "app_profile": app_profile,
+                "group": default_endpoint_group,
+            },
+            "namespace_default_endpoint_group": {
+                system_namespace: {
+                    "tenant": tenant,
+                    "app_profile": app_profile,
+                    "group": namespace_endpoint_group,
+                },
+            },
+        },
+        "registry": {
+            "configuration_version": token,
+        }
+    }
+
+    if not config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"]:
+        node_subnet = config["net_config"]["node_subnet"][0]
+        config["net_config"]["node_subnet"] = node_subnet
+
+    if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
+        adj_config["aci_config"]["apic_refreshtime"] = config["aci_config"]["apic_refreshtime"]
+
+    if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+        adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
+
+    if config["net_config"].get("pbr_tracking_non_snat"):
+        adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
+
+    ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
+
+    # To add kube-system namespace to ACI system EPG
+    adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
+
+    if config["aci_config"]["vmm_domain"]:
+        encap_type = config["aci_config"]["vmm_domain"]["encap_type"]
+        adj_config["aci_config"]["vmm_domain"] = {
+            "domain": system_id,
+            "controller": system_id,
+            "mcast_pool": system_id + "-mpool",
+            "vlan_pool": system_id + "-vpool",
+            "vlan_range": {
+                "start": None,
+                "end": None,
+            },
+        }
+        adj_config["aci_config"]["node_config"] = {
+            "encap_type": encap_type,
+        }
+        # Add openshift system namespaces to ACI system EPG
+        if config["aci_config"]["vmm_domain"]["type"] == "OpenShift":
+            ns_list = ["kube-service-catalog", "openshift-console", "openshift-dns", "openshift-authentication",
+                       "openshift-authentication-operator", "openshift-monitoring", "openshift-web-console"]
+            for ns in ns_list:
+                adj_config["kube_config"]["namespace_default_endpoint_group"][ns] = ns_value
+
+        if not config["aci_config"]["vmm_domain"].get("injected_cluster_type"):
+            adj_config["aci_config"]["vmm_domain"]["injected_cluster_type"] = ""
+        if not config["aci_config"]["vmm_domain"].get("injected_cluster_provider"):
+            adj_config["aci_config"]["vmm_domain"]["injected_cluster_provider"] = ""
+
+    return adj_config
 
 
 def config_adjust(args, config, prov_apic, no_random):
@@ -976,6 +1129,35 @@ def config_validate(flavor_opts, config):
             "net_config/pod_subnet": (get(("net_config", "pod_subnet")), required),
             "net_config/node_subnet": (get(("net_config", "node_subnet")), required),
         }
+    elif is_chained_mode(config):
+        checks = {
+            # ACI config
+            "aci_config/system_id": (get(("aci_config", "system_id")),
+                                     lambda x: required(x) and isname(x, 32)),
+            "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
+                                            is_valid_refreshtime),
+            "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
+                                                     is_valid_apic_refreshticker_adjust),
+            "aci_config/apic_subscription_delay": (get(("aci_config", "apic_subscription_delay")),
+                                                   is_valid_apic_sub_delay),
+            "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
+            "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
+                                              is_valid_image_pull_policy),
+            "chained_cni_config/enable": (get(("chained_cni_config", "enable")), required),
+            "chained_cni_config/primary_cni_path": (get(("chained_cni_config", "primary_cni_path")), required),
+        }
+        if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+            # Network Config
+            checks["net_config/node_subnet"] = (
+                get(("net_config", "node_subnet")), required)
+            checks["aci_config/vrf/name"] = (get(("aci_config", "vrf", "name")), required)
+            checks["aci_config/vrf/tenant"] = (get(("aci_config", "vrf", "tenant")), required)
+        if config["user_config"]["aci_config"].get("vmm_domain", False):
+            # ACI Config
+            checks["aci_config/vmm_domain/domain"] = (
+                get(("aci_config", "vmm_domain", "domain")), required)
+            checks["aci_config/vmm_domain/type"] = (
+                get(("aci_config", "vmm_domain", "type")), required)
     elif not isOverlay(config["flavor"]) or config["aci_config"]["capic"]:
         checks = {
             # ACI config
@@ -1019,6 +1201,19 @@ def config_validate(flavor_opts, config):
             }
         else:
             extra_checks = {}
+    elif is_chained_mode(config):
+        extra_checks = {
+            "aci_config/secondary_aep": (get(("aci_config", "secondary_aep")), required),
+            # Network Config
+            "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
+                                         is_valid_mtu),
+            "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
+                                                  is_valid_headroom),
+            "aci_config/secondary_vlans": (get(("net_config", "secondary_vlans")), required),
+        }
+        if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+            extra_checks["aci_config/aep"] = (
+                get(("aci_config", "aep")), required)
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -1100,7 +1295,7 @@ def config_validate(flavor_opts, config):
             get(("aci_config", "vmm_domain", "nested_inside", "type")),
             required)
 
-    if get(("aci_config", "vmm_domain", "encap_type")) == "vlan":
+    if not is_chained_mode(config) and get(("aci_config", "vmm_domain", "encap_type")) == "vlan":
         checks["aci_config/vmm_domain/vlan_range/start"] = \
             (get(("aci_config", "vmm_domain", "vlan_range", "start")),
              required)
@@ -1116,7 +1311,7 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
              required)
 
-    if get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+    if not is_chained_mode(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
         checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
@@ -1143,12 +1338,72 @@ def config_validate(flavor_opts, config):
     return ret
 
 
+def chained_config_validate_preexisting(config, prov_apic):
+    try:
+        if prov_apic is not None:
+            apic = get_apic(config)
+            if apic is None:
+                return False
+
+            secondary_aep_name = config["aci_config"]["secondary_aep"]
+            secondary_aep = apic.get_aep(secondary_aep_name)
+            if secondary_aep is None:
+                err("Secondary AEP %s not defined in the APIC. Please create secondary AEP and try again." % secondary_aep_name)
+                return False
+
+            if config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"]:
+                return True
+
+            aep_name = config["aci_config"]["aep"]
+            aep = apic.get_aep(aep_name)
+            if aep is None:
+                err("AEP %s not defined in the APIC. Please create AEP and try again." % aep_name)
+                return False
+
+            if config["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
+                phydom_name = config["user_config"]["aci_config"]["physical_domain"]["domain"]
+                phydom = apic.get_phys_dom(phydom_name)
+                if phydom is None:
+                    err("Physical domain %s not defined in the APIC. Please create and try again." % phydom_name)
+                    return False
+
+            if (config["user_config"]["aci_config"].get("vmm_domain", {}).get("domain", False)) and (
+                    config["user_config"]["aci_config"].get("vmm_domain", {}).get("type", False)):
+                vmm_name = config["user_config"]["aci_config"]["vmm_domain"]["domain"]
+                vmm_type = config["user_config"]["aci_config"]["vmm_domain"]["type"]
+                vmm = apic.get_vmm_dom(vmm_type, vmm_name)
+                if vmm is None:
+                    err("VMM domain %s not defined in the APIC. Please create and try again." % vmm_name)
+                    return False
+
+            vrf_tenant = config["aci_config"]["vrf"]["tenant"]
+            vrf_name = config["aci_config"]["vrf"]["name"]
+            vrf_dn = config["aci_config"]["vrf"]["dn"]
+            l3out_name = config["aci_config"]["l3out"]["name"]
+            vrf = apic.get_vrf(vrf_dn)
+            if vrf is None:
+                err("VRF %s/%s not defined in the APIC.Please create VRF and try again." %
+                    (vrf_tenant, vrf_name))
+                return False
+
+            l3out = apic.get_l3out(vrf_tenant, l3out_name)
+            if l3out:
+                # get l3out context and check if it's the same as vrf in
+                # input config
+                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+                if not result:
+                    info("L3out and Kubernetes EPGs are configured in different VRFs")
+    except Exception as e:
+        warn("Unable to validate resources on APIC: {}".format(e))
+    return True
+
+
 def config_validate_preexisting(config, prov_apic):
     try:
         if isOverlay(config["flavor"]):
             return True
 
-        if prov_apic is not None:
+        if prov_apic is not None and not is_chained_mode(config):
             apic = get_apic(config)
             if apic is None:
                 return False
@@ -1593,6 +1848,10 @@ def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
 
+def is_chained_mode(config):
+    return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
+
+
 def generate_calico_deployment_files(config, network_operator_output):
     config['net_config']['node_subnet'] = config['net_config']['node_subnet'][0]
     config['net_config']['pod_subnet'] = config['net_config']['pod_subnet'][0]
@@ -1957,13 +2216,14 @@ def check_overlapping_subnets(config):
             "node_svc_subnet": config["net_config"]["node_svc_subnet"]
         }
 
+    counter = 0
+
     if not isinstance(config["net_config"]["pod_subnet"], list):
         subnet_info[-1] = config["net_config"]["pod_subnet"]
     else:
         pod_subnets = []
         for pod_subnet in config["net_config"]["pod_subnet"]:
             pod_subnets.append(pod_subnet)
-        counter = 0
         for pod_subnet in pod_subnets:
             subnet_info[counter] = pod_subnet
             counter += 1
@@ -2066,10 +2326,11 @@ def get_subnet_list(config):
         return subnet_info
 
     net_config = config["net_config"]
-    process_subnet_value(net_config.get("pod_subnet", []), subnet_info)
+    if not is_chained_mode(config):
+        process_subnet_value(net_config.get("pod_subnet", []), subnet_info)
+        process_subnet_value(net_config.get("extern_dynamic", []), subnet_info)
+        process_subnet_value(net_config.get("extern_static", []), subnet_info)
     process_subnet_value(net_config.get("node_subnet", []), subnet_info)
-    process_subnet_value(net_config.get("extern_dynamic", []), subnet_info)
-    process_subnet_value(net_config.get("extern_static", []), subnet_info)
 
     return subnet_info
 
@@ -2218,7 +2479,7 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["apic_login"]["timeout"] = timeout
 
     # Create config
-    user_config = config_user(config_file)
+    user_config = config_user(flavor, config_file)
     if 'aci_config' in user_config and 'use_legacy_kube_naming_convention' in user_config['aci_config'] and 'tenant' in user_config['aci_config']:
         err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
         return False
@@ -2234,6 +2495,11 @@ def provision(args, apic_file, no_random):
 
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
+
+    if 'chained_cni_config' in config and config["chained_cni_config"]["enable"]:
+        if flavor != 'openshift-sdn-ovn-baremetal':
+            err("Chained mode is not supported with flavor " + flavor)
+            return False
 
     if flavor in FLAVORS:
         info("Using configuration flavor " + flavor)
@@ -2267,9 +2533,21 @@ def provision(args, apic_file, no_random):
         err(" Multisubnet feature is not supported in calico.")
         return False
 
+    get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
+    if is_chained_mode(config):
+        if get(("aci_config", "vmm_domain", "mcast_range", "start")):
+            warn(("mcast_range option is not used in %s flavor with chained mode" % config["flavor"]))
+        if get(("aci_config", "vmm_domain", "encap_type")):
+            warn(("encap_type option is not used in %s flavor with chained mode" % config["flavor"]))
+        if get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")):
+            warn(("nested_inside option is not used in %s flavor with chained mode" % config["flavor"]))
+
     deep_merge(config, config_default())
 
-    if (args.disable_multus == 'false'):
+    if is_chained_mode(config) and not user_config.get("aci_config", {}).get("vmm_domain"):
+        config["aci_config"]["vmm_domain"] = None
+
+    if (args.disable_multus == 'false' or is_chained_mode(config)):
         config['multus']['disable'] = False
 
     if config["registry"]["version"] in VERSIONS:
@@ -2300,7 +2578,7 @@ def provision(args, apic_file, no_random):
         print("%s") % ex
 
     # Verify if overlapping subnet present in config input file
-    if not check_overlapping_subnets(config):
+    if not is_chained_mode(config) and not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
 
@@ -2311,10 +2589,18 @@ def provision(args, apic_file, no_random):
             return False
 
     # Adjust config based on convention/apic data
-    adj_config = config_adjust(args, config, prov_apic, no_random)
+    if is_chained_mode(config):
+        adj_config = config_adjust_chained_mode(args, config, no_random)
+        if config["net_config"]["secondary_vlans"]:
+            normalized_vlans = normalize_vlans(config["net_config"]["secondary_vlans"])
+            config["net_config"]["secondary_vlans"] = json.dumps(normalized_vlans).replace("\"", "")
+    else:
+        adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
 
     if is_calico_flavor(config["flavor"]) and not calico_config_validate_preexisting(config, prov_apic):
+        return False
+    elif is_chained_mode(config) and not chained_config_validate_preexisting(config, prov_apic):
         return False
     else:
         # Advisory checks, including apic checks, ignore failures
@@ -2389,11 +2675,13 @@ def provision(args, apic_file, no_random):
     if flavor == "k8s-overlay":
         return True
 
-    if (config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
+    if (config['aci_config']['vmm_domain'] and config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
         apic = get_apic(config)
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
 
+    if is_chained_mode(config) and config["user_config"]["net_config"].get("secondary_vlans"):
+        config["net_config"]["secondary_vlans"] = normalized_vlans
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 
