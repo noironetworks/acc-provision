@@ -18,6 +18,16 @@ metadata:
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 {% set flavor_version = config.flavor.split('-') %}
+{% if config.flavor == "l2-tenant-chained-multus-openshift-4.12-baremetal" %}
+{% set major_version = flavor_version[5].split('.')[0] | int %}
+{% set minor_version = flavor_version[5].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[6] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
+apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
+{% else %}
 {% set major_version = flavor_version[1].split('.')[0] | int %}
 {% set minor_version = flavor_version[1].split('.')[1] | int %}
 {% if (major_version >= 4 and  minor_version >= 9
@@ -25,6 +35,7 @@ metadata:
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
 {% endif %}
 kind: PriorityClass
 metadata:
@@ -1335,6 +1346,75 @@ metadata:
 data:
   controller-config: |-
     {
+        {% if config.flavor == "l2-tenant-chained-multus-openshift-4.12-baremetal" %}
+        "flavor": {{config.flavor|json}},
+        "log-level": {{config.logging.controller_log_level|json}},
+        "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        "aci-additional-phys-dom": {{config.aci_config.secondary_physical_domain}},
+        "chained_mode": true,
+        {% if config.aci_config.apic_refreshtime %}
+        "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
+        {% endif %}
+        {% if config.aci_config.apic_subscription_delay %}
+        "apic-subscription-delay": {{config.aci_config.apic_subscription_delay|json}},
+        {% endif %}
+        {% if config.aci_config.apic_refreshticker_adjust %}
+        "apic-refreshticker-adjust": "{{ config.aci_config.apic_refreshticker_adjust|json }}",
+        {% endif %}
+        "apic-username": {{config.aci_config.sync_login.username|json}},
+        "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        {% if config.aci_config.tenant.name %}
+        "aci-prefix": {{config.aci_config.tenant.name|json}},
+        {% else %}
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        {% endif %}
+        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
+        {% if config.kube_config.no_wait_for_service_ep_readiness %}
+        "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
+        {% endif %}
+        {% if config.kube_config.service_graph_endpoint_add_delay %}
+        "service-graph-endpoint-add-delay": {{ config.kube_config.service_graph_endpoint_add_delay|json|indent(width=8) }},
+        {% endif %}
+        {% if config.kube_config.add_external_subnets_to_rdconfig %}
+        "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
+        {% endif %}
+        {% if config.kube_config.snat_operator.disable_periodic_snat_global_info_sync %}
+        "disable-periodic-snat-global-info-sync": {{ config.kube_config.snat_operator.disable_periodic_snat_global_info_sync|json }},
+        {% endif %}
+        {% if config.kube_config.snat_operator.sleep_time_snat_global_info_sync %}
+        "sleep-time-snat-global-info-sync": {{ config.kube_config.snat_operator.sleep_time_snat_global_info_sync|json }},
+        {% endif %}
+        "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
+        "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
+        "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
+        "aci-service-monitor-interval": {{ config.net_config.service_monitor_interval|json }},
+        "aci-pbr-tracking-non-snat": {{ config.net_config.pbr_tracking_non_snat|json }},
+        "default-endpoint-group": {
+            "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
+            "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
+        },
+        {% if config.flavor != "k8s-overlay" %}
+        "max-nodes-svc-graph": {{ config.kube_config.max_nodes_svc_graph|json }},
+        {% endif %}
+        "namespace-default-endpoint-group": {
+            {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
+            "{{ns}}": {
+                "policy-space": {{val['tenant']|json}},
+                "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
+        },
+        "snat-contract-scope": {{ config.kube_config.snat_operator.contract_scope|json }},
+        {% if config.kube_config.use_external_service_ip_allocator %}
+        "allocate-service-ips": false,
+        {% endif %}
+        {% if config.kube_config.enable_endpointslice %}
+        "enable_endpointslice": true
+        {% endif %}
+        {% else %}
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
@@ -1450,9 +1530,67 @@ data:
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true
         {% endif %}
+        {% endif %}
     }
   host-agent-config: |-
     {
+        {% if config.flavor == "l2-tenant-chained-multus-openshift-4.12-baremetal" %}
+        "flavor": {{config.flavor|json}},
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        "chained_mode": true,
+        {% if config.kube_config.use_aci_anywhere_crd %}
+        "ep-registry": {{ config.kube_config.ep_registry|json }},
+        {% endif %}
+        {% if config.kube_config.dhcp_renew_max_retry_count %}
+        "dhcp-renew-max-retry-count": {{config.kube_config.dhcp_renew_max_retry_count|json}},
+        {% endif %}
+        "log-level": {{config.logging.hostagent_log_level|json}},
+        "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        "service-vlan": {{ config.net_config.service_vlan|json }},
+        "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
+        "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
+        {% if config.net_config.interface_mtu %}
+        "interface-mtu": {{ config.net_config.interface_mtu|json }},
+        {% endif %}
+        {% if config.net_config.interface_mtu_headroom %}
+        "interface-mtu-headroom": {{ config.net_config.interface_mtu_headroom|json }},
+        {% endif %}
+        "default-endpoint-group": {
+            "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
+            "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
+        },
+        "namespace-default-endpoint-group": {
+            {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
+            "{{ns}}": {
+                "policy-space": {{val['tenant']|json}},
+                "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
+        },
+        {% if config.drop_log_config.enable %}
+        "enable-drop-log": true,
+        {% else %}
+        "enable-drop-log": false,
+        {% endif %}
+        {% if config.kube_config.enable_endpointslice %}
+        "enable_endpointslice": true,
+        {% endif %}
+        {% if config.nodepodif_config.enable %}
+        "enable-nodepodif": true,
+        {% else %}
+        "enable-nodepodif": false,
+        {% endif %}
+        {% if config.sriov_config.enable %}
+        {% if config.dpu_config.enable %}
+        "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},
+        {% endif %}
+        "enable-ovs-hw-offload": true
+        {% else %}
+        "enable-ovs-hw-offload": false
+        {% endif %}
+        {% else %}
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         {% if config.kube_config.use_aci_anywhere_crd %}
@@ -1534,6 +1672,7 @@ data:
         "enable-ovs-hw-offload": true
         {% else %}
         "enable-ovs-hw-offload": false
+        {% endif %}
         {% endif %}
     }
   {% if config.dpu_config.enable != True %}
@@ -2232,6 +2371,12 @@ spec:
             {% if config.flavor == "eks" %}
             - name: SKIP_DOCKER_CHECK
               value: "true"
+            {% endif %}
+            {% if config.flavor == "l2-tenant-chained-multus-openshift-4.12-baremetal"%}
+            - name: CHAINED_MODE
+            - value: "{{ config.cni_config.mode }}"
+            - name: PRIMARY_CNI_PATH
+            - value: "{{ config.cni_config.primary_cni_path }}" 
             {% endif %}
           volumeMounts:
             - name: cni-bin

@@ -526,6 +526,18 @@ def test_flavor_openshift_412_baremetal():
 
 
 @in_testdir
+def test_flavor_l2_tenant_chained_multus_openshift_412_baremetal():
+    run_provision(
+        "flavor_l2_tenant_chained_multus_openshift_412_baremetal.inp.yaml",
+        "flavor_l2_tenant_chained_multus_openshift_412_baremetal.kube.yaml",
+        "flavor_l2_tenant_chained_multus_openshift_412_baremetal_tar",
+        None,
+        "flavor_l2_tenant_chained_multus_openshift_412_baremetal.apic.txt",
+        overrides={"flavor": "l2-tenant-chained-multus-openshift-4.12-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",
