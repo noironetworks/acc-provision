@@ -6,6 +6,7 @@ import argparse
 import base64
 import copy
 import functools
+import hashlib
 import ipaddress
 import requests
 import json
@@ -393,6 +394,12 @@ def normalize_cidr(cidr):
     return str(n)
 
 
+def get_md5_hash(str):
+    m = hashlib.md5()
+    m.update(str.encode())
+    return m.hexdigest()
+
+
 def config_adjust(args, config, prov_apic, no_random):
     if is_calico_flavor(config["flavor"]):
         l3out_name = ""
@@ -401,10 +408,12 @@ def config_adjust(args, config, prov_apic, no_random):
             l3out_name = "calico-l3out-fsvi-vlan-%s" % vlan_id
             config["aci_config"]["cluster_l3out"]["name"] = l3out_name
         l3out_name = config["aci_config"]["cluster_l3out"]["name"]
+        config["aci_config"]["cluster_l3out"]["name"] = l3out_name + "-" + get_md5_hash(l3out_name)[:6]
+
         if not config["aci_config"].get("system_id"):
             system_id = "calico-%s" % l3out_name if "calico" not in l3out_name else l3out_name
             system_id = system_id[:30]
-            config["aci_config"]["system_id"] = system_id
+            config["aci_config"]["system_id"] = system_id + "-" + get_md5_hash(system_id)[:6]
     else:
         l3out_name = config["aci_config"]["l3out"]["name"]
     system_id = config["aci_config"]["system_id"]
