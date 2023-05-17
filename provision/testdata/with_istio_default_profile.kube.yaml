@@ -1320,7 +1320,6 @@ spec:
         - spec
         type: object
 ---
-
 apiVersion: v1
 kind: ConfigMap
 metadata:

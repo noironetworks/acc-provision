@@ -732,6 +732,66 @@ def test_flavor_openshift_412_baremetal():
 
 
 @in_testdir
+def test_flavor_openshift_sdn_ovn_baremetal():
+    run_provision(
+        "flavor_openshift_sdn_ovn_baremetal.inp.yaml",
+        "flavor_openshift_sdn_ovn_baremetal.kube.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_tar",
+        None,
+        "flavor_openshift_sdn_ovn_baremetal.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_preexisting_tenant_chained_mode():
+    run_provision(
+        "with_preexisting_tenant_chained_mode.inp.yaml",
+        "with_preexisting_tenant_chained_mode.kube.yaml",
+        None,
+        None,
+        "with_preexisting_tenant_chained_mode.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_chained_mode_skip_node_network_provision():
+    run_provision(
+        "chained_mode_skip_node_network_provision.inp.yaml",
+        "chained_mode_skip_node_network_provision.kube.yaml",
+        None,
+        None,
+        "chained_mode_skip_node_network_provision.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_chained_mode_without_l3out():
+    run_provision(
+        "chained_mode_without_l3out.inp.yaml",
+        "chained_mode_without_l3out.kube.yaml",
+        None,
+        None,
+        "chained_mode_without_l3out.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_chained_mode_without_phys_domains():
+    run_provision(
+        "chained_mode_without_phys_domains.inp.yaml",
+        "chained_mode_without_phys_domains.kube.yaml",
+        None,
+        None,
+        "chained_mode_without_phys_domains.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",
@@ -1611,6 +1671,7 @@ def get_args(**overrides):
         "upgrade": False,
         "disable_multus": 'true',
         "operator_mode": False,
+        "chained": False,
         # infra_vlan is not part of command line input, but we do
         # pass it as a command line arg in unit tests to pass in
         # configuration which would otherwise be discovered from
