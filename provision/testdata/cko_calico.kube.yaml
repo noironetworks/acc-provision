@@ -1757,7 +1757,7 @@ metadata:
   name: installer-calico-cni
 spec:
   operatorConfigs:
-    networking:
+    network:
       cko-cni:
         version: "3.23"
         type: "cko-cni-calico"

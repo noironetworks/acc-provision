@@ -1770,7 +1770,7 @@ metadata:
   name: installer-aci-cni
 spec:
   operatorConfigs:
-    networking:
+    network:
       cko-cni:
         version: "5.2.3.4"
         type: "cko-cni-aci"
