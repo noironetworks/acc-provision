@@ -1702,6 +1702,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         if config["flavor"] != "k8s-overlay":
             oper_cmap_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators-configmap.yaml')
             cmap_temp = ''.join(oper_cmap_template.stream(config=config))
+            cmap_temp = "\n" + cmap_temp
 
             op_template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-operators.yaml')
             output_from_parsed_template = op_template.render(config=config)
@@ -1712,6 +1713,7 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
 
             acc_provision_crd_template = get_jinja_template(config["aci_cni_versions_path"] + 'acc-provision-crd.yaml')
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
+
             acc_provision_oper_cmap_template = get_jinja_template(config["aci_cni_versions_path"] + 'acc-provision-configmap.yaml')
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
             new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + \
