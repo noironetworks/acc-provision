@@ -1367,7 +1367,8 @@ spec:
         required:
         - spec
         type: object
----apiVersion: v1
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: aci-operator-config
