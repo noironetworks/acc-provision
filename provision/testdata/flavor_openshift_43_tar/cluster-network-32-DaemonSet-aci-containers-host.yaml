@@ -34,7 +34,7 @@ spec:
           value: kubernetes|kube-nodes
         - name: DURATION_WAIT_FOR_NETWORK
           value: '210'
-        image: noiro/aci-containers-host:5.2.3.7.1d150da
+        image: noiro/aci-containers-host:5.2.7.1.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
@@ -73,7 +73,7 @@ spec:
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
-        image: noiro/opflex:5.2.3.7.1d150da
+        image: noiro/opflex:5.2.7.1.81c2369
         imagePullPolicy: Always
         name: opflex-agent
         securityContext:
@@ -96,7 +96,7 @@ spec:
         - /usr/local/bin/launch-mcastdaemon.sh
         command:
         - /bin/sh
-        image: noiro/opflex:5.2.3.7.1d150da
+        image: noiro/opflex:5.2.7.1.81c2369
         imagePullPolicy: Always
         name: mcast-daemon
         securityContext:
@@ -112,7 +112,7 @@ spec:
       hostNetwork: true
       hostPID: true
       initContainers:
-      - image: noiro/cnideploy:5.2.3.7.1d150da
+      - image: noiro/cnideploy:5.2.7.1.81c2369
         imagePullPolicy: Always
         name: cnideploy
         securityContext:
