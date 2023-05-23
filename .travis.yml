@@ -3,8 +3,14 @@ os: linux
 language: python
 python: 3.6
 install:
-  - pip install flake8 coverage coveralls boto3
+  - pip install boto3
   - python provision/setup.py install
 script:
-  - make -C provision test
-  - cd provision; coverage run --source=. -m pytest acc_provision; coveralls
+  - ls
+deploy:
+  provider: pypi
+  username: ${PYPI_USER}
+  password: ${PYPI_PASS}
+  server: https://test.pypi.org/index
+  on:
+    tags: true
