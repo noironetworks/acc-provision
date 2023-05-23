@@ -2120,6 +2120,8 @@ def check_overlapping_subnets(config):
             net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
         elif ip1.version == 6 and ip2.version == 6:
             net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
+        else:
+            continue
         out = net1.overlaps(net2)
         if out:
             return False
@@ -2144,47 +2146,6 @@ def has_multi_subnet(config):
     return True
 
 
-def is_dualstack_config(config):
-    if "net_config" not in config:
-        return False
-    subnet_info = []
-    if not isinstance(config["net_config"]["pod_subnet"], list):
-        subnet_info[-1] = config["net_config"]["pod_subnet"]
-    else:
-        pod_subnets = []
-        for pod_subnet in config["net_config"]["pod_subnet"]:
-            pod_subnets.append(pod_subnet)
-        for pod_subnet in pod_subnets:
-            subnet_info.append(pod_subnet)
-
-    if not isinstance(config["net_config"]["node_subnet"], list):
-        subnet_info[-1] = config["net_config"]["node_subnet"]
-    else:
-        node_subnets = []
-        for node_subnet in config["net_config"]["node_subnet"]:
-            node_subnets.append(node_subnet)
-        for node_subnet in node_subnets:
-            subnet_info.append(node_subnet)
-
-    if not isinstance(config["net_config"]["extern_dynamic"], list):
-        subnet_info[-1] = config["net_config"]["extern_dynamic"]
-    else:
-        extern_dynamics = []
-        for extern_dynamic in config["net_config"]["extern_dynamic"]:
-            extern_dynamics.append(extern_dynamic)
-
-        for extern_dynamic in extern_dynamics:
-            subnet_info.append(extern_dynamic)
-
-    for subnet in subnet_info:
-        rtr, _ = subnet.split("/")
-        ip = ipaddress.ip_address(rtr)
-        if ip.version == 6:
-            return True
-
-    return False
-
-
 def is_support_dualstack(flavor):
     version = flavor.split("-")[1]
     support_k8s_version = "1.21"
@@ -2196,6 +2157,99 @@ def is_support_dualstack(flavor):
         return True
 
     return False
+
+
+def process_subnet_value(subnet_value, subnet_info):
+    if not isinstance(subnet_value, list):
+        subnet_info.append(subnet_value)
+    else:
+        for subnet in subnet_value:
+            subnet_info.append(subnet)
+
+
+def get_subnet_list(config):
+    subnet_info = []
+    if "net_config" not in config:
+        return subnet_info
+
+    net_config = config["net_config"]
+    process_subnet_value(net_config.get("pod_subnet", []), subnet_info)
+    process_subnet_value(net_config.get("node_subnet", []), subnet_info)
+    process_subnet_value(net_config.get("extern_dynamic", []), subnet_info)
+    process_subnet_value(net_config.get("extern_static", []), subnet_info)
+
+    return subnet_info
+
+
+def is_dualstack_config(config):
+    subnet_info = get_subnet_list(config)
+    subnet_type = determine_subnet_type(subnet_info)
+    if subnet_type == "DualStack":
+        return True
+    return False
+
+
+def determine_subnet_type(subnet_info):
+    if len(subnet_info) == 0:
+        return ""
+
+    has_ipv4 = False
+    has_ipv6 = False
+
+    for subnet in subnet_info:
+        rtr, _ = subnet.split("/")
+        try:
+            ip = ipaddress.ip_address(rtr)
+        except Exception as e:
+            err("%s is malformed. %s" % (subnet, str(e)))
+            sys.exit(1)
+        if ip.version == 4:
+            has_ipv4 = True
+        elif ip.version == 6:
+            has_ipv6 = True
+
+    if has_ipv4 and has_ipv6:
+        return "DualStack"
+    elif has_ipv4:
+        return "IPv4"
+    elif has_ipv6:
+        return "IPv6"
+    else:
+        return ""
+
+
+def get_subnet_types(config):
+    if "net_config" not in config:
+        return False
+
+    net_config = config["net_config"]
+
+    pod_subnet, node_subnet, extern_static, extern_dynamic = [], [], [], []
+    process_subnet_value(net_config.get("pod_subnet", []), pod_subnet)
+    process_subnet_value(net_config.get("node_subnet", []), node_subnet)
+    process_subnet_value(net_config.get("extern_static", []), extern_static)
+    process_subnet_value(net_config.get("extern_dynamic", []), extern_dynamic)
+
+    return determine_subnet_type(pod_subnet), determine_subnet_type(node_subnet), determine_subnet_type(extern_static), determine_subnet_type(extern_dynamic)
+
+
+def is_valid_dualstack_config(config):
+    if "net_config" not in config:
+        return False, ""
+
+    pod_subnet_type, node_subnet_type, extern_static_type, extern_dynamic_type = get_subnet_types(config)
+
+    if node_subnet_type != "DualStack":
+        return False, "Node Subnet " + " ".join(config['net_config']['node_subnet']) + " does not have IPv6"
+    if node_subnet_type != "DualStack" and pod_subnet_type == "DualStack":
+        return False, "Pod Subnet " + " ".join(config['net_config']['pod_subnet']) + " has IPv6 but Node Subnet " + " ".join(config['net_config']['node_subnet']) + " does not have IPv6"
+
+    if extern_static_type == "DualStack" or extern_dynamic_type == "DualStack":
+        if pod_subnet_type == "DualStack" and node_subnet_type == "DualStack":
+            return True, ""
+        return False, "If extern_static " + " ".join(config['net_config']['extern_static']) + " or extern_dynamic " + " ".join(config['net_config']['extern_dynamic']) + " configured with IPv6, then pod_subnet " + " ".join(config['net_config']['pod_subnet']) + " and node_subnet " + " ".join(config['net_config']['node_subnet']) + " must have IPv6."
+
+    return True, ""
 
 
 def provision(args, apic_file, no_random):
@@ -2310,8 +2364,15 @@ def provision(args, apic_file, no_random):
 
     # Verify for Dualstack
     if is_dualstack_config(config) and not is_support_dualstack(flavor):
-        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 4.21 or later or OpenShift version 4.8 or later.")
+        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 1.21 or later or OpenShift version 4.8 or later.")
         return False
+
+    if is_dualstack_config(config):
+        valid, message = is_valid_dualstack_config(config)
+        if not valid:
+            err("Please provide a valid Dualstack configuration with both IPv4 and IPv6 addresses for node and pod subnets.")
+            err(message)
+            return False
 
     if is_calico_flavor(config["flavor"]) and has_multi_subnet(config):
         err(" Multisubnet feature is not supported in calico.")
