@@ -1,10 +1,65 @@
-dist: bionic
+dist: jammy
 os: linux
+env:
+  global:
+    - DEFAULT_BRANCH: kmr2-5.2.7
+    - GOPROXY: https://proxy.golang.org,https://goproxy.io,direct
 language: python
-python: 3.6
-install:
-  - pip install flake8 coverage coveralls boto3
-  - python provision/setup.py install
-script:
-  - make -C provision test
-  - cd provision; coverage run --source=. -m pytest acc_provision; coveralls
+python: 3.9
+#language: go
+#addons:
+#  apt:
+#    sources:
+#      - sourceline: 'ppa:deadsnakes/ppa'
+#    packages:
+#      - python3.9
+jobs:
+  include:
+    - stage: run-unit-tests
+      if: tag IS NOT present
+      #language: python
+      #python: 3.9
+      install:
+        - pip install flake8 coverage coveralls boto3
+        - python provision/setup.py install
+      script:
+        #- make -C provision test
+        - cd provision; coverage run --source=. -m pytest acc_provision; coveralls
+    - stage: push-package
+      if: tag IS present
+      #language: go
+      go: 1.20.x
+      go_import_path: github.com/noironetworks/aci-containers
+      before_script:
+        - export RELEASE_TAG=5.2.7.1
+        - export UPSTREAM_ID=81c2369
+        - export EXPECTED_TAG_PREFIX=5.2.7.1.d1e7c1e
+        - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
+        - export TRAVIS_GO_VERSION=1.20.4
+        - export TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/aci-containers
+        - go version
+      script:
+        - echo "Skip running UTs"
+        - git clone http://www.github.com/noironetworks/cicd -b kmr2-5.2.7 /tmp/cicd
+        - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
+        - pip install boto3 || travis_terminate 1
+        - python provision/setup.py install || travis_terminate 1
+        - git clone --depth=50 --branch=${TRAVIS_TAG} https://github.com/noironetworks/aci-containers.git /tmp/noironetworks/aci-containers
+        - pushd /tmp/noironetworks/aci-containers
+        - git checkout -qf ${TRAVIS_TAG} 
+        - make -C . dist-static/acikubectl || travis_terminate 1
+        - popd
+        - cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl || travis_terminate 1
+        - /tmp/cicd/travis/build-acc-provision.sh || travis_terminate 1
+        - /tmp/cicd/travis/push-git-tag.sh acc-provision || travis_terminate 1
+        - git add --all
+        - git commit -m "Changes added by travis build"
+      before_deploy:
+        - cd provision
+      deploy:
+        provider: pypi
+        username: ${PYPI_USER}
+        password: ${PYPI_PASS}
+        server: https://test.pypi.org/legacy/
+        on:
+          tags: true
