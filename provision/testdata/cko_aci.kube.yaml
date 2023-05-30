@@ -53,6 +53,12 @@ spec:
           spec:
             description: CniOpsSpec defines the desired state of CniOps.
             properties:
+              arrayOptions:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                type: object
               config:
                 properties:
                   workload:
@@ -78,6 +84,8 @@ spec:
           status:
             description: CniOpsStatus defines the observed state of CniOps.
             properties:
+              cniState:
+                type: string
               cniStatus:
                 additionalProperties:
                   type: string
@@ -670,28 +678,31 @@ spec:
           spec:
             description: ObservedOpsSpec defines the desired state of ObservedOps.
             properties:
-              cniConfPath:
-                default:
-                - cni/net.d
-                - /kubernetes/cni/net.d
+              forceReconcile:
+                type: integer
+              validCniMountPaths:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                type: object
+              validCniTypes:
                 items:
                   type: string
                 type: array
-              cniMountPath:
-                default: /mnt/cni-conf
-                type: string
-              forceReconcile:
-                type: integer
             type: object
           status:
             description: ObservedOpsStatus defines the observed state of ObservedOps.
             properties:
-              Multus:
+              chainedMode:
                 type: boolean
               cniType:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
                 type: string
               cniVersion:
                 type: string
+              multus:
+                type: boolean
             type: object
         type: object
     served: true
@@ -1573,6 +1584,8 @@ spec:
         command:
         - /manager
         env:
+        - name: CREATE_OBSERVED_CNIOPS
+          value: "false"
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -1695,10 +1708,10 @@ spec:
         volumeMounts:
         - mountPath: /mnt/cni-bin
           name: cni-bin
-        - mountPath: /mnt/cni-conf
-          name: cni-conf
-        - mountPath: /mnt/cni-config
-          name: cni-config-volume
+        - mountPath: /mnt/system-cni
+          name: system-cni-dir
+        - mountPath: /mnt/multus-cni
+          name: multus-cni-dir
       hostNetwork: true
       securityContext:
         runAsNonRoot: false
@@ -1719,36 +1732,16 @@ spec:
       volumes:
       - hostPath:
           path: /opt
+          type: Directory
         name: cni-bin
       - hostPath:
           path: /etc
-        name: cni-conf
-      - configMap:
-          name: netop-manager-cni-config
-          optional: true
-        name: cni-config-volume
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: netop-manager-cni-config
-  namespace: netop-manager-system
-data:
-  cniconfig.yaml: |-
-    cniConfig:
-      cko-cni-calico:
-      - "01-calico.conflist"
-      - "01-calico.conf"
-      - "10-calico.conflist"
-      - "10-calico.conf"
-      cko-cni-aci:
-      - "01-opflex-cni.conf"
-      - "10-opflex-cni.conf"
-      cko-cni-cilium:
-      - "05-cilium.conf"
-      cko-cni-awsvpc:
-      - "10-aws.conflist"
-      - "10-aws.conf"
+          type: Directory
+        name: system-cni-dir
+      - hostPath:
+          path: /var/run/multus/cni/
+          type: Directory
+        name: multus-cni-dir
 
 ---
 apiVersion: controller.netop-manager.io/v1alpha1
