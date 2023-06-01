@@ -2910,3 +2910,16 @@ spec:
                   description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
                   type: string
 {% endif %}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-limit-range
+  namespace: {{ config.kube_config.system_namespace }}
+spec:
+  limits:
+  - default:
+      memory: {{ config.kube_config.aci_containers_memory_limit }}
+    defaultRequest:
+      memory: {{ config.kube_config.aci_containers_memory_request }}
+    type: Container
