@@ -3,8 +3,7 @@ os: linux
 language: python
 python: 3.6
 install:
-  - pip install flake8 coverage coveralls boto3
-  - pip3 install -U pip
+  - pip install flake8 coverage coveralls boto3 setuptools-rust
   - python provision/setup.py install
 script:
   - make -C provision test
