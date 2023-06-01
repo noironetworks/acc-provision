@@ -225,6 +225,8 @@ def config_default():
             "kubectl": "kubectl",
             "system_namespace": "aci-containers-system",
             "ovs_memory_limit": "1Gi",
+            "aci_containers_memory_request": "128Mi",
+            "aci_containers_memory_limit": "3Gi",
             "reboot_opflex_with_ovs": "true",
             "snat_operator": {
                 "name": "snat-operator",

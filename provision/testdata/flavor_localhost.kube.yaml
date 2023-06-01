@@ -2085,3 +2085,16 @@ spec:
                 path: controller.conf
               - key: gbp-server-config
                 path: gbp-server.conf
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-limit-range
+  namespace: kube-system
+spec:
+  limits:
+  - default:
+      memory: 3Gi
+    defaultRequest:
+      memory: 128Mi
+    type: Container

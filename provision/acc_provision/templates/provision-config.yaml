@@ -101,6 +101,8 @@ registry:
         #   delay: 60                   # per service delay that overrides common delay
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
+  # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
+  # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
