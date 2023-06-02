@@ -40,6 +40,7 @@ setup(
         ]
     },
     install_requires=[
+          'cryptography==40.0.2',
           'requests',
           'pyyaml',
           'jinja2',
