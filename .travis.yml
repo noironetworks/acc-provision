@@ -33,7 +33,7 @@ jobs:
       before_script:
         - export RELEASE_TAG=5.2.7.1
         - export UPSTREAM_ID=81c2369
-        - export EXPECTED_TAG_PREFIX=5.2.7.1.d1e7c1e
+        - export EXPECTED_TAG_PREFIX=5.2.7.1
         - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
         - export TRAVIS_GO_VERSION=1.20.4
         - export TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/aci-containers
@@ -54,12 +54,4 @@ jobs:
         - /tmp/cicd/travis/push-git-tag.sh acc-provision || travis_terminate 1
         - git add --all
         - git commit -m "Changes added by travis build"
-      before_deploy:
-        - cd provision
-      deploy:
-        provider: pypi
-        username: ${PYPI_USER}
-        password: ${PYPI_PASS}
-        server: https://test.pypi.org/legacy/
-        on:
-          tags: true
+        - /tmp/cicd/travis/push-to-pypi.sh || travis_terminate 1
