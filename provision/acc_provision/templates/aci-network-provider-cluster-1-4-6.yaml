@@ -134,10 +134,10 @@ network:
     {% if config.kube_config.hpp_optimization %}
     hpp_optimization: "{{ config.kube_config.hpp_optimization|lower() }}"
     {% endif %}
-    {% if config.kube_config.aci_multipod != False %}
+    {% if config.kube_config.aci_multipod == True %}
     aci_multipod: "{{ config.kube_config.aci_multipod|lower() }}"
     {% endif %}
-    {% if config.kube_config.aci_multipod_ubuntu != False %}
+    {% if config.kube_config.aci_multipod_ubuntu == True %}
     aci_multipod_ubuntu: "{{ config.kube_config.aci_multipod_ubuntu|lower() }}"
     {% endif %}
     {% if config.kube_config.dhcp_renew_max_retry_count %}
