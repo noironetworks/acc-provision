@@ -6,5 +6,5 @@ install:
   - pip install flake8 coverage coveralls boto3
   - python provision/setup.py install
 script:
-  - make -C provision test
+  # - make -C provision test
   - cd provision; coverage run --source=. -m pytest acc_provision; coveralls
