@@ -210,13 +210,13 @@ def test_multiple_subnets():
 
 
 @in_testdir
-def test_dualstack():
+def test_dualstack_base():
     run_provision(
-        "dualstack.inp.yaml",
-        "dualstack.kube.yaml",
+        "dualstack_base.inp.yaml",
+        "dualstack_base.kube.yaml",
         None,
         None,
-        "dualstack.apic.txt",
+        "dualstack_base.apic.txt",
     )
 
 
