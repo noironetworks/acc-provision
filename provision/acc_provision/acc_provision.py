@@ -255,7 +255,13 @@ def config_default():
             "enable_endpointslice": False,
             "opflex_agent_opflex_asyncjson_enabled": "false",
             "opflex_agent_ovs_asyncjson_enabled": "false",
-            "acicni_priority_class_value": 1000000000
+            "acicni_priority_class_value": 1000000000,
+            "use_aci_containers_host_priority_class": False,
+            "aci_containers_host_priority_class_value": 1000000000,
+            "use_aci_containers_openvswitch_priority_class": False,
+            "aci_containers_openvswitch_priority_class_value": 1000000000,
+            "use_aci_containers_controller_priority_class": False,
+            "aci_containers_controller_priority_class_value": 1000000000,
         },
         "istio_config": {
             "install_istio": False,

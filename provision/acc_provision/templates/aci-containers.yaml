@@ -2190,6 +2190,9 @@ spec:
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
       {% endif %}
+      {% if config.kube_config.use_aci_containers_host_priority_class %}
+      priorityClassName: aci-containers-host
+      {% endif %}
       containers:
         - name: aci-containers-host
           image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
@@ -2482,6 +2485,9 @@ spec:
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
       {% endif %}
+      {% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
+      priorityClassName: aci-containers-openvswitch
+      {% endif %}
       containers:
         - name: aci-containers-openvswitch
           image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
@@ -2586,6 +2592,9 @@ spec:
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
+      {% endif %}
+      {% if config.kube_config.use_aci_containers_controller_priority_class %}
+      priorityClassName: aci-containers-controller
       {% endif %}
       containers:
         {% if config.kube_config.run_gbp_container %}
@@ -2996,3 +3005,57 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
+{% if config.kube_config.use_aci_containers_host_priority_class %}
+---
+{% set flavor_version = config.flavor.split('-') %}
+{% set major_version = flavor_version[1].split('.')[0] | int %}
+{% set minor_version = flavor_version[1].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
+apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
+kind: PriorityClass
+metadata:
+  name: aci-containers-host
+value: {{ config.kube_config.aci_containers_host_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-host pod"
+{% endif %}
+{% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
+---
+{% set flavor_version = config.flavor.split('-') %}
+{% set major_version = flavor_version[1].split('.')[0] | int %}
+{% set minor_version = flavor_version[1].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
+apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
+kind: PriorityClass
+metadata:
+  name: aci-containers-openvswitch
+value: {{ config.kube_config.aci_containers_openvswitch_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-openvswitch pod"
+{% endif %}
+{% if config.kube_config.use_aci_containers_controller_priority_class %}
+---
+{% set flavor_version = config.flavor.split('-') %}
+{% set major_version = flavor_version[1].split('.')[0] | int %}
+{% set minor_version = flavor_version[1].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
+apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
+kind: PriorityClass
+metadata:
+  name: aci-containers-controller
+value: {{ config.kube_config.aci_containers_controller_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-controller pod"
+{% endif %}
