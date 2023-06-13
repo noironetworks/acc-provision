@@ -161,10 +161,10 @@ data:
                 "kubeapi_vlan": {{config.net_config.kubeapi_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_static %}
-                "extern_static": {{config.net_config.extern_static|tojson}},
+                "extern_static": {{config.net_config.extern_static|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_dynamic %}
-                "extern_dynamic": {{config.net_config.extern_dynamic|tojson}},
+                "extern_dynamic": {{config.net_config.extern_dynamic|json}},
                 {% endif %}
                 {% if config.user_config.net_config.node_svc_subnet %}
                 "node_svc_subnet": {{config.net_config.node_svc_subnet|json}},
@@ -190,12 +190,12 @@ data:
                 {% if config.user_config.net_config.duration_wait_for_network %}
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
-                "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
+                "node_subnet": {{config.net_config.node_subnet|json}},
                 {% if config.user_config.net_config.cluster_svc_subnet %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
+                "pod_subnet": {{config.net_config.pod_subnet|json}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
                 {% else %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}}
+                "pod_subnet": {{config.net_config.pod_subnet|json}}
                 {% endif %}
             {% if config.user_config.topology %}
             },
