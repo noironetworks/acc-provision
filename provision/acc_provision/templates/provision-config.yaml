@@ -115,6 +115,12 @@ registry:
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
   # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
   # acicni_priority_class_value: 1000001000  # override if needed, default is 1000000000
+  # use_aci_containers_host_priority_class: True                # override if needed, default is False
+  # aci_containers_host_priority_class_value: 1000001000        # override if needed, default is 1000000000
+  # use_aci_containers_openvswitch_priority_class: True         # override if needed, default is False
+  # aci_containers_openvswitch_priority_class_value: 1000001000 # override if needed, default is 1000000000
+  # use_aci_containers_controller_priority_class: True          # override if needed, default is False
+  # aci_containers_controller_priority_class_value: 1000001000  # override if needed, default is 1000000000
 
 #
 # Configuration for ACI CNI Operator
