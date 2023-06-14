@@ -72,13 +72,9 @@ kube_config:
       sleep_time_snat_global_info_sync: 60
   image_pull_policy: IfNotPresent
   opflex_agent_policy_retry_delay_timer: 10
-  no_priority_class: True
-  use_acicni_priority_class: False
   acicni_priority_class_value: 1000001000
   use_aci_containers_host_priority_class: True
   aci_containers_host_priority_class_value: 1000001000
-  use_aci_containers_openvswitch_priority_class: True
-  aci_containers_openvswitch_priority_class_value: 1000001000
   use_aci_containers_controller_priority_class: True
   aci_containers_controller_priority_class_value: 1000001000
 
