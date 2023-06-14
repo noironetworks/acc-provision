@@ -1344,6 +1344,7 @@ data:
             "kube_config": {
                 "aci_multipod": true, 
                 "dhcp_renew_max_retry_count": 10, 
+                "dhcp_delay": 10, 
                 "use_external_service_ip_allocator": true, 
                 "use_privileged_containers": true, 
                 "use_openshift_security_context_constraints": true, 
@@ -1522,6 +1523,7 @@ data:
         "app-profile": "kubernetes",
         "aci-multipod": true,
         "dhcp-renew-max-retry-count": 10,
+        "dhcp-delay": 10,
         "opflex-mode": null,
         "log-level": "debug",
         "aci-snat-namespace": "aci-containers-system",
