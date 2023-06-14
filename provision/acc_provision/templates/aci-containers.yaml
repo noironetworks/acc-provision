@@ -2180,11 +2180,15 @@ spec:
             - name: cni-bin
               mountPath: /mnt/cni-bin
       {% endif %}
+      {% if config.kube_config.use_aci_containers_host_priority_class %}
+      priorityClassName: aci-containers-host
+      {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
+      {% endif %}
       {% endif %}
       containers:
         - name: aci-containers-host
@@ -2431,11 +2435,15 @@ spec:
       {% endif %}
       tolerations:
         - operator: Exists
+      {% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
+      priorityClassName: aci-containers-openvswitch
+      {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
+      {% endif %}
       {% endif %}
       containers:
         - name: aci-containers-openvswitch
@@ -2535,11 +2543,15 @@ spec:
           key: node-role.kubernetes.io/control-plane
           operator: Exists
         {% endif %}
+      {% if config.kube_config.use_aci_containers_controller_priority_class %}
+      priorityClassName: aci-containers-controller
+      {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
       {% endif %}
       {% if config.kube_config.use_acicni_priority_class %}
       priorityClassName: acicni-priority
+      {% endif %}
       {% endif %}
       containers:
         {% if config.kube_config.run_gbp_container %}
@@ -2926,3 +2938,33 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
+{% if config.kube_config.use_aci_containers_host_priority_class %}
+---
+apiVersion: {{ config.priority_class_api_version }}
+kind: PriorityClass
+metadata:
+  name: aci-containers-host
+value: {{ config.kube_config.aci_containers_host_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-host pod"
+{% endif %}
+{% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
+---
+apiVersion: {{ config.priority_class_api_version }}
+kind: PriorityClass
+metadata:
+  name: aci-containers-openvswitch
+value: {{ config.kube_config.aci_containers_openvswitch_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-openvswitch pod"
+{% endif %}
+{% if config.kube_config.use_aci_containers_controller_priority_class %}
+---
+apiVersion: {{ config.priority_class_api_version }}
+kind: PriorityClass
+metadata:
+  name: aci-containers-controller
+value: {{ config.kube_config.aci_containers_controller_priority_class_value }}
+globalDefault: false
+description: "This priority class is used for ACI-CNI aci-containers-controller pod"
+{% endif %}
