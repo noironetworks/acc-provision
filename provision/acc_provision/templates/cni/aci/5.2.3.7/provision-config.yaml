@@ -1,0 +1,143 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: mykube             # Every opflex cluster must have a distinct ID
+  #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
+  #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
+  #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
+  #tenant:
+    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
+  apic_hosts:                   # List of APIC hosts to connect for APIC API
+  - 10.1.1.101
+  vmm_domain:                   # Kubernetes container domain configuration
+    encap_type: vxlan           # Encap mode: vxlan or vlan
+    mcast_range:                # Every opflex VMM must use a distinct range
+      start: 225.20.1.1
+      end: 225.20.255.255
+    nested_inside:              # Include if nested inside a VMM;
+                                #   supported for Kubernetes
+    # type: vmware              # Specify the VMM vendor (supported: vmware)
+    # name: myvmware            # Specify the name of the VMM domain
+
+    # Mandatory field for Openshift on ESX flavor
+    # Loadbalancer IP used to create duplicate service file for
+    # router-default service in Openshift on ESX case. This has to be
+    # the same LB IP used during installation
+    # installer_provisioned_lb_ip: 192.168.18.201
+
+  # The following resources must already exist on the APIC.
+  # They are used, but not created, by the provisioning tool.
+  aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: mykube-vrf
+    tenant: common              # This can be system-id or common
+  l3out:
+    name: mykube_l3out          # Used to provision external IPs
+    external_networks:
+    - mykube_extepg             # Used for external contracts
+  #custom_epgs:                 # List of additional endpoint-group names
+  #  - custom_group1            # to configure for use with annotations
+  #  - custom_group2
+
+
+#
+# Networks used by ACI containers
+#
+net_config:
+  node_subnet: 10.1.0.1/16      # Subnet to use for nodes
+  pod_subnet:
+  - 10.2.0.1/24       # Subnet to use for Kubernetes Pods
+  - 10.2.1.1/24       # Subnet to use for Kubernetes Pods
+  extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
+  extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
+  node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
+  kubeapi_vlan: 4001            # The VLAN used by the physdom for nodes
+                                #   (Kubernetes only)
+  service_vlan: 4003            # The VLAN used by LoadBalancer services
+  infra_vlan: 4093              # The VLAN used by ACI infra
+  #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  #interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
+                                # Must be >= 50
+                                # Default value si set to 100
+  #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
+                                # default is 5, set to 0 to disable, max: 65535
+  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
+                                # be effective with non-snat services
+  #disable_wait_for_network: true  # Default is false, set to true if the ACI
+                                   # CNI should not wait for datapath to be
+                                   # ready before returning success for pod
+                                   # interface creation
+ #duration_wait_for_network: 210  # Duration in seconds that ACI should wait
+                                  # for datapath to be ready.
+                                  # Default is 210 seconds.
+                                  # Only enabled if disable_wait_for_network
+                                  # is set to false.
+
+#
+# Configuration for container registry
+# Update if a custom container registry has been setup
+#
+registry:
+  image_prefix: noiro                   # e.g: registry.example.com/noiro
+  # image_pull_secret: secret_name      # (if needed)
+
+#kube_config:
+  # aci_multipod: True #override if multipod setup, default is False
+  # aci_multipod_ubuntu: True #override if multipod setup with ubuntu nodes, default is False (Used only for rke)
+  # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
+  # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
+  # hpp_optimization: True #override if needed, default is False
+  # no_wait_for_service_ep_readiness: True    #override if needed, default is False
+  # service_graph_endpoint_add_delay:
+        # delay: 30                     #Delay in seconds
+        # services:                     #List of services for which delay should be added
+        # - name: "service-name1"
+        #   namespace: "service-ns1"
+        # - name: "service-name2"
+        #   namespace: "service-ns2"
+        #   delay: 60                   # per service delay that overrides common delay
+  # add_external_subnets_to_rdconfig: True               #override if needed, default is False
+  # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
+  # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
+  # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
+  # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
+  # snat_operator:
+        # disable_periodic_snat_global_info_sync: True
+        # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
+  # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
+  # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
+  # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
+  # acicni_priority_class_value: 1000001000  # override if needed, default is 1000000000
+
+#
+# Configuration for ACI CNI Operator
+#
+# operator_managed_config: 
+    #enable_updates: True # Default is False
+
+#istio_config:
+  # install_istio: False         # default is True
+  # install_profile: "default"   # override if needed, default is "demo"
+
+#drop_log_config:
+  # enable: False         # default is True
+
+#multus:
+  # disable: False       # default is True
+
+#sriov_config:
+  # enable: True     # default is False
+  # device_info:
+    # isRdma: True   # default is false
+    # devices: ""    # default is "1014","101e"
+
+#nodepodif_config:
+  # enable: True     # default is False, set to True to enable ERSPAN feature
+
+# Configuration for RKE2 cluster
+
+#rke2_config:
+  # logging_namespace: "cattle-logging" #override if needed, default is "cattle-logging"
+  # monitoring_namespace: "cattle-prometheus" #override if needed, default is "cattle-prometheus"

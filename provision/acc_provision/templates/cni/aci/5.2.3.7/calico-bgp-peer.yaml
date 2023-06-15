@@ -1,0 +1,14 @@
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata: 
+  name: {{config.peer_name}}
+spec:
+  peerIP: {{config.local_ip}}
+  asNumber: {{ config.aci_config.cluster_l3out.bgp.peering.aci_as_number }}
+  nodeSelector: rack_id == "{{config.id}}"
+  {% if config.aci_config.cluster_l3out.bgp.secret %}
+  password:
+    secretKeyRef:
+      name: bgp-secrets
+      key: rr-password
+  {% endif %}

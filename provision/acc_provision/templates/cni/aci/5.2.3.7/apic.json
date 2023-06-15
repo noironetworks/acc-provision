@@ -1,0 +1,9 @@
+{
+  "system_id": {{config.aci_config.system_id|json}},
+  "kubeapi_vlan": "{{ config.net_config.kubeapi_vlan|json }}",
+  "infra_vlan": "{{ config.net_config.infra_vlan|json }}",
+  "node_network": {{ config.net_config.node_network|json|indent(width=8) }},
+  "node_network_gateway": {{ config.net_config.node_network_gateway|json|indent(width=8) }},
+  "pod_network": {{ config.net_config.pod_network|json|indent(width=8) }},
+  "apic_hosts": {{ config.aci_config.apic_hosts|json|indent(width=8) }}
+}
