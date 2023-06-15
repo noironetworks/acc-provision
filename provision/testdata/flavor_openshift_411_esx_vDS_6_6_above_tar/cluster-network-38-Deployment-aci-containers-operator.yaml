@@ -43,7 +43,7 @@ spec:
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
           value: openshift-4.10-esx
-        image: noiro/aci-containers-operator:5.2.3.6.1d150da
+        image: noiro/aci-containers-operator:5.2.3.4.1d150da
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
@@ -65,7 +65,7 @@ spec:
           value: openshift-4.10-esx
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
-        image: noiro/acc-provision-operator:5.2.3.6.1d150da
+        image: noiro/acc-provision-operator:5.2.3.4.1d150da
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}

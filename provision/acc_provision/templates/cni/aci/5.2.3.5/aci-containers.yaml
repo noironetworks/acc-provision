@@ -1427,10 +1427,10 @@ data:
         },
         "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }},
         {% if config.user_config.net_config.extern_static %}
-        "extern-static": {{config.net_config.extern_static|json}},
+        "extern-static": {{config.net_config.extern_static|tojson}},
         {% endif %}
         {% if config.user_config.net_config.extern_dynamic %}
-        "extern-dynamic": {{config.net_config.extern_dynamic|json}},
+        "extern-dynamic": {{config.net_config.extern_dynamic|tojson}},
         {% endif %}
         "snat-contract-scope": {{ config.kube_config.snat_operator.contract_scope|json }},
         "static-service-ip-pool": {{ config.kube_config.static_service_ip_pool|json|indent(width=8) }},
@@ -1474,8 +1474,8 @@ data:
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
         {% endif %}
-        "pod-subnet": {{ config.net_config.pod_subnet|json }},
-        "node-subnet": {{ config.net_config.node_subnet|json }},
+        "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
+        "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
         {% if config.net_config.interface_mtu %}
