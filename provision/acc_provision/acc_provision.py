@@ -638,14 +638,11 @@ def config_adjust(args, config, prov_apic, no_random):
         net_config_object = adj_config["net_config"]
         for pod_subnet in pod_subnets:
             if "pod_network" not in net_config_object:
-                net_config_object["pod_network"] = [normalize_cidr(pod_subnet)]
-            else:
-                net_config_object["pod_network"].append(normalize_cidr(pod_subnet))
+                net_config_object["pod_network"] = normalize_cidr(pod_subnet)
+
         for node_subnet in node_subnets:
             if "node_network" not in net_config_object:
-                net_config_object["node_network"] = [normalize_cidr(node_subnet)]
-            else:
-                net_config_object["node_network"].append(normalize_cidr(node_subnet))
+                net_config_object["node_network"] = normalize_cidr(node_subnet)
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
