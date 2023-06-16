@@ -94,6 +94,16 @@ versions:
     opflex_agent_version: 5.2.3.4.1d150da
     opflex_server_version: 5.2.3.4.1d150da
     gbp_version: 5.2.3.4.1d150da
+  5.2.3.7:
+    acc_provision_operator_version: 5.2.3.7.1d150da
+    aci_containers_controller_version: 5.2.3.7.1d150da
+    aci_containers_host_version: 5.2.3.7.1d150da
+    aci_containers_operator_version: 5.2.3.7.1d150da
+    cnideploy_version: 5.2.3.7.1d150da
+    openvswitch_version: 5.2.3.7.1d150da
+    opflex_agent_version: 5.2.3.7.1d150da
+    opflex_server_version: 5.2.3.7.1d150da
+    gbp_version: 5.2.3.7.1d150da
   6.0:
     acc_provision_operator_version: 6.0.0.0.179471b
     aci_containers_controller_version: 6.0.0.0.0ef4718
