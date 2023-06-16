@@ -255,7 +255,13 @@ def config_default():
             "enable_endpointslice": False,
             "opflex_agent_opflex_asyncjson_enabled": "false",
             "opflex_agent_ovs_asyncjson_enabled": "false",
-            "acicni_priority_class_value": 1000000000
+            "acicni_priority_class_value": 1000000000,
+            "use_aci_containers_host_priority_class": False,
+            "aci_containers_host_priority_class_value": 1000000000,
+            "use_aci_containers_openvswitch_priority_class": False,
+            "aci_containers_openvswitch_priority_class_value": 1000000000,
+            "use_aci_containers_controller_priority_class": False,
+            "aci_containers_controller_priority_class_value": 1000000000
         },
         "istio_config": {
             "install_istio": False,
@@ -724,6 +730,17 @@ def config_adjust(args, config, prov_apic, no_random):
                     adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
             else:
                 err("Opflex_mode is not set to dpu. Cannot generate dpu config")
+
+    if (config['kube_config']['use_aci_containers_host_priority_class'] or
+            config['kube_config']['use_aci_containers_openvswitch_priority_class'] or
+            config['kube_config']['use_aci_containers_controller_priority_class']):
+        flavor_version = config["flavor"].split('-')
+        major_version = flavor_version[1].split('.')[0]
+        minor_version = flavor_version[1].split('.')[1]
+        if int(major_version) >= 4 and int(minor_version) >= 9 and flavor_version[2] in ["openstack", "esx", "baremetal"]:
+            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1"
+        else:
+            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1beta1"
 
     return adj_config
 
