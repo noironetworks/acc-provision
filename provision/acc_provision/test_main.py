@@ -457,6 +457,17 @@ def test_pod_external_access():
 
 
 @in_testdir
+def test_enable_opflex_agent_prometheus():
+    run_provision(
+        "enable_opflex_agent_prometheus.inp.yaml",
+        "enable_opflex_agent_prometheus.kube.yaml",
+        None,
+        None,
+        "enable_opflex_agent_prometheus.apic.txt"
+    )
+
+
+@in_testdir
 def test_flavor_openshift_310():
     run_provision(
         "flavor_openshift.inp.yaml",
@@ -1064,6 +1075,28 @@ def test_no_sriov_config():
 
 
 @in_testdir
+def test_no_dpu_config():
+    run_provision(
+        "with_no_dpu_config_input.yaml",
+        "with_no_dpu_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
+def test_dpu_config():
+    run_provision(
+        "with_dpu_config_input.yaml",
+        "with_dpu_config_kube.yaml",
+        None,
+        None,
+        "base_case.apic.txt"
+    )
+
+
+@in_testdir
 def test_sriov_with_no_deviceinfo():
     run_provision(
         "with_sriov_config_no_deviceinfo_input.yaml",
@@ -1487,6 +1520,7 @@ def get_args(**overrides):
         # configuration which would otherwise be discovered from
         # the APIC
         "infra_vlan": None,
+        "dpu": None,
         "test_run": True,
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
