@@ -2497,9 +2497,11 @@ spec:
         - name: aci-containers-openvswitch
           image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.ovs_memory_limit != "1Gi" %}
           resources:
             limits:
               memory: "{{ config.kube_config.ovs_memory_limit }}"
+          {% endif %}
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
             privileged: true

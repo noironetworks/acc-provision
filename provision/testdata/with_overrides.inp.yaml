@@ -77,6 +77,7 @@ kube_config:
   aci_containers_host_priority_class_value: 1000001000
   use_aci_containers_controller_priority_class: True
   aci_containers_controller_priority_class_value: 1000001000
+  ovs_memory_limit: "2Gi"
 
 registry:
   image_prefix: noiro
