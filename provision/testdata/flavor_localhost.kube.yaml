@@ -1959,9 +1959,6 @@ spec:
         - name: aci-containers-openvswitch
           image: noirolabs/openvswitch:latest
           imagePullPolicy: Always
-          resources:
-            limits:
-              memory: "1Gi"
           securityContext:
             privileged: true
             capabilities:

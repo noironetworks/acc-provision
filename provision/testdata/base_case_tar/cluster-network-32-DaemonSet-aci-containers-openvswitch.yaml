@@ -30,9 +30,6 @@ spec:
             command:
             - /usr/local/bin/liveness-ovs.sh
         name: aci-containers-openvswitch
-        resources:
-          limits:
-            memory: 1Gi
         securityContext:
           capabilities:
             add:
