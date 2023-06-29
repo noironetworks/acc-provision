@@ -33,6 +33,8 @@ spec:
         resources:
           limits:
             memory: 1Gi
+          requests:
+            memory: 128Mi
         securityContext:
           capabilities:
             add:
