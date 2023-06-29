@@ -1962,6 +1962,8 @@ spec:
           resources:
             limits:
               memory: "1Gi"
+            requests:
+              memory: "128Mi"
           securityContext:
             privileged: true
             capabilities:
