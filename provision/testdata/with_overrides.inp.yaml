@@ -73,6 +73,8 @@ kube_config:
   image_pull_policy: IfNotPresent
   opflex_agent_policy_retry_delay_timer: 10
   use_system_node_priority_class: True
+  ovs_memory_request: "512Mi"
+  ovs_memory_limit: "2Gi"
 
 registry:
   image_prefix: noiro
