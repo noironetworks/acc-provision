@@ -13,8 +13,7 @@ spec:
       network-plugin: aci-containers
   template:
     metadata:
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
+      annotations: null
       labels:
         name: aci-containers-host
         network-plugin: aci-containers
