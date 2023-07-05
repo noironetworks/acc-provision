@@ -19,8 +19,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
       labels:
         name: aci-containers-operator
         network-plugin: aci-containers
