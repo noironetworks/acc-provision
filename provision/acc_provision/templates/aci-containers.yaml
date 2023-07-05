@@ -2150,7 +2150,6 @@ spec:
         name: aci-containers-host
         network-plugin: aci-containers
       annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
         prometheus.io/scrape: "true"
         prometheus.io/port: "9612"
     spec:
@@ -2424,8 +2423,6 @@ spec:
       labels:
         name: aci-containers-openvswitch
         network-plugin: aci-containers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       hostPID: true
@@ -2525,8 +2522,6 @@ spec:
       labels:
         name: aci-containers-controller
         network-plugin: aci-containers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       serviceAccountName: aci-containers-controller
