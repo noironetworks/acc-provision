@@ -75,6 +75,18 @@ kube_config:
   use_system_node_priority_class: True
   ovs_memory_request: "512Mi"
   ovs_memory_limit: "2Gi"
+  aci_containers_controller_memory_request: "256Mi"
+  aci_containers_controller_memory_limit: "5Gi"
+  aci_containers_host_memory_request: "256Mi"
+  aci_containers_host_memory_limit: "5Gi"
+  mcast_daemon_memory_request: "256Mi"
+  mcast_daemon_memory_limit: "5Gi"
+  opflex_agent_memory_request: "256Mi"
+  opflex_agent_memory_limit: "5Gi"
+  acc_provision_operator_memory_request: "256Mi"
+  acc_provision_operator_memory_limit: "5Gi"
+  aci_containers_operator_memory_request: "256Mi"
+  aci_containers_operator_memory_limit: "5Gi"
 
 registry:
   image_prefix: noiro

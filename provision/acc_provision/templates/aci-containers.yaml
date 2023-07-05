@@ -2195,6 +2195,21 @@ spec:
         - name: aci-containers-host
           image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.aci_containers_host_memory_limit or config.kube_config.aci_containers_host_memory_request %}
+          resources:
+            limits:
+              {% if config.kube_config.aci_containers_host_memory_limit %}
+              memory: "{{ config.kube_config.aci_containers_host_memory_limit }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+              {% endif %}
+            requests:
+              {% if config.kube_config.aci_containers_host_memory_request %}
+              memory: "{{ config.kube_config.aci_containers_host_memory_request }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_request }}"
+              {% endif %}
+          {% endif %}
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
             privileged: true
@@ -2292,6 +2307,21 @@ spec:
             {% endif %}
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.opflex_agent_memory_limit or config.kube_config.opflex_agent_memory_request %}
+          resources:
+            limits:
+              {% if config.kube_config.opflex_agent_memory_limit %}
+              memory: "{{ config.kube_config.opflex_agent_memory_limit }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+              {% endif %}
+            requests:
+              {% if config.kube_config.opflex_agent_memory_request %}
+              memory: "{{ config.kube_config.opflex_agent_memory_request }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_request }}"
+              {% endif %}
+          {% endif %}
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
             privileged: true
@@ -2339,6 +2369,21 @@ spec:
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.mcast_daemon_memory_limit or config.kube_config.mcast_daemon_memory_request %}
+          resources:
+            limits:
+              {% if config.kube_config.mcast_daemon_memory_limit %}
+              memory: "{{ config.kube_config.mcast_daemon_memory_limit }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+              {% endif %}
+            requests:
+              {% if config.kube_config.mcast_daemon_memory_request %}
+              memory: "{{ config.kube_config.mcast_daemon_memory_request }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_request }}"
+              {% endif %}
+          {% endif %}
           {% if config.kube_config.use_privileged_containers %}
           securityContext:
             privileged: true
@@ -2577,6 +2622,21 @@ spec:
         - name: aci-containers-controller
           image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.aci_containers_controller_memory_limit or config.kube_config.aci_containers_controller_memory_request %}
+          resources:
+            limits:
+              {% if config.kube_config.aci_containers_controller_memory_limit %}
+              memory: "{{ config.kube_config.aci_containers_controller_memory_limit }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+              {% endif %}
+            requests:
+              {% if config.kube_config.aci_containers_controller_memory_request %}
+              memory: "{{ config.kube_config.aci_containers_controller_memory_request }}"
+              {% else %}
+              memory: "{{ config.kube_config.aci_containers_memory_request }}"
+              {% endif %}
+          {% endif %}
           env:
             {% if config.flavor != "k8s-overlay" %}
             - name: WATCH_NAMESPACE
