@@ -193,6 +193,21 @@ spec:
       containers:
       - image: {{ config.registry.image_prefix }}/aci-containers-operator:{{ config.registry.aci_containers_operator_version }}
         imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.aci_containers_operator_memory_limit or config.kube_config.aci_containers_operator_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.aci_containers_operator_memory_limit %}
+            memory: "{{ config.kube_config.aci_containers_operator_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.aci_containers_operator_memory_request %}
+            memory: "{{ config.kube_config.aci_containers_operator_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
+        {% endif %}
         name: aci-containers-operator
         resources: {}
         terminationMessagePath: /dev/termination-log
@@ -220,6 +235,21 @@ spec:
           value: "accprovisioninput"
         image: {{ config.registry.image_prefix }}/acc-provision-operator:{{ config.registry.acc_provision_operator_version }}
         imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.acc_provision_operator_memory_limit or config.kube_config.acc_provision_operator_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.acc_provision_operator_memory_limit %}
+            memory: "{{ config.kube_config.acc_provision_operator_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.acc_provision_operator_memory_request %}
+            memory: "{{ config.kube_config.acc_provision_operator_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
+        {% endif %}
         name: acc-provision-operator
         resources: {}
         terminationMessagePath: /dev/termination-log
