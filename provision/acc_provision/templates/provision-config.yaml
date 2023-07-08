@@ -84,6 +84,7 @@ registry:
   # image_pull_secret: secret_name      # (if needed)
   # dpu_init_version: <version>
   # dpu_control_server: ip:port # e.g: 192.168.20.1:5000
+  # use_digest: true   # option to pull images using digest, override if needed, default is false.
 
 #kube_config:
   # aci_multipod: True #override if multipod setup, default is False
