@@ -52,6 +52,15 @@ spec:
           name: aci-operator-config
         - mountPath: /usr/local/etc/acc-provision/
           name: acc-provision-config
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit
@@ -93,3 +102,12 @@ spec:
             path: acc-provision-operator.conf
           name: acc-provision-config
         name: acc-provision-config
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker

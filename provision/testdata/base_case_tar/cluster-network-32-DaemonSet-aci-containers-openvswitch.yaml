@@ -51,6 +51,15 @@ spec:
           name: hostetc
         - mountPath: /lib/modules
           name: hostmodules
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
       hostIPC: true
       hostNetwork: true
       hostPID: true
@@ -72,5 +81,14 @@ spec:
       - hostPath:
           path: /lib/modules
         name: hostmodules
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker
   updateStrategy:
     type: RollingUpdate

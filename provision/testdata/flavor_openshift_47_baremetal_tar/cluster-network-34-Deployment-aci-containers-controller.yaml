@@ -51,6 +51,15 @@ spec:
         volumeMounts:
         - mountPath: /usr/local/etc/aci-containers/
           name: controller-config-volume
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
       hostNetwork: true
@@ -76,3 +85,12 @@ spec:
             path: controller.conf
           name: aci-containers-config
         name: controller-config-volume
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker
