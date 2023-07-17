@@ -2288,6 +2288,15 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: host-config-volume
               mountPath: /usr/local/etc/aci-containers/
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlogcontainers
+              mountPath: /var/log/containers
+              readOnly: true
+            - name: varlibdocker
+              mountPath: /var/lib/docker
+              readOnly: true
             {% if config.kube_config.aci_multipod %}
             - name: dhclient
               mountPath: /var/lib/dhclient
@@ -2473,6 +2482,15 @@ spec:
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlogcontainers
+          hostPath:
+            path: /var/log/containers
+        - name: varlibdocker
+          hostPath:
+            path: /var/lib/docker
         {% if config.kube_config.aci_multipod %}
         - name: dhclient
           hostPath:
@@ -2596,6 +2614,15 @@ spec:
               mountPath: /usr/local/etc
             - name: hostmodules
               mountPath: /lib/modules
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlogcontainers
+              mountPath: /var/log/containers
+              readOnly: true
+            - name: varlibdocker
+              mountPath: /var/lib/docker
+              readOnly: true
           livenessProbe:
             exec:
               command:
@@ -2614,6 +2641,15 @@ spec:
         - name: hostmodules
           hostPath:
             path: /lib/modules
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlogcontainers
+          hostPath:
+            path: /var/log/containers
+        - name: varlibdocker
+          hostPath:
+            path: /var/lib/docker
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -2734,6 +2770,15 @@ spec:
           volumeMounts:
             - name: controller-config-volume
               mountPath: /usr/local/etc/aci-containers/
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlogcontainers
+              mountPath: /var/log/containers
+              readOnly: true
+            - name: varlibdocker
+              mountPath: /var/lib/docker
+              readOnly: true
             {% if config.flavor != "k8s-overlay" %}
             - name: aci-user-cert-volume
               mountPath: /usr/local/etc/aci-cert/
@@ -2789,6 +2834,15 @@ spec:
               - key: gbp-server-config
                 path: gbp-server.conf
               {% endif %}
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlogcontainers
+          hostPath:
+            path: /var/log/containers
+        - name: varlibdocker
+          hostPath:
+            path: /var/lib/docker
 {% if config.aci_config.capic %}
 ---
 apiVersion: aci.aw/v1
