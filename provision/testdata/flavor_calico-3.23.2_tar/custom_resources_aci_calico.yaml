@@ -228,7 +228,7 @@ data:
                 "enable_updates": false
             },
             "aci_config": {
-                "system_id": "calico-l3out-fsvi-vlan-13",
+                "system_id": "calico-cni",
                 "apic_hosts": [
                     "10.30.120.100"
                 ],
@@ -246,7 +246,7 @@ data:
                         },
                         "secret": "test"
                     },
-                    "name": "calico-l3out-fsvi-vlan-13",
+                    "name": "test-l3out",
                     "svi": {
                         "floating_ip": "2.100.101.100/24",
                         "mtu": 9000,
