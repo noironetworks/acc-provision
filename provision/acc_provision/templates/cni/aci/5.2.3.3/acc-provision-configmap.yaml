@@ -1,12 +1,3 @@
-{% if config.user_config.aci_config.cluster_l3out %}
-{% if config.user_config.aci_config.cluster_l3out.aep %}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ config.kube_config.system_namespace }}
----
-{% endif %}
-{% endif %}
 
 apiVersion: v1
 kind: ConfigMap
@@ -49,9 +40,6 @@ data:
                     "name": {{config.aci_config.vrf.name|json}},
                     "tenant": {{config.aci_config.vrf.tenant|json}}
                 },
-                {% if config.user_config.aci_config.cluster_l3out %}
-                "cluster_l3out": {{config.user_config.aci_config.cluster_l3out|json|indent(width=16)}},
-                {% endif %}
                 {% if config.user_config.aci_config.sync_login %}
                 "sync_login": {
                     {% for key, value in config.user_config.aci_config.sync_login.items() %}
@@ -62,29 +50,11 @@ data:
                 {% if config.user_config.aci_config.client_ssl %}
                 "client_ssl": {{ config.aci_config.client_ssl|json }},
                 {% endif %}
-                {% if (config.user_config.aci_config.vmm_domain) %}
+                {% if ((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
                 "vmm_domain": {
-                    "type": {{ config.aci_config.vmm_domain.type|json }},
-                    "encap_type": {{ config.aci_config.vmm_domain.encap_type|json }},
-                    "mcast_fabric": {{ config.aci_config.vmm_domain.mcast_fabric|json }},
-                    "mcast_range": {
-                        "start": {{ config.aci_config.vmm_domain.mcast_range.start|json }},
-                        "end": {{ config.aci_config.vmm_domain.mcast_range.end|json }}
-                {% endif %}
-                {% if((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
-                    },
-                    "nested_inside": {
-                        {% if (config.user_config.aci_config.vmm_domain.nested_inside.type) %}
-                        "type": {{config.user_config.aci_config.vmm_domain.nested_inside.type|json|indent(width=20)}},
-                        {% endif %}
-                        {% if (config.user_config.aci_config.vmm_domain.nested_inside.name) %}
-                        "name": {{config.user_config.aci_config.vmm_domain.nested_inside.name|json|indent(width=20)}},
-                        {% endif %}
-                        "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
-                    }
-                },
-                {% elif (config.user_config.aci_config.vmm_domain) %}
-                    }
+                  "nested_inside": {
+                    "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
+                  }
                 },
                 {% endif %}
                 "l3out": {
@@ -161,10 +131,10 @@ data:
                 "kubeapi_vlan": {{config.net_config.kubeapi_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_static %}
-                "extern_static": {{config.net_config.extern_static|tojson}},
+                "extern_static": {{config.net_config.extern_static|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_dynamic %}
-                "extern_dynamic": {{config.net_config.extern_dynamic|tojson}},
+                "extern_dynamic": {{config.net_config.extern_dynamic|json}},
                 {% endif %}
                 {% if config.user_config.net_config.node_svc_subnet %}
                 "node_svc_subnet": {{config.net_config.node_svc_subnet|json}},
@@ -190,28 +160,8 @@ data:
                 {% if config.user_config.net_config.duration_wait_for_network %}
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
-                "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
-                {% if config.user_config.net_config.cluster_svc_subnet %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
-                "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
-                {% else %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}}
-                {% endif %}
-            {% if config.user_config.topology %}
-            },
-            {% if config.user_config.calico_config %}
-            "calico_config": {
-                {% if config.user_config.calico_config.net_config %}
-                "net_config": {{config.user_config.calico_config.net_config|json|indent(width=20)}}
-                {% endif %}
-            },
-            {% endif %}
-            "topology": {
-                "rack": {{config.user_config.topology.rack|json|indent(width=20)}}
-            },
-            "flavor": {{config.flavor|json}}
-            {% else %}
+                "node_subnet": {{config.net_config.node_subnet|json}},
+                "pod_subnet": {{config.net_config.pod_subnet|json}}
             }
-            {% endif %}
         }
      }

@@ -18,6 +18,7 @@ Requires:       python3-boto3
 Tools to provision and support ACI fabric DC workloads
 
 %define  debug_package %{nil}
+%define _unpackaged_files_terminate_build 0
 
 %prep
 %setup -qn acc_provision-%{version}

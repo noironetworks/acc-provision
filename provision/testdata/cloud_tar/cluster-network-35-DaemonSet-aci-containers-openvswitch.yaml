@@ -13,8 +13,6 @@ spec:
       network-plugin: aci-containers
   template:
     metadata:
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
       labels:
         name: aci-containers-openvswitch
         network-plugin: aci-containers
@@ -33,6 +31,8 @@ spec:
         resources:
           limits:
             memory: 1Gi
+          requests:
+            memory: 128Mi
         securityContext:
           capabilities:
             add:

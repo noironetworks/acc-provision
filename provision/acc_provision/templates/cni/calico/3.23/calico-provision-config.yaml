@@ -12,6 +12,7 @@ aci_config:
     name: calico_l3out          # This is the l3out created by acc-provision
     aep: kube-cluster             # Required field. The AEP for ports/VPCs used by this cluster
     svi:
+      type: floating                          # This is the interface type. Only "floating" is supported
       floating_ip: 2.100.101.100/24           # Required field. Should be an IP in the node subnet
       secondary_ip: 2.100.101.254/24          # Required field
       vlan_id: 13                             # Required field. Valid vlan-id for the whole cluster
@@ -21,7 +22,7 @@ aci_config:
       peering:
         prefixes: 500               # Maximum number of prefixes to limit how many prefixes we can accept from a single K8s node. Default is 500
         remote_as_number: 64512     # By default, all Calico nodes use 64512 AS number
-        aci_as_number: 2            # Required field. This is derived from APIC> system> system settings
+        aci_as_number: 2            # Required field. This is derived frm APIC.
 
   l3out:
     name: mykube_l3out          # External l3Out

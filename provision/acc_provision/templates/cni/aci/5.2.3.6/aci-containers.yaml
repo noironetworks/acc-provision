@@ -1362,8 +1362,14 @@ data:
         {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
+        {% endif %}
+        {% if config.kube_config.service_graph_endpoint_add_delay %}
+        "service-graph-endpoint-add-delay": {{ config.kube_config.service_graph_endpoint_add_delay|json|indent(width=8) }},
         {% endif %}
         {% if config.kube_config.add_external_subnets_to_rdconfig %}
         "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
@@ -1474,8 +1480,8 @@ data:
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
         {% endif %}
-        "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
-        "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
+        "pod-subnet": {{ config.net_config.pod_subnet|json }},
+        "node-subnet": {{ config.net_config.node_subnet|json }},
         "encap-type": {{ config.node_config.encap_type|json }},
         "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
         {% if config.net_config.interface_mtu %}
@@ -1519,15 +1525,11 @@ data:
         "enable-nodepodif": false,
         {% endif %}
         {% if config.sriov_config.enable %}
-        {% if config.dpu_config.enable %}
-        "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},
-        {% endif %}
         "enable-ovs-hw-offload": true
         {% else %}
         "enable-ovs-hw-offload": false
         {% endif %}
     }
-  {% if config.dpu_config.enable != True %}
   opflex-agent-config: |-
     {
         "log": {
@@ -1542,15 +1544,17 @@ data:
           {% if config.kube_config.run_gbp_container %}
             ,"statistics" : { "mode" : "off" }
           {% endif %}
+          {% if config.kube_config.opflex_agent_policy_retry_delay_timer %}
+            ,"timers" : { "policy-retry-delay" : {{ config.kube_config.opflex_agent_policy_retry_delay_timer|json }} }
+          {% endif %}
         },
         "ovs": {
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
         },
         "prometheus": {
-            "enabled": {{ config.kube_config.opflex_agent_prometheus|json }}
+            "enabled": "false"
         }
     }
-  {% endif %}
   {% if config.kube_config.run_gbp_container %}
   gbp-server-config: |-
    {
@@ -1651,7 +1655,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers-controller
 rules:
 - apiGroups:
   - ""
@@ -1888,7 +1892,7 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ""
@@ -2039,13 +2043,13 @@ rules:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:controller
+  name: aci-containers-controller
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:controller
+  name: aci-containers-controller
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
@@ -2054,13 +2058,13 @@ subjects:
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
@@ -2132,10 +2136,8 @@ spec:
         network-plugin: aci-containers
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
-        {% if config.kube_config.opflex_agent_prometheus == "true" %}
         prometheus.io/scrape: "true"
         prometheus.io/port: "9612"
-        {% endif %}
     spec:
       hostNetwork: true
       hostPID: true
@@ -2246,10 +2248,6 @@ spec:
             - name: multus-cni-conf
               mountPath: /mnt/multus-cni-conf
             {% endif %}
-            {% if config.dpu_config.enable == True %}
-            - name: opflex-lsyncd-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs
-            {% endif %}
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -2260,7 +2258,6 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 30
-        {% if config.dpu_config.enable != True %}
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
@@ -2278,11 +2275,6 @@ spec:
             capabilities:
               add:
                 - NET_ADMIN
-          {% if config.kube_config.opflex_agent_prometheus == "true" %}
-          ports:
-            - name: metrics
-              containerPort: 9612
-          {% endif %}
           volumeMounts:
             - name: hostvar
               mountPath: /usr/local/var
@@ -2294,7 +2286,6 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: opflex-config-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
-        {% endif %}
         {% if config.kube_config.run_opflex_server_container %}
         - name: opflex-server
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
@@ -2319,7 +2310,6 @@ spec:
               mountPath: /usr/local/var
         {% endif %}
         {% if config.kube_config.opflex_mode != "overlay" %}
-        {% if config.dpu_config.enable != True %}
         - name: mcast-daemon
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
           command: ["/bin/sh"]
@@ -2337,21 +2327,6 @@ spec:
             - name: hostrun
               mountPath: /usr/local/run
         {% endif %}
-        {% endif %}
-        {% if config.dpu_config.enable == True %}
-        - name: lsyncd-daemon
-          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-lsyncd.sh"]
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: opflex-lsyncd-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs
-            - name: lsyncd-config-volume
-              mountPath: /etc/configmap
-          {% endif %}
       restartPolicy: Always
       volumes:
         - name: cni-bin
@@ -2375,14 +2350,12 @@ spec:
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
-        {% if config.dpu_config.enable != True %}
         - name: opflex-config-volume
           configMap:
             name: aci-containers-config
             items:
               - key: opflex-agent-config
                 path: local.conf
-        {% endif %}
         {% if config.kube_config.use_opflex_server_volume %}
         - name: opflex-server-config-volume
         {% endif %}
@@ -2396,18 +2369,6 @@ spec:
           hostPath:
             path: /var/run/multus/
         {% endif %}
-        {% if config.dpu_config.enable == True %}
-        - name: opflex-lsyncd-volume
-          hostPath:
-            path: /usr/local/etc/opflex-agent-ovs
-        - name: lsyncd-config-volume
-          configMap:
-            name: lsyncd-config
-            items:
-             - key: lsyncd.json
-               path: lsyncd.json
-        {% endif %}
-{% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
@@ -2501,7 +2462,6 @@ spec:
         - name: hostmodules
           hostPath:
             path: /lib/modules
-{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: Deployment
@@ -2546,11 +2506,6 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: Exists
-        {% if config.flavor == "RKE2-kubernetes-1.24" %}
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/control-plane
-          operator: Exists
-        {% endif %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
       {% endif %}
@@ -2878,9 +2833,6 @@ data:
                       "devices": [{{config.devices|json}}],
                       {% endif %}
                       "drivers": [{{config.drivers|json}}],
-                      {% if config.dpu_config.enable == True %}
-                      "pfNames": [{{config.pfNames|json}}],
-                      {% endif %}
                       "isRdma":  {{config.isRdma}}
                    }
                  }
@@ -2931,25 +2883,4 @@ spec:
                 config:
                   description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
                   type: string
-{% endif %}
-{% if config.dpu_config.enable == True %}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: lsyncd-config
-  {% if config.flavor != "k8s-overlay" %}
-  namespace: aci-containers-system
-  {% else %}
-  namespace: {{ config.kube_config.system_namespace }}
-  {% endif %}
-  labels:
-    aci-containers-config-version: "{{ config.registry.configuration_version }}"
-    network-plugin: aci-containers
-data:
-  lsyncd.json: |-
-    {
-       "dpuIp": {{config.dpuIp|json}},
-       "dpuUser": {{config.dpuUser|json}}
-    }
 {% endif %}

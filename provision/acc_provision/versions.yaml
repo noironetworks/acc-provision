@@ -94,14 +94,34 @@ versions:
     opflex_agent_version: 5.2.3.4.1d150da
     opflex_server_version: 5.2.3.4.1d150da
     gbp_version: 5.2.3.4.1d150da
-  6.0:
-    acc_provision_operator_version: 6.0.0.0.179471b
-    aci_containers_controller_version: 6.0.0.0.0ef4718
-    aci_containers_host_version: 6.0.0.0.0ef4718
-    aci_containers_operator_version: 6.0.0.0.0ef4718
-    cnideploy_version: 6.0.0.0.0ef4718
-    openvswitch_version: 6.0.0.0.5681a9b
-    opflex_agent_version: 6.0.0.0.d2739da
-    opflex_server_version: 6.0.0.0.d2739da
-    gbp_version: 6.0.0.0.8ac1bd4
+  5.2.3.6:
+    acc_provision_operator_version: 5.2.3.6.1d150da
+    aci_containers_controller_version: 5.2.3.6.1d150da
+    aci_containers_host_version: 5.2.3.6.1d150da
+    aci_containers_operator_version: 5.2.3.6.1d150da
+    cnideploy_version: 5.2.3.6.1d150da
+    openvswitch_version: 5.2.3.6.1d150da
+    opflex_agent_version: 5.2.3.6.1d150da
+    opflex_server_version: 5.2.3.6.1d150da
+    gbp_version: 5.2.3.6.1d150da
+  5.2.7.1:
+    acc_provision_operator_version: 5.2.7.1.81c2369
+    aci_containers_controller_version: 5.2.7.1.81c2369
+    aci_containers_host_version: 5.2.7.1.81c2369
+    aci_containers_operator_version: 5.2.7.1.81c2369
+    cnideploy_version: 5.2.7.1.81c2369
+    openvswitch_version: 5.2.7.1.81c2369
+    opflex_agent_version: 5.2.7.1.81c2369
+    opflex_server_version: 5.2.7.1.81c2369
+    gbp_version: 5.2.7.1.81c2369
+  6.0.3.1:
+    acc_provision_operator_version: 6.0.3.1.81c2369
+    aci_containers_controller_version: 6.0.3.1.81c2369
+    aci_containers_host_version: 6.0.3.1.81c2369
+    aci_containers_operator_version: 6.0.3.1.81c2369
+    cnideploy_version: 6.0.3.1.81c2369
+    openvswitch_version: 6.0.3.1.81c2369
+    opflex_agent_version: 6.0.3.1.81c2369
+    opflex_server_version: 6.0.3.1.81c2369
+    gbp_version: 6.0.3.1.81c2369
     network_operator_version: test

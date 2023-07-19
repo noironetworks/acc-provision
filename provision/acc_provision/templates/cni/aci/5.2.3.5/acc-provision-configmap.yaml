@@ -1,11 +1,9 @@
 {% if config.user_config.aci_config.cluster_l3out %}
-{% if config.user_config.aci_config.cluster_l3out.aep %}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ config.kube_config.system_namespace }}
 ---
-{% endif %}
 {% endif %}
 
 apiVersion: v1
@@ -70,8 +68,7 @@ data:
                     "mcast_range": {
                         "start": {{ config.aci_config.vmm_domain.mcast_range.start|json }},
                         "end": {{ config.aci_config.vmm_domain.mcast_range.end|json }}
-                {% endif %}
-                {% if((config.user_config.aci_config.vmm_domain) and (config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
+                {% if ((config.user_config.aci_config.vmm_domain.nested_inside) and (config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip)) %}
                     },
                     "nested_inside": {
                         {% if (config.user_config.aci_config.vmm_domain.nested_inside.type) %}
@@ -82,9 +79,9 @@ data:
                         {% endif %}
                         "installer_provisioned_lb_ip": {{config.user_config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json|indent(width=20)}}
                     }
-                },
-                {% elif (config.user_config.aci_config.vmm_domain) %}
+                {% else %}
                     }
+                {% endif %}
                 },
                 {% endif %}
                 "l3out": {
@@ -116,6 +113,26 @@ data:
                 {% endif %}
                 {% endfor %}
                 }
+                {% elif key == 'service_graph_endpoint_add_delay' %}
+                "service_graph_endpoint_add_delay": {
+                {% for delaykey, delayvalue in config.kube_config.service_graph_endpoint_add_delay.items() %}
+                    {% if delaykey == 'services' %}
+                    "services": [
+                        {% for delaysvc in config.kube_config.service_graph_endpoint_add_delay.services %}
+                        {
+                            {% for delaysvckey, delaysvcvalue in delaysvc.items() %}
+                            {% if delaysvckey == 'name' or delaysvckey == 'namespace' %}
+                            {{ delaysvckey|json }}: {{ delaysvcvalue|json|indent(width=20) }}{{ ", " if not loop.last else "" }}
+                            {% endif %}
+                            {% endfor %}
+                        }{{ ", " if not loop.last else "" }}
+                        {% endfor %}
+                    ]{{ ", " if not loop.last else "" }}
+                    {% else %}
+                    {{ delaykey|json }}: {{ delayvalue|json|indent(width=20) }}{{ ", " if not loop.last else "" }}
+                    {% endif %}
+                {% endfor %}
+                }{{ ", " if not loop.last else "" }}
                 {% else %}
                 {{ key|json }}: {{ value|json }}{{ ", " if not loop.last else "" }}
                 {% endif %}
@@ -161,10 +178,10 @@ data:
                 "kubeapi_vlan": {{config.net_config.kubeapi_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_static %}
-                "extern_static": {{config.net_config.extern_static|tojson}},
+                "extern_static": {{config.net_config.extern_static|json}},
                 {% endif %}
                 {% if config.user_config.net_config.extern_dynamic %}
-                "extern_dynamic": {{config.net_config.extern_dynamic|tojson}},
+                "extern_dynamic": {{config.net_config.extern_dynamic|json}},
                 {% endif %}
                 {% if config.user_config.net_config.node_svc_subnet %}
                 "node_svc_subnet": {{config.net_config.node_svc_subnet|json}},
@@ -190,12 +207,12 @@ data:
                 {% if config.user_config.net_config.duration_wait_for_network %}
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
-                "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
+                "node_subnet": {{config.net_config.node_subnet|json}},
                 {% if config.user_config.net_config.cluster_svc_subnet %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
+                "pod_subnet": {{config.net_config.pod_subnet|json}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
                 {% else %}
-                "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}}
+                "pod_subnet": {{config.net_config.pod_subnet|json}}
                 {% endif %}
             {% if config.user_config.topology %}
             },

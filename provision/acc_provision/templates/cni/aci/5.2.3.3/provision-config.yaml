@@ -7,8 +7,6 @@ aci_config:
   #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
   #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
   #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
-  #tenant:
-    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
   apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101
   vmm_domain:                   # Kubernetes container domain configuration
@@ -47,9 +45,7 @@ aci_config:
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
-  pod_subnet:
-  - 10.2.0.1/24       # Subnet to use for Kubernetes Pods
-  - 10.2.1.1/24       # Subnet to use for Kubernetes Pods
+  pod_subnet: 10.2.0.1/16       # Subnet to use for Kubernetes Pods
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
   node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
@@ -90,14 +86,7 @@ registry:
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
-        # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
-
-  #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
-  #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
-  # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
-  # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
-  # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
-
+ 
 #
 # Configuration for ACI CNI Operator
 #
@@ -120,18 +109,5 @@ registry:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
 
-#dpu_config:
-    # enable: True          # default is false
-    # ip: ""                # default is "192.168.200.2"
-    # user: ""              # default is "opflex"
-    # ovsdb_socket_port: "" # default is "6640"
-    # masterNodeIp: ""
-
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
-
-# Configuration for RKE2 cluster
-
-#rke2_config:
-  # logging_namespace: "cattle-logging" #override if needed, default is "cattle-logging"
-  # monitoring_namespace: "cattle-prometheus" #override if needed, default is "cattle-prometheus"

@@ -1,0 +1,23 @@
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  creationTimestamp: null
+  name: cluster
+spec:
+  disableMultiNetwork: true
+  {% for i, subnet in config.net_config.pod_subnet|enumerate %}
+  {% if is_ipv6(subnet) %}
+  {% set hostPrefix = 64 %}
+  {% else %}
+  {% set hostPrefix = 23 %}
+  {% endif %}
+  {% if i == 0 %}
+  clusterNetwork:
+  {% endif %}
+  - cidr: {{ subnet }}
+    hostPrefix: {{ hostPrefix }}
+  {% endfor %}
+  defaultNetwork:
+    type: CiscoACI
+  serviceNetwork:
+  - 172.30.0.0/25

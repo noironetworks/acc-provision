@@ -1306,8 +1306,12 @@ data:
         "aci-prefix": "kube",
         "aci-vrf": "defaultVrf",
         "aci-vrf-tenant": "kube",
-        "pod-subnet": ["10.2.56.1/21"],
-        "node-subnet": ["1.100.202.1/24"],
+        "pod-subnet": [
+            "10.2.56.1/21"
+        ],
+        "node-subnet": [
+            "1.100.202.1/24"
+        ],
         "encap-type": "vxlan",
         "aci-infra-vlan": null,
         "interface-mtu": 1400,
@@ -1396,7 +1400,7 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-  name: aci-containers:controller
+  name: aci-containers-controller
 rules:
 - apiGroups:
   - ""
@@ -1592,7 +1596,7 @@ metadata:
   labels:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ""
@@ -1716,13 +1720,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:controller
+  name: aci-containers-controller
   labels:
     aci-containers-config-version: "dummy"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:controller
+  name: aci-containers-controller
 subjects:
 - kind: ServiceAccount
   name: aci-containers-controller
@@ -1731,13 +1735,13 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
   labels:
     aci-containers-config-version: "dummy"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aci-containers:host-agent
+  name: aci-containers-host-agent
 subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
@@ -1764,7 +1768,6 @@ spec:
         name: aci-containers-host
         network-plugin: aci-containers
       annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       hostPID: true
@@ -1939,8 +1942,6 @@ spec:
       labels:
         name: aci-containers-openvswitch
         network-plugin: aci-containers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       hostPID: true
@@ -1956,6 +1957,8 @@ spec:
           resources:
             limits:
               memory: "1Gi"
+            requests:
+              memory: "128Mi"
           securityContext:
             privileged: true
             capabilities:
@@ -2021,8 +2024,6 @@ spec:
       labels:
         name: aci-containers-controller
         network-plugin: aci-containers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       serviceAccountName: aci-containers-controller
@@ -2081,3 +2082,16 @@ spec:
                 path: controller.conf
               - key: gbp-server-config
                 path: gbp-server.conf
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-limit-range
+  namespace: kube-system
+spec:
+  limits:
+  - default:
+      memory: 3Gi
+    defaultRequest:
+      memory: 128Mi
+    type: Container
