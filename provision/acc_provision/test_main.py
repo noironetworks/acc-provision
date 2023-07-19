@@ -673,6 +673,18 @@ def test_flavor_openshift_412_esx():
 
 
 @in_testdir
+def test_flavor_openshift_413_esx():
+    run_provision(
+        "flavor_openshift_413_esx.inp.yaml",
+        "flavor_openshift_413_esx.kube.yaml",
+        "flavor_openshift_413_esx_tar",
+        None,
+        "flavor_openshift_413_esx.apic.txt",
+        overrides={"flavor": "openshift-4.13-esx"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_412_baremetal():
     run_provision(
         "flavor_openshift_412_baremetal.inp.yaml",
@@ -1474,7 +1486,7 @@ def get_args(**overrides):
         "timeout": None,
         "debug": True,
         "list_flavors": False,
-        "flavor": "kubernetes-1.25",
+        "flavor": "kubernetes-1.26",
         "version_token": "dummy",
         "release": False,
         "test_data_out": None,
