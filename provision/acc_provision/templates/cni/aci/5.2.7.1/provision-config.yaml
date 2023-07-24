@@ -80,6 +80,7 @@ registry:
   # image_pull_secret: secret_name      # (if needed)
 
 #kube_config:
+  # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"

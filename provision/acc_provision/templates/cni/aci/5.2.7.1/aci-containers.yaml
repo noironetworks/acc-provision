@@ -1452,6 +1452,9 @@ data:
         {% if config.kube_config.use_aci_anywhere_crd %}
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         {% endif %}
+        {% if config.kube_config.dhcp_delay %}
+        "dhcp-delay": {{ config.kube_config.dhcp_delay|json}},
+        {% endif %}
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         "log-level": {{config.logging.hostagent_log_level|json}},
         "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",

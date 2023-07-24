@@ -49,6 +49,7 @@ net_config:
   disable_wait_for_network: true
 
 kube_config:
+  dhcp_delay: 10
   use_external_service_ip_allocator: true
   use_privileged_containers: true
   use_openshift_security_context_constraints: true
