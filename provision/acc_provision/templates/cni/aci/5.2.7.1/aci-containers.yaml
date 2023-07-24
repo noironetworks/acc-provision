@@ -1,0 +1,2955 @@
+
+{% if config.flavor != "k8s-overlay" %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aci-containers-system
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+{% if config.kube_config.system_namespace == "aci-containers-system" %}
+    network-plugin: aci-containers
+{% endif %}
+{% if config.kube_config.use_openshift_run_level %}
+    openshift.io/run-level: "0"
+{% endif %}
+  annotations:
+    openshift.io/node-selector: ''
+---
+{% endif %}
+{% if config.kube_config.use_acicni_priority_class %}
+{% set flavor_version = config.flavor.split('-') %}
+{% set major_version = flavor_version[1].split('.')[0] | int %}
+{% set minor_version = flavor_version[1].split('.')[1] | int %}
+{% if (major_version >= 4 and  minor_version >= 9
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
+apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
+kind: PriorityClass
+metadata:
+  name: acicni-priority
+value: 1000000000
+globalDefault: false
+description: "This priority class is used for ACI-CNI resources"
+---
+{% endif %}
+{% if config.kube_config.use_aci_anywhere_crd %}
+{% if not config.aci_config.capic %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: epgs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Epg
+    listKind: EpgList
+    plural: epgs
+    singular: epg
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: Epg describes a group of network endpoints
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EpgSpec is the spec for an epg
+            properties:
+              consumed-contracts:
+                items:
+                  type: string
+                type: array
+              name:
+                type: string
+              provided-contracts:
+                items:
+                  type: string
+                type: array
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: contracts.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: Contract
+    listKind: ContractList
+    plural: contracts
+    singular: contract
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: Contract describe a policy between two endpoint groups
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ContractSpec is the spec for a Contract resource
+            properties:
+              allow-list:
+                items:
+                  description: WLRules are implicit allow
+                  properties:
+                    ports:
+                      properties:
+                        end:
+                          type: integer
+                        start:
+                          type: integer
+                      type: object
+                    protocol:
+                      type: string
+                  type: object
+                type: array
+              name:
+                type: string
+            type: object
+        type: object
+---
+{% endif %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gbpsstates.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: GBPSState
+    listKind: GBPSStateList
+    plural: gbpsstates
+    singular: gbpsstate
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        description: GBPSState describes the internal state of the GBP server
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          status:
+            description: GBPSStatus is the operational state for a gbpserver
+            properties:
+              class-ids:
+                additionalProperties:
+                  type: integer
+                type: object
+              tunnel-ids:
+                additionalProperties:
+                  format: int64
+                  type: integer
+                type: object
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: podifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: PodIF
+    listKind: PodIFList
+    plural: podifs
+    singular: podif
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: PodIF describes a pod network interface
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          status:
+            description: PodIFStatus is the status of a PodIF
+            properties:
+              containerID:
+                type: string
+              epg:
+                type: string
+              ifname:
+                type: string
+              ipaddr:
+                type: string
+              macaddr:
+                type: string
+              podname:
+                type: string
+              podns:
+                type: string
+              vtep:
+                type: string
+            type: object
+        required:
+        - status
+        type: object
+---
+{% endif %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nodepodifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: NodePodIF
+    listKind: NodePodIFList
+    plural: nodepodifs
+    singular: nodepodif
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              podifs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    containerID:
+                      type: string
+                    epg:
+                      type: string
+                    ifname:
+                      type: string
+                    ipaddr:
+                      type: string
+                    macaddr:
+                      type: string
+                    podname:
+                      type: string
+                    podns:
+                      type: string
+                    vtep:
+                      type: string
+        required:
+        - spec
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: snatglobalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatGlobalInfo
+    listKind: SnatGlobalInfoList
+    plural: snatglobalinfos
+    singular: snatglobalinfo
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: SnatGlobalInfo is the Schema for the snatglobalinfos API
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              globalInfos:
+                additionalProperties:
+                  items:
+                    properties:
+                      macAddress:
+                        type: string
+                      portRanges:
+                        items:
+                          properties:
+                            end:
+                              maximum: 65535
+                              minimum: 1
+                              type: integer
+                            start:
+                              maximum: 65535
+                              minimum: 1
+                              type: integer
+                          type: object
+                        type: array
+                      snatIp:
+                        type: string
+                      snatIpUid:
+                        type: string
+                      snatPolicyName:
+                        type: string
+                    required:
+                    - macAddress
+                    - portRanges
+                    - snatIp
+                    - snatIpUid
+                    - snatPolicyName
+                    type: object
+                  type: array
+                type: object
+            required:
+            - globalInfos
+            type: object
+          status:
+            description: SnatGlobalInfoStatus defines the observed state of SnatGlobalInfo
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: snatlocalinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatLocalInfo
+    listKind: SnatLocalInfoList
+    plural: snatlocalinfos
+    singular: snatlocalinfo
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SnatLocalInfoSpec defines the desired state of SnatLocalInfo
+            properties:
+              localInfos:
+                items:
+                  properties:
+                    podName:
+                      type: string
+                    podNamespace:
+                      type: string
+                    podUid:
+                      type: string
+                    snatPolicies:
+                      items:
+                        properties:
+                          destIp:
+                            items:
+                              type: string
+                            type: array
+                          name:
+                            type: string
+                          snatIp:
+                            type: string
+                        required:
+                        - destIp
+                        - name
+                        - snatIp
+                        type: object
+                      type: array
+                  required:
+                  - podName
+                  - podNamespace
+                  - podUid
+                  - snatPolicies
+                  type: object
+                type: array
+            required:
+            - localInfos
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: snatpolicies.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: SnatPolicy
+    listKind: SnatPolicyList
+    plural: snatpolicies
+    singular: snatpolicy
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              selector:
+                type: object
+                properties:
+                  labels:
+                    type: object
+                    description: 'Selection of Pods'
+                    properties:
+                    additionalProperties:
+                      type: string
+                  namespace:
+                    type: string
+                type: object
+              snatIp:
+                type: array
+                items:
+                  type: string
+              destIp:
+                type: array
+                items:
+                  type: string
+            type: object
+          status:
+            type: object
+            properties:
+            additionalProperties:
+              type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nodeinfos.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: NodeInfo
+    listKind: NodeInfoList
+    plural: nodeinfos
+    singular: nodeinfo
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              macaddress:
+                type: string
+              snatpolicynames:
+                additionalProperties:
+                  type: boolean
+                type: object
+            type: object
+          status:
+            description: NodeinfoStatus defines the observed state of Nodeinfo
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: rdconfigs.aci.snat
+spec:
+  group: aci.snat
+  names:
+    kind: RdConfig
+    listKind: RdConfigList
+    plural: rdconfigs
+    singular: rdconfig
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              discoveredsubnets:
+                items:
+                  type: string
+                type: array
+              usersubnets:
+                items:
+                  type: string
+                type: array
+            type: object
+          status:
+            description: NodeinfoStatus defines the observed state of Nodeinfo
+            type: object
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: networkpolicies.aci.netpol
+spec:
+  group: aci.netpol
+  names:
+    kind: NetworkPolicy
+    listKind: NetworkPolicyList
+    plural: networkpolicies
+    singular: networkpolicy
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Network Policy describes traffic flow at IP address or port level
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              appliedTo:
+                properties:
+                  namespaceSelector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  podSelector:
+                    description: allow ingress from the same namespace
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+              egress:
+                description: Set of egress rules evaluated based on the order in which they are set.
+                items:
+                  properties:
+                    action:
+                      description: Action specifies the action to be applied on the rule.
+                      type: string
+                    enableLogging:
+                      description: EnableLogging is used to indicate if agent should generate logs default to false.
+                      type: boolean
+                    ports:
+                      description: Set of port and protocol allowed/denied by the rule. If this field is unset or empty, this rule matches all ports.
+                      items:
+                        description: NetworkPolicyPort describes the port and protocol to match in a rule.
+                        properties:
+                          endPort:
+                            description: EndPort defines the end of the port range, being the end included within the range. It can only be specified when a numerical `port` is specified.
+                            format: int32
+                            type: integer
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: The port on the given protocol. This can be either a numerical or named port on a Pod. If this field is not provided, this matches all port names and numbers.
+                            x-kubernetes-int-or-string: true
+                          protocol:
+                            default: TCP
+                            description: The protocol (TCP, UDP, or SCTP) which traffic must match. If not specified, this field defaults to TCP.
+                            type: string
+                        type: object
+                      type: array
+                    to:
+                      description: Rule is matched if traffic is intended for workloads selected by this field. If this field is empty or missing, this rule matches all destinations.
+                      items:
+                        properties:
+                          ipBlock:
+                            description: IPBlock describes the IPAddresses/IPBlocks that is matched in to/from. IPBlock cannot be set as part of the AppliedTo field. Cannot be set with any other selector.
+                            properties:
+                              cidr:
+                                description: CIDR is a string representing the IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64"
+                                type: string
+                              except:
+                                description: Except is a slice of CIDRs that should not be included within an IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64" Except values will be rejected if they are outside the CIDR range
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - cidr
+                            type: object
+                          namespaceSelector:
+                            description: Select all Pods from Namespaces matched by this selector, as workloads in To/From fields. If set with PodSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except PodSelector or ExternalEntitySelector.
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          podSelector:
+                            description: Select Pods from NetworkPolicy's Namespace as workloads in AppliedTo/To/From fields. If set with NamespaceSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except NamespaceSelector.
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        type: object
+                      type: array
+                    toFqDn:
+                      properties:
+                        matchNames:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - matchNames
+                      type: object
+                  required:
+                  - enableLogging
+                  - toFqDn
+                  type: object
+                type: array
+              ingress:
+                description: Set of ingress rules evaluated based on the order in which they are set.
+                items:
+                  properties:
+                    action:
+                      description: Action specifies the action to be applied on the rule.
+                      type: string
+                    enableLogging:
+                      description: EnableLogging is used to indicate if agent should generate logs when rules are matched. Should be default to false.
+                      type: boolean
+                    from:
+                      description: Rule is matched if traffic originates from workloads selected by this field. If this field is empty, this rule matches all sources.
+                      items:
+                        properties:
+                          ipBlock:
+                            description: IPBlock describes the IPAddresses/IPBlocks that is matched in to/from. IPBlock cannot be set as part of the AppliedTo field. Cannot be set with any other selector.
+                            properties:
+                              cidr:
+                                description: CIDR is a string representing the IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64"
+                                type: string
+                              except:
+                                description: Except is a slice of CIDRs that should not be included within an IP Block Valid examples are "192.168.1.1/24" or "2001:db9::/64" Except values will be rejected if they are outside the CIDR range
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - cidr
+                            type: object
+                          namespaceSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          podSelector:
+                            description: Select Pods from NetworkPolicy's Namespace as workloads in AppliedTo/To/From fields. If set with NamespaceSelector, Pods are matched from Namespaces matched by the NamespaceSelector. Cannot be set with any other selector except NamespaceSelector.
+                            properties:
+                              matchExpressions:
+                                description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                      type: string
+                                    values:
+                                      description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        type: object
+                      type: array
+                    ports:
+                      description: Set of port and protocol allowed/denied by the rule. If this field is unset or empty, this rule matches all ports.
+                      items:
+                        description: NetworkPolicyPort describes the port and protocol to match in a rule.
+                        properties:
+                          endPort:
+                            description: EndPort defines the end of the port range, being the end included within the range. It can only be specified when a numerical `port` is specified.
+                            format: int32
+                            type: integer
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: The port on the given protocol. This can be either a numerical or named port on a Pod. If this field is not provided, this matches all port names and numbers.
+                            x-kubernetes-int-or-string: true
+                          protocol:
+                            default: TCP
+                            description: The protocol (TCP, UDP, or SCTP) which traffic must match. If not specified, this field defaults to TCP.
+                            type: string
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              policyTypes:
+                items:
+                  description: Policy Type string describes the NetworkPolicy type This type is beta-level in 1.8
+                  type: string
+                type: array
+              priority:
+                description: Priority specfies the order of the NetworkPolicy relative to other NetworkPolicies.
+                type: integer
+              type:
+                description: type of the policy.
+                type: string
+            required:
+            - type
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: dnsnetworkpolicies.aci.dnsnetpol
+spec:
+  group: aci.dnsnetpol
+  names:
+    kind: DnsNetworkPolicy
+    listKind: DnsNetworkPolicyList
+    plural: dnsnetworkpolicies
+    singular: dnsnetworkpolicy
+  scope: Namespaced
+  versions:
+  - name: v1beta
+    schema:
+      openAPIV3Schema:
+        description: dns network Policy
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              appliedTo:
+                properties:
+                  namespaceSelector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  podSelector:
+                    description: allow ingress from the same namespace
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+              egress:
+                description: Set of egress rules evaluated based on the order in which they are set.
+                properties:
+                  toFqdn:
+                    properties:
+                      matchNames:
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - matchNames
+                    type: object
+                required:
+                - toFqdn
+                type: object
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: qospolicies.aci.qos
+spec:
+  group: aci.qos
+  names:
+    kind: QosPolicy
+    listKind: QosPolicyList
+    plural: qospolicies
+    singular: qospolicy
+  scope: Namespaced
+  preserveUnknownFields: false
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            type: object
+            properties:
+              podSelector:
+                description: 'Selection of Pods'
+                type: object
+                properties:
+                  matchLabels:
+                    type: object
+                    description:
+              ingress:
+                type: object
+                properties:
+                  policing_rate:
+                    type: integer
+                    minimum: 0
+                  policing_burst:
+                    type: integer
+                    minimum: 0
+              egress:
+                type: object
+                properties:
+                  policing_rate:
+                    type: integer
+                    minimum: 0
+                  policing_burst:
+                    type: integer
+                    minimum: 0
+              dscpmark:
+                type: integer
+                default: 0
+                minimum: 0
+                maximum: 63
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: netflowpolicies.aci.netflow
+spec:
+  group: aci.netflow
+  names:
+    kind: NetflowPolicy
+    listKind: NetflowPolicyList
+    plural: netflowpolicies
+    singular: netflowpolicy
+  scope: Cluster
+  preserveUnknownFields: false
+  versions:
+  - name: v1alpha
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            type: object
+            properties:
+              flowSamplingPolicy:
+                type: object
+                properties:
+                  destIp:
+                    type: string
+                  destPort:
+                    type: integer
+                    minimum: 0
+                    maximum: 65535
+                    default: 2055
+                  flowType:
+                    type: string
+                    enum:
+                      - netflow
+                      - ipfix
+                    default: netflow
+                  activeFlowTimeOut:
+                    type: integer
+                    minimum: 0
+                    maximum: 3600
+                    default: 60
+                  idleFlowTimeOut:
+                    type: integer
+                    minimum: 0
+                    maximum: 600
+                    default: 15
+                  samplingRate:
+                    type: integer
+                    minimum: 0
+                    maximum: 1000
+                    default: 0
+                required:
+                - destIp
+                type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: erspanpolicies.aci.erspan
+spec:
+  group: aci.erspan
+  names:
+    kind: ErspanPolicy
+    listKind: ErspanPolicyList
+    plural: erspanpolicies
+    singular: erspanpolicy
+  scope: Cluster
+  preserveUnknownFields: false
+  versions:
+  - name: v1alpha
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            type: object
+            properties:
+              selector:
+                type: object
+                description: 'Selection of Pods'
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+                  namespace:
+                    type: string
+              source:
+                type: object
+                properties:
+                  adminState:
+                    description: Administrative state.
+                    default: start
+                    type: string
+                    enum:
+                      - start
+                      - stop
+                  direction:
+                    description: Direction of the packets to monitor.
+                    default: both
+                    type: string
+                    enum:
+                      - in
+                      - out
+                      - both
+              destination:
+                type: object
+                properties:
+                  destIP:
+                    description: Destination IP of the ERSPAN packet.
+                    type: string
+                  flowID:
+                    description: Unique flow ID of the ERSPAN packet.
+                    default: 1
+                    type: integer
+                    minimum: 1
+                    maximum: 1023
+                required:
+                - destIP
+                type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: enabledroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: EnableDropLog
+    listKind: EnableDropLogList
+    plural: enabledroplogs
+    singular: enabledroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of EnableDropLog
+            type: object
+            properties:
+              disableDefaultDropLog:
+                description: Disables the default droplog enabled by acc-provision.
+                default: false
+                type: boolean
+              nodeSelector:
+                type: object
+                description: Drop logging is enabled on nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prunedroplogs.aci.droplog
+spec:
+  group: aci.droplog
+  names:
+    kind: PruneDropLog
+    listKind: PruneDropLogList
+    plural: prunedroplogs
+    singular: prunedroplog
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+   # openAPIV3Schema is the schema for validating custom objects.
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          spec:
+            description: Defines the desired state of PruneDropLog
+            type: object
+            properties:
+              nodeSelector:
+                type: object
+                description: Drop logging filters are applied to nodes selected based on labels
+                properties:
+                  labels:
+                    type: object
+                    properties:
+                    additionalProperties:
+                      type: string
+              dropLogFilters:
+                type: object
+                properties:
+                  srcIP:
+                    type: string
+                  destIP:
+                    type: string
+                  srcMAC:
+                    type: string
+                  destMAC:
+                    type: string
+                  srcPort:
+                    type: integer
+                  destPort:
+                    type: integer
+                  ipProto:
+                    type: integer
+---
+{% if config.istio_config.install_istio %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: aciistiooperators.aci.istio
+spec:
+  group: aci.istio
+  names:
+    kind: AciIstioOperator
+    listKind: AciIstioOperatorList
+    plural: aciistiooperators
+    singular: aciistiooperator
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AciIstioOperatorSpec defines the desired state of AciIstioOperator
+            properties:
+              config:
+                type: string
+              profile:
+                type: string
+            required:
+            - config
+            - profile
+            type: object
+          status:
+            description: AciIstioOperatorStatus defines the observed state of AciIstioOperator
+            properties:
+              Successful or Not:
+                type: boolean
+            required:
+            - Successful or Not
+            type: object
+        type: object
+---
+{% endif %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-containers-config
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+  controller-config: |-
+    {
+        "flavor": {{config.flavor|json}},
+        "log-level": {{config.logging.controller_log_level|json}},
+        "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        {% if config.aci_config.capic %}
+        "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
+        {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
+        {% if config.aci_config.apic_refreshtime %}
+        "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
+        {% endif %}
+        {% if config.aci_config.apic_subscription_delay %}
+        "apic-subscription-delay": {{config.aci_config.apic_subscription_delay|json}},
+        {% endif %}
+        {% if config.aci_config.apic_refreshticker_adjust %}
+        "apic-refreshticker-adjust": "{{ config.aci_config.apic_refreshticker_adjust|json }}",
+        {% endif %}
+        "apic-username": {{config.aci_config.sync_login.username|json}},
+        "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+        "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        {% endif %}
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
+        "lb-type": "None",
+        {% endif %}
+        {% if config.kube_config.no_wait_for_service_ep_readiness %}
+        "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
+        {% endif %}
+        {% if config.kube_config.add_external_subnets_to_rdconfig %}
+        "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
+        {% endif %}
+        {% if config.kube_config.snat_operator.disable_periodic_snat_global_info_sync %}
+        "disable-periodic-snat-global-info-sync": {{ config.kube_config.snat_operator.disable_periodic_snat_global_info_sync|json }},
+        {% endif %}
+        {% if config.aci_config.opflex_device_delete_timeout %}
+        "opflex-device-delete-timeout": {{ config.aci_config.opflex_device_delete_timeout|json }},
+        {% endif %}
+        {% if config.kube_config.snat_operator.sleep_time_snat_global_info_sync %}
+        "sleep-time-snat-global-info-sync": {{ config.kube_config.snat_operator.sleep_time_snat_global_info_sync|json }},
+        {% endif %}
+        {% if config.istio_config.install_istio %}
+        "install-istio": {{ config.istio_config.install_istio|json }},
+        "istio-profile": {{ config.istio_config.install_profile|json }},
+        {% endif %}
+        {% if not config.aci_config.capic and config.flavor != "k8s-overlay" %}
+        "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
+        "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
+        {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
+        "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
+        "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
+        "aci-service-monitor-interval": {{ config.net_config.service_monitor_interval|json }},
+        "aci-pbr-tracking-non-snat": {{ config.net_config.pbr_tracking_non_snat|json }},
+        {% endif %}
+        "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        {% if config.flavor != "k8s-overlay" %}
+        "aci-vrf-dn": {{ config.aci_config.vrf.dn|json }},
+        "aci-l3out": {{config.aci_config.l3out.name|json}},
+        "aci-ext-networks": {{ config.aci_config.l3out.external_networks|json|indent(width=8) }},
+        {% endif %}
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        {% else %}
+        "aci-vrf": {{config.aci_config.vrf.name|json}},
+        {% endif %}
+        "default-endpoint-group": {
+            "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
+        {% if config.aci_config.capic %}
+            "name": {{config.kube_config.default_endpoint_group.group|json}}
+        {% else %}
+            "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
+        {% endif %}
+        },
+        {% if config.flavor != "k8s-overlay" %}
+        "max-nodes-svc-graph": {{ config.kube_config.max_nodes_svc_graph|json }},
+        {% endif %}
+        "namespace-default-endpoint-group": {
+            {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
+            "{{ns}}": {
+                "policy-space": {{val['tenant']|json}},
+            {% if config.aci_config.capic %}
+            "name": {{config.kube_config.default_endpoint_group.group|json}}
+            {% else %}
+                "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
+            {% endif %}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
+        },
+        "service-ip-pool": {{ config.kube_config.service_ip_pool|json|indent(width=8) }},
+        {% if config.user_config.net_config.extern_static %}
+        "extern-static": {{config.net_config.extern_static|json}},
+        {% endif %}
+        {% if config.user_config.net_config.extern_dynamic %}
+        "extern-dynamic": {{config.net_config.extern_dynamic|json}},
+        {% endif %}
+        "snat-contract-scope": {{ config.kube_config.snat_operator.contract_scope|json }},
+        "static-service-ip-pool": {{ config.kube_config.static_service_ip_pool|json|indent(width=8) }},
+        {% if config.kube_config.use_external_service_ip_allocator %}
+        "allocate-service-ips": false,
+        {% endif %}
+        "pod-ip-pool": {{ config.kube_config.pod_ip_pool|json|indent(width=8) }},
+        "pod-subnet-chunk-size": {{ config.net_config.pod_subnet_chunk_size|json }},
+        "node-service-ip-pool": {{ config.kube_config.node_service_ip_pool|json|indent(width=8) }},
+        "node-service-subnets": {{ config.kube_config.node_service_gw_subnets|json|indent(width=8) }}
+        {% if config.kube_config.enable_endpointslice %}
+        "enable_endpointslice": true
+        {% endif %}
+    }
+  host-agent-config: |-
+    {
+        "flavor": {{config.flavor|json}},
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        {% if config.kube_config.use_aci_anywhere_crd %}
+        "ep-registry": {{ config.kube_config.ep_registry|json }},
+        {% endif %}
+        "opflex-mode": {{ config.kube_config.opflex_mode|json }},
+        "log-level": {{config.logging.hostagent_log_level|json}},
+        "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
+        {% if config.flavor != "k8s-overlay" %}
+        "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+        "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% endif %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        {% else %}
+        "aci-vrf": {{config.aci_config.vrf.name|json}},
+        {% endif %}
+        "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        {% if config.flavor != "k8s-overlay" %}
+        "service-vlan": {{ config.net_config.service_vlan|json }},
+        "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        {% endif %}
+        "pod-subnet": {{ config.net_config.pod_subnet|json }},
+        "node-subnet": {{ config.net_config.node_subnet|json }},
+        "encap-type": {{ config.node_config.encap_type|json }},
+        "aci-infra-vlan": {{ config.net_config.infra_vlan|json }},
+        {% if config.net_config.interface_mtu %}
+        "interface-mtu": {{ config.net_config.interface_mtu|json }},
+        {% endif %}
+        {% if config.net_config.interface_mtu_headroom %}
+        "interface-mtu-headroom": {{ config.net_config.interface_mtu_headroom|json }},
+        {% endif %}
+        "cni-netconfig": {{ config.kube_config.pod_network|json|indent(width=8) }},
+        "default-endpoint-group": {
+            "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
+        {% if config.aci_config.capic %}
+            "name": {{config.kube_config.default_endpoint_group.group|json}}
+        {% else %}
+            "name": {{(config.kube_config.default_endpoint_group.app_profile ~ "|" ~ config.kube_config.default_endpoint_group.group)|json}}
+        {% endif %}
+        },
+        "namespace-default-endpoint-group": {
+            {% for ns, val in (config.kube_config.namespace_default_endpoint_group.items() | sort) %}
+            "{{ns}}": {
+                "policy-space": {{val['tenant']|json}},
+            {% if config.aci_config.capic %}
+            "name": {{config.kube_config.default_endpoint_group.group|json}}
+            {% else %}
+                "name": {{(val['app_profile'] ~ "|" ~ val['group'])|json}}
+            {% endif %}
+            }{% if not loop.last %},
+            {% endif %}{% endfor %}
+        },
+        {% if config.drop_log_config.enable %}
+        "enable-drop-log": true,
+        {% else %}
+        "enable-drop-log": false,
+        {% endif %}
+        {% if config.kube_config.enable_endpointslice %}
+        "enable_endpointslice": true,
+        {% endif %}
+        {% if config.nodepodif_config.enable %}
+        "enable-nodepodif": true,
+        {% else %}
+        "enable-nodepodif": false,
+        {% endif %}
+        {% if config.sriov_config.enable %}
+        {% if config.dpu_config.enable %}
+        "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},
+        {% endif %}
+        "enable-ovs-hw-offload": true
+        {% else %}
+        "enable-ovs-hw-offload": false
+        {% endif %}
+    }
+  {% if config.dpu_config.enable != True %}
+  opflex-agent-config: |-
+    {
+        "log": {
+            "level": {{config.logging.opflexagent_log_level|json}}
+        },
+        "opflex": {
+            "notif" : { "enabled" : "false" },
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
+          {% if not config.aci_config.client_ssl %}
+            ,"ssl": { "mode": "disabled" }
+          {% endif %}
+          {% if config.kube_config.run_gbp_container %}
+            ,"statistics" : { "mode" : "off" }
+          {% endif %}
+        },
+        "ovs": {
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
+        },
+        "prometheus": {
+            "enabled": {{ config.kube_config.opflex_agent_prometheus|json }}
+        }
+    }
+  {% endif %}
+  {% if config.kube_config.run_gbp_container %}
+  gbp-server-config: |-
+   {
+        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+        {% if not config.aci_config.capic %}
+        "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
+        {% else %}
+        "csr-list": {{ config.net_config.csr_list|json|indent(width=8) }},
+        "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
+        "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
+        "apic": {
+            "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+            "apic-username": {{config.aci_config.sync_login.username|json}},
+            "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+            "kafka": {
+                "brokers": {{config.aci_config.kafka.brokers|json|indent(width=16)}},
+                "client-key-path": "/certs/kafka-client.key",
+                "client-cert-path": "/certs/kafka-client.crt",
+                "ca-cert-path": "/certs/ca.crt",
+                "topic": {{config.aci_config.system_id|json}}
+            },
+            "cloud-info": {
+                "cluster-name": {{config.aci_config.system_id|json}},
+                "subnet": {{config.aci_config.subnet_dn|json}},
+                "vrf": {{config.aci_config.vrf_dn|json}}
+            }
+        }
+        {% endif %}
+   }
+   {% endif %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snat-operator-config
+  {% if config.flavor != "k8s-overlay" %}
+  namespace: aci-containers-system
+  {% else %}
+  namespace: {{ config.kube_config.system_namespace }}
+  {% endif %}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+    "start": "{{config.kube_config.snat_operator.port_range.start}}"
+    "end": "{{config.kube_config.snat_operator.port_range.end}}"
+    "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
+{% if config.flavor != "k8s-overlay" and config.aci_config.sync_login.key_data and config.aci_config.sync_login.cert_data %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aci-user-cert
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+data:
+  user.key: {{config.aci_config.sync_login.key_data|base64enc}}
+  user.crt: {{config.aci_config.sync_login.cert_data|base64enc}}
+{% endif %}
+{% if config.aci_config.capic %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-client-certificates 
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+data:
+  ca.crt: {{config.aci_config.kafka.cacert|base64enc}}
+  kafka-client.crt: {{config.aci_config.kafka.cert|base64enc}}
+  kafka-client.key: {{config.aci_config.kafka.key|base64enc}}
+{% endif %}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-controller
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-host-agent
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+---
+{% if config.kube_config.use_cluster_role %}
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: aci-containers:controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - namespaces
+  {% if not config.kube_config.pod_exec_resources_controller %}
+  - pods
+  {% else %}
+  - pods
+  - pods/exec
+  {% endif %}
+  - endpoints
+  - services
+  - events
+  - replicationcontrollers
+  - serviceaccounts
+  verbs:
+  - list
+  - watch
+  - get
+  - patch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - '*'
+- apiGroups:
+  - "rbac.authorization.k8s.io"
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - '*'
+{% if config.istio_config.install_istio %}
+- apiGroups:
+  - "install.istio.io"
+  resources:
+  - istiocontrolplanes
+  - istiooperators
+  verbs:
+  - '*'
+- apiGroups:
+  - "aci.istio"
+  resources:
+  - aciistiooperators
+  - aciistiooperator
+  verbs:
+  - '*'
+{% endif %}
+- apiGroups:
+  - "{{ config.kube_config.use_netpol_apigroup }}"
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+{% if config.kube_config.use_aci_anywhere_crd %}
+{% if not config.aci_config.capic %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - epgs
+  - contracts
+  verbs:
+  - list
+  - watch
+  - get
+{% endif %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - gbpsstates
+  - gbpsstates/status
+  verbs:
+  - '*'
+{% endif %}
+- apiGroups:
+  - "{{ config.kube_config.use_apps_apigroup }}"
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  {% if config.kube_config.pod_exec_resources_controller %}
+  - pods
+  - pods/exec
+  {% endif %}
+  - nodes
+  - services/status
+  {% if not config.kube_config.all_access_controller_clusterrole %}
+  verbs:
+  - update
+  {% else %}
+  verbs:
+  - '*'
+  {% endif %}
+- apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatpolicies/finalizers
+  - snatpolicies/status
+  - nodeinfos
+  verbs:
+  - update
+  - create
+  - list
+  - watch
+  - get
+  - delete
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatglobalinfos
+  - snatpolicies
+  - nodeinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+- apiGroups:
+  - "aci.qos"
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - "aci.netflow"
+  resources:
+  - netflowpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
+  - "aci.erspan"
+  resources:
+  - erspanpolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - update
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - nodepodifs
+  verbs:
+  - '*'
+{% if config.flavor != "k8s-overlay" %}
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs:
+  - list
+  - watch
+  - get
+{% endif %}
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "aci.netpol"
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - "aci.dnsnetpol"
+  resources:
+  - dnsnetworkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRole
+metadata:
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+  name: aci-containers:host-agent
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  {% if not config.kube_config.skip_namespace_resource_hostagent %}
+  - namespaces
+  {% endif %}
+  - pods
+  - endpoints
+  - services
+  {% if not config.kube_config.skip_replicationcontroller_resource_hostagent %}
+  - replicationcontrollers
+  {% endif %}
+  verbs:
+  - list
+  - watch
+  - get
+{% if config.drop_log_config.enable %}
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+{% endif %}
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - list
+  - watch
+  - get
+{% if config.kube_config.use_aci_anywhere_crd %}
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - podifs
+  - podifs/status
+  verbs:
+  - "*"
+{% endif %}
+{% if not config.kube_config.no_hostagent_networking_clusterrole %}
+- apiGroups:
+  - "{{ config.kube_config.use_netpol_apigroup }}"
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+  - get
+{% endif %}
+{% if not config.kube_config.no_hostagent_deployment_clusterrole %}
+- apiGroups:
+  - "{{ config.kube_config.use_apps_apigroup }}"
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - list
+  - watch
+  - get
+{% endif %}
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - snatpolicies
+  - snatglobalinfos
+  - rdconfigs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.qos"
+  resources:
+  - qospolicies
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - "aci.droplog"
+  resources:
+  - enabledroplogs
+  - prunedroplogs
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - "aci.snat"
+  resources:
+  - nodeinfos
+  - snatlocalinfos
+  verbs:
+  - create
+  - update
+  - list
+  - watch
+  - get
+  - delete
+{% if config.kube_config.host_agent_openshift_resource %}
+- apiGroups:
+  - "config.openshift.io"
+  resources:
+  - infrastructures
+  verbs:
+  - get
+{% endif %}
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "aci.netpol"
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "aci.aw"
+  resources:
+  - nodepodifs
+  verbs:
+  - "*"
+{% if config.sriov_config.enable %}
+- apiGroups: ["k8s.cni.cncf.io"]
+  resources:
+  - '*'
+  verbs:
+  - '*'
+{% endif %}
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers:controller
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers:controller
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-controller
+  namespace: {{ config.kube_config.system_namespace }}
+---
+apiVersion: {{ config.kube_config.use_rbac_api }}
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers:host-agent
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers:host-agent
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-host-agent
+  namespace: {{ config.kube_config.system_namespace }}
+---
+{% endif %}
+{% if config.kube_config.use_openshift_security_context_constraints %}
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: aci-containers-scc
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+users:
+  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-controller
+  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-host-agent
+{% if config.kube_config.openshift_security_constraint_operator_serviceaccount %}
+  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-operator
+{% endif %}
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+allowPrivilegedContainer: true
+allowedCapabilities:
+- '*'
+defaultAddCapabilities: []
+requiredDropCapabilities: []
+readOnlyRootFilesystem: false
+fsGroup:
+  type: RunAsAny
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+seccompProfiles:
+- '*'
+volumes:
+- '*'
+priority: 100
+---
+{% endif %}
+apiVersion: {{ config.kube_config.use_apps_api }}
+kind: DaemonSet
+metadata:
+  name: aci-containers-host
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+spec:
+  updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
+    type: RollingUpdate
+{% endif %}
+  selector:
+    matchLabels:
+      name: aci-containers-host
+      network-plugin: aci-containers
+  template:
+    metadata:
+      labels:
+        name: aci-containers-host
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        {% if config.kube_config.opflex_agent_prometheus == "true" %}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9612"
+        {% endif %}
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: aci-containers-host-agent
+      {% if config.registry.image_pull_secret %}
+      imagePullSecrets:
+        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      {% endif %}
+      tolerations:
+        - operator: Exists
+      {% if config.kube_config.use_cnideploy_initcontainer %}
+      initContainers:
+        - name: cnideploy
+          image: {{ config.registry.image_prefix }}/cnideploy:{{ config.registry.cnideploy_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          securityContext:
+            {% if config.kube_config.use_privileged_containers %}
+            privileged: true
+            {% endif %}
+            capabilities:
+              add:
+                - SYS_ADMIN
+          volumeMounts:
+            - name: cni-bin
+              mountPath: /mnt/cni-bin
+      {% endif %}
+      {% if not config.kube_config.no_priority_class %}
+      priorityClassName: system-cluster-critical
+      {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
+      {% endif %}
+      containers:
+        - name: aci-containers-host
+          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          securityContext:
+            {% if config.kube_config.use_privileged_containers %}
+            privileged: true
+            {% endif %}
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+                - SYS_PTRACE
+                - NET_RAW
+          env:
+            - name: GOTRACEBACK
+              value: "2"
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: TENANT
+              value: {{config.kube_config.default_endpoint_group.tenant|json}}
+            {% if config.kube_config.run_gbp_container %}
+            {% if config.aci_config.capic %}
+            - name: NODE_EPG
+              value: {{config.aci_config.nodes_epg|json}}
+            {% else %}
+            - name: NODE_EPG
+              value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
+            {% endif %}
+            - name: OPFLEX_MODE
+              value: overlay
+            {% else %}
+            - name: NODE_EPG
+              value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
+            {% endif %}
+            {% if config.multus.disable != True %}
+            - name: MULTUS
+              value: 'True'
+            {% endif %}
+            {% if config.net_config.disable_wait_for_network %}
+            - name: DISABLE_WAIT_FOR_NETWORK
+              value: 'True'
+            {% else %}
+            - name: DURATION_WAIT_FOR_NETWORK
+              value: {{'\"' + config.net_config.duration_wait_for_network|json + '\"'}}
+            {% endif %}
+            {% if config.flavor == "eks" %}
+            - name: SKIP_DOCKER_CHECK
+              value: "true"
+            {% endif %}
+          volumeMounts:
+            - name: cni-bin
+              mountPath: /mnt/cni-bin
+            - name: cni-conf
+              mountPath: /mnt/cni-conf
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: host-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            {% if config.kube_config.use_host_netns_volume %}
+            - mountPath: /run/netns
+              name: host-run-netns
+              readOnly: true
+              mountPropagation: HostToContainer
+            {% endif %}
+            {% if config.multus.disable != True %}
+            - name: multus-cni-conf
+              mountPath: /mnt/multus-cni-conf
+            {% endif %}
+            {% if config.dpu_config.enable == True %}
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            {% endif %}
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /status
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 30
+        {% if config.dpu_config.enable != True %}
+        - name: opflex-agent
+          env:
+            - name: REBOOT_WITH_OVS
+              value: "{{ config.kube_config.reboot_opflex_with_ovs }}"
+            {% if config.kube_config.run_gbp_container %}
+            - name: SSL_MODE
+              value: disabled
+            {% endif %}
+          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          securityContext:
+            {% if config.kube_config.use_privileged_containers %}
+            privileged: true
+            {% endif %}
+            capabilities:
+              add:
+                - NET_ADMIN
+          {% if config.kube_config.opflex_agent_prometheus == "true" %}
+          ports:
+            - name: metrics
+              containerPort: 9612
+          {% endif %}
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: opflex-hostconfig-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            - name: opflex-config-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+        {% endif %}
+        {% if config.kube_config.run_opflex_server_container %}
+        - name: opflex-server
+          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-opflexserver.sh"]
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          ports:
+            - containerPort: {{
+              config.net_config.opflex_server_port|json }}
+            - name: metrics
+              containerPort: 9632
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - name: opflex-server-config-volume
+              mountPath: /usr/local/etc/opflex-server
+            - name: hostvar
+              mountPath: /usr/local/var
+        {% endif %}
+        {% if config.kube_config.opflex_mode != "overlay" %}
+        {% if config.dpu_config.enable != True %}
+        - name: mcast-daemon
+          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-mcastdaemon.sh"]
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          {% if config.kube_config.use_privileged_containers %}
+          securityContext:
+            privileged: true
+          {% endif %}
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+        {% endif %}
+        {% endif %}
+        {% if config.dpu_config.enable == True %}
+        - name: lsyncd-daemon
+          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+          command: ["/bin/sh"]
+          args: ["/usr/local/bin/launch-lsyncd.sh"]
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: opflex-lsyncd-volume
+              mountPath: /usr/local/etc/opflex-agent-ovs
+            - name: lsyncd-config-volume
+              mountPath: /etc/configmap
+          {% endif %}
+      restartPolicy: Always
+      volumes:
+        - name: cni-bin
+          hostPath:
+            path: {{ config.kube_config.host_agent_cni_bin_path }}
+        - name: cni-conf
+          hostPath:
+            path: {{ config.kube_config.host_agent_cni_conf_path }}
+        - name: hostvar
+          hostPath:
+            path: /var
+        - name: hostrun
+          hostPath:
+            path: /run
+        - name: host-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: host-agent-config
+                path: host-agent.conf
+        - name: opflex-hostconfig-volume
+          emptyDir:
+            medium: Memory
+        {% if config.dpu_config.enable != True %}
+        - name: opflex-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: opflex-agent-config
+                path: local.conf
+        {% endif %}
+        {% if config.kube_config.use_opflex_server_volume %}
+        - name: opflex-server-config-volume
+        {% endif %}
+        {% if config.kube_config.use_host_netns_volume %}
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
+        {% endif %}
+        {% if config.multus.disable != True %}
+        - name: multus-cni-conf
+          hostPath:
+            path: /var/run/multus/
+        {% endif %}
+        {% if config.dpu_config.enable == True %}
+        - name: opflex-lsyncd-volume
+          hostPath:
+            path: /usr/local/etc/opflex-agent-ovs
+        - name: lsyncd-config-volume
+          configMap:
+            name: lsyncd-config
+            items:
+             - key: lsyncd.json
+               path: lsyncd.json
+        {% endif %}
+{% if config.dpu_config.enable != True %}
+---
+apiVersion: {{ config.kube_config.use_apps_api }}
+kind: DaemonSet
+metadata:
+  name: aci-containers-openvswitch
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+spec:
+  updateStrategy:
+{% if config.provision.upgrade_cluster %}
+    type: OnDelete
+{% else %}
+    type: RollingUpdate
+{% endif %}
+  selector:
+    matchLabels:
+      name: aci-containers-openvswitch
+      network-plugin: aci-containers
+  template:
+    metadata:
+      labels:
+        name: aci-containers-openvswitch
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: aci-containers-host-agent
+      {% if config.registry.image_pull_secret %}
+      imagePullSecrets:
+        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      {% endif %}
+      tolerations:
+        - operator: Exists
+      {% if not config.kube_config.no_priority_class %}
+      priorityClassName: system-cluster-critical
+      {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
+      {% endif %}
+      containers:
+        - name: aci-containers-openvswitch
+          image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          resources:
+            limits:
+              memory: "{{ config.kube_config.ovs_memory_limit }}"
+          securityContext:
+            {% if config.kube_config.use_privileged_containers %}
+            privileged: true
+            {% endif %}
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+                - SYS_NICE
+                - IPC_LOCK
+          env:
+            - name: OVS_RUNDIR
+              value: /usr/local/var/run/openvswitch
+          volumeMounts:
+            - name: hostvar
+              mountPath: /usr/local/var
+            - name: hostrun
+              mountPath: /run
+            - name: hostrun
+              mountPath: /usr/local/run
+            - name: hostetc
+              mountPath: /usr/local/etc
+            - name: hostmodules
+              mountPath: /lib/modules
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/liveness-ovs.sh
+      restartPolicy: Always
+      volumes:
+        - name: hostetc
+          hostPath:
+            path: /etc
+        - name: hostvar
+          hostPath:
+            path: /var
+        - name: hostrun
+          hostPath:
+            path: /run
+        - name: hostmodules
+          hostPath:
+            path: /lib/modules
+{% endif %}
+---
+apiVersion: {{ config.kube_config.use_apps_api }}
+kind: Deployment
+metadata:
+  name: aci-containers-controller
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+    name: aci-containers-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: aci-containers-controller
+      network-plugin: aci-containers
+  template:
+    metadata:
+      name: aci-containers-controller
+      namespace: {{ config.kube_config.system_namespace }}
+      labels:
+        name: aci-containers-controller
+        network-plugin: aci-containers
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      hostNetwork: true
+      serviceAccountName: aci-containers-controller
+      {% if config.registry.image_pull_secret %}
+      imagePullSecrets:
+        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      {% endif %}
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoSchedule
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        {% if config.flavor == "RKE2-kubernetes-1.24" %}
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        {% endif %}
+      {% if not config.kube_config.no_priority_class %}
+      priorityClassName: system-node-critical
+      {% endif %}
+      {% if config.kube_config.use_acicni_priority_class %}
+      priorityClassName: acicni-priority
+      {% endif %}
+      containers:
+        {% if config.kube_config.run_gbp_container %}
+        - name: aci-gbpserver
+          image: {{ config.registry.image_prefix }}/gbp-server:{{ config.registry.gbp_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+        {% if config.aci_config.capic %}
+            - name: kafka-certs
+              mountPath: /certs
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+        {% endif %}
+          env:
+            - name: GBP_SERVER_CONF
+              value: /usr/local/etc/aci-containers/gbp-server.conf
+        {% endif %}
+        - name: aci-containers-controller
+          image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          env:
+            {% if config.flavor != "k8s-overlay" %}
+            - name: WATCH_NAMESPACE
+              value: "{{ config.kube_config.snat_operator.watch_namespace }}"
+            {% endif %}
+            - name: ACI_SNAT_NAMESPACE
+              value: "{{ config.kube_config.snat_operator.snat_namespace }}"
+            - name: ACI_SNAGLOBALINFO_NAME
+              value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
+            - name: ACI_RDCONFIG_NAME
+              value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
+            - name: SYSTEM_NAMESPACE
+              value: "{{ config.kube_config.system_namespace}}"
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            {% if config.flavor != "k8s-overlay" %}
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+            {% endif %}
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /status
+              port: 8091
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 30
+      {% if config.aci_config.capic %}
+      initContainers:
+        - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+          name: stateinit
+          command:
+            - gbpserver
+            - -init
+            - -config-path
+            - /usr/local/etc/aci-containers/gbp-server.conf
+          volumeMounts:
+            - name: controller-config-volume
+              mountPath: /usr/local/etc/aci-containers/
+            - name: aci-user-cert-volume
+              mountPath: /usr/local/etc/aci-cert/
+      {% endif %}
+      volumes:
+        {% if config.aci_config.capic %}
+        - name: kafka-certs
+          secret:
+            secretName: kafka-client-certificates
+        {% endif %}
+        {% if config.flavor != "k8s-overlay" %}
+        - name: aci-user-cert-volume
+          secret:
+            secretName: aci-user-cert
+        {% endif %}
+        - name: controller-config-volume
+          configMap:
+            name: aci-containers-config
+            items:
+              - key: controller-config
+                path: controller.conf
+              {% if config.kube_config.run_gbp_container %}
+              - key: gbp-server-config
+                path: gbp-server.conf
+              {% endif %}
+{% if config.aci_config.capic %}
+---
+apiVersion: aci.aw/v1
+kind: PodIF
+metadata:
+  name: inet-route
+  namespace: kube-system
+status:
+  epg: aci-containers-inet-out
+  ipaddr: 0.0.0.0/0
+{% endif %}
+{% if config.sriov_config.enable %}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sriov-device-plugin
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-sriov-device-plugin-amd64
+  namespace: kube-system
+  labels:
+    tier: node
+    app: sriovdp
+spec:
+  selector:
+    matchLabels:
+      name: sriov-device-plugin
+  template:
+    metadata:
+      labels:
+        name: sriov-device-plugin
+        tier: node
+        app: sriovdp
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      serviceAccountName: sriov-device-plugin
+      containers:
+      - name: kube-sriovdp
+        image: docker.io/nfvpe/sriov-device-plugin:v3.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - --log-dir=sriovdp
+        - --log-level=10
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: devicesock
+          mountPath: /var/lib/kubelet/
+          readOnly: false
+        - name: log
+          mountPath: /var/log
+        - name: config-volume
+          mountPath: /etc/pcidp
+        - name: device-info
+          mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
+      volumes:
+        - name: devicesock
+          hostPath:
+            path: /var/lib/kubelet/
+        - name: log
+          hostPath:
+            path: /var/log
+        - name: device-info
+          hostPath:
+            path: /var/run/k8s.cni.cncf.io/devinfo/dp
+            type: DirectoryOrCreate
+        - name: config-volume
+          configMap:
+            name: sriovdp-config
+            items:
+            - key: config.json
+              path: config.json
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-sriov-device-plugin-ppc64le
+  namespace: kube-system
+  labels:
+    tier: node
+    app: sriovdp
+spec:
+  selector:
+    matchLabels:
+      name: sriov-device-plugin
+  template:
+    metadata:
+      labels:
+        name: sriov-device-plugin
+        tier: node
+        app: sriovdp
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/arch: ppc64le
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      serviceAccountName: sriov-device-plugin
+      containers:
+      - name: kube-sriovdp
+        image: docker.io/nfvpe/sriov-device-plugin:ppc64le
+        imagePullPolicy: IfNotPresent
+        args:
+        - --log-dir=sriovdp
+        - --log-level=10
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: devicesock
+          mountPath: /var/lib/kubelet/
+          readOnly: false
+        - name: log
+          mountPath: /var/log
+        - name: config-volume
+          mountPath: /etc/pcidp
+        - name: device-info
+          mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
+      volumes:
+        - name: devicesock
+          hostPath:
+            path: /var/lib/kubelet/
+        - name: log
+          hostPath:
+            path: /var/log
+        - name: device-info
+          hostPath:
+            path: /var/run/k8s.cni.cncf.io/devinfo/dp
+            type: DirectoryOrCreate
+        - name: config-volume
+          configMap:
+            name: sriovdp-config
+            items:
+            - key: config.json
+              path: config.json
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-sriov-device-plugin-arm64
+  namespace: kube-system
+  labels:
+    tier: node
+    app: sriovdp
+spec:
+  selector:
+    matchLabels:
+      name: sriov-device-plugin
+  template:
+    metadata:
+      labels:
+        name: sriov-device-plugin
+        tier: node
+        app: sriovdp
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/arch: arm64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      serviceAccountName: sriov-device-plugin
+      containers:
+      - name: kube-sriovdp
+# this is a temporary image repository for arm64 architecture, util CI/CD of the
+# sriov-device-plugin will not allow to recreate multiple images
+        image: alexeyperevalov/arm64-sriov-device-plugin
+        imagePullPolicy: IfNotPresent
+        args:
+        - --log-dir=sriovdp
+        - --log-level=10
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: devicesock
+          mountPath: /var/lib/kubelet/
+          readOnly: false
+        - name: log
+          mountPath: /var/log
+        - name: config-volume
+          mountPath: /etc/pcidp
+        - name: device-info
+          mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
+      volumes:
+        - name: devicesock
+          hostPath:
+            path: /var/lib/kubelet/
+        - name: log
+          hostPath:
+            path: /var/log
+        - name: device-info
+          hostPath:
+            path: /var/run/k8s.cni.cncf.io/devinfo/dp
+            type: DirectoryOrCreate
+        - name: config-volume
+          configMap:
+            name: sriovdp-config
+            items:
+            - key: config.json
+              path: config.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sriovdp-config
+  namespace: kube-system
+data:
+  config.json: |
+    {
+        "resourceList": [
+                 {
+                   "resourcePrefix": {{config.resourcePrefix|json}},
+                   "resourceName": {{config.resourceName|json}},
+                   "selectors": {
+                      "vendors": [{{config.vendors|json}}],
+                      {% if config.devices == "" %}
+                      "devices": ["1014","101e"],
+                      {% else %}
+                      "devices": [{{config.devices|json}}],
+                      {% endif %}
+                      "drivers": [{{config.drivers|json}}],
+                      {% if config.dpu_config.enable == True %}
+                      "pfNames": [{{config.pfNames|json}}],
+                      {% endif %}
+                      "isRdma":  {{config.isRdma}}
+                   }
+                 }
+        ]
+    }
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: network-attachment-definitions.k8s.cni.cncf.io
+spec:
+  group: k8s.cni.cncf.io
+  scope: Namespaced
+  names:
+    plural: network-attachment-definitions
+    singular: network-attachment-definition
+    kind: NetworkAttachmentDefinition
+    shortNames:
+    - net-attach-def
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: 'NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
+            Working Group to express the intent for attaching pods to one or more logical or physical
+            networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec'
+          type: object
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this represen
+                tation of an object. Servers should convert recognized schemas to the
+                latest internal value, and may reject unrecognized values. More info:
+                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this
+                object represents. Servers may infer this from the endpoint the client
+                submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: 'NetworkAttachmentDefinition spec defines the desired state of a network attachment'
+              type: object
+              properties:
+                config:
+                  description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
+                  type: string
+{% endif %}
+{% if config.dpu_config.enable == True %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lsyncd-config
+  {% if config.flavor != "k8s-overlay" %}
+  namespace: aci-containers-system
+  {% else %}
+  namespace: {{ config.kube_config.system_namespace }}
+  {% endif %}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+    network-plugin: aci-containers
+data:
+  lsyncd.json: |-
+    {
+       "dpuIp": {{config.dpuIp|json}},
+       "dpuUser": {{config.dpuUser|json}}
+    }
+{% endif %}
