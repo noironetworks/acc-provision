@@ -91,6 +91,7 @@ kube_config:
 registry:
   image_prefix: noiro
   aci_cni_operator_version: AciCniOperatorTag
+  use_digest : true
 
 logging:
   controller_log_level: debug

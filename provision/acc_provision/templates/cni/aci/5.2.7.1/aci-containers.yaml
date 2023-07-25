@@ -2174,7 +2174,11 @@ spec:
       {% if config.kube_config.use_cnideploy_initcontainer %}
       initContainers:
         - name: cnideploy
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/cnideploy@sha256:{{ config.registry.cnideploy_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/cnideploy:{{ config.registry.cnideploy_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
@@ -2201,7 +2205,11 @@ spec:
       {% endif %}
       containers:
         - name: aci-containers-host
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/aci-containers-host@sha256:{{ config.registry.aci_containers_host_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           {% if config.kube_config.aci_containers_host_memory_limit or config.kube_config.aci_containers_host_memory_request %}
           resources:
@@ -2318,7 +2326,11 @@ spec:
             - name: SSL_MODE
               value: disabled
             {% endif %}
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           {% if config.kube_config.opflex_agent_memory_limit or config.kube_config.opflex_agent_memory_request %}
           resources:
@@ -2361,7 +2373,11 @@ spec:
         {% endif %}
         {% if config.kube_config.run_opflex_server_container %}
         - name: opflex-server
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          {% endif %}
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-opflexserver.sh"]
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
@@ -2385,7 +2401,11 @@ spec:
         {% if config.kube_config.opflex_mode != "overlay" %}
         {% if config.dpu_config.enable != True %}
         - name: mcast-daemon
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+          {% endif %}
           command: ["/bin/sh"]
           args: ["/usr/local/bin/launch-mcastdaemon.sh"]
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
@@ -2544,7 +2564,11 @@ spec:
       {% endif %}
       containers:
         - name: aci-containers-openvswitch
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/openvswitch@sha256:{{ config.registry.openvswitch_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           resources:
             limits:
@@ -2658,7 +2682,11 @@ spec:
       containers:
         {% if config.kube_config.run_gbp_container %}
         - name: aci-gbpserver
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/gbp-server@sha256:{{ config.registry.gbp_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/gbp-server:{{ config.registry.gbp_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           volumeMounts:
             - name: controller-config-volume
@@ -2674,7 +2702,11 @@ spec:
               value: /usr/local/etc/aci-containers/gbp-server.conf
         {% endif %}
         - name: aci-containers-controller
+          {% if config.registry.use_digest %}
+          image: {{ config.registry.image_prefix }}/aci-containers-controller@sha256:{{ config.registry.aci_containers_controller_version }}
+          {% else %}
           image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
+          {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           {% if config.kube_config.aci_containers_controller_memory_limit or config.kube_config.aci_containers_controller_memory_request %}
           resources:
@@ -2723,7 +2755,11 @@ spec:
             timeoutSeconds: 30
       {% if config.aci_config.capic %}
       initContainers:
+        {% if config.registry.use_digest %}
+        - image: {{ config.registry.image_prefix }}/gbp-server-batch@sha256:{{ config.registry.gbp_version }}
+        {% else %}
         - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+        {% endif %}
           imagePullPolicy: {{ config.kube_config.image_pull_policy }}
           name: stateinit
           command:

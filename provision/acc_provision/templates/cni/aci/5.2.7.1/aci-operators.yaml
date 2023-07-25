@@ -193,7 +193,11 @@ spec:
                 - aci-containers-operator-2577247291
             weight: 1
       containers:
+      {% if config.registry.use_digest %}
+      - image: {{ config.registry.image_prefix }}/aci-containers-operator@sha256:{{ config.registry.aci_containers_operator_version }}
+      {% else %}
       - image: {{ config.registry.image_prefix }}/aci-containers-operator:{{ config.registry.aci_containers_operator_version }}
+      {% endif %}
         imagePullPolicy: {{ config.kube_config.image_pull_policy }}
         {% if config.kube_config.aci_containers_operator_memory_limit or config.kube_config.aci_containers_operator_memory_request %}
         resources:
@@ -235,7 +239,11 @@ spec:
           value: "{{ config.flavor }}"
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: "accprovisioninput"
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/acc-provision-operator@sha256:{{ config.registry.acc_provision_operator_version }}
+        {% else %}
         image: {{ config.registry.image_prefix }}/acc-provision-operator:{{ config.registry.acc_provision_operator_version }}
+        {% endif %}
         imagePullPolicy: {{ config.kube_config.image_pull_policy }}
         {% if config.kube_config.acc_provision_operator_memory_limit or config.kube_config.acc_provision_operator_memory_request %}
         resources:
