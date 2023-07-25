@@ -108,10 +108,8 @@ network:
     {% if config.kube_config.service_graph_endpoint_add_delay %}
     {% if config.kube_config.service_graph_endpoint_add_delay.delay != 0 %}
     service_graph_endpoint_add_delay: "{{ config.kube_config.service_graph_endpoint_add_delay.delay }}"
-    {% if config.kube_config.service_graph_endpoint_add_delay.services|length > 1 %}
-    service_graph_endpoint_add_services: [{%- for service in config.kube_config.service_graph_endpoint_add_delay.services %}{% if loop.first %}{{'"'}}{% endif %}{% if not loop.last %}{{ "{\\\"name\\\":\\\"%s\\\", \\\"namespace\\\":\\\"%s\\\"},"|format(service.name, service.namespace)}}{% else %}{{ "{\\\"name\\\":\\\"%s\\\", \\\"namespace\\\":\\\"%s\\\"}\""|format(service.name, service.namespace)}}{% endif %}{% endfor -%}]
-    {% else %}
-    service_graph_endpoint_add_services: [{% for service in config.kube_config.service_graph_endpoint_add_delay.services %}{{ "\"{\\\"name\\\":\\\"%s\\\", \\\"namespace\\\":\\\"%s\\\"}\""|format(service.name, service.namespace) }}{% endfor %}]
+    {% if config.kube_config.service_graph_endpoint_add_delay.services|length > 0 %}
+    service_graph_endpoint_add_services: ["{% for delaysvc in config.kube_config.service_graph_endpoint_add_delay.services %}{{ '{' }}{% for delaysvckey, delaysvcvalue in delaysvc.items() %}{% if delaysvckey == 'name' or delaysvckey == 'namespace' or delaysvckey == 'delay' %}{{'\\\"'}}{{ "%s"|format(delaysvckey) }}{{'\\\"'}}:{{'\\\"'}}{{ "%s"|format(delaysvcvalue) }}{{'\\\"'}}{{ ", " if not loop.last else "" }}{% endif %}{% endfor %}{{ '}' }}{{ "," if not loop.last else "" }}{% endfor %}"]
     {% endif %}
     {% endif %}
     {% endif %}

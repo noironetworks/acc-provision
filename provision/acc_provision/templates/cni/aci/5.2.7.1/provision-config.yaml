@@ -82,6 +82,14 @@ registry:
 #kube_config:
   # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
+  # service_graph_endpoint_add_delay:
+        # delay: 30                     #Delay in seconds
+        # services:                     #List of services for which delay should be added
+        # - name: "service-name1"
+        #   namespace: "service-ns1"
+        # - name: "service-name2"
+        #   namespace: "service-ns2"
+        #   delay: 60                   # per service delay that overrides common delay
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
