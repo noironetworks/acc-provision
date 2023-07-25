@@ -7,6 +7,8 @@ aci_config:
   #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
   #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
   #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
+  #tenant:
+    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
   apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101
   vmm_domain:                   # Kubernetes container domain configuration
@@ -84,6 +86,7 @@ registry:
   # aci_multipod: True #override if multipod setup, default is False
   # aci_multipod_ubuntu: True #override if multipod setup with ubuntu nodes, default is False (Used only for rke)
   # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
+  # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
   # hpp_optimization: True #override if needed, default is False
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
   # service_graph_endpoint_add_delay:
