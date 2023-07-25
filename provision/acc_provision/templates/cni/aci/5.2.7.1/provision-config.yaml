@@ -106,6 +106,7 @@ registry:
   #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
   # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
+  # acicni_priority_class_value: 1000001000  # override if needed, default is 1000000000
 
 #
 # Configuration for ACI CNI Operator

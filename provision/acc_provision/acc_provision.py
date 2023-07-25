@@ -261,7 +261,8 @@ def config_default():
             "use_host_netns_volume": False,
             "enable_endpointslice": False,
             "opflex_agent_opflex_asyncjson_enabled": "false",
-            "opflex_agent_ovs_asyncjson_enabled": "false"
+            "opflex_agent_ovs_asyncjson_enabled": "false",
+            "acicni_priority_class_value": 1000000000
         },
         "istio_config": {
             "install_istio": False,
