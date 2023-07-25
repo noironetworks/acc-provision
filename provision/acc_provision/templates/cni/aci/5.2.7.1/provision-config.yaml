@@ -94,6 +94,7 @@ registry:
         #   namespace: "service-ns2"
         #   delay: 60                   # per service delay that overrides common delay
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
+  # ovs_memory_request: "512Mi"         # override if needed, default is "128Mi"
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
   # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"

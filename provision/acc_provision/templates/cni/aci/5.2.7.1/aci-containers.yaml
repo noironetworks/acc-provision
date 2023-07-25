@@ -2504,6 +2504,8 @@ spec:
           resources:
             limits:
               memory: "{{ config.kube_config.ovs_memory_limit }}"
+            requests:
+              memory: "{{ config.kube_config.ovs_memory_request }}"
           securityContext:
             {% if config.kube_config.use_privileged_containers %}
             privileged: true

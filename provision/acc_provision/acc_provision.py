@@ -231,6 +231,7 @@ def config_default():
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "aci-containers-system",
+            "ovs_memory_request": "128Mi",
             "ovs_memory_limit": "1Gi",
             "aci_containers_memory_request": "128Mi",
             "aci_containers_memory_limit": "3Gi",
