@@ -1341,6 +1341,9 @@ data:
         {% if config.aci_config.capic %}
         "max-csr-tunnels": {{config.net_config.max_csr_tunnels|json|indent(width=8)}},
         {% endif %}
+        {% if config.kube_config.aci_multipod %}
+        "aci-multipod": {{config.kube_config.aci_multipod|json}},
+        {% endif %}
         {% if config.flavor != "k8s-overlay" %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
@@ -1457,6 +1460,12 @@ data:
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         {% if config.kube_config.use_aci_anywhere_crd %}
         "ep-registry": {{ config.kube_config.ep_registry|json }},
+        {% endif %}
+        {% if config.kube_config.aci_multipod %}
+        "aci-multipod": {{config.kube_config.aci_multipod|json}},
+        {% endif %}
+        {% if config.kube_config.dhcp_renew_max_retry_count %}
+        "dhcp-renew-max-retry-count": {{config.kube_config.dhcp_renew_max_retry_count|json}},
         {% endif %}
         {% if config.kube_config.dhcp_delay %}
         "dhcp-delay": {{ config.kube_config.dhcp_delay|json}},
@@ -2248,6 +2257,10 @@ spec:
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             - name: host-config-volume
               mountPath: /usr/local/etc/aci-containers/
+            {% if config.kube_config.aci_multipod %}
+            - name: dhclient
+              mountPath: /var/lib/dhclient
+            {% endif %}
             {% if config.kube_config.use_host_netns_volume %}
             - mountPath: /run/netns
               name: host-run-netns
@@ -2387,6 +2400,11 @@ spec:
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
+        {% if config.kube_config.aci_multipod %}
+        - name: dhclient
+          hostPath:
+            path: /var/lib/dhclient
+        {% endif %}
         {% if config.dpu_config.enable != True %}
         - name: opflex-config-volume
           configMap:
