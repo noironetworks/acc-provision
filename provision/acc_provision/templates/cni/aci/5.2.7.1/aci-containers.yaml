@@ -1362,6 +1362,9 @@ data:
         {% if config.aci_config.capic or config.flavor == "k8s-overlay" %}
         "lb-type": "None",
         {% endif %}
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
@@ -1479,6 +1482,9 @@ data:
         {% if config.flavor != "k8s-overlay" %}
         "service-vlan": {{ config.net_config.service_vlan|json }},
         "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        {% endif %}
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
         {% endif %}
         "pod-subnet": {{ config.net_config.pod_subnet|json }},
         "node-subnet": {{ config.net_config.node_subnet|json }},

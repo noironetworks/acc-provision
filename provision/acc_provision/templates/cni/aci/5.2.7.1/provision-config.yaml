@@ -80,7 +80,7 @@ registry:
   # image_pull_secret: secret_name      # (if needed)
 
 #kube_config:
-  # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
+  # hpp_optimization: True #override if needed, default is False
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
   # service_graph_endpoint_add_delay:
         # delay: 30                     #Delay in seconds
