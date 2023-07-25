@@ -109,6 +109,18 @@ registry:
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
   # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
   # use_system_node_priority_class: True        # override if needed, default is False
+  # aci_containers_controller_memory_request: "256Mi"   # override if needed, default is aci_containers_memory_request
+  # aci_containers_controller_memory_limit: "5Gi"       # override if needed, default is aci_containers_memory_limit
+  # aci_containers_host_memory_request: "256Mi"         # override if needed, default is aci_containers_memory_request
+  # aci_containers_host_memory_limit: "5Gi"             # override if needed, default is aci_containers_memory_limit
+  # mcast_daemon_memory_request: "256Mi"                # override if needed, default is aci_containers_memory_request
+  # mcast_daemon_memory_limit: "5Gi"                    # override if needed, default is aci_containers_memory_limit
+  # opflex_agent_memory_request: "256Mi"                # override if needed, default is aci_containers_memory_request
+  # opflex_agent_memory_limit: "5Gi"                    # override if needed, default is aci_containers_memory_limit
+  # acc_provision_operator_memory_request: "256Mi"      # override if needed, default is aci_containers_memory_request
+  # acc_provision_operator_memory_limit: "5Gi"          # override if needed, default is aci_containers_memory_limit
+  # aci_containers_operator_memory_request: "256Mi"     # override if needed, default is aci_containers_memory_request
+  # aci_containers_operator_memory_limit: "5Gi"         # override if needed, default is aci_containers_memory_limit
 
 #
 # Configuration for ACI CNI Operator
