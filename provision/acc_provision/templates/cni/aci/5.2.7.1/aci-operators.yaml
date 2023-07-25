@@ -176,8 +176,6 @@ spec:
     metadata:
       name: aci-containers-operator
       namespace: {{ config.kube_config.system_namespace }}
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
       labels:
         name: aci-containers-operator
         network-plugin: aci-containers
