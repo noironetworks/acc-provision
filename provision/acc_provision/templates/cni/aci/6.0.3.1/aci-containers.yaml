@@ -1567,7 +1567,7 @@ data:
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_ovs_asyncjson_enabled|json }} }
         },
         "prometheus": {
-            "enabled": "false"
+            "enabled": {{ config.kube_config.opflex_agent_prometheus|json }}
         }
     }
   {% if config.kube_config.run_gbp_container %}
@@ -2150,8 +2150,10 @@ spec:
         name: aci-containers-host
         network-plugin: aci-containers
       annotations:
+        {% if config.kube_config.opflex_agent_prometheus == "true" %}
         prometheus.io/scrape: "true"
         prometheus.io/port: "9612"
+        {% endif %}
     spec:
       hostNetwork: true
       hostPID: true
@@ -2341,6 +2343,11 @@ spec:
             capabilities:
               add:
                 - NET_ADMIN
+          {% if config.kube_config.opflex_agent_prometheus == "true" %}
+          ports:
+            - name: metrics
+              containerPort: 9612
+          {% endif %}
           volumeMounts:
             - name: hostvar
               mountPath: /usr/local/var
