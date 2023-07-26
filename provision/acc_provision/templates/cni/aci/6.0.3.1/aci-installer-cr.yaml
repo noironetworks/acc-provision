@@ -1,0 +1,17 @@
+apiVersion: controller.netop-manager.io/v1alpha1
+kind: Installer
+metadata:
+  name: installer-aci-cni
+spec:
+  operatorConfigs:
+    network:
+      cko-cni:
+        version: "{{ config.aci_config.cni_flavor_version }}"
+        type: "cko-cni-aci"
+        {% if config.managedComponent == "managed" %}
+        managedComponent: true
+        {% else %}
+        managedComponent: false
+        {% endif %}        
+        manifests:
+          aci-cni-specs: {{ config.aci_config.base64_encoded_cko_aci_spec }}
