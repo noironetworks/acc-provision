@@ -17,8 +17,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
       labels:
         name: aci-containers-controller
         network-plugin: aci-containers
@@ -37,7 +35,7 @@ spec:
           value: routingdomain-config
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
-        image: quay.io/ckodev/aci-containers-controller:5.2.3.4.1d150da
+        image: quay.io/ckodev/aci-containers-controller:6.0.3.1.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10

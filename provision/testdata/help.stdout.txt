@@ -5,8 +5,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [--upgrade] [--disable-multus disable_multus]
                         [--flavor-version flavor_version] [--cko]
                         [--cko-version cko_version] [--cko-mode cko_mode]
-                        [--netop-image-tag netop_image_tag]
-                        [-s file]
+                        [--netop-image-tag netop_image_tag] [-s file]
 
 Provision an ACI/Kubernetes installation
 
