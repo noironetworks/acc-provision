@@ -6,6 +6,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [--flavor-version flavor_version] [--cko]
                         [--cko-version cko_version] [--cko-mode cko_mode]
                         [--netop-image-tag netop_image_tag]
+                        [-s file]
 
 Provision an ACI/Kubernetes installation
 
@@ -48,3 +49,4 @@ optional arguments:
   --cko-mode cko_mode   netop-manager cni managed/unmanaged
   --netop-image-tag netop_image_tag
                         network operator image tag
+  -s, --dpu file        output file for your dpu kubernetes deployment

@@ -1568,6 +1568,7 @@ def get_args(**overrides):
         # configuration which would otherwise be discovered from
         # the APIC
         "infra_vlan": None,
+        "dpu": None,
         "test_run": True,
         "flavor_version": None,
         "cko": False,

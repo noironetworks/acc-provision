@@ -82,6 +82,8 @@ net_config:
 registry:
   image_prefix: noiro                   # e.g: registry.example.com/noiro
   # image_pull_secret: secret_name      # (if needed)
+  # dpu_init_version: <version>
+  # dpu_control_server: ip:port # e.g: 192.168.20.1:5000
   # use_digest: true   # option to pull images using digest, override if needed, default is false.
 
 #kube_config:
@@ -108,6 +110,8 @@ registry:
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
         # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
+
+  #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
   #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
   # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
@@ -147,6 +151,13 @@ registry:
   # device_info:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
+
+#dpu_config:
+    # enable: True          # default is false
+    # ip: ""                # default is "192.168.200.2"
+    # user: ""              # default is "opflex"
+    # ovsdb_socket_port: "" # default is "6640"
+    # masterNodeIp: ""
 
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
