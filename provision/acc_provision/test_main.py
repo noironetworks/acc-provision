@@ -1539,6 +1539,18 @@ def test_flvr_openshift_410_esx_vDS_6_6_above():
     )
 
 
+@in_testdir
+def test_flvr_openshift_411_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_411_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_411_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
