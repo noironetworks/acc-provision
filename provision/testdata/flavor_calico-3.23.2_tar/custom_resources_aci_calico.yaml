@@ -30,7 +30,7 @@ metadata:
   name: default 
 spec: {}
 ---
-#This creates a secret to store the BGP Password. We also need to add a Role and RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
+#This creates a secret to store the BGP Password. We also need to add a Roleand RoleBinding to ensure the calico-node ServiceAccount can access the Secret.
 apiVersion: v1
 kind: Secret
 metadata:
@@ -228,7 +228,7 @@ data:
                 "enable_updates": false
             },
             "aci_config": {
-                "system_id": "calico-cni",
+                "system_id": "calico-l3out-fsvi-vlan-13",
                 "apic_hosts": [
                     "10.30.120.100"
                 ],
@@ -246,7 +246,7 @@ data:
                         },
                         "secret": "test"
                     },
-                    "name": "test-l3out",
+                    "name": "calico-l3out-fsvi-vlan-13",
                     "svi": {
                         "floating_ip": "2.100.101.100/24",
                         "mtu": 9000,
