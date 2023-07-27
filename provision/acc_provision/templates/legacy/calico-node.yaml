@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Node
-metadata:
-  name: {{config.node_name}}
-  labels:
-    rack_id: "{{config.id}}"
