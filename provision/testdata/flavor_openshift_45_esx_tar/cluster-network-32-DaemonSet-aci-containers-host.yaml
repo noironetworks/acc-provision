@@ -68,6 +68,15 @@ spec:
           name: opflex-hostconfig-volume
         - mountPath: /usr/local/etc/aci-containers/
           name: host-config-volume
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
         - mountPath: /run/netns
           mountPropagation: HostToContainer
           name: host-run-netns
@@ -152,6 +161,15 @@ spec:
       - emptyDir:
           medium: Memory
         name: opflex-hostconfig-volume
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker
       - configMap:
           items:
           - key: opflex-agent-config
