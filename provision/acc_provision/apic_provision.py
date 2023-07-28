@@ -37,6 +37,7 @@ apic_cookies = {}
 apic_default_timeout = (15, 90)
 aciContainersOwnerAnnotation = "orchestrator:aci-containers-controller"
 aci_prefix = "aci-containers-"
+aci_chained_prefix = "netop-"
 
 
 def err(msg):
@@ -69,10 +70,15 @@ def aci_obj(klass, pair_list):
     return data
 
 
+def is_chained_mode(config):
+    return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
+
+
 class Apic(object):
 
     TENANT_OBJECTS = ["ap-kubernetes", "BD-kube-node-bd", "BD-kube-pod-bd", "brc-kube-api", "brc-health-check", "brc-dns", "brc-icmp", "flt-kube-api-filter", "flt-dns-filter", "flt-health-check-filter-out", "flt-icmp-filter", "flt-health-check-filter-in"]
     ACI_PREFIX = aci_prefix
+    ACI_CHAINED_PREFIX = aci_chained_prefix
 
     def __init__(
         self,
@@ -237,6 +243,10 @@ class Apic(object):
         path = "/api/mo/uni/tn-%s/out-%s.json" % (tenant, name)
         return self.get_path(path)
 
+    def get_vmm_dom(self, vmm_type, vmm_domain):
+        path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_domain)
+        return self.get_path(path)
+
     def get_vmmdom_vlanpool_tDn(self, vmmdom):
         path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children&target-subtree-class=infraRsVlanNs" % (vmmdom)
         return self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
@@ -267,8 +277,8 @@ class Apic(object):
         path = "/api/node/mo/uni/userext/user-%s.json" % name
         return self.get_path(path)
 
-    def get_ap(self, tenant):
-        path = "/api/mo/uni/tn-%s/ap-kubernetes.json" % tenant
+    def get_ap(self, tenant, ap):
+        path = "/api/mo/uni/tn-%s/ap-%s.json" % (tenant, ap)
         return self.get_path(path)
 
     def get_ext_l3out_lnodep(self, tenant, l3out_name):
@@ -326,6 +336,11 @@ class Apic(object):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
+        if is_chained_mode(cfg):
+            if cfg["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
+                pysdom_path = "/api/mo/uni/phys-%s.json" % cfg["user_config"]["aci_config"]["physical_domain"]["domain"]
+                shared_resources.append(pysdom_path)
+
         if vrf_tenant not in ["common", system_id]:
             shared_resources.append("/api/mo/uni/tn-%s.json" % vrf_tenant)
 
@@ -381,7 +396,13 @@ class Apic(object):
                                         del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
                                         if 'name' in val['attributes']:
                                             name = val['attributes']['name']
+                                            if is_chained_mode(cfg) and "ap-" in val['attributes']['dn']:
+                                                continue
                                             if (not old_naming) and (system_id in name):
+                                                resp = self.delete(del_path)
+                                                self.check_resp(resp)
+                                                dbg("%s: %s" % (del_path, resp.text))
+                                            elif is_chained_mode(cfg) and (name == self.ACI_CHAINED_PREFIX + "nodes"):
                                                 resp = self.delete(del_path)
                                                 self.check_resp(resp)
                                                 dbg("%s: %s" % (del_path, resp.text))
@@ -424,6 +445,28 @@ class Apic(object):
                 if self.check_valid_annotation(cluster_l3out_tenant_path):
                     self.delete(cluster_l3out_tenant_path)
 
+        if is_chained_mode(cfg):
+            ap_path = "/api/mo/uni/tn-%s/ap-%s.json" % (cluster_tenant, self.ACI_CHAINED_PREFIX + system_id)
+            ap_query_path = ap_path + "?query-target=children"
+            resp = self.get(ap_query_path)
+            self.check_resp(resp)
+            respj = json.loads(resp.text)
+            respj = respj["imdata"]
+            for resp in respj:
+                for val in resp.values():
+                    if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
+                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        if 'name' in val['attributes']:
+                            name = val['attributes']['name']
+                            if self.check_valid_annotation(del_path, 'fvAEPg'):
+                                resp = self.delete(del_path)
+                                self.check_resp(resp)
+                                dbg("%s: %s" % (del_path, resp.text))
+            if self.check_valid_annotation(ap_path, 'fvAp'):
+                resp = self.delete(ap_path)
+                self.check_resp(resp)
+                dbg("%s: %s" % (ap_path, resp.text))
+
         # Clean the cluster tenant iff it has our annotation and does
         # not have any application profiles
         # considering it's not a pre_existing_tenant which is manually created on the APIC
@@ -455,10 +498,11 @@ class Apic(object):
             dbg("Unable to get APIC version object %s: %s" % (path, str(e)))
         return version
 
-    def check_valid_annotation(self, path):
+    def check_valid_annotation(self, path, mo=''):
         try:
+            mo = mo if mo else 'fvTenant'
             data = self.get_path(path)
-            if data['fvTenant']['attributes']['annotation'] == aciContainersOwnerAnnotation:
+            if data[mo]['attributes']['annotation'] == aciContainersOwnerAnnotation:
                 return True
         except Exception as e:
             dbg("Unable to find APIC object %s: %s" % (path, str(e)))
@@ -557,12 +601,14 @@ class Apic(object):
 class ApicKubeConfig(object):
 
     ACI_PREFIX = aci_prefix
+    ACI_CHAINED_PREFIX = aci_chained_prefix
 
     def __init__(self, config, apic):
         self.config = config
         self.apic = apic if apic else None
         self.use_kubeapi_vlan = True
         self.tenant_generator = "kube_tn"
+        self.tenant_generator_chained_mode = "chained_mode_kube_tn"
         self.associate_aep_to_nested_inside_domain = False
 
     def get_nested_domain_type(self):
@@ -573,6 +619,17 @@ class ApicKubeConfig(object):
         if t and t.lower() == "vmware":
             return "VMware"
         return t
+
+    def get_vlan_range(self, vlan):
+        start_vlan = None
+        end_vlan = None
+        if type(vlan) is int:
+            start_vlan = vlan
+            end_vlan = vlan
+        elif '-' in vlan:
+            start_vlan = int(vlan.split('-')[0])
+            end_vlan = int(vlan.split('-')[1])
+        return start_vlan, end_vlan
 
     @staticmethod
     def save_config(config, outfilep):
@@ -606,11 +663,34 @@ class ApicKubeConfig(object):
                     data.append((path, None))
 
         data = []
-        if "calico" not in self.config['flavor']:
+        if is_chained_mode(self.config):
+            if not self.config["chained_cni_config"]["skip_node_network_provisioning"]:
+                pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
+                kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+                phys_name = self.config["aci_config"]["physical_domain"]["domain"]
+                if phys_name != self.config["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
+                    update(data, self.pdom_pool_chained(pool_name, [kubeapi_vlan]))
+                    update(data, self.chained_phys_dom(phys_name, pool_name))
+                update(data, self.chained_mode_associate_aep())
+
+            # if self.config["user_config"]["aci_config"].get("vmm_domain") == None:
+            #     update(data, self.chained_kube_dom(apic_version))
+
+            update(data, getattr(self, self.tenant_generator_chained_mode)())
+            if self.config["aci_config"].get("l3out", None).get("external_networks", False):
+                update(data, self.l3out_tn())
+                for l3out_instp in self.config["aci_config"]["l3out"]["external_networks"]:
+                    update(data, self.l3out_contract(l3out_instp))
+            update(data, self.kube_user())
+            update(data, self.kube_cert())
+            return data
+        elif "calico" not in self.config['flavor']:
             update(data, self.pdom_pool())
             update(data, self.vdom_pool())
             update(data, self.mcast_pool())
-            update(data, self.phys_dom())
+            phys_name = self.config["aci_config"]["physical_domain"]["domain"]
+            pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
+            update(data, self.phys_dom(phys_name, pool_name))
             update(data, self.kube_dom(apic_version))
             update(data, self.nested_dom())
             update(data, self.associate_aep())
@@ -755,6 +835,13 @@ class ApicKubeConfig(object):
         elif not (data[key]["attributes"]["name"] == "common") and not (pre_existing_tenant):
             data[key]["attributes"]["annotation"] = ann
 
+        if is_chained_mode(self.config) and key == "fvAp":
+            tenant_name = self.config["aci_config"].get("tenant", None).get("name", None)
+            if self.apic and tenant_name:
+                app_profile = self.ACI_CHAINED_PREFIX + self.config["aci_config"]["system_id"]
+                if self.apic.get_ap(tenant_name, app_profile):
+                    data[key]["attributes"]["annotation"] = ""
+
     def cluster_info(self):
         tn_name = self.config["aci_config"]["cluster_tenant"]
         vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
@@ -826,6 +913,67 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        return path, data
+
+    def pdom_pool_chained(self, pool_name, vlan_list):
+        path = "/api/mo/uni/infra/vlanns-[%s]-static.json" % pool_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvnsVlanInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [("name", pool_name), ("allocMode", "static")]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        for vlan in vlan_list:
+            start_vlan, end_vlan = self.get_vlan_range(vlan)
+            vlan_encap_blk_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvnsEncapBlk",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "allocMode",
+                                                "static",
+                                            ),
+                                            (
+                                                "from",
+                                                "vlan-%s"
+                                                % start_vlan,
+                                            ),
+                                            (
+                                                "to",
+                                                "vlan-%s"
+                                                % end_vlan,
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data["fvnsVlanInstP"]["children"].append(vlan_encap_blk_obj)
+        self.annotateApicObjects(data)
         return path, data
 
     def pdom_pool(self):
@@ -1045,10 +1193,61 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
-    def phys_dom(self):
-        phys_name = self.config["aci_config"]["physical_domain"]["domain"]
-        pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
+    def chained_phys_dom(self, phys_name, pool_name):
+        path = "/api/mo/uni/phys-%s.json" % phys_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "physDomP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("dn", "uni/phys-%s" % phys_name),
+                                        ("name", phys_name),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        if pool_name:
+            vlan_pool_obj = collections.OrderedDict(
+                [
+                    (
+                        "infraRsVlanNs",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tDn",
+                                                "uni/infra/vlanns-[%s]-static"
+                                                % pool_name,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data["physDomP"]["children"].append(vlan_pool_obj)
+        self.annotateApicObjects(data)
+        return path, data
 
+    def phys_dom(self, phys_name, pool_name):
         path = "/api/mo/uni/phys-%s.json" % phys_name
         data = collections.OrderedDict(
             [
@@ -1092,6 +1291,47 @@ class ApicKubeConfig(object):
                                         ]
                                     )
                                 ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
+
+    def chained_kube_dom(self, apic_version):
+        vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
+        vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+        encap_type = self.config["aci_config"]["vmm_domain"]["encap_type"]
+        mcast_fabric = self.config["aci_config"]["vmm_domain"]["mcast_fabric"]
+        cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
+
+        mode = "k8s"
+        if vmm_type == "OpenShift":
+            mode = "openshift"
+        elif self.is_newer_version(apic_version, "5.1") and cluster_provider == "Rancher":
+            mode = "rancher"
+
+        path = "/api/mo/uni/vmmp-%s/dom-%s.json" % (vmm_type, vmm_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vmmDomP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("name", vmm_name),
+                                        ("mode", mode),
+                                        ("enfPref", "sw"),
+                                        ("encapMode", encap_type),
+                                        ("prefEncapMode", encap_type),
+                                        ("mcastAddr", mcast_fabric),
+                                    ]
+                                ),
                             ),
                         ]
                     ),
@@ -2340,6 +2580,197 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
+    def chained_mode_associate_aep(self):
+        aep_name = self.config["aci_config"]["aep"]
+        phys_name = self.config["aci_config"]["physical_domain"]["domain"]
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        system_id = self.config["aci_config"]["system_id"]
+        aci_system_id = self.ACI_CHAINED_PREFIX + system_id
+
+        path = "/api/mo/uni/infra.json"
+        data = collections.OrderedDict(
+            [
+                (
+                    "infraAttEntityP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict([("name", aep_name)]),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "infraRsDomP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "tDn",
+                                                                        "uni/phys-%s"
+                                                                        % phys_name,
+                                                                    )
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        if self.use_kubeapi_vlan:
+            kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+            kubeapi_vlan_mode = self.config["net_config"]["kubeapi_vlan_mode"]
+            if self.config["aci_config"]["use_legacy_kube_naming_convention"]:
+                data["infraAttEntityP"]["children"].append(
+                    collections.OrderedDict(
+                        [
+                            (
+                                "infraGeneric",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict([("name", "default")]),
+                                        ),
+                                        (
+                                            "children",
+                                            [
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "infraRsFuncToEpg",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "attributes",
+                                                                        collections.OrderedDict(
+                                                                            [
+                                                                                (
+                                                                                    "tDn",
+                                                                                    "uni/tn-%s/ap-kubernetes/epg-kube-nodes"
+                                                                                    % (
+                                                                                        tn_name,
+                                                                                    ),
+                                                                                ),
+                                                                                (
+                                                                                    "encap",
+                                                                                    "vlan-%s"
+                                                                                    % (
+                                                                                        kubeapi_vlan,
+                                                                                    ),
+                                                                                ),
+                                                                                (
+                                                                                    "mode",
+                                                                                    kubeapi_vlan_mode
+                                                                                ),
+                                                                            ]
+                                                                        ),
+                                                                    )
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                )
+                                            ],
+                                        ),
+                                    ]
+                                ),
+                            )
+                        ]
+                    )
+                )
+            else:
+                data["infraAttEntityP"]["children"].append(
+                    collections.OrderedDict(
+                        [
+                            (
+                                "infraGeneric",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict([("name", "default")]),
+                                        ),
+                                        (
+                                            "children",
+                                            [
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "infraRsFuncToEpg",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "attributes",
+                                                                        collections.OrderedDict(
+                                                                            [
+                                                                                (
+                                                                                    "tDn",
+                                                                                    "uni/tn-%s/ap-%s/epg-%snodes"
+                                                                                    % (
+                                                                                        tn_name,
+                                                                                        aci_system_id,
+                                                                                        self.ACI_CHAINED_PREFIX,
+                                                                                    ),
+                                                                                ),
+                                                                                (
+                                                                                    "encap",
+                                                                                    "vlan-%s"
+                                                                                    % (
+                                                                                        kubeapi_vlan,
+                                                                                    ),
+                                                                                ),
+                                                                                (
+                                                                                    "mode",
+                                                                                    kubeapi_vlan_mode
+                                                                                ),
+                                                                            ]
+                                                                        ),
+                                                                    )
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                )
+                                            ],
+                                        ),
+                                    ]
+                                ),
+                            )
+                        ]
+                    )
+                )
+
+        base = "/api/mo/uni/infra/attentp-%s" % aep_name
+        rsphy = base + "/rsdomP-[uni/phys-%s].json" % phys_name
+
+        if self.config["aci_config"]["use_legacy_kube_naming_convention"]:
+            rsfun = (
+                base + "/gen-default/rsfuncToEpg-"
+                "[uni/tn-%s/ap-kubernetes/epg-kube-nodes].json" % (tn_name)
+            )
+        else:
+            rsfun = (
+                base + "/gen-default/rsfuncToEpg-"
+                "[uni/tn-%s/ap-%s/epg-%snodes].json" % (tn_name, aci_system_id, self.ACI_CHAINED_PREFIX)
+            )
+        self.annotateApicObjects(data)
+        return path, data, rsphy, rsfun
+
     def associate_aep(self):
         aep_name = self.config["aci_config"]["aep"]
         phys_name = self.config["aci_config"]["physical_domain"]["domain"]
@@ -3441,6 +3872,365 @@ class ApicKubeConfig(object):
                     else:
                         prov[idx1] = self.ACI_PREFIX + prov[idx1]
                 config["aci_config"]["items"][idx]["provided"] = prov
+
+    def chained_mode_kube_tn(self):
+        system_id = self.config["aci_config"]["system_id"]
+        app_profile = self.config["aci_config"]["app_profile"]
+        tn_name = self.config["aci_config"]["cluster_tenant"]
+        pre_existing_tenant = self.config["aci_config"]["use_pre_existing_tenant"]
+        phys_name = self.config["aci_config"]["physical_domain"]["domain"]
+        kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
+        kube_vrf = self.config["aci_config"]["vrf"]["name"]
+        kube_l3out = self.config["aci_config"].get("l3out", None).get("name", None)
+        node_subnets = self.config["net_config"].get("node_subnet", [])
+        if not isinstance(node_subnets, list):
+            node_subnets = [node_subnets]
+
+        bd_prefix = self.ACI_CHAINED_PREFIX
+        epg_prefix = self.ACI_CHAINED_PREFIX
+
+        node_bd_name = "%snodes" % bd_prefix
+        node_epg_name = "%snodes" % epg_prefix
+        kube_default_children = []
+        path = "/api/mo/uni/tn-%s.json" % tn_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvTenant",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name)]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvAp",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [("name", app_profile)]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        if self.config["aci_config"]["vmm_domain"]:
+            vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
+            vmm_type = self.config["aci_config"]["vmm_domain"]["type"]
+            vmm_epg_rs_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvRsDomAtt",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tDn",
+                                                "uni/vmmp-%s/dom-%s"
+                                                % (vmm_type, vmm_name),
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            kube_default_children.append(vmm_epg_rs_obj)
+
+        if not self.config["chained_cni_config"]["skip_node_network_provisioning"]:
+            l3out_contract_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvRsCons",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "tnVzBrCPName",
+                                                "%s-l3out-allow-all"
+                                                % system_id,
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+
+            node_epg_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvAEPg",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                node_epg_name,
+                                            )
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "fvRsBd",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "tnFvBDName",
+                                                                            node_bd_name,
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            )
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        ),
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+
+            if kube_l3out:
+                node_epg_obj["fvAEPg"]["children"].append(l3out_contract_obj)
+
+            node_bd_obj = collections.OrderedDict(
+                [
+                    (
+                        "fvBD",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                node_bd_name,
+                                            ),
+                                            (
+                                                "arpFlood",
+                                                yesno(True),
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "fvRsCtx",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "tnFvCtxName",
+                                                                            kube_vrf,
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            )
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        ),
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+
+            # If flavor requires adding kubeapi VLAN, add corresponding
+            # fvRsDomAtt object to node-epg
+            # To avoid association of physdom with node EPG for ESX install
+            if not self.config["aci_config"]["no_physdom_for_node_epg"]:
+                if self.use_kubeapi_vlan:
+                    kubeapi_dom_obj = collections.OrderedDict(
+                        [
+                            (
+                                "fvRsDomAtt",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "encap",
+                                                        "vlan-%s"
+                                                        % kubeapi_vlan,
+                                                    ),
+                                                    (
+                                                        "tDn",
+                                                        "uni/phys-%s"
+                                                        % phys_name,
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    )
+
+            # If dhcp_relay_label is present, attach the label to the kube-node-bd
+            if "dhcp_relay_label" in self.config["aci_config"]:
+                dbg("Handle DHCP Relay Label")
+                dhcp_relay_label = self.config["aci_config"]["dhcp_relay_label"]
+                attr = collections.OrderedDict(
+                    [
+                        (
+                            "dhcpLbl",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [("name", dhcp_relay_label), ("owner", "infra")]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            tenant_obj = data["fvTenant"]["children"]
+            tenant_obj.append(node_bd_obj)
+            for i, child in enumerate(data["fvTenant"]["children"]):
+                if "fvAp" in child.keys() and child["fvAp"]["attributes"]["name"] == app_profile:
+                    ap_object = child["fvAp"]["children"]
+                    ap_object.append(node_epg_obj)
+
+                    if self.config["aci_config"]["vmm_domain"]:
+                        for j, ap_child in enumerate(child["fvAp"]["children"]):
+                            if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
+                                epg_object = ap_child["fvAEPg"]["children"]
+                                epg_object.append(vmm_epg_rs_obj)
+
+                    if not self.config["aci_config"]["no_physdom_for_node_epg"]:
+                        if not self.config["aci_config"]["vmm_domain"]:
+                            for j, ap_child in enumerate(child["fvAp"]["children"]):
+                                if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
+                                    epg_object = ap_child["fvAEPg"]["children"]
+                        epg_object.append(kubeapi_dom_obj)
+
+                if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
+                    bd_object = child["fvBD"]["children"]
+                    for node_subnet in node_subnets:
+                        node_subnet_obj = collections.OrderedDict(
+                            [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
+                        )
+                        bd_object.append(
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "fvSubnet",
+                                        node_subnet_obj
+                                    )
+                                ]
+                            )
+                        )
+                    if kube_l3out:
+                        l3out_object = collections.OrderedDict(
+                            [
+                                (
+                                    "fvRsBDToOut",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "attributes",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "tnL3extOutName",
+                                                            kube_l3out,
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                )
+                            ]
+                        )
+                        bd_object.append(l3out_object)
+
+                    # If dhcp_relay_label is present, attach the label to the kube-node-bd
+                    if "dhcp_relay_label" in self.config["aci_config"]:
+                        bd_object.append(attr)
+                        break
+
+        for epg in self.config["aci_config"].get("custom_epgs", []):
+            data["fvTenant"]["children"][0]["fvAp"]["children"].append(
+                {
+                    "fvAEPg": {
+                        "attributes": {
+                            "name": epg
+                        },
+                        "children": kube_default_children
+                    }
+                })
+
+        self.annotateApicObjects(data, pre_existing_tenant)
+        return path, data
 
     def kube_tn(self, flavor):
         system_id = self.config["aci_config"]["system_id"]

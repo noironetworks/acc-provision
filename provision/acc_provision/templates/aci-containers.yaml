@@ -18,6 +18,9 @@ metadata:
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 {% set flavor_version = config.flavor.split('-') %}
+{% if config.chained_cni_config.enable %}
+apiVersion: scheduling.k8s.io/v1
+{% else %}
 {% set major_version = flavor_version[1].split('.')[0] | int %}
 {% set minor_version = flavor_version[1].split('.')[1] | int %}
 {% if (major_version >= 4 and  minor_version >= 9
@@ -25,6 +28,7 @@ metadata:
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 apiVersion: scheduling.k8s.io/v1beta1
+{% endif %}
 {% endif %}
 kind: PriorityClass
 metadata:
@@ -1335,6 +1339,59 @@ metadata:
 data:
   controller-config: |-
     {
+        {% if config.chained_cni_config.enable %}
+        "flavor": {{config.flavor|json}},
+        "log-level": {{config.logging.controller_log_level|json}},
+        "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
+        "chained-mode": true,
+        "primary-cni-path": {{config.chained_cni_config.primary_cni_path|json}},
+        "aci-phys-dom": {{config.aci_config.physical_domain.domain|json}},
+        {% if config.aci_config.apic_refreshtime %}
+        "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
+        {% endif %}
+        {% if config.aci_config.apic_subscription_delay %}
+        "apic-subscription-delay": {{config.aci_config.apic_subscription_delay|json}},
+        {% endif %}
+        {% if config.aci_config.apic_refreshticker_adjust %}
+        "apic-refreshticker-adjust": "{{ config.aci_config.apic_refreshticker_adjust|json }}",
+        {% endif %}
+        "apic-username": {{config.aci_config.sync_login.username|json}},
+        "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        {% if config.aci_config.tenant.name %}
+        "aci-prefix": {{config.aci_config.tenant.name|json}},
+        {% else %}
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        {% endif %}
+        {% if config.aci_config.vmm_domain %}
+        "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+        "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% endif %}
+        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
+        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+        {% if config.kube_config.hpp_optimization %}
+        "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
+        {% if config.kube_config.no_wait_for_service_ep_readiness %}
+        "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
+        {% endif %}
+        {% if config.kube_config.service_graph_endpoint_add_delay %}
+        "service-graph-endpoint-add-delay": {{ config.kube_config.service_graph_endpoint_add_delay|json|indent(width=8) }},
+        {% endif %}
+        {% if config.kube_config.add_external_subnets_to_rdconfig %}
+        "add-external-subnets-to-rdconfig": {{ config.kube_config.add_external_subnets_to_rdconfig|json }},
+        {% endif %}
+        "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
+        "aci-service-phys-dom": {{config.aci_config.physical_domain.domain|json}},
+        "aci-service-encap": {{ ("vlan-" ~ config.net_config.service_vlan)|json }},
+        "aci-pbr-tracking-non-snat": {{ config.net_config.pbr_tracking_non_snat|json }},
+        "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        "aci-vrf-dn": {{ config.aci_config.vrf.dn|json }},
+        "aci-vrf": {{config.aci_config.vrf.name|json}},
+        "aci-l3out": {{config.aci_config.l3out.name|json}},
+        "aci-ext-networks": {{ config.aci_config.l3out.external_networks|json|indent(width=8) }}
+        {% else %}
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
@@ -1453,9 +1510,56 @@ data:
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true
         {% endif %}
+        {% endif %}
     }
   host-agent-config: |-
     {
+        {% if config.chained_cni_config.enable %}
+        "flavor": {{config.flavor|json}},
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        "chained-mode": true,
+        "primary-cni-path": {{ config.chained_cni_config.primary_cni_path|json }},
+        {% if config.kube_config.use_aci_anywhere_crd %}
+        "ep-registry": {{ config.kube_config.ep_registry|json }},
+        {% endif %}
+        {% if config.kube_config.dhcp_renew_max_retry_count %}
+        "dhcp-renew-max-retry-count": {{config.kube_config.dhcp_renew_max_retry_count|json}},
+        {% endif %}
+        "log-level": {{config.logging.hostagent_log_level|json}},
+        {% if config.aci_config.vmm_domain %}
+        "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
+        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+        "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
+        {% endif %}
+        "aci-vrf": {{config.aci_config.vrf.name|json}},
+        "aci-vrf-tenant": {{config.aci_config.vrf.tenant|json}},
+        "aci-prefix": {{config.aci_config.system_id|json}},
+        "kubeapi-vlan": {{ config.net_config.kubeapi_vlan|json }},
+        "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
+        {% if config.net_config.interface_mtu %}
+        "interface-mtu": {{ config.net_config.interface_mtu|json }},
+        {% endif %}
+        {% if config.net_config.interface_mtu_headroom %}
+        "interface-mtu-headroom": {{ config.net_config.interface_mtu_headroom|json }},
+        {% endif %}
+        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
+        {% if config.drop_log_config.enable %}
+        "enable-drop-log": true,
+        {% else %}
+        "enable-drop-log": false,
+        {% endif %}
+        {% if config.kube_config.enable_endpointslice %}
+        "enable_endpointslice": true,
+        {% endif %}
+        {% if config.nodepodif_config.enable %}
+        "enable-nodepodif": true
+        {% else %}
+        "enable-nodepodif": false
+        {% endif %}
+        {% else %}
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         {% if config.kube_config.use_aci_anywhere_crd %}
@@ -1547,8 +1651,9 @@ data:
         {% else %}
         "enable-ovs-hw-offload": false
         {% endif %}
+        {% endif %}
     }
-  {% if config.dpu_config.enable != True %}
+  {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
   opflex-agent-config: |-
     {
         "log": {
@@ -1607,6 +1712,7 @@ data:
         {% endif %}
    }
    {% endif %}
+{% if not config.chained_cni_config.enable %}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1624,6 +1730,7 @@ data:
     "start": "{{config.kube_config.snat_operator.port_range.start}}"
     "end": "{{config.kube_config.snat_operator.port_range.end}}"
     "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
+{% endif %}
 {% if config.flavor != "k8s-overlay" and config.aci_config.sync_login.key_data and config.aci_config.sync_login.cert_data %}
 ---
 apiVersion: v1
@@ -1905,6 +2012,16 @@ rules:
   - create
   - update
   - delete
+{% if config.chained_cni_config.enable %}
+- apiGroups:
+  - "aci.fabricattachment"
+  resources:
+  - nodefabricnetworkattachments
+  verbs:
+  - get
+  - list
+  - watch
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -2052,12 +2169,29 @@ rules:
   - nodepodifs
   verbs:
   - "*"
-{% if config.sriov_config.enable %}
+{% if config.sriov_config.enable or config.chained_cni_config.enable %}
 - apiGroups: ["k8s.cni.cncf.io"]
   resources:
   - '*'
   verbs:
   - '*'
+{% endif %}
+{% if config.chained_cni_config.enable %}
+- apiGroups:
+  - "aci.fabricattachment"
+  resources:
+  - nodefabricnetworkattachments
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - list
+  - watch
+  - get
+  - update
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
@@ -2273,6 +2407,12 @@ spec:
             - name: SKIP_DOCKER_CHECK
               value: "true"
             {% endif %}
+            {% if config.chained_cni_config.enable %}
+            - name: CHAINED_MODE
+              value: "true"
+            - name: PRIMARY_CNI_PATH
+              value: "{{ config.chained_cni_config.primary_cni_path }}"
+            {% endif %}
           volumeMounts:
             - name: cni-bin
               mountPath: /mnt/cni-bin
@@ -2284,8 +2424,10 @@ spec:
               mountPath: /run
             - name: hostrun
               mountPath: /usr/local/run
+            {% if not config.chained_cni_config.enable %}
             - name: opflex-hostconfig-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+            {% endif %}
             - name: host-config-volume
               mountPath: /usr/local/etc/aci-containers/
             - name: varlogpods
@@ -2325,7 +2467,7 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 30
-        {% if config.dpu_config.enable != True %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
@@ -2407,7 +2549,7 @@ spec:
               mountPath: /usr/local/var
         {% endif %}
         {% if config.kube_config.opflex_mode != "overlay" %}
-        {% if config.dpu_config.enable != True %}
+        {% if config.dpu_config.enable != True and config.chained_cni_config.enable != True %}
         - name: mcast-daemon
           {% if config.registry.use_digest %}
           image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
@@ -2479,9 +2621,11 @@ spec:
             items:
               - key: host-agent-config
                 path: host-agent.conf
+        {% if not config.chained_cni_config.enable %}
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
+        {% endif %}
         - name: varlogpods
           hostPath:
             path: /var/log/pods
@@ -2496,7 +2640,7 @@ spec:
           hostPath:
             path: /var/lib/dhclient
         {% endif %}
-        {% if config.dpu_config.enable != True %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
         - name: opflex-config-volume
           configMap:
             name: aci-containers-config
@@ -2528,6 +2672,7 @@ spec:
              - key: lsyncd.json
                path: lsyncd.json
         {% endif %}
+{% if not config.chained_cni_config.enable %}
 {% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -2651,6 +2796,7 @@ spec:
           hostPath:
             path: /var/lib/docker
 {% endif %}
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: Deployment
@@ -2755,6 +2901,7 @@ spec:
               {% endif %}
           {% endif %}
           env:
+            {% if not config.chained_cni_config.enable %}
             {% if config.flavor != "k8s-overlay" %}
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
@@ -2765,6 +2912,7 @@ spec:
               value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
             - name: ACI_RDCONFIG_NAME
               value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
+            {% endif %}
             - name: SYSTEM_NAMESPACE
               value: "{{ config.kube_config.system_namespace}}"
           volumeMounts:
@@ -3193,4 +3341,114 @@ metadata:
 value: {{ config.kube_config.aci_containers_controller_priority_class_value }}
 globalDefault: false
 description: "This priority class is used for ACI-CNI aci-containers-controller pod"
+{% endif %}
+{% if config.chained_cni_config.enable %}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: nodefabricnetworkattachments.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NodeFabricNetworkAttachment
+    listKind: NodeFabricNetworkAttachmentList
+    plural: nodefabricnetworkattachments
+    shortNames:
+    - nfna
+    singular: nodefabricnetworkattachment
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NodeFabricAttachment is the Schema for the FabricAttachments
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NodeFabricAttachmentSpec defines the desired state of network
+              attachment to the fabric
+            properties:
+              aciTopology:
+                additionalProperties:
+                  properties:
+                    fabricLink:
+                      items:
+                        type: string
+                      type: array
+                    pods:
+                      items:
+                        properties:
+                          localIface:
+                            type: string
+                          podRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            required:
+                            - name
+                            - namespace
+                            type: object
+                        type: object
+                      type: array
+                  type: object
+                description: Map of iface to fabricLink
+                type: object
+              encapVlan:
+                type: string
+              networkRef:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "operator-sdk generate k8s" to regenerate code after
+                  modifying this file Add custom validation using kubebuilder tags:
+                  https://book.kubebuilder.io/beyond_basics/generating_crd.html NetworkRef
+                  is the ns/net-att-def name, used as part of the epg ns-<NetworkName>'
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              nodeName:
+                type: string
+              primaryCni:
+                description: 'informational: primaryCNI sriov/macvlan'
+                type: string
+            required:
+            - networkRef
+            type: object
+          status:
+            description: NodeFabricAttachmentStatus defines the observed state of
+              FabricAttachment
+            properties:
+              state:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                  code after modifying this file7 Add custom validation using kubebuilder
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
+                type: string
+            required:
+            - state
+            type: object
+        type: object
+    served: true
+    storage: true
 {% endif %}
