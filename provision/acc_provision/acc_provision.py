@@ -231,7 +231,10 @@ def config_default():
             "image_pull_policy": "Always",
             "kubectl": "kubectl",
             "system_namespace": "aci-containers-system",
+            "ovs_memory_request": "128Mi",
             "ovs_memory_limit": "1Gi",
+            "aci_containers_memory_request": "128Mi",
+            "aci_containers_memory_limit": "3Gi",
             "reboot_opflex_with_ovs": "true",
             "snat_operator": {
                 "name": "snat-operator",
@@ -259,7 +262,14 @@ def config_default():
             "use_host_netns_volume": False,
             "enable_endpointslice": False,
             "opflex_agent_opflex_asyncjson_enabled": "false",
-            "opflex_agent_ovs_asyncjson_enabled": "false"
+            "opflex_agent_ovs_asyncjson_enabled": "false",
+            "acicni_priority_class_value": 1000000000,
+            "use_aci_containers_host_priority_class": False,
+            "aci_containers_host_priority_class_value": 1000000000,
+            "use_aci_containers_openvswitch_priority_class": False,
+            "aci_containers_openvswitch_priority_class_value": 1000000000,
+            "use_aci_containers_controller_priority_class": False,
+            "aci_containers_controller_priority_class_value": 1000000000
         },
         "istio_config": {
             "install_istio": False,
@@ -712,20 +722,34 @@ def config_adjust(args, config, prov_apic, no_random):
                 adj_config["isRdma"] = "true"
 
         if config["dpu_config"].get("enable"):
-            if 'ip' in config["dpu_config"]:
-                adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
-            else:
-                adj_config["dpuIp"] = "192.168.200.2"
+            if opflex_mode == "dpu":
+                if 'ip' in config["dpu_config"] and config["dpu_config"].get("ip"):
+                    adj_config["dpuIp"] = str(config["dpu_config"]["ip"])
+                else:
+                    adj_config["dpuIp"] = "192.168.200.2"
 
-            if 'user' in config["dpu_config"]:
-                adj_config["dpuUser"] = str(config["dpu_config"]["user"])
-            else:
-                adj_config["dpuUser"] = "opflex"
+                if 'user' in config["dpu_config"] and config["dpu_config"].get("user"):
+                    adj_config["dpuUser"] = str(config["dpu_config"]["user"])
+                else:
+                    adj_config["dpuUser"] = "opflex"
 
-            if 'ovsdb_socket_port' in config["dpu_config"]:
-                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+                if 'ovsdb_socket_port' in config["dpu_config"] and config["dpu_config"].get("ovsdb_socket_port"):
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+                else:
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
             else:
-                adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
+                err("Opflex_mode is not set to dpu. Cannot generate dpu config")
+
+    if (config['kube_config']['use_aci_containers_host_priority_class'] or
+            config['kube_config']['use_aci_containers_openvswitch_priority_class'] or
+            config['kube_config']['use_aci_containers_controller_priority_class']):
+        flavor_version = config["flavor"].split('-')
+        major_version = flavor_version[1].split('.')[0]
+        minor_version = flavor_version[1].split('.')[1]
+        if int(major_version) >= 4 and int(minor_version) >= 9 and flavor_version[2] in ["openstack", "esx", "baremetal"]:
+            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1"
+        else:
+            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1beta1"
 
     return adj_config
 
@@ -1506,7 +1530,7 @@ def generate_rancher_1_3_18_yaml(args, config, operator_output, operator_tar, op
 
 def generate_rancher_1_3_20_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-20.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-3-20.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1529,7 +1553,7 @@ def generate_rancher_1_3_20_yaml(args, config, operator_output, operator_tar, op
 
 def generate_rancher_1_4_6_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-6.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-4-6.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1552,7 +1576,7 @@ def generate_rancher_1_4_6_yaml(args, config, operator_output, operator_tar, ope
 
 def generate_rancher_1_3_21_yaml(args, config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-21.yaml')
+        template = get_jinja_template(config["aci_cni_versions_path"] + 'aci-network-provider-cluster-1-3-21.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -1701,6 +1725,14 @@ def generate_calico_deployment_files(args, config, network_operator_output):
             tar.close()
 
         print("Generated the deployment tar file")
+
+
+def gendpu(config, dpu_output_file):
+    template = get_jinja_template('dpu-containers.yaml')
+    outname = dpu_output_file
+    info("Writing DPU kubernetes configuration to  %s" % outname)
+    with open(dpu_output_file, "w") as fh:
+        fh.write(template.render(config=config))
 
 
 def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_output):
@@ -2022,6 +2054,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--operator-mode', default=False,
         help=argparse.SUPPRESS, metavar='operator_mode')
+    parser.add_argument(
+        '-s', '--dpu', default=None, metavar='file',
+        help='output file for your dpu kubernetes deployment')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -2117,6 +2152,8 @@ def check_overlapping_subnets(config):
             net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
         elif ip1.version == 6 and ip2.version == 6:
             net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
+        else:
+            continue
         out = net1.overlaps(net2)
         if out:
             return False
@@ -2141,47 +2178,6 @@ def has_multi_subnet(config):
     return True
 
 
-def is_dualstack_config(config):
-    if "net_config" not in config:
-        return False
-    subnet_info = []
-    if not isinstance(config["net_config"]["pod_subnet"], list):
-        subnet_info[-1] = config["net_config"]["pod_subnet"]
-    else:
-        pod_subnets = []
-        for pod_subnet in config["net_config"]["pod_subnet"]:
-            pod_subnets.append(pod_subnet)
-        for pod_subnet in pod_subnets:
-            subnet_info.append(pod_subnet)
-
-    if not isinstance(config["net_config"]["node_subnet"], list):
-        subnet_info[-1] = config["net_config"]["node_subnet"]
-    else:
-        node_subnets = []
-        for node_subnet in config["net_config"]["node_subnet"]:
-            node_subnets.append(node_subnet)
-        for node_subnet in node_subnets:
-            subnet_info.append(node_subnet)
-
-    if not isinstance(config["net_config"]["extern_dynamic"], list):
-        subnet_info[-1] = config["net_config"]["extern_dynamic"]
-    else:
-        extern_dynamics = []
-        for extern_dynamic in config["net_config"]["extern_dynamic"]:
-            extern_dynamics.append(extern_dynamic)
-
-        for extern_dynamic in extern_dynamics:
-            subnet_info.append(extern_dynamic)
-
-    for subnet in subnet_info:
-        rtr, _ = subnet.split("/")
-        ip = ipaddress.ip_address(rtr)
-        if ip.version == 6:
-            return True
-
-    return False
-
-
 def is_support_dualstack(flavor):
     version = flavor.split("-")[1]
     support_k8s_version = "1.21"
@@ -2193,6 +2189,99 @@ def is_support_dualstack(flavor):
         return True
 
     return False
+
+
+def process_subnet_value(subnet_value, subnet_info):
+    if not isinstance(subnet_value, list):
+        subnet_info.append(subnet_value)
+    else:
+        for subnet in subnet_value:
+            subnet_info.append(subnet)
+
+
+def get_subnet_list(config):
+    subnet_info = []
+    if "net_config" not in config:
+        return subnet_info
+
+    net_config = config["net_config"]
+    process_subnet_value(net_config.get("pod_subnet", []), subnet_info)
+    process_subnet_value(net_config.get("node_subnet", []), subnet_info)
+    process_subnet_value(net_config.get("extern_dynamic", []), subnet_info)
+    process_subnet_value(net_config.get("extern_static", []), subnet_info)
+
+    return subnet_info
+
+
+def is_dualstack_config(config):
+    subnet_info = get_subnet_list(config)
+    subnet_type = determine_subnet_type(subnet_info)
+    if subnet_type == "DualStack":
+        return True
+    return False
+
+
+def determine_subnet_type(subnet_info):
+    if len(subnet_info) == 0:
+        return ""
+
+    has_ipv4 = False
+    has_ipv6 = False
+
+    for subnet in subnet_info:
+        rtr, _ = subnet.split("/")
+        try:
+            ip = ipaddress.ip_address(rtr)
+        except Exception as e:
+            err("%s is malformed. %s" % (subnet, str(e)))
+            sys.exit(1)
+        if ip.version == 4:
+            has_ipv4 = True
+        elif ip.version == 6:
+            has_ipv6 = True
+
+    if has_ipv4 and has_ipv6:
+        return "DualStack"
+    elif has_ipv4:
+        return "IPv4"
+    elif has_ipv6:
+        return "IPv6"
+    else:
+        return ""
+
+
+def get_subnet_types(config):
+    if "net_config" not in config:
+        return False
+
+    net_config = config["net_config"]
+
+    pod_subnet, node_subnet, extern_static, extern_dynamic = [], [], [], []
+    process_subnet_value(net_config.get("pod_subnet", []), pod_subnet)
+    process_subnet_value(net_config.get("node_subnet", []), node_subnet)
+    process_subnet_value(net_config.get("extern_static", []), extern_static)
+    process_subnet_value(net_config.get("extern_dynamic", []), extern_dynamic)
+
+    return determine_subnet_type(pod_subnet), determine_subnet_type(node_subnet), determine_subnet_type(extern_static), determine_subnet_type(extern_dynamic)
+
+
+def is_valid_dualstack_config(config):
+    if "net_config" not in config:
+        return False, ""
+
+    pod_subnet_type, node_subnet_type, extern_static_type, extern_dynamic_type = get_subnet_types(config)
+
+    if node_subnet_type != "DualStack":
+        return False, "Node Subnet " + " ".join(config['net_config']['node_subnet']) + " does not have IPv6"
+    if node_subnet_type != "DualStack" and pod_subnet_type == "DualStack":
+        return False, "Pod Subnet " + " ".join(config['net_config']['pod_subnet']) + " has IPv6 but Node Subnet " + " ".join(config['net_config']['node_subnet']) + " does not have IPv6"
+
+    if extern_static_type == "DualStack" or extern_dynamic_type == "DualStack":
+        if pod_subnet_type == "DualStack" and node_subnet_type == "DualStack":
+            return True, ""
+        return False, "If extern_static " + " ".join(config['net_config']['extern_static']) + " or extern_dynamic " + " ".join(config['net_config']['extern_dynamic']) + " configured with IPv6, then pod_subnet " + " ".join(config['net_config']['pod_subnet']) + " and node_subnet " + " ".join(config['net_config']['node_subnet']) + " must have IPv6."
+
+    return True, ""
 
 
 def provision(args, apic_file, no_random):
@@ -2307,8 +2396,15 @@ def provision(args, apic_file, no_random):
 
     # Verify for Dualstack
     if is_dualstack_config(config) and not is_support_dualstack(flavor):
-        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 4.21 or later or OpenShift version 4.8 or later.")
+        err(" Dualstack feature is not supported. Please upgrade to Kubernetes version 1.21 or later or OpenShift version 4.8 or later.")
         return False
+
+    if is_dualstack_config(config):
+        valid, message = is_valid_dualstack_config(config)
+        if not valid:
+            err("Please provide a valid Dualstack configuration with both IPv4 and IPv6 addresses for node and pod subnets.")
+            err(message)
+            return False
 
     if is_calico_flavor(config["flavor"]) and has_multi_subnet(config):
         err(" Multisubnet feature is not supported in calico.")
@@ -2452,7 +2548,16 @@ def provision(args, apic_file, no_random):
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
+
+    if args.dpu:
+        if config["dpu_config"].get("enable"):
+            dpu_output_file = args.dpu
+            gendpu(config, dpu_output_file)
+        else:
+            err("Cannot generate DPU kubernetes Yaml file: dpu_config not enabled in acc_provision input file")
+
     if not callable(gen):
+
         gen = globals()[gen]
     gen(args, config, output_file, output_tar, operator_cr_output_file)
 

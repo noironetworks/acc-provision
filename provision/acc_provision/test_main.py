@@ -210,14 +210,184 @@ def test_multiple_subnets():
 
 
 @in_testdir
-def test_dualstack():
+def test_dualstack_base():
     run_provision(
-        "dualstack.inp.yaml",
-        "dualstack.kube.yaml",
+        "dualstack_base.inp.yaml",
+        "dualstack_base.kube.yaml",
         None,
         None,
-        "dualstack.apic.txt",
+        "dualstack_base.apic.txt",
     )
+
+
+@in_testdir
+def test_dualstack_only_ipv4():
+    run_provision(
+        "dualstack_only_ipv4.inp.yaml",
+        "dualstack_only_ipv4.kube.yaml",
+        None,
+        None,
+        "dualstack_only_ipv4.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack_node_subnet():
+    run_provision(
+        "dualstack_node_subnet.inp.yaml",
+        "dualstack_node_subnet.kube.yaml",
+        None,
+        None,
+        "dualstack_node_subnet.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack_pod_and_node_subnet():
+    run_provision(
+        "dualstack_pod_and_node_subnet.inp.yaml",
+        "dualstack_pod_and_node_subnet.kube.yaml",
+        None,
+        None,
+        "dualstack_pod_and_node_subnet.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack_extern_static():
+    run_provision(
+        "dualstack_extern_static.inp.yaml",
+        "dualstack_extern_static.kube.yaml",
+        None,
+        None,
+        "dualstack_extern_static.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack_extern_dynamic():
+    run_provision(
+        "dualstack_extern_dynamic.inp.yaml",
+        "dualstack_extern_dynamic.kube.yaml",
+        None,
+        None,
+        "dualstack_extern_dynamic.apic.txt",
+    )
+
+
+@in_testdir
+def test_dualstack_invalid():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "dualstack_invalid.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("dualstack_invalid.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
+def test_dualstack_pod_subnet_invalid():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "dualstack_pod_subnet_invalid.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("dualstack_pod_subnet_invalid.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
+def test_dualstack_extern_dynamic_invalid():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "dualstack_extern_dynamic_invalid.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("dualstack_extern_dynamic_invalid.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
+def test_dualstack_extern_static_invalid():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "dualstack_extern_static_invalid.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("dualstack_extern_static_invalid.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
+@in_testdir
+def test_malformed():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "malformed.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("malformed.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
 
 
 @in_testdir
@@ -1369,6 +1539,18 @@ def test_flvr_openshift_410_esx_vDS_6_6_above():
     )
 
 
+@in_testdir
+def test_flvr_openshift_411_esx_vDS_6_6_above():
+    run_provision(
+        "flavor_openshift_411_esx_vDS_6_6_above.inp.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above.kube.yaml",
+        "flavor_openshift_411_esx_vDS_6_6_above_tar",
+        None,
+        "flavor_openshift_411_esx_vDS_6_6_above.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
@@ -1398,6 +1580,7 @@ def get_args(**overrides):
         # configuration which would otherwise be discovered from
         # the APIC
         "infra_vlan": None,
+        "dpu": None,
         "test_run": True,
         "flavor_version": None,
         "cko": False,

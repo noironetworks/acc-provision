@@ -80,16 +80,22 @@ registry:
   # image_pull_secret: secret_name      # (if needed)
 
 #kube_config:
+  # hpp_optimization: True #override if needed, default is False
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
+  # service_graph_endpoint_add_delay:
+        # delay: 30                     #Delay in seconds
+        # services:                     #List of services for which delay should be added
+        # - name: "service-name1"
+        #   namespace: "service-ns1"
+        # - name: "service-name2"
+        #   namespace: "service-ns2"
+        #   delay: 60                   # per service delay that overrides common delay
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
         # disable_periodic_snat_global_info_sync: True
         # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
-
-  #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
-  #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
   # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
 
@@ -114,13 +120,6 @@ registry:
   # device_info:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
-
-#dpu_config:
-    # enable: True          # default is false
-    # ip: ""                # default is "192.168.200.2"
-    # user: ""              # default is "opflex"
-    # ovsdb_socket_port: "" # default is "6640"
-    # masterNodeIp: ""
 
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature

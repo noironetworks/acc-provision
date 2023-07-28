@@ -1,0 +1,58 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 02-worker-kubelet
+spec:
+  config:
+    ignition:
+      config: {}
+      security:
+        tls: {}
+      timeouts: {}
+      version: 2.2.0
+    networkd: {}
+    passwd: {}
+    storage:
+      files:
+      - contents:
+          source: data:,%5BGlobal%5D%0Asecret-name%20%3D%20openstack-credentials%0Asecret-namespace%20%3D%20kube-system%0Aregion%20%3D%20regionOne
+          verification: {}
+        filesystem: root
+        mode: 420
+        path: /etc/kubernetes/cloud.conf
+    systemd:
+      units:
+      - contents: |
+                                    [Unit]
+                                    Description=Kubernetes Kubelet
+                                    Wants=rpc-statd.service crio.service
+                                    After=crio.service
+                                    [Service]
+                                    Type=notify
+                                    ExecStartPre=/bin/mkdir --parents /etc/kubernetes/manifests
+                                    ExecStartPre=/bin/rm -f /var/lib/kubelet/cpu_manager_state
+                                    ExecStartPre=/bin/bash -c "/bin/systemctl set-environment ip=$(/sbin/ip -o -4 addr list ens3.{{ config.net_config.kubeapi_vlan|json }} | awk '{print $4}' | cut -d/ -f1)"
+                                    EnvironmentFile=/etc/os-release
+                                    EnvironmentFile=-/etc/kubernetes/kubelet-workaround
+                                    EnvironmentFile=-/etc/kubernetes/kubelet-env
+                                    ExecStart=/usr/bin/hyperkube \
+                                                    kubelet \
+                                                    --config=/etc/kubernetes/kubelet.conf \
+                                                    --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
+                                                    --kubeconfig=/var/lib/kubelet/kubeconfig \
+                                                    --container-runtime=remote \
+                                                    --container-runtime-endpoint=/var/run/crio/crio.sock \
+                                                    --node-labels=node-role.kubernetes.io/worker,node.openshift.io/os_id=${ID} \
+                                                    --minimum-container-ttl-duration=6m0s \
+                                                    --volume-plugin-dir=/etc/kubernetes/kubelet-plugins/volume/exec \
+                                                    --address=${ip} \
+                                                    --node-ip=${ip} \
+                                                    --v=3
+                                    Restart=always
+                                    RestartSec=10
+                                    [Install]
+                                    WantedBy=multi-user.target
+        enabled: true
+        name: kubelet.service

@@ -1,0 +1,61 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: testCluster        # Every opflex cluster must have a distinct ID
+  #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  apic_hosts:                   # List of cAPIC hosts to connect for APIC API
+  - A.B.C.D
+  tenant:
+    name: testTenant
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: vnetVrf                # This is the vrf attached to the CCP. Will be created
+                                # if not present
+    tenant: testTenant
+    region: region-xxx          # your azure region
+  #custom_epgs:                 # List of additional endpoint-group names
+  #  - epg-a                    # to configure for use with annotations
+  #  - custom_group2
+
+#
+# Networks used by ACI containers/AKS
+#
+net_config:
+  pod_subnet: 10.14.0.1/16      # Subnet to use for Kubernetes pods
+  machine_cidr: 10.0.0.0/16     # cidr for aks vmscaleset
+  node_subnet: 10.0.0.1/24      # must be part of machine_cidr
+  extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
+  extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
+  node_svc_subnet: 10.5.0.1/24  
+  opflex_server_port: 19999 
+  interface_mtu: 1450          # min = 1280 for ipv6, max = 8900 for VXLAN
+
+#
+# Configuration for container registry
+# Update if a custom container registry has been setup
+#
+#registry:
+#  image_prefix: <prefix>                   # e.g: registry.example.com/noiro
+#  aci_containers_host_version: <version>
+#  opflex_agent_version: <version>
+#  opflex_server_version: <version>
+#  openvswitch_version: <version>
+#  gbp_version: <version>
+#  aci_containers_controller_version: <version>
+  
+  # image_pull_secret: secret_name      # (if needed)
+
+kube_config:
+  run_snat_container: false
+  run_gbp_container: true
+  ep_registry: k8s
+  opflex_mode: overlay
+  # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
+  # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
+
+istio_config:
+  install_istio: False          # default is True
+  # install_profile: "default"   # override if needed, default is "demo"
+
+#drop_log_config:
+  #enable: False        #default is True
