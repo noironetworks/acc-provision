@@ -50,6 +50,7 @@ net_config:
 
 kube_config:
   aci_multipod: true
+  opflex_device_reconnect_wait_timeout: 10
   dhcp_renew_max_retry_count: 10
   dhcp_delay: 10
   use_external_service_ip_allocator: true
