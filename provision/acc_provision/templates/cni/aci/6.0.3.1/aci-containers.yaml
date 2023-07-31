@@ -1344,6 +1344,9 @@ data:
         {% if config.kube_config.aci_multipod %}
         "aci-multipod": {{config.kube_config.aci_multipod|json}},
         {% endif %}
+        {% if config.kube_config.opflex_device_reconnect_wait_timeout %}
+        "opflex-device-reconnect-wait-timeout": {{ config.kube_config.opflex_device_reconnect_wait_timeout|json }},
+        {% endif %}
         {% if config.flavor != "k8s-overlay" %}
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
