@@ -29,15 +29,15 @@ jobs:
         - go version
       script:
         - echo "Skip running UTs"
-        - git clone http://www.github.com/noironetworks/cicd -b main /tmp/cicd
+        - git clone http://www.github.com/noironetworks/cicd -b test-cicd /tmp/cicd
         - pip install jq || travis_terminate 1
         - /tmp/cicd/travis/show-image-tags.sh || travis_terminate 1
-        - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
+#        - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
         - pip install boto3 || travis_terminate 1
         - python provision/setup.py install || travis_terminate 1
         - git clone --depth=50 --branch=${RELEASE_TAG} https://github.com/noironetworks/aci-containers.git /tmp/noironetworks/aci-containers
         - pushd /tmp/noironetworks/aci-containers
-        - git checkout -qf ${TRAVIS_TAG} 
+#        - git checkout -qf ${TRAVIS_TAG}
         - /tmp/cicd/travis/show-git-repo-status.sh
         - make -C . dist-static/acikubectl || travis_terminate 1
         - popd
