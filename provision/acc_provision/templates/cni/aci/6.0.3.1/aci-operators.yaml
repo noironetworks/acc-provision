@@ -221,6 +221,15 @@ spec:
           mountPath: /usr/local/etc/aci-containers/
         - name: acc-provision-config
           mountPath: /usr/local/etc/acc-provision/
+        - name: varlogpods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
         env:
         - name: SYSTEM_NAMESPACE
           value: "{{ config.kube_config.system_namespace}}"
@@ -286,3 +295,12 @@ spec:
           items:
             - key: spec
               path: acc-provision-operator.conf
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
