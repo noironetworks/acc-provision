@@ -317,6 +317,7 @@ def config_default():
             "enable": False,
             "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf",
             "skip_node_network_provisioning": False,
+            "use_global_scope_vlan": False,
         }
     }
     return default_config
@@ -508,7 +509,7 @@ def config_adjust_chained_mode(args, config, no_random):
         }
     }
 
-    if not config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"]:
+    if not config["chained_cni_config"]["skip_node_network_provisioning"]:
         node_subnet = config["net_config"]["node_subnet"][0]
         config["net_config"]["node_subnet"] = node_subnet
 
