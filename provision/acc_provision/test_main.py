@@ -660,6 +660,18 @@ def test_flavor_openshift_410_esx():
 
 
 @in_testdir
+def test_flavor_openshift_411_esx():
+    run_provision(
+        "flavor_openshift_411_esx.inp.yaml",
+        "flavor_openshift_411_esx.kube.yaml",
+        "flavor_openshift_411_esx_tar",
+        None,
+        "flavor_openshift_411_esx.apic.txt",
+        overrides={"flavor": "openshift-4.11-esx"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_412_esx():
     run_provision(
         "flavor_openshift_412_esx.inp.yaml",
@@ -672,14 +684,14 @@ def test_flavor_openshift_412_esx():
 
 
 @in_testdir
-def test_flavor_openshift_411_esx():
+def test_flavor_openshift_413_esx():
     run_provision(
-        "flavor_openshift_411_esx.inp.yaml",
-        "flavor_openshift_411_esx.kube.yaml",
-        "flavor_openshift_411_esx_tar",
+        "flavor_openshift_413_esx.inp.yaml",
+        "flavor_openshift_413_esx.kube.yaml",
+        "flavor_openshift_413_esx_tar",
         None,
-        "flavor_openshift_411_esx.apic.txt",
-        overrides={"flavor": "openshift-4.11-esx"}
+        "flavor_openshift_413_esx.apic.txt",
+        overrides={"flavor": "openshift-4.13-esx"}
     )
 
 
