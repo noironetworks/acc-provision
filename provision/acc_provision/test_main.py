@@ -756,13 +756,13 @@ def test_preexisting_tenant_chained_mode():
 
 
 @in_testdir
-def test_chained_mode_skip_node_network_provision():
+def test_override_skip_node_network_provision():
     run_provision(
-        "chained_mode_skip_node_network_provision.inp.yaml",
-        "chained_mode_skip_node_network_provision.kube.yaml",
+        "override_skip_node_network_provision.inp.yaml",
+        "override_skip_node_network_provision.kube.yaml",
         None,
         None,
-        "chained_mode_skip_node_network_provision.apic.txt",
+        "override_skip_node_network_provision.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
@@ -787,6 +787,18 @@ def test_chained_mode_without_phys_domains():
         None,
         None,
         "chained_mode_without_phys_domains.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_override_use_global_scope_vlan():
+    run_provision(
+        "override_use_global_scope_vlan.inp.yaml",
+        "override_use_global_scope_vlan.kube.yaml",
+        None,
+        None,
+        "override_use_global_scope_vlan.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
