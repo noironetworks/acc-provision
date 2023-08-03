@@ -1311,7 +1311,7 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
              required)
 
-    if not is_chained_mode(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+    if not is_chained_mode(config) and not is_assisted_installer(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
         checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
@@ -1851,6 +1851,8 @@ def is_calico_flavor(flavor):
 def is_chained_mode(config):
     return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
 
+def is_assisted_installer(config):
+    return True if config.get("assisted_installer") and config["assisted_installer"]["enable"] else False
 
 def generate_calico_deployment_files(config, network_operator_output):
     config['net_config']['node_subnet'] = config['net_config']['node_subnet'][0]

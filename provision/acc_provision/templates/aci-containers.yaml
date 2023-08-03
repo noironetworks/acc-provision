@@ -1533,7 +1533,7 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
-        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and not config.assisted_installer.enable %}
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
         {% endif %}
@@ -1585,7 +1585,7 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         {% endif %}
-        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and not config.assisted_installer.enable %}
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
@@ -2226,6 +2226,37 @@ subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
   namespace: {{ config.kube_config.system_namespace }}
+---
+{% endif %}
+{% if config.kube_config.use_openshift_security_context_constraints_414 %}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: aci-cni-role
+  namespace: aci-containers-system
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aci-cni-rolebinding
+  namespace: aci-containers-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: aci-cni-role
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-host-agent
+  namespace: aci-containers-system
 ---
 {% endif %}
 {% if config.kube_config.use_openshift_security_context_constraints %}
