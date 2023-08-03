@@ -4952,3 +4952,32 @@ flavors:
     status: Experimental
     hidden: False
     order: 63
+  openshift-sdn-ovn-baremetal:
+    desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
+    default_version: 6.0.3.1
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: False
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /run/multus
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+    status: null
+    hidden: false
+    order: 64

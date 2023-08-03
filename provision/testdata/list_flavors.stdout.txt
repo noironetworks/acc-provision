@@ -35,3 +35,4 @@ INFO: RKE-1.3.17:	Rancher Kubernetes Engine min version 1.3.17
 INFO: RKE-1.3.13:	Rancher Kubernetes Engine min version 1.3.13
 INFO: RKE-1.2.3:	Rancher Kubernetes Engine min version 1.2.3
 INFO: calico-3.23.2:	calico-3.23.2 [Experimental]
+INFO: openshift-sdn-ovn-baremetal:	Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal

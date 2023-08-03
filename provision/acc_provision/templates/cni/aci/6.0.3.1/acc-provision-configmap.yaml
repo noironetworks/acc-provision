@@ -31,6 +31,15 @@ data:
                 {% if config.user_config.aci_config.aep %}
                 "aep": {{config.aci_config.aep|json}},
                 {% endif %}
+                {% if config.user_config.aci_config.secondary_aep %}
+                "secondary_aep": {{config.aci_config.secondary_aep|json}},
+                {% endif %}
+                {% if (config.user_config.chained_cni_config) and  config.user_config.aci_config.physical_domain %}
+                "physical_domain": {
+                    "domain": {{config.aci_config.physical_domain.domain|json}},
+                    "vlan_pool": {{config.aci_config.physical_domain.vlan_pool|json}}
+                },
+                {% endif %}
                 {% if config.aci_config.apic_subscription_delay %}
                 "apic-subscription-delay": {{ config.aci_config.apic_subscription_delay|json }},
                 {% endif %}
@@ -85,12 +94,20 @@ data:
                 },
                 {% elif (config.user_config.aci_config.vmm_domain) %}
                     }
-                },
+                }{% if (config.user_config.aci_config.l3out) %},
                 {% endif %}
+                {% endif %}
+                {% if((config.user_config.chained_cni_config) and (config.user_config.aci_config.l3out)) %}
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
                 }
+                {% else %}
+                "l3out": {
+                    "name": {{config.aci_config.l3out.name|json}},
+                    "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
+                }
+                {% endif %}
             },
             {% if config.user_config.registry %}
             "registry": {
@@ -170,6 +187,15 @@ data:
                {% endfor %}
             },
             {% endif %}
+            {% if config.user_config.chained_cni_config %}
+            "chained_cni_config": {
+                "enable": {{config.chained_cni_config.enable|json}},
+                "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}},
+                {% if config.user_config.chained_cni_config.skip_node_network_provisioning %}
+                "skip_node_network_provisioning": {{config.chained_cni_config.skip_node_network_provisioning|json}},
+                {% endif %}
+            },
+            {% endif %}
             "net_config": {
                 {% if config.user_config.net_config.infra_vlan %}
                 "infra_vlan": {{config.net_config.infra_vlan|json}},
@@ -211,10 +237,13 @@ data:
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
                 "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
+                {% if config.user_config.net_config.secondary_vlans %}
+                "secondary_vlans": {{config.net_config.secondary_vlans|json|indent(width=16)}},
+                {% endif %}
                 {% if config.user_config.net_config.cluster_svc_subnet %}
                 "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
-                {% else %}
+                {% elif config.net_config.pod_subnet %}
                 "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}}
                 {% endif %}
             {% if config.user_config.topology %}
