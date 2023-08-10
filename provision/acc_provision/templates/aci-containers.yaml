@@ -2205,6 +2205,24 @@ rules:
   - watch
   - get
   - update
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
