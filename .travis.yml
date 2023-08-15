@@ -26,6 +26,7 @@ jobs:
         - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
         - export TRAVIS_GO_VERSION=1.20.4
         - export TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/aci-containers
+        - export TRAVIS_COMMIT_AUTHOR="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
         - go version
       script:
         - echo "Skip running UTs"
