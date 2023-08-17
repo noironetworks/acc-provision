@@ -6605,6 +6605,8 @@ class ApicKubeConfig(object):
                     add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix)
             elif flavor == "docker-ucp-3.0":
                 dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
+            elif flavor == "RKE-1.4.9":
+                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
             elif flavor.startswith("RKE"):
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
 
