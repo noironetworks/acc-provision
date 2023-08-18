@@ -2357,8 +2357,6 @@ spec:
       {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_host_priority_class %}
-      priorityClassName: aci-containers-host
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
@@ -2743,8 +2741,6 @@ spec:
         - operator: Exists
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_openvswitch_priority_class %}
-      priorityClassName: aci-containers-openvswitch
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
@@ -2877,8 +2873,6 @@ spec:
         {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_controller_priority_class %}
-      priorityClassName: aci-containers-controller
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
@@ -3343,36 +3337,6 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
-{% if config.kube_config.use_aci_containers_host_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-host
-value: {{ config.kube_config.aci_containers_host_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-host pod"
-{% endif %}
-{% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-openvswitch
-value: {{ config.kube_config.aci_containers_openvswitch_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-openvswitch pod"
-{% endif %}
-{% if config.kube_config.use_aci_containers_controller_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-controller
-value: {{ config.kube_config.aci_containers_controller_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-controller pod"
-{% endif %}
 {% if config.chained_cni_config.enable %}
 ---
 apiVersion: apiextensions.k8s.io/v1
