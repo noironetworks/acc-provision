@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 import argparse
 import base64
 import copy
+import csv
 import functools
 import ipaddress
 import requests
@@ -102,6 +103,49 @@ def json_indent(s):
 
 def yaml_quote(s):
     return "'%s'" % str(s).replace("'", "''")
+
+
+def get_csv_contents(file_path):
+    csv_data = []
+    try:
+        with open(file_path, 'r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                csv_data.append(row)
+    except Exception as ex:
+        print("Error while getting CSV %s file contents. Error: %s") % (file_path, ex)
+    return csv_data
+
+
+def prepare_nadvlanmap(file_path):
+    csv_data = get_csv_contents(file_path)
+    all_resources = {}
+    old_namespace = ''
+    old_nad_prefix = ''
+    network = ''
+    vlan_id = ''
+    try:
+        for resource in csv_data:
+            namespace = resource['Namespace']
+            nad_prefix = resource['NAD Prefix']
+            if (namespace and namespace != old_namespace) or (nad_prefix and nad_prefix != old_nad_prefix):
+                resource_header = namespace + "/" + nad_prefix
+                if resource_header not in all_resources.keys():
+                    all_resources[resource_header] = []
+                old_namespace = namespace
+                old_nad_prefix = nad_prefix
+
+            network = resource['Network'] if resource['Network'] else network
+            vlan_id = resource['VLAN ID'] if resource['VLAN ID'] else vlan_id
+            resource_item = {
+                "label": network,
+                "vlans": vlan_id.split('.')[0]
+            }
+            all_resources[resource_header].append(resource_item)
+    except Exception as ex:
+        print("Error while preparing yaml contents from given CSV %s file. Error: %s" % (file_path, ex))
+        all_resources = {}
+    return all_resources
 
 
 def yaml_indent(s, **kwargs):
@@ -2006,7 +2050,20 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
             if not tar_path or tar_path == "-":
                 tar_path = operator_output + ".tar.gz"
 
-        temp = ''.join(template.stream(config=config))
+        yaml_output = {}
+        if config.get("chained_cni_config", {}).get("enable"):
+            file_path = config["chained_cni_config"].get("ip_sheet_file")
+            if not file_path or not os.path.isfile(file_path):
+                config["chained_cni_config"].pop('ip_sheet_file', None)
+            else:
+                all_resources = prepare_nadvlanmap(file_path)
+                if all_resources:
+                    yaml_output = yaml.dump(all_resources, default_flow_style=False)
+                else:
+                    config["chained_cni_config"].pop('ip_sheet_file', None)
+            temp = ''.join(template.stream(config=config, input=yaml_output))
+        else:
+            temp = ''.join(template.stream(config=config))
         parsed_temp = temp.split("---")
         # Find the place where to put the acioperators configmap
         for cmap_idx in range(len(parsed_temp)):
