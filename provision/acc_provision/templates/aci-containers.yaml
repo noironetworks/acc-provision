@@ -12,6 +12,18 @@ metadata:
 {% if config.kube_config.use_openshift_run_level %}
     openshift.io/run-level: "0"
 {% endif %}
+{% if config.flavor.startswith('openshift-4')  %}
+  {% set flavor_version = config.flavor.split('-') %}
+  {% set major_version = flavor_version[1].split('.')[0] | int %}
+  {% set minor_version = flavor_version[1].split('.')[1] | int %}
+  {% if (major_version == 4 and  minor_version >= 11
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    security.openshift.io/scc.podSecurityLabelSync: "false"
+  {% endif %}
+{% endif %}
   annotations:
     openshift.io/node-selector: ''
 ---
