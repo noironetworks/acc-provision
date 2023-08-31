@@ -1345,6 +1345,7 @@ data:
             },
             "chained_cni_config": {
                 "enable": true,
+                "ip_sheet_file": "nad_vlan_map_input.csv",
                 "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
             },
             "net_config": {
