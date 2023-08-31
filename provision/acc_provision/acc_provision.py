@@ -1139,6 +1139,12 @@ def isOverlay(flavor):
     return False
 
 
+def is_valid_file_path(path):
+    print("ERR:  File path invalid: ", path)
+    # If file path not provided in input, consider input not provieded
+    return True if not path or os.path.isfile(path) else False
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -1246,6 +1252,8 @@ def config_validate(flavor_opts, config):
             "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
                                                   is_valid_headroom),
             "aci_config/secondary_vlans": (get(("net_config", "secondary_vlans")), required),
+            "chained_cni_config/ip_sheet_file": (get(("chained_cni_config", "ip_sheet_file")),
+                                                 is_valid_file_path),
         }
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             extra_checks["aci_config/aep"] = (
@@ -1549,6 +1557,8 @@ def generate_sample(filep, flavor, config):
         data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + ' aks-provision-config.yaml')
     elif flavor == "calico-3.23.2":
         data = pkgutil.get_data('acc_provision', 'templates/' + config["calico_cni_versions_path"] + 'calico-provision-config.yaml')
+    elif flavor == "openshift-sdn-ovn-baremetal":
+        data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + 'chained-mode-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/' + config["aci_cni_versions_path"] + 'provision-config.yaml')
     try:
@@ -2053,14 +2063,14 @@ def generate_kube_yaml(args, config, operator_output, operator_tar, operator_cr_
         yaml_output = {}
         if config.get("chained_cni_config", {}).get("enable"):
             file_path = config["chained_cni_config"].get("ip_sheet_file")
-            if not file_path or not os.path.isfile(file_path):
-                config["chained_cni_config"].pop('ip_sheet_file', None)
-            else:
+            if file_path:
                 all_resources = prepare_nadvlanmap(file_path)
                 if all_resources:
                     yaml_output = yaml.dump(all_resources, default_flow_style=False)
                 else:
-                    config["chained_cni_config"].pop('ip_sheet_file', None)
+                    print("File is empty or with invalid contents: ", file_path)
+                    config["chained_cni_config"]["ip_sheet_file"] = ''
+        if yaml_output:
             temp = ''.join(template.stream(config=config, input=yaml_output))
         else:
             temp = ''.join(template.stream(config=config))

@@ -3611,6 +3611,7 @@ spec:
     storage: true
     subresources:
       status: {}
+{% if config.chained_cni_config.ip_sheet_file %}
 ---
 apiVersion: aci.fabricattachment/v1
 kind: NadVlanMap
@@ -3619,63 +3620,6 @@ metadata:
   namespace: aci-containers-system
 spec:
   nadVlanMapping:
-  {% if config.chained_cni_config.ip_sheet_file %}
     {{ input|indent(width=4) }}
-  {% else %}
-    "pccmm/pc-mm":
-    - label: pc-mm-oam
-      vlans: "3023"
-    - label: pc-mm-ran-1
-      vlans: "3829"
-    - label: pc-mm-ran-2
-      vlans: "3879"
-    - label: pc-mm-signaling-1
-      vlans: "3877"
-    - label: pc-mm-signaling-2
-      vlans: "3878"
-    - label: pc-mm-media
-      vlans: "3826"
-    - label: pc-mm-li
-      vlans: "3830"
-    "pccsm/eric-pc-routing-engine":
-    - label: pc-sm-media
-      vlans: "3801"
-    - label: pc-sm-signaling
-      vlans: "3852"
-    - label: pc-sm-li-x2
-      vlans: "3840"
-    "pccsm/eric-pc-vpn-gateway-forwarder":
-    - label: pc-sm-media
-      vlans: "3801"
-    - label: pc-sm-signaling
-      vlans: "3852"
-    - label: pc-sm-li-x2
-      vlans: "3840"
-    - label: pc-sm-intra
-      vlans: "3701"
-    "pcg/eric-pcg-routing-engine":
-    - label: pc-up-ran
-      vlans: "3804"
-    - label: pc-up-dn
-      vlans: "3805"
-    - label: pc-up-signaling
-      vlans: "3827"
-    - label: pc-up-media
-      vlans: "3851"
-    - label: pc-up-li-x3
-      vlans: "3850"
-    "pcg/eric-pc-up-data-plane":
-    - label: pc-up-ran
-      vlans: "3804"
-    - label: pc-up-dn
-      vlans: "3805"
-    - label: pc-up-signaling
-      vlans: "3827"
-    - label: pc-up-media
-      vlans: "3851"
-    - label: pc-up-li-x3
-      vlans: "3850"
-    - label: pc-up-intrafrwd
-      vlans: "3700"
 {% endif %}
 {% endif %}
