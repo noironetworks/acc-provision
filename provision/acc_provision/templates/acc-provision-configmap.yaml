@@ -195,6 +195,9 @@ data:
                 {% if config.user_config.chained_cni_config.use_global_scope_vlan %}
                 "use_global_scope_vlan": {{config.chained_cni_config.use_global_scope_vlan|json}},
                 {% endif %}
+                {% if config.user_config.chained_cni_config.ip_sheet_file %}
+                "ip_sheet_file": {{config.chained_cni_config.ip_sheet_file|json}},
+                {% endif %}
                 "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}}
             },
             {% endif %}
