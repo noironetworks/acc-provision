@@ -18,8 +18,9 @@ data:
     \            \"ip_sheet_file\": \"nad_vlan_map_input.csv\",\n            \"primary_cni_path\"\
     : \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\"\n        },\n        \"net_config\"\
     : {\n            \"kubeapi_vlan\": 4001,\n            \"node_subnet\": \"10.1.0.1/16\"\
-    ,\n            \"secondary_vlans\": \"[4002, 4003, 4009, 4004-4007]\",\n     \
-    \   }\n    }\n }"
+    ,\n            \"secondary_vlans\": \"[3023, 3700-3701, 3801, 3804-3805, 3826-3827,\
+    \ 3829-3830, 3840, 3850-3852, 3877-3879, 4002-4007, 4009]\",\n        }\n    }\n\
+    \ }"
 kind: ConfigMap
 metadata:
   labels:

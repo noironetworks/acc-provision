@@ -25,7 +25,7 @@ import yaml
 from yaml import SafeLoader
 
 from jinja2 import Undefined
-from itertools import combinations
+from itertools import combinations, groupby
 from OpenSSL import crypto
 from jinja2 import Environment, PackageLoader
 from os.path import exists
@@ -138,6 +138,51 @@ def prepare_nadvlanmap(file_path):
         print("Error while preparing yaml contents from given CSV %s file. Error: %s" % (file_path, ex))
         all_resources = {}
     return all_resources
+
+
+def check_vlans_available_in_file(ip_sheet_file_path):
+    csv_data = get_csv_contents(ip_sheet_file_path)
+    vlans_from_file = []
+    try:
+        for resource in csv_data:
+            vlan_id = resource.get('VLAN ID')
+            if vlan_id:
+                vlans_from_file.append(int(vlan_id.split('.')[0]))
+    except Exception:
+        print("ERR:  Invalid VLAN value in file: ", ip_sheet_file_path)
+        return False
+    if not vlans_from_file:
+        print("ERR:  VLANs not available in file: ", ip_sheet_file_path)
+        return False
+    return True
+
+
+def prepare_secondary_vlans(config):
+    ip_sheet_file_path = config["chained_cni_config"].get("ip_sheet_file")
+    secondary_vlans = config["net_config"]["secondary_vlans"] if config["net_config"].get(
+        "secondary_vlans") else []
+    if ip_sheet_file_path:
+        vlans_from_file = []
+        csv_data = get_csv_contents(ip_sheet_file_path)
+        for resource in csv_data:
+            vlan_id = resource.get('VLAN ID')
+            if vlan_id:
+                vlans_from_file.append(vlan_id.split('.')[0])
+        secondary_vlans.extend(vlans_from_file)
+    return secondary_vlans
+
+
+def group_in_ranges(vlans):
+    integer_vlans = [int(x) for x in vlans]
+    sorted_vlans = list(sorted(set(integer_vlans)))
+    ranges = []
+    for _, group in groupby(enumerate(sorted_vlans), lambda i_x: i_x[1] - i_x[0]):
+        group = list(group)
+        if len(group) > 1:
+            ranges.append(f"{group[0][1]}-{group[-1][1]}")
+        else:
+            ranges.append(str(group[0][1]))
+    return ranges
 
 
 def yaml_indent(s, **kwargs):
@@ -452,6 +497,10 @@ def normalize_vlans(secondary_vlans):
         elif ',' in str(vlan):
             values = [int(val) for val in vlan.split(',')]
             normalized_vlans.extend(values)
+        elif '-' in str(vlan):
+            start, end = map(int, vlan.split('-'))
+            result_vlans = list(range(start, end + 1))
+            normalized_vlans.extend(result_vlans)
         else:
             normalized_vlans.append(vlan)
     return normalized_vlans
@@ -1131,10 +1180,13 @@ def isOverlay(flavor):
     return False
 
 
-def is_valid_file_path(path):
-    print("ERR:  File path invalid: ", path)
-    # If file path not provided in input, consider input not provieded
-    return True if not path or os.path.isfile(path) else False
+def is_valid_file(path):
+    if not path or not os.path.isfile(path):
+        print("ERR:  File path invalid: ", path)
+        return False
+    if not check_vlans_available_in_file(path):
+        return False
+    return True
 
 
 def config_validate(flavor_opts, config):
@@ -1243,13 +1295,16 @@ def config_validate(flavor_opts, config):
                                          is_valid_mtu),
             "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
                                                   is_valid_headroom),
-            "aci_config/secondary_vlans": (get(("net_config", "secondary_vlans")), required),
-            "chained_cni_config/ip_sheet_file": (get(("chained_cni_config", "ip_sheet_file")),
-                                                 is_valid_file_path),
         }
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             extra_checks["aci_config/aep"] = (
                 get(("aci_config", "aep")), required)
+        if config["chained_cni_config"].get("ip_sheet_file"):
+            extra_checks["chained_cni_config/ip_sheet_file"] = (
+                get(("chained_cni_config", "ip_sheet_file")), is_valid_file)
+        else:
+            extra_checks["aci_config/secondary_vlans"] = (
+                get(("net_config", "secondary_vlans")), required)
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -2642,9 +2697,10 @@ def provision(args, apic_file, no_random):
     # Adjust config based on convention/apic data
     if is_chained_mode(config):
         adj_config = config_adjust_chained_mode(args, config, no_random)
-        if config["net_config"]["secondary_vlans"]:
-            normalized_vlans = normalize_vlans(config["net_config"]["secondary_vlans"])
-            config["net_config"]["secondary_vlans"] = json.dumps(normalized_vlans).replace("\"", "")
+        config["net_config"]["secondary_vlans"] = prepare_secondary_vlans(config)
+        normalized_vlans = normalize_vlans(config["net_config"]["secondary_vlans"])
+        grouped_vlans = group_in_ranges(normalized_vlans)
+        config["net_config"]["secondary_vlans"] = json.dumps(grouped_vlans).replace("\"", "")
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
