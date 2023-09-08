@@ -20,7 +20,7 @@ jobs:
       go: 1.20.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:
-        - export RELEASE_TAG=6.0.3.1
+        - export RELEASE_TAG=4.3.2.1
         - export UPSTREAM_ID=81c2369
         - export EXPECTED_TAG_PREFIX=${RELEASE_TAG}
         - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
