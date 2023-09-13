@@ -187,7 +187,19 @@ rules:
   - nodefabricnetworkattachments
   - nadvlanmaps
   - staticfabricnetworkattachments
+  - fabricvlanpools
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps/status
+  - fabricvlanpools/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch

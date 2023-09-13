@@ -1380,7 +1380,6 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         {% endif %}
-        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
         {% if config.chained_cni_config.use_global_scope_vlan %}
         "aci-use-global-scope-vlan": true,
         {% else %}
@@ -1565,7 +1564,6 @@ data:
         {% if config.net_config.interface_mtu_headroom %}
         "interface-mtu-headroom": {{ config.net_config.interface_mtu_headroom|json }},
         {% endif %}
-        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
         {% if config.chained_cni_config.use_global_scope_vlan %}
         "aci-use-global-scope-vlan": true,
         {% else %}
@@ -2044,10 +2042,22 @@ rules:
   - nodefabricnetworkattachments
   - nadvlanmaps
   - staticfabricnetworkattachments
+  - fabricvlanpools
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps/status
+  - fabricvlanpools/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
@@ -2223,20 +2233,11 @@ rules:
   - aci.fabricattachment
   resources:
   - nadvlanmaps
+  - fabricvlanpools
   verbs:
   - get
   - list
   - watch
-- apiGroups:
-  - aci.fabricattachment
-  resources:
-  - nadvlanmaps/status
-  verbs:
-  - get
-  - list
-  - watch
-  - update
-  - patch
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
@@ -3632,6 +3633,75 @@ metadata:
   namespace: aci-containers-system
 spec:
   nadVlanMapping:
-    {{ input|indent(width=4) }}
+    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
 {% endif %}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: fabricvlanpools.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: FabricVlanPool
+    listKind: FabricVlanPoolList
+    plural: fabricvlanpools
+    singular: fabricvlanpool
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: FabricVlanPool is the Schema for the fabricattachments vlanpool
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FabricVlanPoolSpec defines the list of vlans in the fabric
+              vlan pool
+            properties:
+              vlans:
+                items:
+                  type: string
+                type: array
+            type: object
+          status:
+            description: FabricVlanPoolStatus defines the observed state of FabricVlanPool
+            properties:
+              error:
+                type: string
+              state:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                  code after modifying this file7 Add custom validation using kubebuilder
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: aci.fabricattachment/v1
+kind: FabricVlanPool
+metadata:
+  name: default
+  namespace: aci-containers-system
+spec:
+  vlans:
+    {{ chained_mode_input.fabric_vlan_pool|indent(width=4) }}
 {% endif %}
