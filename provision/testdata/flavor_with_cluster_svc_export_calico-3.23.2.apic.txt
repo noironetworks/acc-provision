@@ -775,7 +775,7 @@ None
                 "aaaUserCert": {
                     "attributes": {
                         "name": "calico-l3out-fsvi-vlan-13.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIICDDCCAXUCAgPoMA0GCSqGSIb3DQEBBQUAME4xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMScwJQYDVQQDDB5Vc2VyIGNhbGljby1sM291dC1m\nc3ZpLXZsYW4tMTMwHhcNMjIwOTAyMTIwMDIwWhcNMzIwODMxMDAwMDIwWjBOMQsw\nCQYDVQQGEwJVUzEWMBQGA1UECgwNQ2lzY28gU3lzdGVtczEnMCUGA1UEAwweVXNl\nciBjYWxpY28tbDNvdXQtZnN2aS12bGFuLTEzMIGfMA0GCSqGSIb3DQEBAQUAA4GN\nADCBiQKBgQCs4x49Q0FoiqhU72ZQ0+JLwVRuC3+XY1i+5xDGPbQrbzVm3fx9wOhe\nT29SE94KTrecWpkZEgPKSJkvrOslwADqSQ8pxzjbqHTJ0guiPVbW80G3ZDRc7NLF\n8E49mvj0N7hK65EgzIkcelNkZ1MO3KZcDBXtTy0DM1Fj815iqDd9WQIDAQABMA0G\nCSqGSIb3DQEBBQUAA4GBAHdHpygUcAwpEx/65AyCBgTYV5jfVoq7I6H017MUoWVR\ng1Ml+royJo3PkYIRKpGCo3ny8tqSM4Ztagrz0jG14c5CcFwGLj0o7l5GSWkPr7ZD\n8TKMh4REQ/p02AL2QR1Dvu5vW0W4iQJbjkxlAyflnT2pDxjiN7z/bJcmgkBtVleg\n-----END CERTIFICATE-----\n",
+                        "data": "dummy\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }

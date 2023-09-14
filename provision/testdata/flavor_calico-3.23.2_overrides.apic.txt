@@ -756,7 +756,7 @@ None
                 "aaaUserCert": {
                     "attributes": {
                         "name": "calico-cni.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7jCCAVcCAgPoMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRgwFgYDVQQDDA9Vc2VyIGNhbGljby1jbmkwHhcN\nMjIwOTAyMTE1OTUxWhcNMzIwODMwMjM1OTUxWjA/MQswCQYDVQQGEwJVUzEWMBQG\nA1UECgwNQ2lzY28gU3lzdGVtczEYMBYGA1UEAwwPVXNlciBjYWxpY28tY25pMIGf\nMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwQkRrD/1IVxlLpPs6JWDEwA5ObIfP\nRkW270o20gucamRP+ESZhi9O5PxS66S7rI6iO0Ey2e40RnQu7PjO0YOoqF/UjUer\nmhS2rARQB8lhNaCM3tLHLzSx4VX0KCBRxOmfGapBguoFVZJSy+HGxirgKV4bOw15\n2e6UdQ1nR7ee8QIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAEmoqepSRC64dCspCdsz\nGNfUW6WUPVK/ffcp934h7MOrveIO9Sx6fPHjFC3J/kSrAWqaQKoBQtbmfCXeM3E1\nDhbpIheIiHgDsOPj+5DPdWvKjk6LMzIQwhWR6IZC7U6kDRlUlIAPO6f/zuPbNMm+\nGKVf4pGW+NlPash9jK3lnwON\n-----END CERTIFICATE-----\n",
+                        "data": "dummy\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }

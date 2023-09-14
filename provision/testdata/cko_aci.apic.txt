@@ -1165,7 +1165,7 @@ None
                 "aaaUserCert": {
                     "attributes": {
                         "name": "bm2acicni.crt",
-                        "data": "-----BEGIN CERTIFICATE-----\nMIIB7DCCAVUCAgPoMA0GCSqGSIb3DQEBBQUAMD4xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRcwFQYDVQQDDA5Vc2VyIGJtMmFjaWNuaTAeFw0y\nMjA4MjUwNzMyMDdaFw0zMjA4MjIxOTMyMDdaMD4xCzAJBgNVBAYTAlVTMRYwFAYD\nVQQKDA1DaXNjbyBTeXN0ZW1zMRcwFQYDVQQDDA5Vc2VyIGJtMmFjaWNuaTCBnzAN\nBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAx/FWaFCB+p+koWoyyIUkSgkPLR9KDhoH\nJT+j13mvcOEjGaz3g63xkoRrchWPw4prHmmWmFDYPkumkezD2Qs3fho7tNAmlEDQ\nP9gX4wQSWiQStoA4moNLtEgohjmI2k5O6zTlsckBQ6JO+JqYguQ9yPsDVsPKbnQ5\nbUrhfjJNnkMCAwEAATANBgkqhkiG9w0BAQUFAAOBgQCQZNsXS8qNhdFwNAKITX2p\nRBUZBCYALWLjLtmwRbv/+LqUYvhV2oYG2pfNjeO7th7SHPyG1cDx3qHWi2JD22Wg\nRgW6YNS38EDs+f/WmcPU8wTOHH/4NJASoGAtfTeZhS9y/SwjFflCuHfik6aQwEGo\n0y6nn3FHo4CsuHwDWGIpiQ==\n-----END CERTIFICATE-----\n",
+                        "data": "dummy\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
                 }
