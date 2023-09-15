@@ -1,0 +1,766 @@
+/api/mo/uni/tn-test/out-test-l3out.json
+{
+    "l3extOut": {
+        "attributes": {
+            "name": "test-l3out",
+            "enforceRtctrl": "export,import",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsEctx": {
+                    "attributes": {
+                        "tnFvCtxName": "mykube_vrf",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extRsL3DomAtt": {
+                    "attributes": {
+                        "tDn": "uni/l3dom-test-l3out-L3-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extLNodeP": {
+                    "attributes": {
+                        "name": "test-l3out_node_prof",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "l3extLIfP": {
+                                "attributes": {
+                                    "name": "test-l3out_int_prof",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/l3dom-test-l3out-L3-dom.json
+{
+    "l3extDomP": {
+        "attributes": {
+            "dn": "uni/l3dom-test-l3out-L3-dom",
+            "name": "test-l3out-L3-dom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[test-l3out-pool]-static",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra/vlanns-[test-l3out-pool]-static.json
+{
+    "fvnsVlanInstP": {
+        "attributes": {
+            "name": "test-l3out-pool",
+            "allocMode": "static",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvnsEncapBlk": {
+                    "attributes": {
+                        "allocMode": "static",
+                        "from": "vlan-13",
+                        "to": "vlan-13",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/phys-test-l3out-phys-dom.json
+{
+    "physDomP": {
+        "attributes": {
+            "dn": "uni/phys-test-l3out-phys-dom",
+            "name": "test-l3out-phys-dom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[test-l3out-pool]-static",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra.json
+{
+    "infraAttEntityP": {
+        "attributes": {
+            "name": "kube-cluster",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/phys-test-l3out-phys-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/l3dom-test-l3out-L3-dom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13].json
+{
+    "l3extVirtualLIfP": {
+        "attributes": {
+            "dn": "uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-101]-[vlan-13]",
+            "addr": "2.100.101.201/24",
+            "encap": "vlan-13",
+            "nodeDn": "topology/pod-1/node-101",
+            "ifInstT": "ext-svi",
+            "autostate": "enabled",
+            "encapScope": "local",
+            "mtu": "9000",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsDynPathAtt": {
+                    "attributes": {
+                        "tDn": "uni/phys-test-l3out-phys-dom",
+                        "floatingAddr": "2.100.101.100/24",
+                        "forgedTransmit": "Disabled",
+                        "promMode": "Disabled",
+                        "macChange": "Disabled",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extIp": {
+                    "attributes": {
+                        "addr": "2.100.101.254/24",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpPeerP": {
+                    "attributes": {
+                        "addr": "2.100.101.0/24",
+                        "ctrl": "as-override,dis-peer-as-check",
+                        "password": "test",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "bgpAsP": {
+                                "attributes": {
+                                    "asn": "64512",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "bgpRsPeerPfxPol": {
+                                "attributes": {
+                                    "tnBgpPeerPfxPolName": "test-l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13].json
+{
+    "l3extVirtualLIfP": {
+        "attributes": {
+            "dn": "uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-102]-[vlan-13]",
+            "addr": "2.100.101.202/24",
+            "encap": "vlan-13",
+            "nodeDn": "topology/pod-1/node-102",
+            "ifInstT": "ext-svi",
+            "autostate": "enabled",
+            "encapScope": "local",
+            "mtu": "9000",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsDynPathAtt": {
+                    "attributes": {
+                        "tDn": "uni/phys-test-l3out-phys-dom",
+                        "floatingAddr": "2.100.101.100/24",
+                        "forgedTransmit": "Disabled",
+                        "promMode": "Disabled",
+                        "macChange": "Disabled",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extIp": {
+                    "attributes": {
+                        "addr": "2.100.101.254/24",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpPeerP": {
+                    "attributes": {
+                        "addr": "2.100.101.0/24",
+                        "ctrl": "as-override,dis-peer-as-check",
+                        "password": "test",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "bgpAsP": {
+                                "attributes": {
+                                    "asn": "64512",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "bgpRsPeerPfxPol": {
+                                "attributes": {
+                                    "tnBgpPeerPfxPolName": "test-l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13].json
+{
+    "l3extVirtualLIfP": {
+        "attributes": {
+            "dn": "uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/lifp-test-l3out_int_prof/vlifp-[topology/pod-1/node-103]-[vlan-13]",
+            "addr": "2.100.101.203/24",
+            "encap": "vlan-13",
+            "nodeDn": "topology/pod-1/node-103",
+            "ifInstT": "ext-svi",
+            "autostate": "enabled",
+            "encapScope": "local",
+            "mtu": "9000",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "l3extRsDynPathAtt": {
+                    "attributes": {
+                        "tDn": "uni/phys-test-l3out-phys-dom",
+                        "floatingAddr": "2.100.101.100/24",
+                        "forgedTransmit": "Disabled",
+                        "promMode": "Disabled",
+                        "macChange": "Disabled",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extIp": {
+                    "attributes": {
+                        "addr": "2.100.101.254/24",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpPeerP": {
+                    "attributes": {
+                        "addr": "2.100.101.0/24",
+                        "ctrl": "as-override,dis-peer-as-check",
+                        "password": "test",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "bgpAsP": {
+                                "attributes": {
+                                    "asn": "64512",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "bgpRsPeerPfxPol": {
+                                "attributes": {
+                                    "tnBgpPeerPfxPolName": "test-l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-102].json
+{
+    "l3extRsNodeL3OutAtt": {
+        "attributes": {
+            "rtrId": "2.2.2.2",
+            "tDn": "topology/pod-1/node-102",
+            "rtrIdLoopBack": "no",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/rsnodeL3OutAtt-[topology/pod-1/node-103].json
+{
+    "l3extRsNodeL3OutAtt": {
+        "attributes": {
+            "rtrId": "1.1.4.103",
+            "tDn": "topology/pod-1/node-103",
+            "rtrIdLoopBack": "no",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/flt-calico-cni-allow-all-filter.json
+{
+    "vzFilter": {
+        "attributes": {
+            "name": "calico-cni-allow-all-filter",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "vzEntry": {
+                    "attributes": {
+                        "name": "allow-all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/brc-calico-cni-l3out-allow-all.json
+{
+    "vzBrCP": {
+        "attributes": {
+            "name": "calico-cni-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "vzSubj": {
+                    "attributes": {
+                        "name": "allow-all-subj",
+                        "consMatchT": "AtleastOne",
+                        "provMatchT": "AtleastOne",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzRsSubjFiltAtt": {
+                                "attributes": {
+                                    "tnVzFilterName": "calico-cni-allow-all-filter",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/instP-test-l3out_svc_epg.json
+{
+    "l3extInstP": {
+        "attributes": {
+            "name": "test-l3out_svc_epg",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvRsCons": {
+                    "attributes": {
+                        "tnVzBrCPName": "calico-cni-l3out-allow-all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "20.3.0.0/16",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/instP-test-l3out_int_epg.json
+{
+    "l3extInstP": {
+        "attributes": {
+            "name": "test-l3out_int_epg",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvRsCons": {
+                    "attributes": {
+                        "tnVzBrCPName": "calico-cni-l3out-allow-all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "20.2.0.0/16",
+                        "aggregate": "shared-rtctrl",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "l3extSubnet": {
+                    "attributes": {
+                        "ip": "2.100.101.0/24",
+                        "scope": "export-rtctrl,import-rtctrl,import-security",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/bgpExtP.json
+{
+    "bgpExtP": {
+        "attributes": {
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out.json
+{
+    "l3extOut": {
+        "attributes": {
+            "enforceRtctrl": "export,import",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/bgpCtxP-test-l3out-Timers.json
+{
+    "bgpCtxPol": {
+        "attributes": {
+            "holdIntvl": "3",
+            "staleIntvl": "6",
+            "kaIntvl": "1",
+            "maxAsLimit": "1",
+            "name": "test-l3out-Timers",
+            "grCtrl": "helper",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/bestpath-test-l3out-Relax-AS.json
+{
+    "bgpBestPathCtrlPol": {
+        "attributes": {
+            "name": "test-l3out-Relax-AS",
+            "ctrl": "asPathMultipathRelax",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/lnodep-test-l3out_node_prof/protp.json
+{
+    "bgpProtP": {
+        "attributes": {
+            "name": "default",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "bgpRsBgpNodeCtxPol": {
+                    "attributes": {
+                        "tnBgpCtxPolName": "test-l3out-Timers",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "bgpRsBestPathCtrlPol": {
+                    "attributes": {
+                        "tnBgpBestPathCtrlPolName": "test-l3out-Relax-AS",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/bgpCtxAfP-test-l3out.json
+{
+    "bgpCtxAfPol": {
+        "attributes": {
+            "name": "test-l3out",
+            "maxEcmpIbgp": "64",
+            "maxEcmp": "64",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[test-l3out]-ipv4-ucast.json
+{
+    "fvRsCtxToBgpCtxAfPol": {
+        "attributes": {
+            "tnBgpCtxAfPolName": "test-l3out",
+            "af": "ipv4-ucast",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/ctx-mykube_vrf/rsctxToBgpCtxAfPol-[test-l3out]-ipv6-ucast.json
+{
+    "fvRsCtxToBgpCtxAfPol": {
+        "attributes": {
+            "tnBgpCtxAfPolName": "test-l3out",
+            "af": "ipv6-ucast",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/subj-test-l3out-export-match.json
+{
+    "rtctrlSubjP": {
+        "attributes": {
+            "name": "test-l3out-export-match",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.2.0.0/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/prof-default-export.json
+{
+    "rtctrlProfile": {
+        "attributes": {
+            "name": "default-export",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlCtxP": {
+                    "attributes": {
+                        "name": "export_pod_subnet",
+                        "order": "0",
+                        "action": "permit",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "rtctrlRsCtxPToSubjP": {
+                                "attributes": {
+                                    "tnRtctrlSubjPName": "test-l3out-export-match",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/subj-test-l3out-import-match.json
+{
+    "rtctrlSubjP": {
+        "attributes": {
+            "name": "test-l3out-import-match",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.2.0.0/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "2.100.101.0/24",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "rtctrlMatchRtDest": {
+                    "attributes": {
+                        "ip": "20.3.0.0/16",
+                        "aggregate": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/out-test-l3out/prof-default-import.json
+{
+    "rtctrlProfile": {
+        "attributes": {
+            "name": "default-import",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "rtctrlCtxP": {
+                    "attributes": {
+                        "name": "import_cluster_subnets",
+                        "order": "0",
+                        "action": "permit",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "rtctrlRsCtxPToSubjP": {
+                                "attributes": {
+                                    "tnRtctrlSubjPName": "test-l3out-import-match",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-test/bgpPfxP-test-l3out.json
+{
+    "bgpPeerPfxPol": {
+        "attributes": {
+            "action": "reject",
+            "maxPfx": "500",
+            "name": "test-l3out",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg.json
+{
+    "fvRsProv": {
+        "attributes": {
+            "matchT": "AtleastOne",
+            "tnVzBrCPName": "calico-cni-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-test/out-ext-l3out/instP-mykube_extepg/rsprov-calico-cni-l3out-allow-all.json
+None
+/api/node/mo/uni/userext/user-calico-cni.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "calico-cni",
+            "accountStatus": "active",
+            "pwd": "NotRandom!",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserDomain": {
+                    "attributes": {
+                        "name": "all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "aaaUserRole": {
+                                "attributes": {
+                                    "name": "admin",
+                                    "privType": "writePriv",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/node/mo/uni/userext/user-calico-cni.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "calico-cni",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserCert": {
+                    "attributes": {
+                        "name": "calico-cni.crt",
+                        "data": "dummy\n",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}

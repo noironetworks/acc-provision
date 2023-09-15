@@ -804,6 +804,18 @@ def test_override_use_global_scope_vlan():
 
 
 @in_testdir
+def test_chained_mode_nad_vlan_map():
+    run_provision(
+        "chained_mode_nad_vlan_map.inp.yaml",
+        "chained_mode_nad_vlan_map.kube.yaml",
+        "chained_mode_nad_vlan_map_tar",
+        None,
+        "chained_mode_nad_vlan_map.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",

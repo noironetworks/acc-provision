@@ -8,19 +8,21 @@ data:
     \    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\",\n    \"\
     aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\
     : \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-additional-vlans\"\
-    : \"[4002-4007, 4009]\",\n    \"aci-use-global-scope-vlan\": false,\n    \"aci-policy-tenant\"\
-    : \"kube\",\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-netop-nodes\",\n    \"aci-service-phys-dom\"\
-    : \"kube-physdom\",\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-pbr-tracking-non-snat\"\
-    : false,\n    \"aci-vrf-tenant\": \"common\",\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\"\
-    ,\n    \"aci-vrf\": \"kube\",\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\"\
-    : [\n        \"default\"\n    ]\n}"
+    : \"[3023, 3700-3701, 3801, 3804-3805, 3826-3827, 3829-3830, 3840, 3850-3852,\
+    \ 3877-3879, 4002-4007, 4009]\",\n    \"aci-use-global-scope-vlan\": false,\n\
+    \    \"aci-policy-tenant\": \"kube\",\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-netop-nodes\"\
+    ,\n    \"aci-service-phys-dom\": \"kube-physdom\",\n    \"aci-service-encap\"\
+    : \"vlan-None\",\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\"\
+    : \"common\",\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-vrf\"\
+    : \"kube\",\n    \"aci-l3out\": null,\n    \"aci-ext-networks\": null\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-sdn-ovn-baremetal\",\n    \"\
     app-profile\": \"netop-kube\",\n    \"chained-mode\": true,\n    \"primary-cni-path\"\
     : \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\",\n    \"log-level\": \"info\"\
     ,\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n\
     \    \"aci-vmm-controller\": \"kube\",\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\"\
     : \"common\",\n    \"aci-prefix\": \"kube\",\n    \"kubeapi-vlan\": 4001,\n  \
-    \  \"node-subnet\": \"10.1.0.1/16\",\n    \"aci-additional-vlans\": \"[4002-4007,\
+    \  \"node-subnet\": \"10.1.0.1/16\",\n    \"aci-additional-vlans\": \"[3023, 3700-3701,\
+    \ 3801, 3804-3805, 3826-3827, 3829-3830, 3840, 3850-3852, 3877-3879, 4002-4007,\
     \ 4009]\",\n    \"aci-use-global-scope-vlan\": false,\n    \"enable-drop-log\"\
     : true,\n    \"enable-nodepodif\": false\n}"
 kind: ConfigMap
