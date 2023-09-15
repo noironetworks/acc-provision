@@ -159,7 +159,8 @@ def check_vlans_available_in_file(ip_sheet_file_path):
 
 def prepare_secondary_vlans(config):
     ip_sheet_file_path = config["chained_cni_config"].get("ip_sheet_file")
-    secondary_vlans = config["net_config"]["secondary_vlans"] if config["net_config"].get(
+    secondary_vlans = config["chained_cni_config"][
+        "secondary_vlans"] if config["chained_cni_config"].get(
         "secondary_vlans") else []
     if ip_sheet_file_path:
         vlans_from_file = []
@@ -287,7 +288,6 @@ def config_default():
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
             "advertise_cluster_svc_subnet": False,
-            "secondary_vlans": None,
         },
         "topology": {
             "rack": {
@@ -394,6 +394,7 @@ def config_default():
             "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf",
             "skip_node_network_provisioning": False,
             "use_global_scope_vlan": False,
+            "secondary_vlans": None,
         }
     }
     return default_config
@@ -421,7 +422,8 @@ def config_user(flavor, config_file):
                 config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
             if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
                 config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
-        if config["net_config"].get("node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
+        if "net_config" in config.keys() and config["net_config"].get(
+                "node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
             config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
     if config is None:
         config = {}
@@ -523,7 +525,7 @@ def config_adjust_chained_mode(args, config, no_random):
     else:
         physical_domain = system_id + "-physdom"
 
-    secondary_vlans = config["net_config"]["secondary_vlans"]
+    secondary_vlans = config["chained_cni_config"]["secondary_vlans"]
 
     app_profile = Apic.ACI_CHAINED_PREFIX + system_id
     default_endpoint_group = Apic.ACI_CHAINED_PREFIX + "default"
@@ -568,7 +570,6 @@ def config_adjust_chained_mode(args, config, no_random):
         },
         "net_config": {
             "infra_vlan": infra_vlan,
-            "secondary_vlans": secondary_vlans,
         },
         "kube_config": {
             "default_endpoint_group": {
@@ -583,6 +584,9 @@ def config_adjust_chained_mode(args, config, no_random):
                     "group": namespace_endpoint_group,
                 },
             },
+        },
+        "chained_cni_config": {
+            "secondary_vlans": secondary_vlans,
         },
         "registry": {
             "configuration_version": token,
@@ -1303,8 +1307,8 @@ def config_validate(flavor_opts, config):
             extra_checks["chained_cni_config/ip_sheet_file"] = (
                 get(("chained_cni_config", "ip_sheet_file")), is_valid_file)
         else:
-            extra_checks["aci_config/secondary_vlans"] = (
-                get(("net_config", "secondary_vlans")), required)
+            extra_checks["chained_cni_config/secondary_vlans"] = (
+                get(("chained_cni_config", "secondary_vlans")), required)
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -2085,18 +2089,23 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             if not tar_path or tar_path == "-":
                 tar_path = operator_output + ".tar.gz"
 
-        yaml_output = {}
+        chained_mode_yaml_output = {}
         if config.get("chained_cni_config", {}).get("enable"):
             file_path = config["chained_cni_config"].get("ip_sheet_file")
             if file_path:
                 all_resources = prepare_nadvlanmap(file_path)
                 if all_resources:
-                    yaml_output = yaml.dump(all_resources, default_flow_style=False)
+                    chained_mode_yaml_output["nadvlan_map"] = yaml.dump(
+                        all_resources, default_flow_style=False)
                 else:
                     print("File is empty or with invalid contents: ", file_path)
                     config["chained_cni_config"]["ip_sheet_file"] = ''
-        if yaml_output:
-            temp = ''.join(template.stream(config=config, input=yaml_output))
+            chained_mode_yaml_output["fabric_vlan_pool"] = (yaml.dump(
+                config["chained_cni_config"]["secondary_vlans"],
+                default_flow_style=False)).rstrip('\n')
+        if chained_mode_yaml_output:
+            temp = ''.join(template.stream(config=config,
+                                           chained_mode_input=chained_mode_yaml_output))
         else:
             temp = ''.join(template.stream(config=config))
         parsed_temp = temp.split("---")
@@ -2743,10 +2752,9 @@ def provision(args, apic_file, no_random):
     # Adjust config based on convention/apic data
     if is_chained_mode(config):
         adj_config = config_adjust_chained_mode(args, config, no_random)
-        config["net_config"]["secondary_vlans"] = prepare_secondary_vlans(config)
-        normalized_vlans = normalize_vlans(config["net_config"]["secondary_vlans"])
-        grouped_vlans = group_in_ranges(normalized_vlans)
-        config["net_config"]["secondary_vlans"] = json.dumps(grouped_vlans).replace("\"", "")
+        config["chained_cni_config"]["secondary_vlans"] = prepare_secondary_vlans(config)
+        normalized_vlans = normalize_vlans(config["chained_cni_config"]["secondary_vlans"])
+        config["chained_cni_config"]["secondary_vlans"] = group_in_ranges(normalized_vlans)
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
@@ -2833,8 +2841,8 @@ def provision(args, apic_file, no_random):
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
 
-    if is_chained_mode(config) and config["user_config"]["net_config"].get("secondary_vlans"):
-        config["net_config"]["secondary_vlans"] = normalized_vlans
+    if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
+        config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 

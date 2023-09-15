@@ -148,17 +148,8 @@ rules:
   - aci.fabricattachment
   resources:
   - nadvlanmaps
+  - fabricvlanpools
   verbs:
   - get
   - list
   - watch
-- apiGroups:
-  - aci.fabricattachment
-  resources:
-  - nadvlanmaps/status
-  verbs:
-  - get
-  - list
-  - watch
-  - update
-  - patch

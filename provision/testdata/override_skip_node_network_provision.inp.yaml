@@ -7,13 +7,11 @@ aci_config:
     certfile: user.crt
     keyfile: user.key
 
-net_config:
-  secondary_vlans:
-    - 4002
-    - 4003, 4009
-    - 4004-4007
-
 chained_cni_config:
   enable: true
   primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
   skip_node_network_provisioning: true
+  secondary_vlans:
+    - 4002
+    - 4003, 4009
+    - 4004-4007
