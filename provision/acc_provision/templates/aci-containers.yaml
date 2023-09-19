@@ -2881,7 +2881,7 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: Exists
-        {% if config.flavor == "RKE2-kubernetes-1.24" %}
+        {% if config.flavor.startswith("RKE2") %}
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
           operator: Exists
