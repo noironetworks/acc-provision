@@ -90,6 +90,7 @@ spec:
           name: controller-config-volume
         - mountPath: /usr/local/etc/aci-cert/
           name: aci-user-cert-volume
+      priorityClassName: system-node-critical
       serviceAccountName: aci-containers-controller
       tolerations:
       - effect: NoExecute
