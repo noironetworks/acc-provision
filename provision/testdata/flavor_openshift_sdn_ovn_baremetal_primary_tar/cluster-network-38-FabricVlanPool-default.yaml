@@ -1,0 +1,9 @@
+apiVersion: aci.fabricattachment/v1
+kind: FabricVlanPool
+metadata:
+  name: default
+  namespace: aci-containers-system
+spec:
+  vlans:
+  - 4002-4007
+  - '4009'
