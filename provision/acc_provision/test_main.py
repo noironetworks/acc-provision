@@ -744,6 +744,30 @@ def test_flavor_openshift_sdn_ovn_baremetal():
 
 
 @in_testdir
+def test_flavor_openshift_sdn_ovn_baremetal_primary():
+    run_provision(
+        "flavor_openshift_sdn_ovn_baremetal_primary.inp.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary.kube.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_tar",
+        None,
+        "flavor_openshift_sdn_ovn_baremetal_primary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_sdn_ovn_baremetal_primary_with_secondary():
+    run_provision(
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.inp.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.kube.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary_tar",
+        None,
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_preexisting_tenant_chained_mode():
     run_provision(
         "with_preexisting_tenant_chained_mode.inp.yaml",

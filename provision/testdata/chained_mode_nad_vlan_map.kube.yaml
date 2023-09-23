@@ -1344,7 +1344,7 @@ data:
                 },
             },
             "chained_cni_config": {
-                "enable": true,
+                "secondary_interface_chaining": true,
                 "secondary_vlans": [
                     "3023",
                     "3700-3701",
@@ -1358,7 +1358,7 @@ data:
                     "4002-4007",
                     "4009"
                 ],
-                "ip_sheet_file": "nad_vlan_map_input.csv",
+                "vlans_file": "nad_vlan_map_input.csv",
                 "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
             },
             "net_config": {

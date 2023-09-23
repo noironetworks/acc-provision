@@ -111,14 +111,15 @@ registry:
   # disable: False       # default is True
 
 chained_cni_config:                                                  # Contains chained mode specific configurations
-  enable: True                                                       # default is False
-  primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf" # Path value of primary CNI to use
-  secondary_vlans:              # VLANs for additional networks
-  - 402
-  - 403-406
-  - 410, 425
-  # skip_node_network_provisioning: True                             # default False
-  # use_global_scope_vlan: True                                      # default False
-  # ip_sheet_file: "chained_mode.csv"     # Absolute/relative path of CSV file. If provided, crating NadVlanMap CR else not
+  secondary_interface_chaining: True                                 # default is False
+  vlans_file: "chained_mode.csv"                                     # Absolute/relative path of CSV file.
+  # primary_interface_chaining: True                                 # default is False
+  # primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf" # Path value of primary CNI to use
+  # secondary_vlans:              # VLANs for additional networks
+  # - 402
+  # - 403-406
+  # - 410, 425
+  # skip_node_network_provisioning: True                             # default is False
+  # use_global_scope_vlan: True                                      # default is False
 
 

@@ -140,8 +140,8 @@ def prepare_nadvlanmap(file_path):
     return all_resources
 
 
-def check_vlans_available_in_file(ip_sheet_file_path):
-    csv_data = get_csv_contents(ip_sheet_file_path)
+def check_vlans_available_in_file(vlans_file_path):
+    csv_data = get_csv_contents(vlans_file_path)
     vlans_from_file = []
     try:
         for resource in csv_data:
@@ -149,22 +149,22 @@ def check_vlans_available_in_file(ip_sheet_file_path):
             if vlan_id:
                 vlans_from_file.append(int(vlan_id.split('.')[0]))
     except Exception:
-        print("ERR:  Invalid VLAN value in file: ", ip_sheet_file_path)
+        print("ERR:  Invalid VLAN value in file: ", vlans_file_path)
         return False
     if not vlans_from_file:
-        print("ERR:  VLANs not available in file: ", ip_sheet_file_path)
+        print("ERR:  VLANs not available in file: ", vlans_file_path)
         return False
     return True
 
 
 def prepare_secondary_vlans(config):
-    ip_sheet_file_path = config["chained_cni_config"].get("ip_sheet_file")
+    vlans_file_path = config["chained_cni_config"].get("vlans_file")
     secondary_vlans = config["chained_cni_config"][
         "secondary_vlans"] if config["chained_cni_config"].get(
         "secondary_vlans") else []
-    if ip_sheet_file_path:
+    if vlans_file_path:
         vlans_from_file = []
-        csv_data = get_csv_contents(ip_sheet_file_path)
+        csv_data = get_csv_contents(vlans_file_path)
         for resource in csv_data:
             vlan_id = resource.get('VLAN ID')
             if vlan_id:
@@ -390,8 +390,9 @@ def config_default():
             "monitoring_namespace": "cattle-prometheus",
         },
         "chained_cni_config": {
-            "enable": False,
-            "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf",
+            "secondary_interface_chaining": False,
+            "primary_interface_chaining": False,
+            "primary_cni_path": None,
             "skip_node_network_provisioning": False,
             "use_global_scope_vlan": False,
             "secondary_vlans": None,
@@ -415,7 +416,7 @@ def config_user(flavor, config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
-        if not config.get("chained_cni_config", {}).get("enable"):
+        if not is_chained_mode(config):
             if not isinstance(config["net_config"]["pod_subnet"], list):
                 config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
             if not isinstance(config["net_config"]["extern_dynamic"], list):
@@ -1233,8 +1234,6 @@ def config_validate(flavor_opts, config):
             "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
             "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
                                               is_valid_image_pull_policy),
-            "chained_cni_config/enable": (get(("chained_cni_config", "enable")), required),
-            "chained_cni_config/primary_cni_path": (get(("chained_cni_config", "primary_cni_path")), required),
         }
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             # Network Config
@@ -1303,9 +1302,9 @@ def config_validate(flavor_opts, config):
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             extra_checks["aci_config/aep"] = (
                 get(("aci_config", "aep")), required)
-        if config["chained_cni_config"].get("ip_sheet_file"):
-            extra_checks["chained_cni_config/ip_sheet_file"] = (
-                get(("chained_cni_config", "ip_sheet_file")), is_valid_file)
+        if config["chained_cni_config"].get("vlans_file"):
+            extra_checks["chained_cni_config/vlans_file"] = (
+                get(("chained_cni_config", "vlans_file")), is_valid_file)
         else:
             extra_checks["chained_cni_config/secondary_vlans"] = (
                 get(("chained_cni_config", "secondary_vlans")), required)
@@ -1992,7 +1991,9 @@ def is_calico_flavor(flavor):
 
 
 def is_chained_mode(config):
-    return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
+    return True if config.get("chained_cni_config") and (
+        config["chained_cni_config"].get("secondary_interface_chaining") or config[
+            "chained_cni_config"].get("primary_interface_chaining")) else False
 
 
 def generate_calico_deployment_files(config, network_operator_output):
@@ -2090,8 +2091,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                 tar_path = operator_output + ".tar.gz"
 
         chained_mode_yaml_output = {}
-        if config.get("chained_cni_config", {}).get("enable"):
-            file_path = config["chained_cni_config"].get("ip_sheet_file")
+        if is_chained_mode(config):
+            file_path = config["chained_cni_config"].get("vlans_file")
             if file_path:
                 all_resources = prepare_nadvlanmap(file_path)
                 if all_resources:
@@ -2099,7 +2100,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                         all_resources, default_flow_style=False)
                 else:
                     print("File is empty or with invalid contents: ", file_path)
-                    config["chained_cni_config"]["ip_sheet_file"] = ''
+                    config["chained_cni_config"]["vlans_file"] = ''
             chained_mode_yaml_output["fabric_vlan_pool"] = (yaml.dump(
                 config["chained_cni_config"]["secondary_vlans"],
                 default_flow_style=False)).rstrip('\n')
@@ -2657,7 +2658,7 @@ def provision(args, apic_file, no_random):
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
 
-    if 'chained_cni_config' in config and config["chained_cni_config"]["enable"]:
+    if is_chained_mode(config):
         if flavor != 'openshift-sdn-ovn-baremetal':
             err("Chained mode is not supported with flavor " + flavor)
             return False
@@ -2705,8 +2706,14 @@ def provision(args, apic_file, no_random):
 
     deep_merge(config, config_default())
 
-    if is_chained_mode(config) and not user_config.get("aci_config", {}).get("vmm_domain"):
-        config["aci_config"]["vmm_domain"] = None
+    if is_chained_mode(config):
+        # TODO: Currently setting primary_cni_path for chained mode with openshift-sdn-ovn-baremetal flavor.
+        # For other flavors needs to be derived from flavor.
+        if flavor == "openshift-sdn-ovn-baremetal":
+            config["chained_cni_config"][
+                "primary_cni_path"] = "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
+        if not user_config.get("aci_config", {}).get("vmm_domain"):
+            config["aci_config"]["vmm_domain"] = None
 
     if (args.disable_multus == 'false' or is_chained_mode(config)):
         config['multus']['disable'] = False

@@ -71,7 +71,9 @@ def aci_obj(klass, pair_list):
 
 
 def is_chained_mode(config):
-    return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
+    return True if config.get("chained_cni_config") and (
+        config["chained_cni_config"]["secondary_interface_chaining"] or config[
+            "chained_cni_config"]["primary_interface_chaining"]) else False
 
 
 class Apic(object):

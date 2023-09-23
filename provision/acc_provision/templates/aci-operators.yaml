@@ -152,7 +152,7 @@ subjects:
 - kind: ServiceAccount
   name: aci-containers-operator
   namespace: {{ config.kube_config.system_namespace }}
-{% if not config.chained_cni_config.enable %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: Deployment

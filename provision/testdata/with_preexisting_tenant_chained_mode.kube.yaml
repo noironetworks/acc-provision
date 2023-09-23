@@ -1353,7 +1353,7 @@ data:
                 }
             },
             "chained_cni_config": {
-                "enable": true,
+                "secondary_interface_chaining": true,
                 "secondary_vlans": [
                     "4002-4007",
                     "4009"
