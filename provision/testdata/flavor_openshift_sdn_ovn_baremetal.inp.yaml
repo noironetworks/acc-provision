@@ -24,12 +24,11 @@ aci_config:
 net_config:
   node_subnet: 10.1.0.1/16
   kubeapi_vlan: 4001
+
+chained_cni_config:
+  secondary_interface_chaining: true
+  primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
   secondary_vlans:
     - 4002
     - 4003, 4009
     - 4004-4007
-
-chained_cni_config:
-  enable: true
-  primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
-  skip_node_network_provisioning: false

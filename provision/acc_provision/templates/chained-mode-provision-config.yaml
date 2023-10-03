@@ -1,0 +1,125 @@
+#
+# Configuration for ACI Fabric
+#
+aci_config:
+  system_id: mykube             # Every opflex cluster must have a distinct ID
+  #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
+  #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
+  #tenant:
+    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
+  apic_hosts:                   # List of APIC hosts to connect for APIC API
+  - 10.1.1.101
+  physical_domain:              # Non mandatory field
+    domain: kube-physdom        # If physical domain provided, then mention name. Otherwise it will create with name <system_id>-physdom
+  vmm_domain:                   # Kubernetes container domain configuration, If already created then mention details
+    type: Kubernetes            # Type of already created VMM domain 
+    domain: kube                # Name of already created VMM domain
+
+    # Mandatory field for Openshift on ESX flavor
+    # Loadbalancer IP used to create duplicate service file for
+    # router-default service in Openshift on ESX case. This has to be
+    # the same LB IP used during installation
+    # installer_provisioned_lb_ip: 192.168.18.201
+
+  # The following resources must already exist on the APIC.
+  # They are used, but not created, by the provisioning tool.
+  aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
+  secondary_aep: kube-cluster-2 # The AEP for additional networks
+  vrf:                          # This VRF used to create all kubernetes EPs
+    name: mykube-vrf
+    tenant: common              # This can be system-id or common
+  l3out:
+    name: mykube_l3out          # Used to provision external IPs
+    external_networks:
+    - mykube_extepg             # Used for external contracts
+
+
+#
+# Networks used by ACI containers
+#
+net_config:
+  node_subnet: 10.1.0.1/16      # Subnet to use for nodes
+  
+  # node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
+  kubeapi_vlan: 4001            # The VLAN used by the physdom for nodes
+                                #   (Kubernetes only)
+  #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  #interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
+                                # Must be >= 50
+                                # Default value is set to 100
+  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
+                                # be effective with non-snat services
+  #disable_wait_for_network: true  # Default is false, set to true if the ACI
+                                   # CNI should not wait for datapath to be
+                                   # ready before returning success for pod
+                                   # interface creation
+  #duration_wait_for_network: 210  # Duration in seconds that ACI should wait
+                                   # for datapath to be ready.
+                                   # Default is 210 seconds.
+                                   # Only enabled if disable_wait_for_network
+                                   # is set to false.
+
+#
+# Configuration for container registry
+# Update if a custom container registry has been setup
+#
+registry:
+  image_prefix: noiro                   # e.g: registry.example.com/noiro
+  # image_pull_secret: secret_name      # (if needed)
+  # use_digest: true   # option to pull images using digest, override if needed, default is false.
+
+#kube_config:
+  # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
+  # hpp_optimization: True #override if needed, default is False
+  # no_wait_for_service_ep_readiness: True    #override if needed, default is False
+  # service_graph_endpoint_add_delay:
+        # delay: 30                     #Delay in seconds
+        # services:                     #List of services for which delay should be added
+        # - name: "service-name1"
+        #   namespace: "service-ns1"
+        # - name: "service-name2"
+        #   namespace: "service-ns2"
+        #   delay: 60                   # per service delay that overrides common delay
+  # add_external_subnets_to_rdconfig: True               #override if needed, default is False
+  # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
+  # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
+  
+  # use_system_node_priority_class: True        # override if needed, default is False
+  # aci_containers_controller_memory_request: "256Mi"   # override if needed, default is aci_containers_memory_request
+  # aci_containers_controller_memory_limit: "5Gi"       # override if needed, default is aci_containers_memory_limit
+  # aci_containers_host_memory_request: "256Mi"         # override if needed, default is aci_containers_memory_request
+  # aci_containers_host_memory_limit: "5Gi"             # override if needed, default is aci_containers_memory_limit
+  # mcast_daemon_memory_request: "256Mi"                # override if needed, default is aci_containers_memory_request
+  # mcast_daemon_memory_limit: "5Gi"                    # override if needed, default is aci_containers_memory_limit
+  # acc_provision_operator_memory_request: "256Mi"      # override if needed, default is aci_containers_memory_request
+  # acc_provision_operator_memory_limit: "5Gi"          # override if needed, default is aci_containers_memory_limit
+  # aci_containers_operator_memory_request: "256Mi"     # override if needed, default is aci_containers_memory_request
+  # aci_containers_operator_memory_limit: "5Gi"         # override if needed, default is aci_containers_memory_limit
+
+#
+# Configuration for ACI CNI Operator
+#
+# operator_managed_config: 
+    #enable_updates: True # Default is False
+
+
+#drop_log_config:
+  # enable: False         # default is True
+
+#multus:
+  # disable: False       # default is True
+
+chained_cni_config:                                                  # Contains chained mode specific configurations
+  secondary_interface_chaining: True                                 # default is False
+  vlans_file: "chained_mode.csv"                                     # Absolute/relative path of CSV file.
+  # primary_interface_chaining: True                                 # default is False
+  # primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf" # Path value of primary CNI to use
+  # secondary_vlans:              # VLANs for additional networks
+  # - 402
+  # - 403-406
+  # - 410, 425
+  # skip_node_network_provisioning: True                             # default is False
+  # use_global_scope_vlan: True                                      # default is False
+
+

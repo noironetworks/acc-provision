@@ -12,13 +12,25 @@ metadata:
 {% if config.kube_config.use_openshift_run_level %}
     openshift.io/run-level: "0"
 {% endif %}
+{% if config.flavor.startswith('openshift-4')  %}
+  {% set flavor_version = config.flavor.split('-') %}
+  {% set major_version = flavor_version[1].split('.')[0] | int %}
+  {% set minor_version = flavor_version[1].split('.')[1] | int %}
+  {% if (major_version == 4 and  minor_version >= 11
+       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    security.openshift.io/scc.podSecurityLabelSync: "false"
+  {% endif %}
+{% endif %}
   annotations:
     openshift.io/node-selector: ''
 ---
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 {% set flavor_version = config.flavor.split('-') %}
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 {% set major_version = flavor_version[1].split('.')[0] | int %}
@@ -1339,13 +1351,15 @@ metadata:
 data:
   controller-config: |-
     {
-        {% if config.chained_cni_config.enable %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
         "chained-mode": true,
+        {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{config.chained_cni_config.primary_cni_path|json}},
+        {% endif %}
         "aci-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
@@ -1368,7 +1382,11 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         {% endif %}
-        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
+        {% if config.chained_cni_config.use_global_scope_vlan %}
+        "aci-use-global-scope-vlan": true,
+        {% else %}
+        "aci-use-global-scope-vlan": false,
+        {% endif %}
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
@@ -1517,11 +1535,13 @@ data:
     }
   host-agent-config: |-
     {
-        {% if config.chained_cni_config.enable %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "chained-mode": true,
+        {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{ config.chained_cni_config.primary_cni_path|json }},
+        {% endif %}
         {% if config.kube_config.use_aci_anywhere_crd %}
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         {% endif %}
@@ -1548,7 +1568,11 @@ data:
         {% if config.net_config.interface_mtu_headroom %}
         "interface-mtu-headroom": {{ config.net_config.interface_mtu_headroom|json }},
         {% endif %}
-        "aci-additional-vlans": {{ config.net_config.secondary_vlans|json|indent(width=8) }},
+        {% if config.chained_cni_config.use_global_scope_vlan %}
+        "aci-use-global-scope-vlan": true,
+        {% else %}
+        "aci-use-global-scope-vlan": false,
+        {% endif %}
         {% if config.drop_log_config.enable %}
         "enable-drop-log": true,
         {% else %}
@@ -1656,7 +1680,7 @@ data:
         {% endif %}
         {% endif %}
     }
-  {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+  {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
   opflex-agent-config: |-
     {
         "log": {
@@ -1715,7 +1739,7 @@ data:
         {% endif %}
    }
    {% endif %}
-{% if not config.chained_cni_config.enable %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -2015,15 +2039,29 @@ rules:
   - create
   - update
   - delete
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
   - "aci.fabricattachment"
   resources:
   - nodefabricnetworkattachments
+  - nadvlanmaps
+  - staticfabricnetworkattachments
+  - fabricvlanpools
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps/status
+  - fabricvlanpools/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
@@ -2172,14 +2210,14 @@ rules:
   - nodepodifs
   verbs:
   - "*"
-{% if config.sriov_config.enable or config.chained_cni_config.enable %}
+{% if config.sriov_config.enable or config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups: ["k8s.cni.cncf.io"]
   resources:
   - '*'
   verbs:
   - '*'
 {% endif %}
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
   - "aci.fabricattachment"
   resources:
@@ -2195,6 +2233,15 @@ rules:
   - watch
   - get
   - update
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nadvlanmaps
+  - fabricvlanpools
+  verbs:
+  - get
+  - list
+  - watch
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
@@ -2360,8 +2407,6 @@ spec:
       {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_host_priority_class %}
-      priorityClassName: aci-containers-host
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
@@ -2441,11 +2486,17 @@ spec:
             - name: SKIP_DOCKER_CHECK
               value: "true"
             {% endif %}
-            {% if config.chained_cni_config.enable %}
+            {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
             - name: CHAINED_MODE
               value: "true"
+            {% if config.flavor == "openshift-sdn-ovn-baremetal" %}
             - name: PRIMARY_CNI_PATH
               value: "{{ config.chained_cni_config.primary_cni_path }}"
+            {% endif %}
+            {% if config.user_config.chained_cni_config.primary_interface_chaining %}
+            - name: CHAINED_MODE_SECONDARY
+              value: "false"
+            {% endif %}
             {% endif %}
           volumeMounts:
             - name: cni-bin
@@ -2458,7 +2509,7 @@ spec:
               mountPath: /run
             - name: hostrun
               mountPath: /usr/local/run
-            {% if not config.chained_cni_config.enable %}
+            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
             - name: opflex-hostconfig-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             {% endif %}
@@ -2501,7 +2552,7 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 30
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
@@ -2583,7 +2634,7 @@ spec:
               mountPath: /usr/local/var
         {% endif %}
         {% if config.kube_config.opflex_mode != "overlay" %}
-        {% if config.dpu_config.enable != True and config.chained_cni_config.enable != True %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: mcast-daemon
           {% if config.registry.use_digest %}
           image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
@@ -2655,7 +2706,7 @@ spec:
             items:
               - key: host-agent-config
                 path: host-agent.conf
-        {% if not config.chained_cni_config.enable %}
+        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
@@ -2674,7 +2725,7 @@ spec:
           hostPath:
             path: /var/lib/dhclient
         {% endif %}
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-config-volume
           configMap:
             name: aci-containers-config
@@ -2706,7 +2757,7 @@ spec:
              - key: lsyncd.json
                path: lsyncd.json
         {% endif %}
-{% if not config.chained_cni_config.enable %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 {% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -2746,8 +2797,6 @@ spec:
         - operator: Exists
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_openvswitch_priority_class %}
-      priorityClassName: aci-containers-openvswitch
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-cluster-critical
@@ -2873,15 +2922,13 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: Exists
-        {% if config.flavor == "RKE2-kubernetes-1.24" %}
+        {% if config.flavor.startswith("RKE2") %}
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
           operator: Exists
         {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
-      {% elif config.kube_config.use_aci_containers_controller_priority_class %}
-      priorityClassName: aci-containers-controller
       {% else %}
       {% if not config.kube_config.no_priority_class %}
       priorityClassName: system-node-critical
@@ -2935,7 +2982,7 @@ spec:
               {% endif %}
           {% endif %}
           env:
-            {% if not config.chained_cni_config.enable %}
+            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
             {% if config.flavor != "k8s-overlay" %}
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
@@ -3346,37 +3393,7 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
-{% if config.kube_config.use_aci_containers_host_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-host
-value: {{ config.kube_config.aci_containers_host_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-host pod"
-{% endif %}
-{% if config.kube_config.use_aci_containers_openvswitch_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-openvswitch
-value: {{ config.kube_config.aci_containers_openvswitch_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-openvswitch pod"
-{% endif %}
-{% if config.kube_config.use_aci_containers_controller_priority_class %}
----
-apiVersion: {{ config.priority_class_api_version }}
-kind: PriorityClass
-metadata:
-  name: aci-containers-controller
-value: {{ config.kube_config.aci_containers_controller_priority_class_value }}
-globalDefault: false
-description: "This priority class is used for ACI-CNI aci-containers-controller pod"
-{% endif %}
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -3445,7 +3462,20 @@ spec:
                 description: Map of iface to fabricLink
                 type: object
               encapVlan:
-                type: string
+                properties:
+                  encapRef:
+                    properties:
+                      key:
+                        type: string
+                      nadVlanMap:
+                        type: string
+                    required:
+                    - key
+                    - nadVlanMap
+                    type: object
+                  vlanList:
+                    type: string
+                type: object
               networkRef:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "operator-sdk generate k8s" to regenerate code after
@@ -3485,4 +3515,234 @@ spec:
         type: object
     served: true
     storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: nadvlanmaps.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NadVlanMap
+    listKind: NadVlanMapList
+    plural: nadvlanmaps
+    singular: nadvlanmap
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NadVlanMap is the Schema for FabricAttachments NAD name to vlan
+          mapping API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              nadVlanMapping:
+                additionalProperties:
+                  items:
+                    properties:
+                      label:
+                        type: string
+                      vlans:
+                        type: string
+                    required:
+                    - vlans
+                    type: object
+                  type: array
+                description: NAD namespace/name to vlan list mapping
+                type: object
+            required:
+            - nadVlanMapping
+            type: object
+          status:
+            properties:
+              status:
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'nad-vlan-map'"
+          message: "Only one instance with name nad-vlan-map allowed"
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: staticfabricnetworkattachments.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: StaticFabricNetworkAttachment
+    listKind: StaticFabricNetworkAttachmentList
+    plural: staticfabricnetworkattachments
+    singular: staticfabricnetworkattachment
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: StaticFabricAttachment allows attaching aeps to NAD based and
+          regular vlans created by aci controller
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              nadVlanRefs:
+                description: Refer to a NADVlanLabel defined in NadVlanMap CR
+                items:
+                  properties:
+                    aeps:
+                      items:
+                        type: string
+                      type: array
+                    nadVlanLabel:
+                      type: string
+                  required:
+                  - aeps
+                  - nadVlanLabel
+                  type: object
+                type: array
+              vlans:
+                description: Refer to vlan/s directly
+                items:
+                  properties:
+                    aeps:
+                      items:
+                        type: string
+                      type: array
+                    vlans:
+                      type: string
+                  required:
+                  - aeps
+                  - vlans
+                  type: object
+                type: array
+            type: object
+          status:
+            description: StaticFabricNetworkAttachmentStatus defines the observed
+              state of StaticFabricNetworkAttachment
+            properties:
+              state:
+                type: string
+            type: object
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'staticfabricnetworkattachment'"
+          message: "Only one instance with name staticfabricnetworkattachment allowed"
+    served: true
+    storage: true
+    subresources:
+      status: {}
+{% if config.chained_cni_config.vlans_file %}
+---
+apiVersion: aci.fabricattachment/v1
+kind: NadVlanMap
+metadata:
+  name: nad-vlan-map
+  namespace: aci-containers-system
+spec:
+  nadVlanMapping:
+    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
+{% endif %}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: fabricvlanpools.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: FabricVlanPool
+    listKind: FabricVlanPoolList
+    plural: fabricvlanpools
+    singular: fabricvlanpool
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: FabricVlanPool is the Schema for the fabricattachments vlanpool
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FabricVlanPoolSpec defines the list of vlans in the fabric
+              vlan pool
+            properties:
+              vlans:
+                items:
+                  type: string
+                type: array
+            type: object
+          status:
+            description: FabricVlanPoolStatus defines the observed state of FabricVlanPool
+            properties:
+              error:
+                type: string
+              state:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                  code after modifying this file7 Add custom validation using kubebuilder
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: aci.fabricattachment/v1
+kind: FabricVlanPool
+metadata:
+  name: default
+  namespace: aci-containers-system
+spec:
+  vlans:
+    {{ chained_mode_input.fabric_vlan_pool|indent(width=4) }}
 {% endif %}

@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 import argparse
 import base64
 import copy
+import csv
 import functools
 import ipaddress
 import requests
@@ -24,7 +25,7 @@ import yaml
 from yaml import SafeLoader
 
 from jinja2 import Undefined
-from itertools import combinations
+from itertools import combinations, groupby
 from OpenSSL import crypto
 from jinja2 import Environment, PackageLoader
 from os.path import exists
@@ -94,6 +95,95 @@ def json_indent(s):
 
 def yaml_quote(s):
     return "'%s'" % str(s).replace("'", "''")
+
+
+def get_csv_contents(file_path):
+    csv_data = []
+    try:
+        with open(file_path, 'r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                csv_data.append(row)
+    except Exception as ex:
+        print("Error while getting CSV %s file contents. Error: %s") % (file_path, ex)
+    return csv_data
+
+
+def prepare_nadvlanmap(file_path):
+    csv_data = get_csv_contents(file_path)
+    all_resources = {}
+    old_namespace = ''
+    old_nad_prefix = ''
+    network = ''
+    vlan_id = ''
+    try:
+        for resource in csv_data:
+            namespace = resource['Namespace']
+            nad_prefix = resource['NAD Prefix']
+            if (namespace and namespace != old_namespace) or (nad_prefix and nad_prefix != old_nad_prefix):
+                resource_header = namespace + "/" + nad_prefix
+                if resource_header not in all_resources.keys():
+                    all_resources[resource_header] = []
+                old_namespace = namespace
+                old_nad_prefix = nad_prefix
+
+            network = resource['Network'] if resource['Network'] else network
+            vlan_id = resource['VLAN ID'] if resource['VLAN ID'] else vlan_id
+            resource_item = {
+                "label": network,
+                "vlans": vlan_id.split('.')[0]
+            }
+            all_resources[resource_header].append(resource_item)
+    except Exception as ex:
+        print("Error while preparing yaml contents from given CSV %s file. Error: %s" % (file_path, ex))
+        all_resources = {}
+    return all_resources
+
+
+def check_vlans_available_in_file(vlans_file_path):
+    csv_data = get_csv_contents(vlans_file_path)
+    vlans_from_file = []
+    try:
+        for resource in csv_data:
+            vlan_id = resource.get('VLAN ID')
+            if vlan_id:
+                vlans_from_file.append(int(vlan_id.split('.')[0]))
+    except Exception:
+        print("ERR:  Invalid VLAN value in file: ", vlans_file_path)
+        return False
+    if not vlans_from_file:
+        print("ERR:  VLANs not available in file: ", vlans_file_path)
+        return False
+    return True
+
+
+def prepare_secondary_vlans(config):
+    vlans_file_path = config["chained_cni_config"].get("vlans_file")
+    secondary_vlans = config["chained_cni_config"][
+        "secondary_vlans"] if config["chained_cni_config"].get(
+        "secondary_vlans") else []
+    if vlans_file_path:
+        vlans_from_file = []
+        csv_data = get_csv_contents(vlans_file_path)
+        for resource in csv_data:
+            vlan_id = resource.get('VLAN ID')
+            if vlan_id:
+                vlans_from_file.append(vlan_id.split('.')[0])
+        secondary_vlans.extend(vlans_from_file)
+    return secondary_vlans
+
+
+def group_in_ranges(vlans):
+    integer_vlans = [int(x) for x in vlans]
+    sorted_vlans = list(sorted(set(integer_vlans)))
+    ranges = []
+    for _, group in groupby(enumerate(sorted_vlans), lambda i_x: i_x[1] - i_x[0]):
+        group = list(group)
+        if len(group) > 1:
+            ranges.append(f"{group[0][1]}-{group[-1][1]}")
+        else:
+            ranges.append(str(group[0][1]))
+    return ranges
 
 
 def yaml_indent(s, **kwargs):
@@ -198,7 +288,6 @@ def config_default():
             "kubeapi_vlan_mode": "regular",
             "cluster_svc_subnet": None,
             "advertise_cluster_svc_subnet": False,
-            "secondary_vlans": None,
         },
         "topology": {
             "rack": {
@@ -258,12 +347,6 @@ def config_default():
             "opflex_agent_opflex_asyncjson_enabled": "false",
             "opflex_agent_ovs_asyncjson_enabled": "false",
             "acicni_priority_class_value": 1000000000,
-            "use_aci_containers_host_priority_class": False,
-            "aci_containers_host_priority_class_value": 1000000000,
-            "use_aci_containers_openvswitch_priority_class": False,
-            "aci_containers_openvswitch_priority_class_value": 1000000000,
-            "use_aci_containers_controller_priority_class": False,
-            "aci_containers_controller_priority_class_value": 1000000000
         },
         "istio_config": {
             "install_istio": False,
@@ -307,9 +390,12 @@ def config_default():
             "monitoring_namespace": "cattle-prometheus",
         },
         "chained_cni_config": {
-            "enable": False,
-            "primary_cni_path": "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf",
+            "secondary_interface_chaining": False,
+            "primary_interface_chaining": False,
+            "primary_cni_path": None,
             "skip_node_network_provisioning": False,
+            "use_global_scope_vlan": False,
+            "secondary_vlans": None,
         }
     }
     return default_config
@@ -330,14 +416,15 @@ def config_user(flavor, config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
-        if not config.get("chained_cni_config", {}).get("enable"):
+        if not is_chained_mode(config):
             if not isinstance(config["net_config"]["pod_subnet"], list):
                 config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
             if not isinstance(config["net_config"]["extern_dynamic"], list):
                 config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
             if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
                 config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
-        if config["net_config"].get("node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
+        if "net_config" in config.keys() and config["net_config"].get(
+                "node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
             config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
     if config is None:
         config = {}
@@ -413,6 +500,10 @@ def normalize_vlans(secondary_vlans):
         elif ',' in str(vlan):
             values = [int(val) for val in vlan.split(',')]
             normalized_vlans.extend(values)
+        elif '-' in str(vlan):
+            start, end = map(int, vlan.split('-'))
+            result_vlans = list(range(start, end + 1))
+            normalized_vlans.extend(result_vlans)
         else:
             normalized_vlans.append(vlan)
     return normalized_vlans
@@ -435,7 +526,7 @@ def config_adjust_chained_mode(args, config, no_random):
     else:
         physical_domain = system_id + "-physdom"
 
-    secondary_vlans = config["net_config"]["secondary_vlans"]
+    secondary_vlans = config["chained_cni_config"]["secondary_vlans"]
 
     app_profile = Apic.ACI_CHAINED_PREFIX + system_id
     default_endpoint_group = Apic.ACI_CHAINED_PREFIX + "default"
@@ -480,7 +571,6 @@ def config_adjust_chained_mode(args, config, no_random):
         },
         "net_config": {
             "infra_vlan": infra_vlan,
-            "secondary_vlans": secondary_vlans,
         },
         "kube_config": {
             "default_endpoint_group": {
@@ -496,12 +586,15 @@ def config_adjust_chained_mode(args, config, no_random):
                 },
             },
         },
+        "chained_cni_config": {
+            "secondary_vlans": secondary_vlans,
+        },
         "registry": {
             "configuration_version": token,
         }
     }
 
-    if not config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"]:
+    if not config["chained_cni_config"]["skip_node_network_provisioning"]:
         node_subnet = config["net_config"]["node_subnet"][0]
         config["net_config"]["node_subnet"] = node_subnet
 
@@ -885,17 +978,6 @@ def config_adjust(args, config, prov_apic, no_random):
             else:
                 err("Opflex_mode is not set to dpu. Cannot generate dpu config")
 
-    if (config['kube_config']['use_aci_containers_host_priority_class'] or
-            config['kube_config']['use_aci_containers_openvswitch_priority_class'] or
-            config['kube_config']['use_aci_containers_controller_priority_class']):
-        flavor_version = config["flavor"].split('-')
-        major_version = flavor_version[1].split('.')[0]
-        minor_version = flavor_version[1].split('.')[1]
-        if int(major_version) >= 4 and int(minor_version) >= 9 and flavor_version[2] in ["openstack", "esx", "baremetal"]:
-            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1"
-        else:
-            adj_config["priority_class_api_version"] = "scheduling.k8s.io/v1beta1"
-
     return adj_config
 
 
@@ -1103,6 +1185,15 @@ def isOverlay(flavor):
     return False
 
 
+def is_valid_file(path):
+    if not path or not os.path.isfile(path):
+        print("ERR:  File path invalid: ", path)
+        return False
+    if not check_vlans_available_in_file(path):
+        return False
+    return True
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -1143,8 +1234,6 @@ def config_validate(flavor_opts, config):
             "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
             "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
                                               is_valid_image_pull_policy),
-            "chained_cni_config/enable": (get(("chained_cni_config", "enable")), required),
-            "chained_cni_config/primary_cni_path": (get(("chained_cni_config", "primary_cni_path")), required),
         }
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             # Network Config
@@ -1209,11 +1298,16 @@ def config_validate(flavor_opts, config):
                                          is_valid_mtu),
             "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
                                                   is_valid_headroom),
-            "aci_config/secondary_vlans": (get(("net_config", "secondary_vlans")), required),
         }
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             extra_checks["aci_config/aep"] = (
                 get(("aci_config", "aep")), required)
+        if config["chained_cni_config"].get("vlans_file"):
+            extra_checks["chained_cni_config/vlans_file"] = (
+                get(("chained_cni_config", "vlans_file")), is_valid_file)
+        else:
+            extra_checks["chained_cni_config/secondary_vlans"] = (
+                get(("chained_cni_config", "secondary_vlans")), required)
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -1513,6 +1607,8 @@ def generate_sample(filep, flavor):
         data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
     elif flavor == "calico-3.23.2":
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
+    elif flavor == "openshift-sdn-ovn-baremetal":
+        data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
@@ -1844,12 +1940,60 @@ def generate_rancher_1_3_21_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
+def generate_rancher_1_4_9_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-network-provider-cluster-1-4-9.yaml')
+        outname = operator_output
+        # At this time, we do not use the aci-containers-operator with Rancher.
+        # The template to generate ACI CNI components is upstream in RKE code
+        # Here we generate the input file to feed into RKE, which looks almost
+        # the same as the acc-provision_input file
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing Rancher network provider portion of cluster.yml to %s" % outname)
+        info("Use this network provider section in the cluster.yml you use with RKE")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
+def generate_rancher_1_3_24_yaml(config, operator_output, operator_tar, operator_cr_output):
+    if operator_output and operator_output != "/dev/null":
+        template = get_jinja_template('aci-network-provider-cluster-1-3-24.yaml')
+        outname = operator_output
+        # At this time, we do not use the aci-containers-operator with Rancher.
+        # The template to generate ACI CNI components is upstream in RKE code
+        # Here we generate the input file to feed into RKE, which looks almost
+        # the same as the acc-provision_input file
+
+        # If no output containers(-o) deployment file is provided, print to stdout.
+        # Else, save to file.
+        if operator_output == "-":
+            outname = "<stdout>"
+            operator_output = sys.stdout
+        info("Writing Rancher network provider portion of cluster.yml to %s" % outname)
+        info("Use this network provider section in the cluster.yml you use with RKE")
+        if operator_output != sys.stdout:
+            with open(operator_output, "w") as fh:
+                fh.write(template.render(config=config))
+        else:
+            template.stream(config=config).dump(operator_output)
+
+
 def is_calico_flavor(flavor):
     return SafeDict(FLAVORS[flavor]).get("calico_cni")
 
 
 def is_chained_mode(config):
-    return True if config.get("chained_cni_config") and config["chained_cni_config"]["enable"] else False
+    return True if config.get("chained_cni_config") and (
+        config["chained_cni_config"].get("secondary_interface_chaining") or config[
+            "chained_cni_config"].get("primary_interface_chaining")) else False
 
 def is_assisted_installer(config):
     return True if config.get("assisted_installer") and config["assisted_installer"]["enable"] else False
@@ -1948,7 +2092,25 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             if not tar_path or tar_path == "-":
                 tar_path = operator_output + ".tar.gz"
 
-        temp = ''.join(template.stream(config=config))
+        chained_mode_yaml_output = {}
+        if is_chained_mode(config):
+            file_path = config["chained_cni_config"].get("vlans_file")
+            if file_path:
+                all_resources = prepare_nadvlanmap(file_path)
+                if all_resources:
+                    chained_mode_yaml_output["nadvlan_map"] = yaml.dump(
+                        all_resources, default_flow_style=False)
+                else:
+                    print("File is empty or with invalid contents: ", file_path)
+                    config["chained_cni_config"]["vlans_file"] = ''
+            chained_mode_yaml_output["fabric_vlan_pool"] = (yaml.dump(
+                config["chained_cni_config"]["secondary_vlans"],
+                default_flow_style=False)).rstrip('\n')
+        if chained_mode_yaml_output:
+            temp = ''.join(template.stream(config=config,
+                                           chained_mode_input=chained_mode_yaml_output))
+        else:
+            temp = ''.join(template.stream(config=config))
         parsed_temp = temp.split("---")
         # Find the place where to put the acioperators configmap
         for cmap_idx in range(len(parsed_temp)):
@@ -2498,7 +2660,7 @@ def provision(args, apic_file, no_random):
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
 
-    if 'chained_cni_config' in config and config["chained_cni_config"]["enable"]:
+    if is_chained_mode(config):
         if flavor != 'openshift-sdn-ovn-baremetal':
             err("Chained mode is not supported with flavor " + flavor)
             return False
@@ -2546,8 +2708,14 @@ def provision(args, apic_file, no_random):
 
     deep_merge(config, config_default())
 
-    if is_chained_mode(config) and not user_config.get("aci_config", {}).get("vmm_domain"):
-        config["aci_config"]["vmm_domain"] = None
+    if is_chained_mode(config):
+        # TODO: Currently setting primary_cni_path for chained mode with openshift-sdn-ovn-baremetal flavor.
+        # For other flavors needs to be derived from flavor.
+        if flavor == "openshift-sdn-ovn-baremetal":
+            config["chained_cni_config"][
+                "primary_cni_path"] = "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
+        if not user_config.get("aci_config", {}).get("vmm_domain"):
+            config["aci_config"]["vmm_domain"] = None
 
     if (args.disable_multus == 'false' or is_chained_mode(config)):
         config['multus']['disable'] = False
@@ -2593,9 +2761,9 @@ def provision(args, apic_file, no_random):
     # Adjust config based on convention/apic data
     if is_chained_mode(config):
         adj_config = config_adjust_chained_mode(args, config, no_random)
-        if config["net_config"]["secondary_vlans"]:
-            normalized_vlans = normalize_vlans(config["net_config"]["secondary_vlans"])
-            config["net_config"]["secondary_vlans"] = json.dumps(normalized_vlans).replace("\"", "")
+        config["chained_cni_config"]["secondary_vlans"] = prepare_secondary_vlans(config)
+        normalized_vlans = normalize_vlans(config["chained_cni_config"]["secondary_vlans"])
+        config["chained_cni_config"]["secondary_vlans"] = group_in_ranges(normalized_vlans)
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
@@ -2682,8 +2850,8 @@ def provision(args, apic_file, no_random):
         nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
 
-    if is_chained_mode(config) and config["user_config"]["net_config"].get("secondary_vlans"):
-        config["net_config"]["secondary_vlans"] = normalized_vlans
+    if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
+        config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 

@@ -34,7 +34,7 @@ data:
                 {% if config.user_config.aci_config.secondary_aep %}
                 "secondary_aep": {{config.aci_config.secondary_aep|json}},
                 {% endif %}
-                {% if (config.user_config.chained_cni_config) and  config.user_config.aci_config.physical_domain %}
+                {% if (config.user_config.chained_cni_config) and (config.user_config.aci_config.physical_domain) %}
                 "physical_domain": {
                     "domain": {{config.aci_config.physical_domain.domain|json}},
                     "vlan_pool": {{config.aci_config.physical_domain.vlan_pool|json}}
@@ -94,15 +94,14 @@ data:
                 },
                 {% elif (config.user_config.aci_config.vmm_domain) %}
                     }
-                }{% if (config.user_config.aci_config.l3out) %},
+                },
                 {% endif %}
-                {% endif %}
-                {% if((config.user_config.chained_cni_config) and (config.user_config.aci_config.l3out)) %}
+                {% if config.user_config.aci_config.l3out %}
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
                 }
-                {% else %}
+                {% elif not config.user_config.chained_cni_config %}
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
@@ -189,13 +188,30 @@ data:
             {% endif %}
             {% if config.user_config.chained_cni_config %}
             "chained_cni_config": {
-                "enable": {{config.chained_cni_config.enable|json}},
-                "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}},
+                {% if config.user_config.chained_cni_config.secondary_interface_chaining %}
+                "secondary_interface_chaining": {{config.chained_cni_config.secondary_interface_chaining|json}},
+                {% endif %}
+                {% if config.user_config.chained_cni_config.primary_interface_chaining %}
+                "primary_interface_chaining": {{config.chained_cni_config.primary_interface_chaining|json}},
+                {% endif %}
+                {% if config.user_config.chained_cni_config.secondary_vlans %}
+                "secondary_vlans": {{config.chained_cni_config.secondary_vlans|json|indent(width=16)}},
+                {% endif %}
                 {% if config.user_config.chained_cni_config.skip_node_network_provisioning %}
                 "skip_node_network_provisioning": {{config.chained_cni_config.skip_node_network_provisioning|json}},
                 {% endif %}
+                {% if config.user_config.chained_cni_config.use_global_scope_vlan %}
+                "use_global_scope_vlan": {{config.chained_cni_config.use_global_scope_vlan|json}},
+                {% endif %}
+                {% if config.user_config.chained_cni_config.vlans_file %}
+                "vlans_file": {{config.chained_cni_config.vlans_file|json}},
+                {% endif %}
+                {% if config.user_config.chained_cni_config.primary_cni_path %}
+                "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}}
+                {% endif %}
             },
             {% endif %}
+            {% if config.user_config.net_config %}
             "net_config": {
                 {% if config.user_config.net_config.infra_vlan %}
                 "infra_vlan": {{config.net_config.infra_vlan|json}},
@@ -237,9 +253,6 @@ data:
                 "duration_wait_for_network": {{config.net_config.duration_wait_for_network|json}},
                 {% endif %}
                 "node_subnet": {{config.net_config.node_subnet|json|indent(width=16)}},
-                {% if config.user_config.net_config.secondary_vlans %}
-                "secondary_vlans": {{config.net_config.secondary_vlans|json|indent(width=16)}},
-                {% endif %}
                 {% if config.user_config.net_config.cluster_svc_subnet %}
                 "pod_subnet": {{config.net_config.pod_subnet|json|indent(width=16)}},
                 "cluster_svc_subnet": {{config.net_config.cluster_svc_subnet|json}}
@@ -261,6 +274,7 @@ data:
             "flavor": {{config.flavor|json}}
             {% else %}
             }
+            {% endif %}
             {% endif %}
         }
      }

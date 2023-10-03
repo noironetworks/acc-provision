@@ -744,6 +744,30 @@ def test_flavor_openshift_sdn_ovn_baremetal():
 
 
 @in_testdir
+def test_flavor_openshift_sdn_ovn_baremetal_primary():
+    run_provision(
+        "flavor_openshift_sdn_ovn_baremetal_primary.inp.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary.kube.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_tar",
+        None,
+        "flavor_openshift_sdn_ovn_baremetal_primary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_sdn_ovn_baremetal_primary_with_secondary():
+    run_provision(
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.inp.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.kube.yaml",
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary_tar",
+        None,
+        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_preexisting_tenant_chained_mode():
     run_provision(
         "with_preexisting_tenant_chained_mode.inp.yaml",
@@ -756,13 +780,13 @@ def test_preexisting_tenant_chained_mode():
 
 
 @in_testdir
-def test_chained_mode_skip_node_network_provision():
+def test_override_skip_node_network_provision():
     run_provision(
-        "chained_mode_skip_node_network_provision.inp.yaml",
-        "chained_mode_skip_node_network_provision.kube.yaml",
+        "override_skip_node_network_provision.inp.yaml",
+        "override_skip_node_network_provision.kube.yaml",
         None,
         None,
-        "chained_mode_skip_node_network_provision.apic.txt",
+        "override_skip_node_network_provision.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
@@ -787,6 +811,30 @@ def test_chained_mode_without_phys_domains():
         None,
         None,
         "chained_mode_without_phys_domains.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_override_use_global_scope_vlan():
+    run_provision(
+        "override_use_global_scope_vlan.inp.yaml",
+        "override_use_global_scope_vlan.kube.yaml",
+        None,
+        None,
+        "override_use_global_scope_vlan.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_chained_mode_nad_vlan_map():
+    run_provision(
+        "chained_mode_nad_vlan_map.inp.yaml",
+        "chained_mode_nad_vlan_map.kube.yaml",
+        "chained_mode_nad_vlan_map_tar",
+        None,
+        "chained_mode_nad_vlan_map.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
@@ -1216,6 +1264,30 @@ def test_flavor_RKE2_kubernetes_1_24_base():
 
 
 @in_testdir
+def test_flavor_RKE2_kubernetes_1_25_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_25.inp.yaml",
+        "flavor_RKE2_kubernetes_1_25.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_25.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.25"}
+    )
+
+
+@in_testdir
+def test_flavor_RKE2_kubernetes_1_26_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_26.inp.yaml",
+        "flavor_RKE2_kubernetes_1_26.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_26.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.26"}
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_2_3_base():
     run_provision(
         "flavor_RKE_1_2_3.inp.yaml",
@@ -1288,6 +1360,18 @@ def test_flavor_RKE_1_3_21_base():
 
 
 @in_testdir
+def test_flavor_RKE_1_3_24_base():
+    run_provision(
+        "flavor_RKE_1_3_24.inp.yaml",
+        "flavor_RKE_1_3_24.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_3_24.apic.txt",
+        overrides={"flavor": "RKE-1.3.24"}
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_4_6_base():
     run_provision(
         "flavor_RKE_1_4_6.inp.yaml",
@@ -1296,6 +1380,18 @@ def test_flavor_RKE_1_4_6_base():
         None,
         "flavor_RKE_1_4_6.apic.txt",
         overrides={"flavor": "RKE-1.4.6"}
+    )
+
+
+@in_testdir
+def test_flavor_RKE_1_4_9_base():
+    run_provision(
+        "flavor_RKE_1_4_9.inp.yaml",
+        "flavor_RKE_1_4_9.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_4_9.apic.txt",
+        overrides={"flavor": "RKE-1.4.9"}
     )
 
 

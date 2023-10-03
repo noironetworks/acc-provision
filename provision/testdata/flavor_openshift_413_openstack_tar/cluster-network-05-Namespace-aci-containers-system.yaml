@@ -7,4 +7,8 @@ metadata:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
     openshift.io/run-level: '0'
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    security.openshift.io/scc.podSecurityLabelSync: 'false'
   name: aci-containers-system
