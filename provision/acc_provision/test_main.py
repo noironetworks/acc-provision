@@ -744,25 +744,25 @@ def test_flavor_openshift_sdn_ovn_baremetal():
 
 
 @in_testdir
-def test_flavor_openshift_sdn_ovn_baremetal_primary():
+def test_flvr_openshift_sdn_ovn_baremetal_primary():
     run_provision(
-        "flavor_openshift_sdn_ovn_baremetal_primary.inp.yaml",
-        "flavor_openshift_sdn_ovn_baremetal_primary.kube.yaml",
-        "flavor_openshift_sdn_ovn_baremetal_primary_tar",
+        "flvr_openshift_sdn_ovn_baremetal_primary.inp.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_primary.kube.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_primary_tar",
         None,
-        "flavor_openshift_sdn_ovn_baremetal_primary.apic.txt",
+        "flvr_openshift_sdn_ovn_baremetal_primary.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
 
 @in_testdir
-def test_flavor_openshift_sdn_ovn_baremetal_primary_with_secondary():
+def test_flvr_openshift_sdn_ovn_baremetal_secondary_with_primary():
     run_provision(
-        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.inp.yaml",
-        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.kube.yaml",
-        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary_tar",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.inp.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.kube.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary_tar",
         None,
-        "flavor_openshift_sdn_ovn_baremetal_primary_with_secondary.apic.txt",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.apic.txt",
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
