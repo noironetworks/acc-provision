@@ -20,7 +20,7 @@ jobs:
       go: 1.20.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:
-        - export RELEASE_TAG=6.0.3.1
+        - export RELEASE_TAG=4.3.2.1
         - export UPSTREAM_ID=81c2369
         - export EXPECTED_TAG_PREFIX=${RELEASE_TAG}
         - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
@@ -30,7 +30,7 @@ jobs:
         - go version
       script:
         - echo "Skip running UTs"
-        - git clone http://www.github.com/noironetworks/cicd -b main /tmp/cicd
+        - git clone http://www.github.com/noironetworks/cicd -b abhi-fix-release-stream /tmp/cicd
         - pip install jq pyyaml pytz || travis_terminate 1
         - /tmp/cicd/travis/show-image-tags.sh || travis_terminate 1
         - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
