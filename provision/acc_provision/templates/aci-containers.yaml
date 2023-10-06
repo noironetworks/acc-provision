@@ -2884,7 +2884,15 @@ spec:
       tolerations:
         - effect: NoExecute
           operator: Exists
+          {% if config.kube_config.toleration_seconds %}
+          tolerationSeconds: {{ config.kube_config.toleration_seconds }}
+          {% else %}
+          {% if config.flavor.startswith("RKE") %}
+          tolerationSeconds: 600
+          {% else %}
           tolerationSeconds: 60
+          {% endif %}
+          {% endif %}
         - effect: NoSchedule
           key: node.kubernetes.io/not-ready
           operator: Exists

@@ -88,6 +88,7 @@ kube_config:
   acc_provision_operator_memory_limit: "5Gi"
   aci_containers_operator_memory_request: "256Mi"
   aci_containers_operator_memory_limit: "5Gi"
+  toleration_seconds: 100
 
 registry:
   image_prefix: noiro
