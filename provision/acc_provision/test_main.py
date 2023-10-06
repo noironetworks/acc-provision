@@ -754,6 +754,30 @@ def test_flavor_openshift_sdn_ovn_baremetal():
 
 
 @in_testdir
+def test_flvr_openshift_sdn_ovn_baremetal_primary():
+    run_provision(
+        "flvr_openshift_sdn_ovn_baremetal_primary.inp.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_primary.kube.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_primary_tar",
+        None,
+        "flvr_openshift_sdn_ovn_baremetal_primary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_flvr_openshift_sdn_ovn_baremetal_secondary_with_primary():
+    run_provision(
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.inp.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.kube.yaml",
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary_tar",
+        None,
+        "flvr_openshift_sdn_ovn_baremetal_secondary_with_primary.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_preexisting_tenant_chained_mode():
     run_provision(
         "with_preexisting_tenant_chained_mode.inp.yaml",
@@ -1720,7 +1744,7 @@ def convert_aci_op_cm_to_base64(kube_yaml_file, kind="ConfigMap", name="aci-oper
     converted_yaml = []
     for k_yaml in kube_yaml_file:
         converted_yaml.append(copy.deepcopy(k_yaml))
-        for k, v in k_yaml.items():
+        for _, v in k_yaml.items():
             if v == kind and k_yaml['metadata']['name'] == name:
                 aci_op_cm_yaml = copy.deepcopy(k_yaml)
                 try:
@@ -1764,29 +1788,6 @@ def compare_kube_yaml(expectedyaml, output, debug, generated, cleanupFunc):
 
     if expectedyaml is None:
         return True
-
-    '''
-    # 1
-    exp_fh = open(expectedyaml, "r")
-    expected_yaml_file = list(yaml.load_all(exp_fh, yaml.FullLoader))
-
-    gen_fh = output.read()  # open("generated_kube.yaml-2", "r")
-    generated_yaml_file = list(yaml.load_all(gen_fh, yaml.FullLoader))
-
-    # 2
-    prepare_gen_yamls_list = convert_aci_op_cm_to_base64(generated_yaml_file)
-    # 3
-    prepare_exp_yamls_list = convert_aci_op_cm_to_base64(expected_yaml_file, "encode")
-    # 4
-    store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(generated_yaml_file, "decode")
-    with open(generated, 'w') as fh:
-        yaml.safe_dump_all(
-            store_gen_yaml_with_aci_op_cm_as_plain_text, fh, default_flow_style=False, sort_keys=False, width=float("inf")
-        )
-    # 5
-    assert prepare_gen_yamls_list == prepare_exp_yamls_list, cleanupFunc()
-
-    '''
 
     exp_fh = open(expectedyaml, "r")
     expected_yaml_file = list(yml.load_all(exp_fh))

@@ -22,9 +22,9 @@ net_config:
   kubeapi_vlan: 4001
 
 chained_cni_config:
-  enable: true
+  secondary_interface_chaining: true
   primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
-  ip_sheet_file: "nad_vlan_map_input.csv"
+  vlans_file: "nad_vlan_map_input.csv"
   secondary_vlans:
     - 4002
     - 4003, 4009

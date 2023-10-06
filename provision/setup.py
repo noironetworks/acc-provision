@@ -23,7 +23,7 @@ else:
 
 setup(
     name='acc_provision',
-    version='6.0.3.1',
+    version='6.0.3.2',
     description='Tool to provision ACI for ACI Containers Controller  Build info: ' + get_git_version(),
     author="Cisco Systems, Inc.",
     author_email="apicapi@noironetworks.com",

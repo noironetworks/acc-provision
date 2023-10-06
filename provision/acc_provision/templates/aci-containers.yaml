@@ -30,7 +30,7 @@ metadata:
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 {% set flavor_version = config.flavor.split('-') %}
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 {% set major_version = flavor_version[1].split('.')[0] | int %}
@@ -1351,13 +1351,15 @@ metadata:
 data:
   controller-config: |-
     {
-        {% if config.chained_cni_config.enable %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
         "chained-mode": true,
+        {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{config.chained_cni_config.primary_cni_path|json}},
+        {% endif %}
         "aci-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         {% if config.aci_config.apic_refreshtime %}
         "apic-refreshtime": "{{config.aci_config.apic_refreshtime|json}}",
@@ -1533,11 +1535,13 @@ data:
     }
   host-agent-config: |-
     {
-        {% if config.chained_cni_config.enable %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "chained-mode": true,
+        {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{ config.chained_cni_config.primary_cni_path|json }},
+        {% endif %}
         {% if config.kube_config.use_aci_anywhere_crd %}
         "ep-registry": {{ config.kube_config.ep_registry|json }},
         {% endif %}
@@ -1676,7 +1680,7 @@ data:
         {% endif %}
         {% endif %}
     }
-  {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+  {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
   opflex-agent-config: |-
     {
         "log": {
@@ -1735,7 +1739,7 @@ data:
         {% endif %}
    }
    {% endif %}
-{% if not config.chained_cni_config.enable %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -2035,7 +2039,7 @@ rules:
   - create
   - update
   - delete
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
   - "aci.fabricattachment"
   resources:
@@ -2206,14 +2210,14 @@ rules:
   - nodepodifs
   verbs:
   - "*"
-{% if config.sriov_config.enable or config.chained_cni_config.enable %}
+{% if config.sriov_config.enable or config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups: ["k8s.cni.cncf.io"]
   resources:
   - '*'
   verbs:
   - '*'
 {% endif %}
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
   - "aci.fabricattachment"
   resources:
@@ -2451,11 +2455,17 @@ spec:
             - name: SKIP_DOCKER_CHECK
               value: "true"
             {% endif %}
-            {% if config.chained_cni_config.enable %}
+            {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
             - name: CHAINED_MODE
               value: "true"
+            {% if config.flavor == "openshift-sdn-ovn-baremetal" %}
             - name: PRIMARY_CNI_PATH
               value: "{{ config.chained_cni_config.primary_cni_path }}"
+            {% endif %}
+            {% if config.user_config.chained_cni_config.primary_interface_chaining %}
+            - name: CHAINED_MODE_SECONDARY
+              value: "false"
+            {% endif %}
             {% endif %}
           volumeMounts:
             - name: cni-bin
@@ -2468,7 +2478,7 @@ spec:
               mountPath: /run
             - name: hostrun
               mountPath: /usr/local/run
-            {% if not config.chained_cni_config.enable %}
+            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
             - name: opflex-hostconfig-volume
               mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
             {% endif %}
@@ -2511,7 +2521,7 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 30
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-agent
           env:
             - name: REBOOT_WITH_OVS
@@ -2593,7 +2603,7 @@ spec:
               mountPath: /usr/local/var
         {% endif %}
         {% if config.kube_config.opflex_mode != "overlay" %}
-        {% if config.dpu_config.enable != True and config.chained_cni_config.enable != True %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: mcast-daemon
           {% if config.registry.use_digest %}
           image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
@@ -2665,7 +2675,7 @@ spec:
             items:
               - key: host-agent-config
                 path: host-agent.conf
-        {% if not config.chained_cni_config.enable %}
+        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-hostconfig-volume
           emptyDir:
             medium: Memory
@@ -2684,7 +2694,7 @@ spec:
           hostPath:
             path: /var/lib/dhclient
         {% endif %}
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.enable %}
+        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-config-volume
           configMap:
             name: aci-containers-config
@@ -2716,7 +2726,7 @@ spec:
              - key: lsyncd.json
                path: lsyncd.json
         {% endif %}
-{% if not config.chained_cni_config.enable %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 {% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -2941,7 +2951,7 @@ spec:
               {% endif %}
           {% endif %}
           env:
-            {% if not config.chained_cni_config.enable %}
+            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
             {% if config.flavor != "k8s-overlay" %}
             - name: WATCH_NAMESPACE
               value: "{{ config.kube_config.snat_operator.watch_namespace }}"
@@ -3352,7 +3362,7 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
-{% if config.chained_cni_config.enable %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -3624,7 +3634,7 @@ spec:
     storage: true
     subresources:
       status: {}
-{% if config.chained_cni_config.ip_sheet_file %}
+{% if config.chained_cni_config.vlans_file %}
 ---
 apiVersion: aci.fabricattachment/v1
 kind: NadVlanMap

@@ -14,13 +14,13 @@ data:
     : \"vxlan\",\n                \"mcast_fabric\": \"225.1.2.3\",\n             \
     \   \"mcast_range\": {\n                    \"start\": \"225.20.1.1\",\n     \
     \               \"end\": \"225.20.255.255\"\n                }\n            },\n\
-    \        },\n        \"chained_cni_config\": {\n            \"enable\": true,\n\
-    \            \"secondary_vlans\": [\n                \"3023\",\n             \
-    \   \"3700-3701\",\n                \"3801\",\n                \"3804-3805\",\n\
-    \                \"3826-3827\",\n                \"3829-3830\",\n            \
-    \    \"3840\",\n                \"3850-3852\",\n                \"3877-3879\"\
+    \        },\n        \"chained_cni_config\": {\n            \"secondary_interface_chaining\"\
+    : true,\n            \"secondary_vlans\": [\n                \"3023\",\n     \
+    \           \"3700-3701\",\n                \"3801\",\n                \"3804-3805\"\
+    ,\n                \"3826-3827\",\n                \"3829-3830\",\n          \
+    \      \"3840\",\n                \"3850-3852\",\n                \"3877-3879\"\
     ,\n                \"4002-4007\",\n                \"4009\"\n            ],\n\
-    \            \"ip_sheet_file\": \"nad_vlan_map_input.csv\",\n            \"primary_cni_path\"\
+    \            \"vlans_file\": \"nad_vlan_map_input.csv\",\n            \"primary_cni_path\"\
     : \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\"\n        },\n        \"net_config\"\
     : {\n            \"kubeapi_vlan\": 4001,\n            \"node_subnet\": \"10.1.0.1/16\"\
     ,\n        }\n    }\n }"

@@ -41,7 +41,7 @@ spec:
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
           value: cloud
-        image: noirolabs/aci-containers-operator:6.0.3.1.81c2369
+        image: noirolabs/aci-containers-operator:6.0.3.2.81c2369
         imagePullPolicy: Always
         name: aci-containers-operator
         resources: {}
@@ -72,7 +72,7 @@ spec:
           value: cloud
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
-        image: noirolabs/acc-provision-operator:6.0.3.1.81c2369
+        image: noirolabs/acc-provision-operator:6.0.3.2.81c2369
         imagePullPolicy: Always
         name: acc-provision-operator
         resources: {}
