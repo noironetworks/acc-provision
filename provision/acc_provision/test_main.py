@@ -1762,9 +1762,6 @@ def convert_aci_op_cm_to_base64(kube_yaml_file, kind="ConfigMap", name="aci-oper
                 elif base64_convert == "decode":
                     base64_decoded_config = base64.b64decode(spec['config']).decode("ascii")
                     spec['config'] = base64_decoded_config
-                else:
-                    # no convert, just load aci-operator-config map as is
-                    pass
 
                 if kind == "ConfigMap" and name == "aci-operator-config":
                     aci_op_cm_yaml['data']['spec'] = spec
@@ -1778,14 +1775,6 @@ def convert_aci_op_cm_to_base64(kube_yaml_file, kind="ConfigMap", name="aci-oper
 
 
 def compare_kube_yaml(expectedyaml, output, debug, generated, cleanupFunc):
-    """
-    1. Load generated *.kube.yaml
-    2. Load expected *.kube.yaml, find aci-operator-config configmap and convert it to base64 encode format
-    3  Load generated *.kube.yaml, find aci-operator-config configmap and convert it to plaintext
-       and store back to /tmp/generated_kube.yaml to be used in fix-testdata.sh
-    4. Compare generated and expected kube.yaml
-    """
-
     if expectedyaml is None:
         return True
 
@@ -1801,16 +1790,17 @@ def compare_kube_yaml(expectedyaml, output, debug, generated, cleanupFunc):
         kind = "AciContainersOperator"
         name = "acicnioperator"
 
-    # 1
+    # 1 Load generated *.kube.yaml
     prepare_gen_yamls_list = convert_aci_op_cm_to_base64(generated_yaml_file, kind=kind, name=name)
-    # 2
+    # 2 Load expected *.kube.yaml, find aci-operator-config configmap and convert it to base64 encode format
     prepare_exp_yamls_list = convert_aci_op_cm_to_base64(expected_yaml_file, kind=kind, name=name, base64_convert="encode")
-    # 3
+    # 3 Load generated *.kube.yaml, find aci-operator-config configmap and convert it to plaintext
+    #   and store back to /tmp/generated_kube.yaml to be used in fix-testdata.sh
     store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(generated_yaml_file, kind=kind, name=name, base64_convert="decode")
     with open(generated, 'w') as fh:
         yml.dump_all(store_gen_yaml_with_aci_op_cm_as_plain_text, fh)
 
-    # 4
+    # 4 Compare generated and expected kube.yaml
     # assert prepare_gen_yamls_list == prepare_exp_yamls_list, cleanupFunc()
     return prepare_gen_yamls_list == prepare_exp_yamls_list
 
@@ -1841,14 +1831,6 @@ def compare_tar(expected, output, debug, generated, cleanupFunc):
 
 
 def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
-    """
-    1. Load generated *-ConfigMap-aci-operator-config.yaml
-    2. Load expected *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
-       and convert it to base64 encode format
-    3  Load generated *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
-       and convert it to plaintext and store back to /tmp/generated_operator.tar.gz to be used in fix-testdata.sh
-    4. Compare generated and expected *-ConfigMap-aci-operator-config.yaml and other files in the tar folder
-    """
     if expected is not None:
         tmp_dir = "tmp_tar"
         tar_output = tarfile.open(mode="r:gz", name=output, encoding="utf-8")
@@ -1856,7 +1838,7 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
         os.mkdir(tmp_dir)
         tar_output.extractall(path=tmp_dir)
 
-        # 1
+        # 1 Load generated *-ConfigMap-aci-operator-config.yaml
         ignore_files_list = []
         prepare_gen_yamls_list = []
         fname_pattern = "-ConfigMap-aci-operator-config.yaml"
@@ -1869,7 +1851,8 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
                 prepare_gen_yamls_list = convert_aci_op_cm_to_base64(generated_yaml_file)
                 break
 
-        # 2
+        # 2 Load expected *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
+        #   and convert it to base64 encode format
         prepare_exp_yamls_list = []
         for fname in os.listdir(expected):
             if fname.endswith(fname_pattern):
@@ -1879,7 +1862,8 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
                 prepare_exp_yamls_list = convert_aci_op_cm_to_base64(expected_yaml_file, base64_convert="encode")
                 break
 
-        # 3
+        # 3 Load generated *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
+        #   and convert it to plaintext and store back to /tmp/generated_operator.tar.gz to be used in fix-testdata.sh
         generated_tar = "/tmp/generated_operator.tar.gz"
         new_tmp_tar_dir = "/tmp/new_tmp_tar"
         tar_output = tarfile.open(mode="r:gz", name=generated_tar, encoding="utf-8")
@@ -1906,7 +1890,7 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
             tar.add(name)
         tar.close()
 
-        # 4
+        # 4 Compare generated and expected *-ConfigMap-aci-operator-config.yaml and other files in the tar folder
         assert prepare_gen_yamls_list == prepare_exp_yamls_list, cleanupFunc()
 
         os.chdir(cwd)
