@@ -15,13 +15,14 @@ data:
     : \"kube\",\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n    \
     \    \"default\"\n    ]\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-sdn-ovn-baremetal\",\n    \"\
-    app-profile\": \"netop-kube\",\n    \"chained-mode\": true,\n    \"primary-cni-path\"\
-    : \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\",\n    \"log-level\": \"info\"\
-    ,\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n\
-    \    \"aci-vmm-controller\": \"kube\",\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\"\
-    : \"common\",\n    \"aci-prefix\": \"kube\",\n    \"kubeapi-vlan\": 4001,\n  \
-    \  \"node-subnet\": \"10.1.0.1/16\",\n    \"aci-use-global-scope-vlan\": false,\n\
-    \    \"enable-drop-log\": true,\n    \"enable-nodepodif\": false\n}"
+    app-profile\": \"netop-kube\",\n    \"chained-mode\": true,\n    \"enable-chained-secondary\"\
+    : true,\n    \"primary-cni-path\": \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\"\
+    ,\n    \"log-level\": \"info\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"\
+    aci-vmm-domain\": \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-vrf\"\
+    : \"kube\",\n    \"aci-vrf-tenant\": \"common\",\n    \"aci-prefix\": \"kube\"\
+    ,\n    \"kubeapi-vlan\": 4001,\n    \"node-subnet\": \"10.1.0.1/16\",\n    \"\
+    aci-use-global-scope-vlan\": false,\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\"\
+    : false\n}"
 kind: ConfigMap
 metadata:
   labels:
