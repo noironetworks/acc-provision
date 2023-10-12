@@ -131,6 +131,7 @@ registry:
   # acc_provision_operator_memory_limit: "5Gi"          # override if needed, default is aci_containers_memory_limit
   # aci_containers_operator_memory_request: "256Mi"     # override if needed, default is aci_containers_memory_request
   # aci_containers_operator_memory_limit: "5Gi"         # override if needed, default is aci_containers_memory_limit
+  # toleration_seconds: 100 # set tolerationSeconds value for controller pod, default value is 60 and 600 for non rke and rke flavors respectively.
 
 #
 # Configuration for ACI CNI Operator
