@@ -1539,6 +1539,12 @@ data:
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "chained-mode": true,
+        {% if config.chained_cni_config.primary_interface_chaining %}
+        "enable-chained-primary": true,
+        {% endif %}
+        {% if config.chained_cni_config.secondary_interface_chaining %}
+        "enable-chained-secondary": true,
+        {% endif %}
         {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{ config.chained_cni_config.primary_cni_path|json }},
         {% endif %}
