@@ -1864,9 +1864,8 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
 
         # 3 Load generated *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
         #   and convert it to plaintext and store back to /tmp/generated_operator.tar.gz to be used in fix-testdata.sh
-        generated_tar = "/tmp/generated_operator.tar.gz"
         new_tmp_tar_dir = "/tmp/new_tmp_tar"
-        tar_output = tarfile.open(mode="r:gz", name=generated_tar, encoding="utf-8")
+        tar_output = tarfile.open(mode="r:gz", name=generated, encoding="utf-8")
         shutil.rmtree(new_tmp_tar_dir, ignore_errors=True)
         os.mkdir(new_tmp_tar_dir)
         tar_output.extractall(path=new_tmp_tar_dir)
@@ -1884,8 +1883,8 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
                     yml.dump_all(store_gen_yaml_with_aci_op_cm_as_plain_text, fh)
                 break
 
-        os.remove(generated_tar)
-        tar = tarfile.open(generated_tar, "w:gz", encoding="utf-8")
+        os.remove(generated)
+        tar = tarfile.open(generated, "w:gz", encoding="utf-8")
         for name in generated_tar_files_list:
             tar.add(name)
         tar.close()
