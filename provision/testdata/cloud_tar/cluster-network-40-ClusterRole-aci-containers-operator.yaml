@@ -32,6 +32,7 @@ rules:
   - serviceaccounts/token
   - endpoints
   - events
+  - limitranges
   verbs:
   - '*'
 - apiGroups:
