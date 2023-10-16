@@ -20,9 +20,7 @@ jobs:
       go: 1.20.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:
-        - export RELEASE_TAG=6.0.3.1
         - export UPSTREAM_ID=81c2369
-        - export EXPECTED_TAG_PREFIX=${RELEASE_TAG}
         - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
         - export TRAVIS_GO_VERSION=1.20.4
         - export TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/aci-containers
@@ -36,7 +34,7 @@ jobs:
         - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
         - pip install boto3 || travis_terminate 1
         - python provision/setup.py install || travis_terminate 1
-        - git clone --depth=50 --branch=${RELEASE_TAG} https://github.com/noironetworks/aci-containers.git /tmp/noironetworks/aci-containers
+        - /tmp/cicd/travis/clone-aci-containers-repo.sh || travis_terminate 1
         - pushd /tmp/noironetworks/aci-containers
         - git checkout -qf ${TRAVIS_TAG}
         - /tmp/cicd/travis/show-git-repo-status.sh
