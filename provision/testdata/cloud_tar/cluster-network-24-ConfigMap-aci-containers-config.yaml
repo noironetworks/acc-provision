@@ -31,20 +31,20 @@ data:
     \        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"10.5.0.2\"\
     \n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n\
     \    ]\n}"
-  gbp-server-config: "{\n     \"aci-policy-tenant\": \"csrtest\",\n     \"aci-vrf\"\
-    : \"clusterjj_overlay\",\n     \"aci-vmm-domain\": \"clusterjj\",\n     \"csr-list\"\
-    : \"\",\n     \"pod-subnet\": \"14.3.0.1/16\",\n     \"vrf-encap-id\": 2785281,\n\
-    \     \"apic\": {\n         \"apic-hosts\": [\n         \"localhost:50000\"\n\
-    \     ],\n         \"apic-username\": \"clusterjj\",\n         \"apic-private-key-path\"\
-    : \"/usr/local/etc/aci-cert/user.key\",\n         \"kafka\": {\n             \"\
-    brokers\": [\n                 \"localhost:9095\"\n             ],\n         \
-    \    \"client-key-path\": \"/certs/kafka-client.key\",\n             \"client-cert-path\"\
-    : \"/certs/kafka-client.crt\",\n             \"ca-cert-path\": \"/certs/ca.crt\"\
-    ,\n             \"topic\": \"clusterjj\"\n         },\n         \"cloud-info\"\
-    : {\n             \"cluster-name\": \"clusterjj\",\n             \"subnet\": \"\
-    acct-[csrtest]/region-[us-west-1]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]/cidr-[14.3.0.0/16]/subnet-[14.3.0.0/16]\"\
-    ,\n             \"vrf\": \"acct-[csrtest]/region-[us-west-1]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]\"\
-    \n         }\n     }\n}"
+  gbp-server-config: "{\n      \"aci-policy-tenant\": \"csrtest\",\n      \"aci-vrf\"\
+    : \"clusterjj_overlay\",\n      \"aci-vmm-domain\": \"clusterjj\",\n      \"csr-list\"\
+    : \"\",\n      \"pod-subnet\": \"14.3.0.1/16\",\n      \"vrf-encap-id\": 2785281,\n\
+    \      \"apic\": {\n          \"apic-hosts\": [\n        \"localhost:50000\"\n\
+    \    ],\n          \"apic-username\": \"clusterjj\",\n          \"apic-private-key-path\"\
+    : \"/usr/local/etc/aci-cert/user.key\",\n          \"kafka\": {\n            \
+    \  \"brokers\": [\n                \"localhost:9095\"\n            ],\n      \
+    \        \"client-key-path\": \"/certs/kafka-client.key\",\n              \"client-cert-path\"\
+    : \"/certs/kafka-client.crt\",\n              \"ca-cert-path\": \"/certs/ca.crt\"\
+    ,\n              \"topic\": \"clusterjj\"\n          },\n          \"cloud-info\"\
+    : {\n              \"cluster-name\": \"clusterjj\",\n              \"subnet\"\
+    : \"acct-[csrtest]/region-[us-west-1]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]/cidr-[14.3.0.0/16]/subnet-[14.3.0.0/16]\"\
+    ,\n              \"vrf\": \"acct-[csrtest]/region-[us-west-1]/context-[clusterjj_overlay]-addr-[14.3.0.0/16]\"\
+    \n          }\n      }\n}"
   host-agent-config: "{\n    \"flavor\": \"cloud\",\n    \"app-profile\": \"aci-containers-clusterjj\"\
     ,\n    \"ep-registry\": \"k8s\",\n    \"opflex-mode\": \"overlay\",\n    \"log-level\"\
     : \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\",\n    \"aci-vmm-type\"\

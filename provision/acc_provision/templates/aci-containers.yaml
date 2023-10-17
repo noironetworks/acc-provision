@@ -469,7 +469,6 @@ spec:
                       type: string
                   namespace:
                     type: string
-                type: object
               snatIp:
                 type: array
                 items:
@@ -478,7 +477,6 @@ spec:
                 type: array
                 items:
                   type: string
-            type: object
           status:
             type: object
             properties:
@@ -1098,8 +1096,8 @@ spec:
                   flowType:
                     type: string
                     enum:
-                      - netflow
-                      - ipfix
+                    - netflow
+                    - ipfix
                     default: netflow
                   activeFlowTimeOut:
                     type: integer
@@ -1118,7 +1116,6 @@ spec:
                     default: 0
                 required:
                 - destIp
-                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1167,16 +1164,16 @@ spec:
                     default: start
                     type: string
                     enum:
-                      - start
-                      - stop
+                    - start
+                    - stop
                   direction:
                     description: Direction of the packets to monitor.
                     default: both
                     type: string
                     enum:
-                      - in
-                      - out
-                      - both
+                    - in
+                    - out
+                    - both
               destination:
                 type: object
                 properties:
@@ -1191,7 +1188,6 @@ spec:
                     maximum: 1023
                 required:
                 - destIP
-                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1715,35 +1711,35 @@ data:
   {% endif %}
   {% if config.kube_config.run_gbp_container %}
   gbp-server-config: |-
-   {
-        "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
-        "aci-vrf": {{config.aci_config.overlay_vrf|json}},
-        "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
-        {% if not config.aci_config.capic %}
-        "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
-        {% else %}
-        "csr-list": {{ config.net_config.csr_list|json|indent(width=8) }},
-        "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
-        "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
-        "apic": {
-            "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
-            "apic-username": {{config.aci_config.sync_login.username|json}},
-            "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
-            "kafka": {
-                "brokers": {{config.aci_config.kafka.brokers|json|indent(width=16)}},
-                "client-key-path": "/certs/kafka-client.key",
-                "client-cert-path": "/certs/kafka-client.crt",
-                "ca-cert-path": "/certs/ca.crt",
-                "topic": {{config.aci_config.system_id|json}}
-            },
-            "cloud-info": {
-                "cluster-name": {{config.aci_config.system_id|json}},
-                "subnet": {{config.aci_config.subnet_dn|json}},
-                "vrf": {{config.aci_config.vrf_dn|json}}
-            }
-        }
-        {% endif %}
-   }
+    {
+          "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
+          "aci-vrf": {{config.aci_config.overlay_vrf|json}},
+          "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
+          {% if not config.aci_config.capic %}
+          "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
+          {% else %}
+          "csr-list": {{ config.net_config.csr_list|json|indent(width=8) }},
+          "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }},
+          "vrf-encap-id": {{config.oper.vrf_encap_id|json}},
+          "apic": {
+              "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+              "apic-username": {{config.aci_config.sync_login.username|json}},
+              "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+              "kafka": {
+                  "brokers": {{config.aci_config.kafka.brokers|json|indent(width=16)}},
+                  "client-key-path": "/certs/kafka-client.key",
+                  "client-cert-path": "/certs/kafka-client.crt",
+                  "ca-cert-path": "/certs/ca.crt",
+                  "topic": {{config.aci_config.system_id|json}}
+              },
+              "cloud-info": {
+                  "cluster-name": {{config.aci_config.system_id|json}},
+                  "subnet": {{config.aci_config.subnet_dn|json}},
+                  "vrf": {{config.aci_config.vrf_dn|json}}
+              }
+          }
+          {% endif %}
+    }
    {% endif %}
 {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 ---
@@ -1760,9 +1756,9 @@ metadata:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
     network-plugin: aci-containers
 data:
-    "start": "{{config.kube_config.snat_operator.port_range.start}}"
-    "end": "{{config.kube_config.snat_operator.port_range.end}}"
-    "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
+  "start": "{{config.kube_config.snat_operator.port_range.start}}"
+  "end": "{{config.kube_config.snat_operator.port_range.end}}"
+  "ports-per-node": "{{config.kube_config.snat_operator.port_range.ports_per_node}}"
 {% endif %}
 {% if config.flavor != "k8s-overlay" and config.aci_config.sync_login.key_data and config.aci_config.sync_login.cert_data %}
 ---
@@ -1782,7 +1778,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: kafka-client-certificates 
+  name: kafka-client-certificates
   namespace: {{ config.kube_config.system_namespace }}
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
@@ -2289,10 +2285,10 @@ metadata:
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
 users:
-  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-controller
-  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-host-agent
+- system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-controller
+- system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-host-agent
 {% if config.kube_config.openshift_security_constraint_operator_serviceaccount %}
-  - system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-operator
+- system:serviceaccount:{{ config.kube_config.system_namespace }}:aci-containers-operator
 {% endif %}
 allowHostDirVolumePlugin: true
 allowHostIPC: true
@@ -2356,29 +2352,29 @@ spec:
       serviceAccountName: aci-containers-host-agent
       {% if config.registry.image_pull_secret %}
       imagePullSecrets:
-        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      - name: {{ config.registry.image_pull_secret|yaml_quote }}
       {% endif %}
       tolerations:
-        - operator: Exists
+      - operator: Exists
       {% if config.kube_config.use_cnideploy_initcontainer %}
       initContainers:
-        - name: cnideploy
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/cnideploy@sha256:{{ config.registry.cnideploy_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/cnideploy:{{ config.registry.cnideploy_version }}
+      - name: cnideploy
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/cnideploy@sha256:{{ config.registry.cnideploy_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/cnideploy:{{ config.registry.cnideploy_version }}
+        {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        securityContext:
+          {% if config.kube_config.use_privileged_containers %}
+          privileged: true
           {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          securityContext:
-            {% if config.kube_config.use_privileged_containers %}
-            privileged: true
-            {% endif %}
-            capabilities:
-              add:
-                - SYS_ADMIN
-          volumeMounts:
-            - name: cni-bin
-              mountPath: /mnt/cni-bin
+          capabilities:
+            add:
+            - SYS_ADMIN
+        volumeMounts:
+        - name: cni-bin
+          mountPath: /mnt/cni-bin
       {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
@@ -2391,347 +2387,347 @@ spec:
       {% endif %}
       {% endif %}
       containers:
-        - name: aci-containers-host
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/aci-containers-host@sha256:{{ config.registry.aci_containers_host_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
-          {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          {% if config.kube_config.aci_containers_host_memory_limit or config.kube_config.aci_containers_host_memory_request %}
-          resources:
-            limits:
-              {% if config.kube_config.aci_containers_host_memory_limit %}
-              memory: "{{ config.kube_config.aci_containers_host_memory_limit }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
-              {% endif %}
-            requests:
-              {% if config.kube_config.aci_containers_host_memory_request %}
-              memory: "{{ config.kube_config.aci_containers_host_memory_request }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_request }}"
-              {% endif %}
-          {% endif %}
-          securityContext:
-            {% if config.kube_config.use_privileged_containers %}
-            privileged: true
-            {% endif %}
-            capabilities:
-              add:
-                - SYS_ADMIN
-                - NET_ADMIN
-                - SYS_PTRACE
-                - NET_RAW
-          env:
-            - name: GOTRACEBACK
-              value: "2"
-            - name: KUBERNETES_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: TENANT
-              value: {{config.kube_config.default_endpoint_group.tenant|json}}
-            {% if config.kube_config.run_gbp_container %}
-            {% if config.aci_config.capic %}
-            - name: NODE_EPG
-              value: {{config.aci_config.nodes_epg|json}}
-            {% else %}
-            - name: NODE_EPG
-              value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
-            {% endif %}
-            - name: OPFLEX_MODE
-              value: overlay
-            {% else %}
-            - name: NODE_EPG
-              value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
-            {% endif %}
-            {% if config.multus.disable != True %}
-            - name: MULTUS
-              value: 'True'
-            {% endif %}
-            {% if config.net_config.disable_wait_for_network %}
-            - name: DISABLE_WAIT_FOR_NETWORK
-              value: 'True'
-            {% else %}
-            - name: DURATION_WAIT_FOR_NETWORK
-              value: {{'\"' + config.net_config.duration_wait_for_network|json + '\"'}}
-            {% endif %}
-            {% if config.flavor == "eks" %}
-            - name: SKIP_DOCKER_CHECK
-              value: "true"
-            {% endif %}
-            {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
-            - name: CHAINED_MODE
-              value: "true"
-            {% if config.flavor == "openshift-sdn-ovn-baremetal" %}
-            - name: PRIMARY_CNI_PATH
-              value: "{{ config.chained_cni_config.primary_cni_path }}"
-            {% endif %}
-            {% if config.user_config.chained_cni_config.primary_interface_chaining %}
-            - name: CHAINED_MODE_SECONDARY
-              value: "false"
-            {% endif %}
-            {% endif %}
-          volumeMounts:
-            - name: cni-bin
-              mountPath: /mnt/cni-bin
-            - name: cni-conf
-              mountPath: /mnt/cni-conf
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
-            - name: opflex-hostconfig-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
-            {% endif %}
-            - name: host-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-            {% if config.kube_config.aci_multipod %}
-            - name: dhclient
-              mountPath: /var/lib/dhclient
-            {% endif %}
-            {% if config.kube_config.use_host_netns_volume %}
-            - mountPath: /run/netns
-              name: host-run-netns
-              readOnly: true
-              mountPropagation: HostToContainer
-            {% endif %}
-            {% if config.multus.disable != True %}
-            - name: multus-cni-conf
-              mountPath: /mnt/multus-cni-conf
-            {% endif %}
-            {% if config.dpu_config.enable == True %}
-            - name: opflex-lsyncd-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs
-            {% endif %}
-          livenessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /status
-              port: 8090
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 30
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
-        - name: opflex-agent
-          env:
-            - name: REBOOT_WITH_OVS
-              value: "{{ config.kube_config.reboot_opflex_with_ovs }}"
-            {% if config.kube_config.run_gbp_container %}
-            - name: SSL_MODE
-              value: disabled
-            {% endif %}
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
-          {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          {% if config.kube_config.opflex_agent_memory_limit or config.kube_config.opflex_agent_memory_request %}
-          resources:
-            limits:
-              {% if config.kube_config.opflex_agent_memory_limit %}
-              memory: "{{ config.kube_config.opflex_agent_memory_limit }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
-              {% endif %}
-            requests:
-              {% if config.kube_config.opflex_agent_memory_request %}
-              memory: "{{ config.kube_config.opflex_agent_memory_request }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_request }}"
-              {% endif %}
-          {% endif %}
-          securityContext:
-            {% if config.kube_config.use_privileged_containers %}
-            privileged: true
-            {% endif %}
-            capabilities:
-              add:
-                - NET_ADMIN
-          {% if config.kube_config.opflex_agent_prometheus == "true" %}
-          ports:
-            - name: metrics
-              containerPort: 9612
-          {% endif %}
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            - name: opflex-hostconfig-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
-            - name: opflex-config-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+      - name: aci-containers-host
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/aci-containers-host@sha256:{{ config.registry.aci_containers_host_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
         {% endif %}
-        {% if config.kube_config.run_opflex_server_container %}
-        - name: opflex-server
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
-          {% endif %}
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-opflexserver.sh"]
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-          ports:
-            - containerPort: {{
-              config.net_config.opflex_server_port|json }}
-            - name: metrics
-              containerPort: 9632
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - name: opflex-server-config-volume
-              mountPath: /usr/local/etc/opflex-server
-            - name: hostvar
-              mountPath: /usr/local/var
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.aci_containers_host_memory_limit or config.kube_config.aci_containers_host_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.aci_containers_host_memory_limit %}
+            memory: "{{ config.kube_config.aci_containers_host_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.aci_containers_host_memory_request %}
+            memory: "{{ config.kube_config.aci_containers_host_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
         {% endif %}
-        {% if config.kube_config.opflex_mode != "overlay" %}
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
-        - name: mcast-daemon
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
-          {% endif %}
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-mcastdaemon.sh"]
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          {% if config.kube_config.mcast_daemon_memory_limit or config.kube_config.mcast_daemon_memory_request %}
-          resources:
-            limits:
-              {% if config.kube_config.mcast_daemon_memory_limit %}
-              memory: "{{ config.kube_config.mcast_daemon_memory_limit }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
-              {% endif %}
-            requests:
-              {% if config.kube_config.mcast_daemon_memory_request %}
-              memory: "{{ config.kube_config.mcast_daemon_memory_request }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_request }}"
-              {% endif %}
-          {% endif %}
+        securityContext:
           {% if config.kube_config.use_privileged_containers %}
-          securityContext:
-            privileged: true
+          privileged: true
           {% endif %}
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+        env:
+        - name: GOTRACEBACK
+          value: "2"
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: TENANT
+          value: {{config.kube_config.default_endpoint_group.tenant|json}}
+        {% if config.kube_config.run_gbp_container %}
+        {% if config.aci_config.capic %}
+        - name: NODE_EPG
+          value: {{config.aci_config.nodes_epg|json}}
+        {% else %}
+        - name: NODE_EPG
+          value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
+        {% endif %}
+        - name: OPFLEX_MODE
+          value: overlay
+        {% else %}
+        - name: NODE_EPG
+          value: "{{ config.aci_config.app_profile }}|{{ config.aci_config.nodes_epg }}"
+        {% endif %}
+        {% if config.multus.disable != True %}
+        - name: MULTUS
+          value: 'True'
+        {% endif %}
+        {% if config.net_config.disable_wait_for_network %}
+        - name: DISABLE_WAIT_FOR_NETWORK
+          value: 'True'
+        {% else %}
+        - name: DURATION_WAIT_FOR_NETWORK
+          value: {{'\"' + config.net_config.duration_wait_for_network|json + '\"'}}
+        {% endif %}
+        {% if config.flavor == "eks" %}
+        - name: SKIP_DOCKER_CHECK
+          value: "true"
+        {% endif %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+        - name: CHAINED_MODE
+          value: "true"
+        {% if config.flavor == "openshift-sdn-ovn-baremetal" %}
+        - name: PRIMARY_CNI_PATH
+          value: "{{ config.chained_cni_config.primary_cni_path }}"
+        {% endif %}
+        {% if config.user_config.chained_cni_config.primary_interface_chaining %}
+        - name: CHAINED_MODE_SECONDARY
+          value: "false"
         {% endif %}
         {% endif %}
-        {% if config.dpu_config.enable == True %}
-        - name: lsyncd-daemon
-          image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-lsyncd.sh"]
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: opflex-lsyncd-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs
-            - name: lsyncd-config-volume
-              mountPath: /etc/configmap
-          {% endif %}
-      restartPolicy: Always
-      volumes:
+        volumeMounts:
         - name: cni-bin
-          hostPath:
-            path: {{ config.kube_config.host_agent_cni_bin_path }}
+          mountPath: /mnt/cni-bin
         - name: cni-conf
-          hostPath:
-            path: {{ config.kube_config.host_agent_cni_conf_path }}
+          mountPath: /mnt/cni-conf
         - name: hostvar
-          hostPath:
-            path: /var
+          mountPath: /usr/local/var
         - name: hostrun
-          hostPath:
-            path: /run
-        - name: host-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: host-agent-config
-                path: host-agent.conf
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
         {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
         - name: opflex-hostconfig-volume
-          emptyDir:
-            medium: Memory
+          mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
         {% endif %}
+        - name: host-config-volume
+          mountPath: /usr/local/etc/aci-containers/
         - name: varlogpods
-          hostPath:
-            path: /var/log/pods
+          mountPath: /var/log/pods
+          readOnly: true
         - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
+          mountPath: /var/log/containers
+          readOnly: true
         - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
+          mountPath: /var/lib/docker
+          readOnly: true
         {% if config.kube_config.aci_multipod %}
         - name: dhclient
-          hostPath:
-            path: /var/lib/dhclient
-        {% endif %}
-        {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
-        - name: opflex-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: opflex-agent-config
-                path: local.conf
-        {% endif %}
-        {% if config.kube_config.use_opflex_server_volume %}
-        - name: opflex-server-config-volume
+          mountPath: /var/lib/dhclient
         {% endif %}
         {% if config.kube_config.use_host_netns_volume %}
-        - name: host-run-netns
-          hostPath:
-            path: /run/netns
+        - mountPath: /run/netns
+          name: host-run-netns
+          readOnly: true
+          mountPropagation: HostToContainer
         {% endif %}
         {% if config.multus.disable != True %}
         - name: multus-cni-conf
-          hostPath:
-            path: /var/run/multus/
+          mountPath: /mnt/multus-cni-conf
         {% endif %}
         {% if config.dpu_config.enable == True %}
         - name: opflex-lsyncd-volume
-          hostPath:
-            path: /usr/local/etc/opflex-agent-ovs
-        - name: lsyncd-config-volume
-          configMap:
-            name: lsyncd-config
-            items:
-             - key: lsyncd.json
-               path: lsyncd.json
+          mountPath: /usr/local/etc/opflex-agent-ovs
         {% endif %}
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8090
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      - name: opflex-agent
+        env:
+        - name: REBOOT_WITH_OVS
+          value: "{{ config.kube_config.reboot_opflex_with_ovs }}"
+        {% if config.kube_config.run_gbp_container %}
+        - name: SSL_MODE
+          value: disabled
+        {% endif %}
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+        {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.opflex_agent_memory_limit or config.kube_config.opflex_agent_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.opflex_agent_memory_limit %}
+            memory: "{{ config.kube_config.opflex_agent_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.opflex_agent_memory_request %}
+            memory: "{{ config.kube_config.opflex_agent_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
+        {% endif %}
+        securityContext:
+          {% if config.kube_config.use_privileged_containers %}
+          privileged: true
+          {% endif %}
+          capabilities:
+            add:
+            - NET_ADMIN
+        {% if config.kube_config.opflex_agent_prometheus == "true" %}
+        ports:
+        - name: metrics
+          containerPort: 9612
+        {% endif %}
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+        - name: opflex-hostconfig-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+        - name: opflex-config-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+      {% endif %}
+      {% if config.kube_config.run_opflex_server_container %}
+      - name: opflex-server
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+        {% endif %}
+        command: ["/bin/sh"]
+        args: ["/usr/local/bin/launch-opflexserver.sh"]
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        ports:
+        - containerPort: {{
+          config.net_config.opflex_server_port|json }}
+        - name: metrics
+          containerPort: 9632
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: opflex-server-config-volume
+          mountPath: /usr/local/etc/opflex-server
+        - name: hostvar
+          mountPath: /usr/local/var
+      {% endif %}
+      {% if config.kube_config.opflex_mode != "overlay" %}
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      - name: mcast-daemon
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/opflex:{{ config.registry.opflex_agent_version }}
+        {% endif %}
+        command: ["/bin/sh"]
+        args: ["/usr/local/bin/launch-mcastdaemon.sh"]
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.mcast_daemon_memory_limit or config.kube_config.mcast_daemon_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.mcast_daemon_memory_limit %}
+            memory: "{{ config.kube_config.mcast_daemon_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.mcast_daemon_memory_request %}
+            memory: "{{ config.kube_config.mcast_daemon_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
+        {% endif %}
+        {% if config.kube_config.use_privileged_containers %}
+        securityContext:
+          privileged: true
+        {% endif %}
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+      {% endif %}
+      {% endif %}
+      {% if config.dpu_config.enable == True %}
+      - name: lsyncd-daemon
+        image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+        command: ["/bin/sh"]
+        args: ["/usr/local/bin/launch-lsyncd.sh"]
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: opflex-lsyncd-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs
+        - name: lsyncd-config-volume
+          mountPath: /etc/configmap
+        {% endif %}
+      restartPolicy: Always
+      volumes:
+      - name: cni-bin
+        hostPath:
+          path: {{ config.kube_config.host_agent_cni_bin_path }}
+      - name: cni-conf
+        hostPath:
+          path: {{ config.kube_config.host_agent_cni_conf_path }}
+      - name: hostvar
+        hostPath:
+          path: /var
+      - name: hostrun
+        hostPath:
+          path: /run
+      - name: host-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: host-agent-config
+            path: host-agent.conf
+      {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      - name: opflex-hostconfig-volume
+        emptyDir:
+          medium: Memory
+      {% endif %}
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
+      {% if config.kube_config.aci_multipod %}
+      - name: dhclient
+        hostPath:
+          path: /var/lib/dhclient
+      {% endif %}
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      - name: opflex-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: opflex-agent-config
+            path: local.conf
+      {% endif %}
+      {% if config.kube_config.use_opflex_server_volume %}
+      - name: opflex-server-config-volume
+      {% endif %}
+      {% if config.kube_config.use_host_netns_volume %}
+      - name: host-run-netns
+        hostPath:
+          path: /run/netns
+      {% endif %}
+      {% if config.multus.disable != True %}
+      - name: multus-cni-conf
+        hostPath:
+          path: /var/run/multus/
+      {% endif %}
+      {% if config.dpu_config.enable == True %}
+      - name: opflex-lsyncd-volume
+        hostPath:
+          path: /usr/local/etc/opflex-agent-ovs
+      - name: lsyncd-config-volume
+        configMap:
+          name: lsyncd-config
+          items:
+          - key: lsyncd.json
+            path: lsyncd.json
+      {% endif %}
 {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
 {% if config.dpu_config.enable != True %}
 ---
@@ -2766,10 +2762,10 @@ spec:
       serviceAccountName: aci-containers-host-agent
       {% if config.registry.image_pull_secret %}
       imagePullSecrets:
-        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      - name: {{ config.registry.image_pull_secret|yaml_quote }}
       {% endif %}
       tolerations:
-        - operator: Exists
+      - operator: Exists
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
       {% else %}
@@ -2781,78 +2777,78 @@ spec:
       {% endif %}
       {% endif %}
       containers:
-        - name: aci-containers-openvswitch
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/openvswitch@sha256:{{ config.registry.openvswitch_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
+      - name: aci-containers-openvswitch
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/openvswitch@sha256:{{ config.registry.openvswitch_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/openvswitch:{{ config.registry.openvswitch_version }}
+        {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        resources:
+          limits:
+            memory: "{{ config.kube_config.ovs_memory_limit }}"
+          requests:
+            memory: "{{ config.kube_config.ovs_memory_request }}"
+        securityContext:
+          {% if config.kube_config.use_privileged_containers %}
+          privileged: true
           {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          resources:
-            limits:
-              memory: "{{ config.kube_config.ovs_memory_limit }}"
-            requests:
-              memory: "{{ config.kube_config.ovs_memory_request }}"
-          securityContext:
-            {% if config.kube_config.use_privileged_containers %}
-            privileged: true
-            {% endif %}
-            capabilities:
-              add:
-                - NET_ADMIN
-                - SYS_MODULE
-                - SYS_NICE
-                - IPC_LOCK
-          env:
-            - name: OVS_RUNDIR
-              value: /usr/local/var/run/openvswitch
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            - name: hostetc
-              mountPath: /usr/local/etc
-            - name: hostmodules
-              mountPath: /lib/modules
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-          livenessProbe:
-            exec:
-              command:
-                - /usr/local/bin/liveness-ovs.sh
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+            - SYS_NICE
+            - IPC_LOCK
+        env:
+        - name: OVS_RUNDIR
+          value: /usr/local/var/run/openvswitch
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+        - name: hostetc
+          mountPath: /usr/local/etc
+        - name: hostmodules
+          mountPath: /lib/modules
+        - name: varlogpods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/liveness-ovs.sh
       restartPolicy: Always
       volumes:
-        - name: hostetc
-          hostPath:
-            path: /etc
-        - name: hostvar
-          hostPath:
-            path: /var
-        - name: hostrun
-          hostPath:
-            path: /run
-        - name: hostmodules
-          hostPath:
-            path: /lib/modules
-        - name: varlogpods
-          hostPath:
-            path: /var/log/pods
-        - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
-        - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
+      - name: hostetc
+        hostPath:
+          path: /etc
+      - name: hostvar
+        hostPath:
+          path: /var
+      - name: hostrun
+        hostPath:
+          path: /run
+      - name: hostmodules
+        hostPath:
+          path: /lib/modules
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
 {% endif %}
 {% endif %}
 ---
@@ -2885,31 +2881,31 @@ spec:
       serviceAccountName: aci-containers-controller
       {% if config.registry.image_pull_secret %}
       imagePullSecrets:
-        - name: {{ config.registry.image_pull_secret|yaml_quote }}
+      - name: {{ config.registry.image_pull_secret|yaml_quote }}
       {% endif %}
       tolerations:
-        - effect: NoExecute
-          operator: Exists
-          {% if config.kube_config.toleration_seconds %}
-          tolerationSeconds: {{ config.kube_config.toleration_seconds }}
-          {% else %}
-          {% if config.flavor.startswith("RKE") %}
-          tolerationSeconds: 600
-          {% else %}
-          tolerationSeconds: 60
-          {% endif %}
-          {% endif %}
-        - effect: NoSchedule
-          key: node.kubernetes.io/not-ready
-          operator: Exists
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
-        {% if config.flavor.startswith("RKE2") %}
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/control-plane
-          operator: Exists
+      - effect: NoExecute
+        operator: Exists
+        {% if config.kube_config.toleration_seconds %}
+        tolerationSeconds: {{ config.kube_config.toleration_seconds }}
+        {% else %}
+        {% if config.flavor.startswith("RKE") %}
+        tolerationSeconds: 600
+        {% else %}
+        tolerationSeconds: 60
         {% endif %}
+        {% endif %}
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      {% if config.flavor.startswith("RKE2") %}
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
       {% else %}
@@ -2921,140 +2917,140 @@ spec:
       {% endif %}
       {% endif %}
       containers:
-        {% if config.kube_config.run_gbp_container %}
-        - name: aci-gbpserver
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/gbp-server@sha256:{{ config.registry.gbp_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/gbp-server:{{ config.registry.gbp_version }}
-          {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          volumeMounts:
-            - name: controller-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-        {% if config.aci_config.capic %}
-            - name: kafka-certs
-              mountPath: /certs
-            - name: aci-user-cert-volume
-              mountPath: /usr/local/etc/aci-cert/
-        {% endif %}
-          env:
-            - name: GBP_SERVER_CONF
-              value: /usr/local/etc/aci-containers/gbp-server.conf
-        {% endif %}
-        - name: aci-containers-controller
-          {% if config.registry.use_digest %}
-          image: {{ config.registry.image_prefix }}/aci-containers-controller@sha256:{{ config.registry.aci_containers_controller_version }}
-          {% else %}
-          image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
-          {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          {% if config.kube_config.aci_containers_controller_memory_limit or config.kube_config.aci_containers_controller_memory_request %}
-          resources:
-            limits:
-              {% if config.kube_config.aci_containers_controller_memory_limit %}
-              memory: "{{ config.kube_config.aci_containers_controller_memory_limit }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_limit }}"
-              {% endif %}
-            requests:
-              {% if config.kube_config.aci_containers_controller_memory_request %}
-              memory: "{{ config.kube_config.aci_containers_controller_memory_request }}"
-              {% else %}
-              memory: "{{ config.kube_config.aci_containers_memory_request }}"
-              {% endif %}
-          {% endif %}
-          env:
-            {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
-            {% if config.flavor != "k8s-overlay" %}
-            - name: WATCH_NAMESPACE
-              value: "{{ config.kube_config.snat_operator.watch_namespace }}"
-            {% endif %}
-            - name: ACI_SNAT_NAMESPACE
-              value: "{{ config.kube_config.snat_operator.snat_namespace }}"
-            - name: ACI_SNAGLOBALINFO_NAME
-              value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
-            - name: ACI_RDCONFIG_NAME
-              value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
-            {% endif %}
-            - name: SYSTEM_NAMESPACE
-              value: "{{ config.kube_config.system_namespace}}"
-          volumeMounts:
-            - name: controller-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-            {% if config.flavor != "k8s-overlay" %}
-            - name: aci-user-cert-volume
-              mountPath: /usr/local/etc/aci-cert/
-            {% endif %}
-          livenessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /status
-              port: 8091
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 30
-      {% if config.aci_config.capic %}
-      initContainers:
+      {% if config.kube_config.run_gbp_container %}
+      - name: aci-gbpserver
         {% if config.registry.use_digest %}
-        - image: {{ config.registry.image_prefix }}/gbp-server-batch@sha256:{{ config.registry.gbp_version }}
+        image: {{ config.registry.image_prefix }}/gbp-server@sha256:{{ config.registry.gbp_version }}
         {% else %}
-        - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+        image: {{ config.registry.image_prefix }}/gbp-server:{{ config.registry.gbp_version }}
         {% endif %}
-          imagePullPolicy: {{ config.kube_config.image_pull_policy }}
-          name: stateinit
-          command:
-            - gbpserver
-            - -init
-            - -config-path
-            - /usr/local/etc/aci-containers/gbp-server.conf
-          volumeMounts:
-            - name: controller-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-            - name: aci-user-cert-volume
-              mountPath: /usr/local/etc/aci-cert/
-      {% endif %}
-      volumes:
-        {% if config.aci_config.capic %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        volumeMounts:
+        - name: controller-config-volume
+          mountPath: /usr/local/etc/aci-containers/
+      {% if config.aci_config.capic %}
         - name: kafka-certs
-          secret:
-            secretName: kafka-client-certificates
+          mountPath: /certs
+        - name: aci-user-cert-volume
+          mountPath: /usr/local/etc/aci-cert/
+      {% endif %}
+        env:
+        - name: GBP_SERVER_CONF
+          value: /usr/local/etc/aci-containers/gbp-server.conf
+      {% endif %}
+      - name: aci-containers-controller
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/aci-containers-controller@sha256:{{ config.registry.aci_containers_controller_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/aci-containers-controller:{{ config.registry.aci_containers_controller_version }}
         {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        {% if config.kube_config.aci_containers_controller_memory_limit or config.kube_config.aci_containers_controller_memory_request %}
+        resources:
+          limits:
+            {% if config.kube_config.aci_containers_controller_memory_limit %}
+            memory: "{{ config.kube_config.aci_containers_controller_memory_limit }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_limit }}"
+            {% endif %}
+          requests:
+            {% if config.kube_config.aci_containers_controller_memory_request %}
+            memory: "{{ config.kube_config.aci_containers_controller_memory_request }}"
+            {% else %}
+            memory: "{{ config.kube_config.aci_containers_memory_request }}"
+            {% endif %}
+        {% endif %}
+        env:
+        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+        {% if config.flavor != "k8s-overlay" %}
+        - name: WATCH_NAMESPACE
+          value: "{{ config.kube_config.snat_operator.watch_namespace }}"
+        {% endif %}
+        - name: ACI_SNAT_NAMESPACE
+          value: "{{ config.kube_config.snat_operator.snat_namespace }}"
+        - name: ACI_SNAGLOBALINFO_NAME
+          value: "{{ config.kube_config.snat_operator.globalinfo_name }}"
+        - name: ACI_RDCONFIG_NAME
+          value: "{{ config.kube_config.snat_operator.rdconfig_name }}"
+        {% endif %}
+        - name: SYSTEM_NAMESPACE
+          value: "{{ config.kube_config.system_namespace}}"
+        volumeMounts:
+        - name: controller-config-volume
+          mountPath: /usr/local/etc/aci-containers/
+        - name: varlogpods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
         {% if config.flavor != "k8s-overlay" %}
         - name: aci-user-cert-volume
-          secret:
-            secretName: aci-user-cert
+          mountPath: /usr/local/etc/aci-cert/
         {% endif %}
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8091
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+      {% if config.aci_config.capic %}
+      initContainers:
+      {% if config.registry.use_digest %}
+      - image: {{ config.registry.image_prefix }}/gbp-server-batch@sha256:{{ config.registry.gbp_version }}
+      {% else %}
+      - image: {{ config.registry.image_prefix }}/gbp-server-batch:{{ config.registry.gbp_version }}
+      {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: stateinit
+        command:
+        - gbpserver
+        - -init
+        - -config-path
+        - /usr/local/etc/aci-containers/gbp-server.conf
+        volumeMounts:
         - name: controller-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: controller-config
-                path: controller.conf
-              {% if config.kube_config.run_gbp_container %}
-              - key: gbp-server-config
-                path: gbp-server.conf
-              {% endif %}
-        - name: varlogpods
-          hostPath:
-            path: /var/log/pods
-        - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
-        - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
+          mountPath: /usr/local/etc/aci-containers/
+        - name: aci-user-cert-volume
+          mountPath: /usr/local/etc/aci-cert/
+      {% endif %}
+      volumes:
+      {% if config.aci_config.capic %}
+      - name: kafka-certs
+        secret:
+          secretName: kafka-client-certificates
+      {% endif %}
+      {% if config.flavor != "k8s-overlay" %}
+      - name: aci-user-cert-volume
+        secret:
+          secretName: aci-user-cert
+      {% endif %}
+      - name: controller-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: controller-config
+            path: controller.conf
+          {% if config.kube_config.run_gbp_container %}
+          - key: gbp-server-config
+            path: gbp-server.conf
+          {% endif %}
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
 {% if config.aci_config.capic %}
 ---
 apiVersion: aci.aw/v1
@@ -3121,22 +3117,22 @@ spec:
         - name: device-info
           mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
       volumes:
-        - name: devicesock
-          hostPath:
-            path: /var/lib/kubelet/
-        - name: log
-          hostPath:
-            path: /var/log
-        - name: device-info
-          hostPath:
-            path: /var/run/k8s.cni.cncf.io/devinfo/dp
-            type: DirectoryOrCreate
-        - name: config-volume
-          configMap:
-            name: sriovdp-config
-            items:
-            - key: config.json
-              path: config.json
+      - name: devicesock
+        hostPath:
+          path: /var/lib/kubelet/
+      - name: log
+        hostPath:
+          path: /var/log
+      - name: device-info
+        hostPath:
+          path: /var/run/k8s.cni.cncf.io/devinfo/dp
+          type: DirectoryOrCreate
+      - name: config-volume
+        configMap:
+          name: sriovdp-config
+          items:
+          - key: config.json
+            path: config.json
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -3185,22 +3181,22 @@ spec:
         - name: device-info
           mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
       volumes:
-        - name: devicesock
-          hostPath:
-            path: /var/lib/kubelet/
-        - name: log
-          hostPath:
-            path: /var/log
-        - name: device-info
-          hostPath:
-            path: /var/run/k8s.cni.cncf.io/devinfo/dp
-            type: DirectoryOrCreate
-        - name: config-volume
-          configMap:
-            name: sriovdp-config
-            items:
-            - key: config.json
-              path: config.json
+      - name: devicesock
+        hostPath:
+          path: /var/lib/kubelet/
+      - name: log
+        hostPath:
+          path: /var/log
+      - name: device-info
+        hostPath:
+          path: /var/run/k8s.cni.cncf.io/devinfo/dp
+          type: DirectoryOrCreate
+      - name: config-volume
+        configMap:
+          name: sriovdp-config
+          items:
+          - key: config.json
+            path: config.json
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -3251,22 +3247,22 @@ spec:
         - name: device-info
           mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
       volumes:
-        - name: devicesock
-          hostPath:
-            path: /var/lib/kubelet/
-        - name: log
-          hostPath:
-            path: /var/log
-        - name: device-info
-          hostPath:
-            path: /var/run/k8s.cni.cncf.io/devinfo/dp
-            type: DirectoryOrCreate
-        - name: config-volume
-          configMap:
-            name: sriovdp-config
-            items:
-            - key: config.json
-              path: config.json
+      - name: devicesock
+        hostPath:
+          path: /var/lib/kubelet/
+      - name: log
+        hostPath:
+          path: /var/log
+      - name: device-info
+        hostPath:
+          path: /var/run/k8s.cni.cncf.io/devinfo/dp
+          type: DirectoryOrCreate
+      - name: config-volume
+        configMap:
+          name: sriovdp-config
+          items:
+          - key: config.json
+            path: config.json
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -3311,36 +3307,39 @@ spec:
     shortNames:
     - net-attach-def
   versions:
-    - name: v1
-      served: true
-      storage: true
-      schema:
-        openAPIV3Schema:
-          description: 'NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
-            Working Group to express the intent for attaching pods to one or more logical or physical
-            networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec'
-          type: object
-          properties:
-            apiVersion:
-              description: 'APIVersion defines the versioned schema of this represen
-                tation of an object. Servers should convert recognized schemas to the
-                latest internal value, and may reject unrecognized values. More info:
-                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-              type: string
-            kind:
-              description: 'Kind is a string value representing the REST resource this
-                object represents. Servers may infer this from the endpoint the client
-                submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-              type: string
-            metadata:
-              type: object
-            spec:
-              description: 'NetworkAttachmentDefinition spec defines the desired state of a network attachment'
-              type: object
-              properties:
-                config:
-                  description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
-                  type: string
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: >-
+          'NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
+          Working Group to express the intent for attaching pods to one or more logical or physical
+          networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec'
+        type: object
+        properties:
+          apiVersion:
+            description: >-
+              'APIVersion defines the versioned schema of this represen
+              tation of an object. Servers should convert recognized schemas to the
+              latest internal value, and may reject unrecognized values. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: >-
+              'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: 'NetworkAttachmentDefinition spec defines the desired state of a network attachment'
+            type: object
+            properties:
+              config:
+                description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
+                type: string
 {% endif %}
 {% if config.dpu_config.enable == True %}
 ---
@@ -3398,24 +3397,24 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: NodeFabricAttachment is the Schema for the FabricAttachments
-          API
+        description: NodeFabricAttachment is the Schema for the FabricAttachments API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
+            description: >-
+              'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
+            description: >-
+              'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
-            description: NodeFabricAttachmentSpec defines the desired state of network
-              attachment to the fabric
+            description: NodeFabricAttachmentSpec defines the desired state of network attachment to the fabric
             properties:
               aciTopology:
                 additionalProperties:
@@ -3460,7 +3459,8 @@ spec:
                     type: string
                 type: object
               networkRef:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                description: >-
+                  'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "operator-sdk generate k8s" to regenerate code after
                   modifying this file Add custom validation using kubebuilder tags:
                   https://book.kubebuilder.io/beyond_basics/generating_crd.html NetworkRef
@@ -3483,11 +3483,11 @@ spec:
             - networkRef
             type: object
           status:
-            description: NodeFabricAttachmentStatus defines the observed state of
-              FabricAttachment
+            description: NodeFabricAttachmentStatus defines the observed state of FabricAttachment
             properties:
               state:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                description: >-
+                  'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "operator-sdk generate k8s" to regenerate
                   code after modifying this file7 Add custom validation using kubebuilder
                   tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
@@ -3517,16 +3517,17 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: NadVlanMap is the Schema for FabricAttachments NAD name to vlan
-          mapping API
+        description: NadVlanMap is the Schema for FabricAttachments NAD name to vlan mapping API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
+            description: >-
+              'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
+            description: >-
+              'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
@@ -3585,16 +3586,17 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: StaticFabricAttachment allows attaching aeps to NAD based and
-          regular vlans created by aci controller
+        description: StaticFabricAttachment allows attaching aeps to NAD based and regular vlans created by aci controller
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
+            description: >-
+              'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
+            description: >-
+              'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
@@ -3634,8 +3636,7 @@ spec:
                 type: array
             type: object
           status:
-            description: StaticFabricNetworkAttachmentStatus defines the observed
-              state of StaticFabricNetworkAttachment
+            description: StaticFabricNetworkAttachmentStatus defines the observed state of StaticFabricNetworkAttachment
             properties:
               state:
                 type: string
@@ -3678,24 +3679,24 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: FabricVlanPool is the Schema for the fabricattachments vlanpool
-          API
+        description: FabricVlanPool is the Schema for the fabricattachments vlanpool API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
+            description: >-
+              'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
+            description: >-
+              'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
-            description: FabricVlanPoolSpec defines the list of vlans in the fabric
-              vlan pool
+            description: FabricVlanPoolSpec defines the list of vlans in the fabric vlan pool
             properties:
               vlans:
                 items:
@@ -3708,7 +3709,8 @@ spec:
               error:
                 type: string
               state:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                description: >-
+                  'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "operator-sdk generate k8s" to regenerate
                   code after modifying this file7 Add custom validation using kubebuilder
                   tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
@@ -3727,5 +3729,5 @@ metadata:
   namespace: aci-containers-system
 spec:
   vlans:
-    {{ chained_mode_input.fabric_vlan_pool|indent(width=4) }}
+  {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
 {% endif %}

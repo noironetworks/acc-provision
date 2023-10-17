@@ -215,7 +215,6 @@ spec:
             {% endif %}
         {% endif %}
         name: aci-containers-operator
-        resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -276,7 +275,6 @@ spec:
             {% endif %}
         {% endif %}
         name: acc-provision-operator
-        resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
@@ -295,14 +293,14 @@ spec:
         configMap:
           name: aci-operator-config
           items:
-            - key: spec
-              path: aci-operator.conf
+          - key: spec
+            path: aci-operator.conf
       - name: acc-provision-config
         configMap:
           name: acc-provision-config
           items:
-            - key: spec
-              path: acc-provision-operator.conf
+          - key: spec
+            path: acc-provision-operator.conf
       - name: varlogpods
         hostPath:
           path: /var/log/pods

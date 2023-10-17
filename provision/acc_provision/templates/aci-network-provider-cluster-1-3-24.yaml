@@ -188,7 +188,7 @@ network:
 services:
   kube-controller:
     {% if config.net_config.pod_subnet %}
-    cluster_cidr: "{%- for pod_subnet in config.net_config.pod_subnet %}{% if loop.last %}{{ "%s"|format(pod_subnet) }}{% else %}{{ "%s,"|format(pod_subnet) }}{% endif %}{% endfor -%}"  
+    cluster_cidr: "{%- for pod_subnet in config.net_config.pod_subnet %}{% if loop.last %}{{ "%s"|format(pod_subnet) }}{% else %}{{ "%s,"|format(pod_subnet) }}{% endif %}{% endfor -%}"
     {% endif %}
 {% with image_name_suffix = "" %}{% if config.registry.use_digest %}{% set image_name_suffix = "@sha256" %}{% endif %}
 {% if config.user_config.registry %}
