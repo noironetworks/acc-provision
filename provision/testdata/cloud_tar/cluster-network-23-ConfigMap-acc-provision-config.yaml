@@ -15,7 +15,7 @@ data:
     ci_test\", \n            \"aci_containers_controller_version\": \"ci_test\"\n\
     \        },\n        \"kube_config\": {\n            \"run_snat_container\": false,\
     \ \n            \"run_gbp_container\": true, \n            \"ep_registry\": \"\
-    k8s\", \n            \"opflex_mode\": \"overlay\"\n\n        },\n        \"istio_config\"\
+    k8s\", \n            \"opflex_mode\": \"overlay\"\n        },\n        \"istio_config\"\
     : {\n           \"install_istio\": false\n        },\n        \"net_config\":\
     \ {\n            \"extern_static\": [\"10.4.0.1/24\"],\n            \"extern_dynamic\"\
     : [\"10.3.0.1/24\"],\n            \"node_svc_subnet\": \"10.5.0.1/24\",\n    \

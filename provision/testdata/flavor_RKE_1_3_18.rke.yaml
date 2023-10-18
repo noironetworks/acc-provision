@@ -22,7 +22,7 @@ network:
     kube_api_vlan: "4001"
     service_vlan: "4003"
     infra_vlan: "4093"
-    service_monitor_interval: "5" 
+    service_monitor_interval: "5"
     apic_refresh_ticker_adjust: "1"
     apic_subscription_delay: "1"
     opflex_device_delete_timeout: "1"
