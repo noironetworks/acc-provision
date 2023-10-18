@@ -2570,6 +2570,8 @@ spec:
           value: "aci-containers-system"
         - name: ACC_PROVISION_FLAVOR
           value: "openshift-4.6-baremetal"
+        - name: OPERATOR_LOGGING_LEVEL
+          value: "info"
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit

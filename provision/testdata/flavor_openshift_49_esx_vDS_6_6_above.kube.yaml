@@ -2579,6 +2579,8 @@ spec:
           value: "aci-containers-system"
         - name: ACC_PROVISION_FLAVOR
           value: "openshift-4.9-esx"
+        - name: OPERATOR_LOGGING_LEVEL
+          value: "info"
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit

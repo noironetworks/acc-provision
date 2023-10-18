@@ -1395,7 +1395,8 @@ data:
             "logging": {
                "controller_log_level": "debug", 
                "hostagent_log_level": "debug", 
-               "opflexagent_log_level": "info"
+               "opflexagent_log_level": "info", 
+               "operator_log_level": "debug"
             },
             "net_config": {
                 "infra_vlan": 4093,
@@ -2627,6 +2628,8 @@ spec:
           value: "kube-system"
         - name: ACC_PROVISION_FLAVOR
           value: "kubernetes-1.27"
+        - name: OPERATOR_LOGGING_LEVEL
+          value: debug
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit

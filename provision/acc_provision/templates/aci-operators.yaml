@@ -237,6 +237,12 @@ spec:
           value: "{{ config.kube_config.system_namespace}}"
         - name: ACC_PROVISION_FLAVOR
           value: "{{ config.flavor }}"
+        - name: OPERATOR_LOGGING_LEVEL
+          {% if config.logging.operator_log_level %}
+          value: {{ config.logging.operator_log_level }}
+          {% else %}
+          value: "info"
+          {% endif %}
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit
