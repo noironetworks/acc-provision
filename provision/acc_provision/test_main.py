@@ -1574,62 +1574,62 @@ def test_preexisting_kube_convention():
 
 
 @in_testdir
-def test_flavor_calico_3_23_2():
+def test_flavor_calico_3_26_3():
     run_provision(
-        "flavor_calico-3.23.2.inp.yaml",
+        "flavor_calico-3.26.3.inp.yaml",
         None,
-        "flavor_calico-3.23.2_tar",
+        "flavor_calico-3.26.3_tar",
         None,
-        "flavor_calico-3.23.2.apic.txt",
-        overrides={"flavor": "calico-3.23.2"}
+        "flavor_calico-3.26.3.apic.txt",
+        overrides={"flavor": "calico-3.26.3"}
     )
 
 
 @in_testdir
-def test_flvr_calico_3_23_2_multiple_vrf_uc1():
+def test_flvr_calico_3_26_3_multiple_vrf_uc1():
     run_provision(
-        "flavor_calico_3.23.2_multiple_vrf_uc1.inp.yaml",
+        "flavor_calico_3.26.3_multiple_vrf_uc1.inp.yaml",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc1_tar",
+        "flavor_calico_3.26.3_multiple_vrf_uc1_tar",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc1.apic.txt",
-        overrides={"flavor": "calico-3.23.2"}
+        "flavor_calico_3.26.3_multiple_vrf_uc1.apic.txt",
+        overrides={"flavor": "calico-3.26.3"}
     )
 
 
 @in_testdir
-def test_flvr_calico_3_23_2_multiple_vrf_uc2():
+def test_flvr_calico_3_26_3_multiple_vrf_uc2():
     run_provision(
-        "flavor_calico_3.23.2_multiple_vrf_uc2.inp.yaml",
+        "flavor_calico_3.26.3_multiple_vrf_uc2.inp.yaml",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc2_tar",
+        "flavor_calico_3.26.3_multiple_vrf_uc2_tar",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc2.apic.txt",
-        overrides={"flavor": "calico-3.23.2"}
+        "flavor_calico_3.26.3_multiple_vrf_uc2.apic.txt",
+        overrides={"flavor": "calico-3.26.3"}
     )
 
 
 @in_testdir
-def test_flvr_calico_3_23_2_multiple_vrf_uc3():
+def test_flvr_calico_3_26_3_multiple_vrf_uc3():
     run_provision(
-        "flavor_calico_3.23.2_multiple_vrf_uc3.inp.yaml",
+        "flavor_calico_3.26.3_multiple_vrf_uc3.inp.yaml",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc3_tar",
+        "flavor_calico_3.26.3_multiple_vrf_uc3_tar",
         None,
-        "flavor_calico_3.23.2_multiple_vrf_uc3.apic.txt",
-        overrides={"flavor": "calico-3.23.2"}
+        "flavor_calico_3.26.3_multiple_vrf_uc3.apic.txt",
+        overrides={"flavor": "calico-3.26.3"}
     )
 
 
 @in_testdir
-def test_flavor_with_cluster_svc_export_calico_3_23_2():
+def test_flavor_with_cluster_svc_export_calico_3_26_3():
     run_provision(
-        "flavor_with_cluster_svc_export_calico-3.23.2.inp.yaml",
+        "flavor_with_cluster_svc_export_calico-3.26.3.inp.yaml",
         None,
-        "flavor_with_cluster_svc_export_calico-3.23.2_tar",
+        "flavor_with_cluster_svc_export_calico-3.26.3_tar",
         None,
-        "flavor_with_cluster_svc_export_calico-3.23.2.apic.txt",
-        overrides={"flavor": "calico-3.23.2"}
+        "flavor_with_cluster_svc_export_calico-3.26.3.apic.txt",
+        overrides={"flavor": "calico-3.26.3"}
     )
 
 
