@@ -41,6 +41,8 @@ spec:
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
           value: openshift-4.5-esx
+        - name: OPERATOR_LOGGING_LEVEL
+          value: info
         image: noiro/aci-containers-operator:6.0.3.2.81c2369
         imagePullPolicy: Always
         name: aci-containers-operator

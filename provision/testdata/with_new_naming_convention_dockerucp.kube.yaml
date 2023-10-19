@@ -2486,6 +2486,8 @@ spec:
           value: "aci-containers-system"
         - name: ACC_PROVISION_FLAVOR
           value: "docker-ucp-3.0"
+        - name: OPERATOR_LOGGING_LEVEL
+          value: "info"
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit
