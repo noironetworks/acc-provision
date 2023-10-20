@@ -12,9 +12,6 @@ aci_config:
   - 10.1.1.101
   physical_domain:              # Non mandatory field
     domain: kube-physdom        # If physical domain provided, then mention name. Otherwise it will create with name <system_id>-physdom
-  vmm_domain:                   # Kubernetes container domain configuration, If already created then mention details
-    type: Kubernetes            # Type of already created VMM domain 
-    domain: kube                # Name of already created VMM domain
 
     # Mandatory field for Openshift on ESX flavor
     # Loadbalancer IP used to create duplicate service file for
@@ -29,10 +26,10 @@ aci_config:
   vrf:                          # This VRF used to create all kubernetes EPs
     name: mykube-vrf
     tenant: common              # This can be system-id or common
-  l3out:
-    name: mykube_l3out          # Used to provision external IPs
-    external_networks:
-    - mykube_extepg             # Used for external contracts
+  # l3out:
+  #   name: mykube_l3out          # Used to provision external IPs
+  #   external_networks:
+  #   - mykube_extepg             # Used for external contracts
 
 
 #
