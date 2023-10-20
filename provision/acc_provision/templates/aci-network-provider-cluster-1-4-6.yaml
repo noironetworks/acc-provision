@@ -19,7 +19,7 @@ network:
     mcast_range_end: "{{ config.aci_config.vmm_domain.mcast_range.end }}"
     aep: "{{ config.aci_config.aep }}"
     vrf_name: "{{ config.aci_config.vrf.name }}"
-    vrf_tenant: "{{ config.aci_config.vrf.tenant }}" 
+    vrf_tenant: "{{ config.aci_config.vrf.tenant }}"
     l3out: "{{ config.aci_config.l3out.name }}"
     node_subnet: "{%- for node_subnet in config.net_config.node_subnet %}{% if loop.last %}{{ "%s"|format(node_subnet) }}{% else %}{{ "%s,"|format(node_subnet) }}{% endif %}{% endfor -%}"
     {% if config.aci_config.l3out.external_networks|length > 1 %}
@@ -34,10 +34,10 @@ network:
     service_vlan: "{{ config.net_config.service_vlan }}"
     infra_vlan: "{{ config.net_config.infra_vlan }}"
     {% if config.aci_config.tenant.name %}
-    tenant: "{{ config.aci_config.tenant.name }}" 
+    tenant: "{{ config.aci_config.tenant.name }}"
     {% endif %}
     {% if config.net_config.service_monitor_interval %}
-    service_monitor_interval: "{{ config.net_config.service_monitor_interval }}" 
+    service_monitor_interval: "{{ config.net_config.service_monitor_interval }}"
     {% endif %}
     {% if config.net_config.pbr_tracking_non_snat %}
     pbr_tracking_non_snat: "{{ config.net_config.pbr_tracking_non_snat|lower() }}"
@@ -146,5 +146,5 @@ network:
 services:
   kube-controller:
     {% if config.net_config.pod_subnet %}
-    cluster_cidr: "{%- for pod_subnet in config.net_config.pod_subnet %}{% if loop.last %}{{ "%s"|format(pod_subnet) }}{% else %}{{ "%s,"|format(pod_subnet) }}{% endif %}{% endfor -%}"  
+    cluster_cidr: "{%- for pod_subnet in config.net_config.pod_subnet %}{% if loop.last %}{{ "%s"|format(pod_subnet) }}{% else %}{{ "%s,"|format(pod_subnet) }}{% endif %}{% endfor -%}"
     {% endif %}

@@ -12,7 +12,7 @@ network:
     mcast_range_end: "225.2.255.255"
     aep: "rke-aep"
     vrf_name: "rke"
-    vrf_tenant: "common" 
+    vrf_tenant: "common"
     l3out: "l3out"
     node_subnet: "10.1.0.1/16"
     l3out_external_networks: ["\"default\",\"test_ext_net\""]

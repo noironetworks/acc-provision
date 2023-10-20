@@ -414,7 +414,6 @@ spec:
                       type: string
                   namespace:
                     type: string
-                type: object
               snatIp:
                 type: array
                 items:
@@ -423,7 +422,6 @@ spec:
                 type: array
                 items:
                   type: string
-            type: object
           status:
             type: object
             properties:
@@ -1043,8 +1041,8 @@ spec:
                   flowType:
                     type: string
                     enum:
-                      - netflow
-                      - ipfix
+                    - netflow
+                    - ipfix
                     default: netflow
                   activeFlowTimeOut:
                     type: integer
@@ -1063,7 +1061,6 @@ spec:
                     default: 0
                 required:
                 - destIp
-                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1112,16 +1109,16 @@ spec:
                     default: start
                     type: string
                     enum:
-                      - start
-                      - stop
+                    - start
+                    - stop
                   direction:
                     description: Direction of the packets to monitor.
                     default: both
                     type: string
                     enum:
-                      - in
-                      - out
-                      - both
+                    - in
+                    - out
+                    - both
               destination:
                 type: object
                 properties:
@@ -1136,7 +1133,6 @@ spec:
                     maximum: 1023
                 required:
                 - destIP
-                type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1358,12 +1354,12 @@ data:
         }
     }
   gbp-server-config: |-
-   {
-        "aci-policy-tenant": "kube",
-        "aci-vrf": "defaultVrf",
-        "aci-vmm-domain": "kubernetes",
-        "pod-subnet": "10.2.56.1/21"
-   }
+    {
+          "aci-policy-tenant": "kube",
+          "aci-vrf": "defaultVrf",
+          "aci-vmm-domain": "kubernetes",
+          "pod-subnet": "10.2.56.1/21"
+    }
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1374,9 +1370,9 @@ metadata:
     aci-containers-config-version: "dummy"
     network-plugin: aci-containers
 data:
-    "start": "5000"
-    "end": "65000"
-    "ports-per-node": "3000"
+  "start": "5000"
+  "end": "65000"
+  "ports-per-node": "3000"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -1774,171 +1770,171 @@ spec:
       hostIPC: true
       serviceAccountName: aci-containers-host-agent
       tolerations:
-        - operator: Exists
+      - operator: Exists
       initContainers:
-        - name: cnideploy
-          image: noirolabs/cnideploy:latest
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - SYS_ADMIN
-          volumeMounts:
-            - name: cni-bin
-              mountPath: /mnt/cni-bin
+      - name: cnideploy
+        image: noirolabs/cnideploy:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+        volumeMounts:
+        - name: cni-bin
+          mountPath: /mnt/cni-bin
       priorityClassName: system-cluster-critical
       containers:
-        - name: aci-containers-host
-          image: noirolabs/aci-containers-host:latest
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - SYS_ADMIN
-                - NET_ADMIN
-                - SYS_PTRACE
-                - NET_RAW
-          env:
-            - name: GOTRACEBACK
-              value: "2"
-            - name: KUBERNETES_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: TENANT
-              value: "kube"
-            - name: NODE_EPG
-              value: "kubernetes|kube-nodes"
-            - name: OPFLEX_MODE
-              value: overlay
-            - name: DURATION_WAIT_FOR_NETWORK
-              value: "210"
-          volumeMounts:
-            - name: cni-bin
-              mountPath: /mnt/cni-bin
-            - name: cni-conf
-              mountPath: /mnt/cni-conf
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            - name: opflex-hostconfig-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
-            - name: host-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-            - mountPath: /run/netns
-              name: host-run-netns
-              readOnly: true
-              mountPropagation: HostToContainer
-          livenessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /status
-              port: 8090
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 30
-        - name: opflex-agent
-          env:
-            - name: REBOOT_WITH_OVS
-              value: "true"
-            - name: SSL_MODE
-              value: disabled
-          image: noirolabs/opflex:latest
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - NET_ADMIN
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            - name: opflex-hostconfig-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
-            - name: opflex-config-volume
-              mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
-        - name: opflex-server
-          image: noirolabs/opflex:latest
-          command: ["/bin/sh"]
-          args: ["/usr/local/bin/launch-opflexserver.sh"]
-          imagePullPolicy: Always
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-          ports:
-            - containerPort: 8009
-            - name: metrics
-              containerPort: 9632
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - name: opflex-server-config-volume
-              mountPath: /usr/local/etc/opflex-server
-            - name: hostvar
-              mountPath: /usr/local/var
+      - name: aci-containers-host
+        image: noirolabs/aci-containers-host:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+        env:
+        - name: GOTRACEBACK
+          value: "2"
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: TENANT
+          value: "kube"
+        - name: NODE_EPG
+          value: "kubernetes|kube-nodes"
+        - name: OPFLEX_MODE
+          value: overlay
+        - name: DURATION_WAIT_FOR_NETWORK
+          value: "210"
+        volumeMounts:
+        - name: cni-bin
+          mountPath: /mnt/cni-bin
+        - name: cni-conf
+          mountPath: /mnt/cni-conf
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+        - name: opflex-hostconfig-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+        - name: host-config-volume
+          mountPath: /usr/local/etc/aci-containers/
+        - name: varlogpods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
+        - mountPath: /run/netns
+          name: host-run-netns
+          readOnly: true
+          mountPropagation: HostToContainer
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8090
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+      - name: opflex-agent
+        env:
+        - name: REBOOT_WITH_OVS
+          value: "true"
+        - name: SSL_MODE
+          value: disabled
+        image: noirolabs/opflex:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+        - name: opflex-hostconfig-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+        - name: opflex-config-volume
+          mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+      - name: opflex-server
+        image: noirolabs/opflex:latest
+        command: ["/bin/sh"]
+        args: ["/usr/local/bin/launch-opflexserver.sh"]
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        ports:
+        - containerPort: 8009
+        - name: metrics
+          containerPort: 9632
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: opflex-server-config-volume
+          mountPath: /usr/local/etc/opflex-server
+        - name: hostvar
+          mountPath: /usr/local/var
       restartPolicy: Always
       volumes:
-        - name: cni-bin
-          hostPath:
-            path: /opt
-        - name: cni-conf
-          hostPath:
-            path: /etc
-        - name: hostvar
-          hostPath:
-            path: /var
-        - name: hostrun
-          hostPath:
-            path: /run
-        - name: host-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: host-agent-config
-                path: host-agent.conf
-        - name: opflex-hostconfig-volume
-          emptyDir:
-            medium: Memory
-        - name: varlogpods
-          hostPath:
-            path: /var/log/pods
-        - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
-        - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
-        - name: opflex-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: opflex-agent-config
-                path: local.conf
-        - name: opflex-server-config-volume
-        - name: host-run-netns
-          hostPath:
-            path: /run/netns
+      - name: cni-bin
+        hostPath:
+          path: /opt
+      - name: cni-conf
+        hostPath:
+          path: /etc
+      - name: hostvar
+        hostPath:
+          path: /var
+      - name: hostrun
+        hostPath:
+          path: /run
+      - name: host-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: host-agent-config
+            path: host-agent.conf
+      - name: opflex-hostconfig-volume
+        emptyDir:
+          medium: Memory
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
+      - name: opflex-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: opflex-agent-config
+            path: local.conf
+      - name: opflex-server-config-volume
+      - name: host-run-netns
+        hostPath:
+          path: /run/netns
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -1966,75 +1962,75 @@ spec:
       hostIPC: true
       serviceAccountName: aci-containers-host-agent
       tolerations:
-        - operator: Exists
+      - operator: Exists
       priorityClassName: system-cluster-critical
       containers:
-        - name: aci-containers-openvswitch
-          image: noirolabs/openvswitch:latest
-          imagePullPolicy: Always
-          resources:
-            limits:
-              memory: "1Gi"
-            requests:
-              memory: "128Mi"
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - NET_ADMIN
-                - SYS_MODULE
-                - SYS_NICE
-                - IPC_LOCK
-          env:
-            - name: OVS_RUNDIR
-              value: /usr/local/var/run/openvswitch
-          volumeMounts:
-            - name: hostvar
-              mountPath: /usr/local/var
-            - name: hostrun
-              mountPath: /run
-            - name: hostrun
-              mountPath: /usr/local/run
-            - name: hostetc
-              mountPath: /usr/local/etc
-            - name: hostmodules
-              mountPath: /lib/modules
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-          livenessProbe:
-            exec:
-              command:
-                - /usr/local/bin/liveness-ovs.sh
+      - name: aci-containers-openvswitch
+        image: noirolabs/openvswitch:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "1Gi"
+          requests:
+            memory: "128Mi"
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+            - SYS_NICE
+            - IPC_LOCK
+        env:
+        - name: OVS_RUNDIR
+          value: /usr/local/var/run/openvswitch
+        volumeMounts:
+        - name: hostvar
+          mountPath: /usr/local/var
+        - name: hostrun
+          mountPath: /run
+        - name: hostrun
+          mountPath: /usr/local/run
+        - name: hostetc
+          mountPath: /usr/local/etc
+        - name: hostmodules
+          mountPath: /lib/modules
+        - name: varlogpods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/liveness-ovs.sh
       restartPolicy: Always
       volumes:
-        - name: hostetc
-          hostPath:
-            path: /etc
-        - name: hostvar
-          hostPath:
-            path: /var
-        - name: hostrun
-          hostPath:
-            path: /run
-        - name: hostmodules
-          hostPath:
-            path: /lib/modules
-        - name: varlogpods
-          hostPath:
-            path: /var/log/pods
-        - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
-        - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
+      - name: hostetc
+        hostPath:
+          path: /etc
+      - name: hostvar
+        hostPath:
+          path: /var
+      - name: hostrun
+        hostPath:
+          path: /run
+      - name: hostmodules
+        hostPath:
+          path: /lib/modules
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -2064,78 +2060,78 @@ spec:
       hostNetwork: true
       serviceAccountName: aci-containers-controller
       tolerations:
-        - effect: NoExecute
-          operator: Exists
-          tolerationSeconds: 60
-        - effect: NoSchedule
-          key: node.kubernetes.io/not-ready
-          operator: Exists
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
+      - effect: NoExecute
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
       priorityClassName: system-node-critical
       containers:
-        - name: aci-gbpserver
-          image: noirolabs/gbp-server:latest
-          imagePullPolicy: Always
-          volumeMounts:
-            - name: controller-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-          env:
-            - name: GBP_SERVER_CONF
-              value: /usr/local/etc/aci-containers/gbp-server.conf
-        - name: aci-containers-controller
-          image: noirolabs/aci-containers-controller:latest
-          imagePullPolicy: Always
-          env:
-            - name: ACI_SNAT_NAMESPACE
-              value: "kube-system"
-            - name: ACI_SNAGLOBALINFO_NAME
-              value: "snatglobalinfo"
-            - name: ACI_RDCONFIG_NAME
-              value: "routingdomain-config"
-            - name: SYSTEM_NAMESPACE
-              value: "kube-system"
-          volumeMounts:
-            - name: controller-config-volume
-              mountPath: /usr/local/etc/aci-containers/
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlogcontainers
-              mountPath: /var/log/containers
-              readOnly: true
-            - name: varlibdocker
-              mountPath: /var/lib/docker
-              readOnly: true
-          livenessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /status
-              port: 8091
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 30
-      volumes:
+      - name: aci-gbpserver
+        image: noirolabs/gbp-server:latest
+        imagePullPolicy: Always
+        volumeMounts:
         - name: controller-config-volume
-          configMap:
-            name: aci-containers-config
-            items:
-              - key: controller-config
-                path: controller.conf
-              - key: gbp-server-config
-                path: gbp-server.conf
+          mountPath: /usr/local/etc/aci-containers/
+        env:
+        - name: GBP_SERVER_CONF
+          value: /usr/local/etc/aci-containers/gbp-server.conf
+      - name: aci-containers-controller
+        image: noirolabs/aci-containers-controller:latest
+        imagePullPolicy: Always
+        env:
+        - name: ACI_SNAT_NAMESPACE
+          value: "kube-system"
+        - name: ACI_SNAGLOBALINFO_NAME
+          value: "snatglobalinfo"
+        - name: ACI_RDCONFIG_NAME
+          value: "routingdomain-config"
+        - name: SYSTEM_NAMESPACE
+          value: "kube-system"
+        volumeMounts:
+        - name: controller-config-volume
+          mountPath: /usr/local/etc/aci-containers/
         - name: varlogpods
-          hostPath:
-            path: /var/log/pods
+          mountPath: /var/log/pods
+          readOnly: true
         - name: varlogcontainers
-          hostPath:
-            path: /var/log/containers
+          mountPath: /var/log/containers
+          readOnly: true
         - name: varlibdocker
-          hostPath:
-            path: /var/lib/docker
+          mountPath: /var/lib/docker
+          readOnly: true
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8091
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+      volumes:
+      - name: controller-config-volume
+        configMap:
+          name: aci-containers-config
+          items:
+          - key: controller-config
+            path: controller.conf
+          - key: gbp-server-config
+            path: gbp-server.conf
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
 ---
 apiVersion: v1
 kind: LimitRange

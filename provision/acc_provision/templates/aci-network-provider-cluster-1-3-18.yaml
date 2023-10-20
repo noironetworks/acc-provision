@@ -19,7 +19,7 @@ network:
     mcast_range_end: "{{ config.aci_config.vmm_domain.mcast_range.end }}"
     aep: "{{ config.aci_config.aep }}"
     vrf_name: "{{ config.aci_config.vrf.name }}"
-    vrf_tenant: "{{ config.aci_config.vrf.tenant }}" 
+    vrf_tenant: "{{ config.aci_config.vrf.tenant }}"
     l3out: "{{ config.aci_config.l3out.name }}"
     node_subnet: "{%- for node_subnet in config.net_config.node_subnet %}{{ "%s"|format(node_subnet) }}{% endfor -%}"
     {% if config.aci_config.l3out.external_networks|length > 1 %}

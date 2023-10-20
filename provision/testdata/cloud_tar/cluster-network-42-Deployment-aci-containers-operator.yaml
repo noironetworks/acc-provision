@@ -41,10 +41,11 @@ spec:
           value: aci-containers-system
         - name: ACC_PROVISION_FLAVOR
           value: cloud
+        - name: OPERATOR_LOGGING_LEVEL
+          value: info
         image: noirolabs/aci-containers-operator:6.0.3.2.81c2369
         imagePullPolicy: Always
         name: aci-containers-operator
-        resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -75,7 +76,6 @@ spec:
         image: noirolabs/acc-provision-operator:6.0.3.2.81c2369
         imagePullPolicy: Always
         name: acc-provision-operator
-        resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
