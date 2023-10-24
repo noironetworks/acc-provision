@@ -19,7 +19,7 @@ data:
     \                ]\n            }\n        },\n        \"registry\": {\n     \
     \       \"image_prefix\": \"noiro\"\n        },\n        \"kube_config\": {\n\
     \            \"controller\": \"1.1.1.1\", \n            \"use_cluster_role\":\
-    \ true, \n            \"use_ds_rolling_update\": true\n\n        },\n        \"\
+    \ true, \n            \"use_ds_rolling_update\": true\n        },\n        \"\
     logging\": {\n           \"controller_log_level\": \"info\", \n           \"hostagent_log_level\"\
     : \"info\", \n           \"opflexagent_log_level\": \"info\"\n        },\n   \
     \     \"net_config\": {\n            \"infra_vlan\": 4093,\n            \"service_vlan\"\

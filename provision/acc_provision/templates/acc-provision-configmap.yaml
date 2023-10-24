@@ -155,7 +155,7 @@ data:
                 {% else %}
                 {{ key|json }}: {{ value|json }}{{ ", " if not loop.last else "" }}
                 {% endif %}
-                {% endfor %} 
+                {% endfor %}
             },
             {% endif %}
             {% if config.user_config.multus %}
