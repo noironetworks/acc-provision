@@ -1693,6 +1693,30 @@ def test_flvr_openshift_411_esx_vDS_6_6_above():
     )
 
 
+@in_testdir
+def test_flavor_openshift_invalid_systemid():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "flavor_openshift_invalid_systemid.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+                overrides={"flavor": "openshift-4.13-esx"}
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("flavor_openshift_invalid_systemid.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
