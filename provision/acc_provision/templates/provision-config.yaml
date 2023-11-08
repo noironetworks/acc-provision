@@ -145,6 +145,7 @@ registry:
   # opflex_openssl_compat: True                         # default is False, use when turning of FIPS on the host
   # enable_opflex_agent_reconnect: True                 # default is False, set it as True to enable opflex agent reconnect after vm migration
   # opflex_agent_statistics: False                      # default is True, set this to False if statistics load is very high
+  # add_external_contract_to_default_epg: True          # override if needed, default is False
 
 #
 # Configuration for ACI CNI Operator
