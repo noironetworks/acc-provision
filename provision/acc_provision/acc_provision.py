@@ -1194,6 +1194,13 @@ def is_valid_file(path):
     return True
 
 
+def validate_system_id_if_openshift(system_id, flavor):
+    if "openshift" in flavor.lower():
+        if not system_id.isalnum() or not system_id.islower():
+            raise Exception("Invalid system_id: %s, only lower case alphanumeric characters allowed" % system_id)
+    return True
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -1224,7 +1231,8 @@ def config_validate(flavor_opts, config):
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
-                                     lambda x: required(x) and isname(x, 32)),
+                                     lambda x: required(x) and isname(x, 32) and
+                                     validate_system_id_if_openshift(x, config['flavor'])),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
             "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
@@ -1251,7 +1259,8 @@ def config_validate(flavor_opts, config):
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
-                                     lambda x: required(x) and isname(x, 32)),
+                                     lambda x: required(x) and isname(x, 32) and
+                                     validate_system_id_if_openshift(x, config['flavor'])),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
             "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),

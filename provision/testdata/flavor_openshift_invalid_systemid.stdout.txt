@@ -1,0 +1,4 @@
+INFO: Loading configuration from "flavor_openshift_invalid_systemid.inp.yaml"
+INFO: Using configuration flavor openshift-4.13-esx
+ERR:  Invalid configuration for aci_config/system_id: Invalid system_id: Kube_OCP, only lower case alphanumeric characters allowed
+ERR:  Please fix configuration and retry.
