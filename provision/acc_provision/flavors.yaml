@@ -19,6 +19,16 @@ openshiftOpenstackFlavorOptions : &anchor1
     use_kubeapi_vlan: false
 
 flavors:
+  kubernetes-1.28:
+     desc: Kubernetes 1.28
+     default_version: 6.0
+     status: null
+     hidden: false
+     order: 34
+     config:
+       kube_config:
+         allow_kube_api_default_epg: True
+         use_host_netns_volume: True
   kubernetes-1.27:
      desc: Kubernetes 1.27
      default_version: 6.0
@@ -43,7 +53,7 @@ flavors:
      desc: Kubernetes 1.25
      default_version: 6.0
      status: null
-     hidden: false
+     hidden: true
      order: 37
      config:
        kube_config:
@@ -5397,7 +5407,7 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 68
+    order: 70
   calico-3.26.3:
     desc: calico-3.26.3
     default_version: 6.0.3.3
@@ -5406,7 +5416,7 @@ flavors:
       template_generator: generate_calico_deployment_files
     hidden: False
     status: null
-    order: 69
+    order: 71
   openshift-sdn-ovn-baremetal:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.0
@@ -5435,4 +5445,4 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 70
+    order: 72
