@@ -718,6 +718,18 @@ def test_flavor_openshift_413_esx():
 
 
 @in_testdir
+def test_flavor_openshift_414_baremetal():
+    run_provision(
+        "flavor_openshift_414_baremetal.inp.yaml",
+        "flavor_openshift_414_baremetal.kube.yaml",
+        "flavor_openshift_414_baremetal_tar",
+        None,
+        "flavor_openshift_414_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.14-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_413_baremetal():
     run_provision(
         "flavor_openshift_413_baremetal.inp.yaml",

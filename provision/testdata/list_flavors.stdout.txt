@@ -1,4 +1,5 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.14-baremetal:	Red Hat OpenShift Container Platform 4.14 on Baremetal
 INFO: openshift-4.13-baremetal:	Red Hat OpenShift Container Platform 4.13 on Baremetal
 INFO: openshift-4.12-baremetal:	Red Hat OpenShift Container Platform 4.12 on Baremetal
 INFO: openshift-4.11-baremetal:	Red Hat OpenShift Container Platform 4.11 on Baremetal
