@@ -3,7 +3,7 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-p pass] [-w timeout] [--list-flavors] [-f flavor]
                         [-t token] [--test-data-out file] [--skip-kafka-certs]
                         [--upgrade] [--disable-multus disable_multus]
-                        [-s file]
+                        [-s file] [--apic-oobm-ip ip]
 
 Provision an ACI/Kubernetes installation
 
@@ -39,3 +39,4 @@ optional arguments:
   --disable-multus disable_multus
                         true/false to disable/enable multus in cluster
   -s, --dpu file        output file for your dpu kubernetes deployment
+  --apic-oobm-ip ip     APIC out of band management IP for day0 configuration
