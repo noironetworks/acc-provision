@@ -634,6 +634,18 @@ def test_flavor_openshift_413_openstack():
 
 
 @in_testdir
+def test_flavor_openshift_414_openstack():
+    run_provision(
+        "flavor_openshift_414_openstack.inp.yaml",
+        "flavor_openshift_414_openstack.kube.yaml",
+        "flavor_openshift_414_openstack_tar",
+        None,
+        "flavor_openshift_414_openstack.apic.txt",
+        overrides={"flavor": "openshift-4.14-openstack"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_47_esx():
     run_provision(
         "flavor_openshift_47_esx.inp.yaml",
