@@ -1201,6 +1201,14 @@ def validate_system_id_if_openshift(system_id, flavor):
     return True
 
 
+def is_valid_ip(ip):
+    try:
+        ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return True
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -2240,7 +2248,10 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
 
 
 def get_apic(config):
-    apic_host = config["aci_config"]["apic_hosts"][0]
+    if config["aci_config"].get("apic_oobm_ip"):
+        apic_host = config["aci_config"]["apic_oobm_ip"]
+    else:
+        apic_host = config["aci_config"]["apic_hosts"][0]
     apic_username = config["aci_config"]["apic_login"]["username"]
     apic_password = config["aci_config"]["apic_login"]["password"]
     timeout = config["aci_config"]["apic_login"]["timeout"]
@@ -2348,6 +2359,9 @@ def parse_args(show_help):
     parser.add_argument(
         '-s', '--dpu', default=None, metavar='file',
         help='output file for your dpu kubernetes deployment')
+    parser.add_argument(
+        '--apic-oobm-ip', default=None, metavar='ip',
+        help='APIC out of band management IP for day0 configuration')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -2631,6 +2645,9 @@ def provision(args, apic_file, no_random):
         "operator_mode": args.operator_mode,
     }
 
+    if args.apic_oobm_ip:
+        config['aci_config']['apic_oobm_ip'] = args.apic_oobm_ip
+
     if upgrade_cluster:
         output_tar = "/dev/null"
         config["provision"]["upgrade_cluster"] = True
@@ -2898,6 +2915,10 @@ def main(args=None, apic_file=None, no_random=False):
 
     if args.disable_multus is not None and (args.disable_multus != 'true' and args.disable_multus != 'false'):
         err("Invalid configuration for disable_multus:" + args.disable_multus + " <Valid values: true/false>")
+        sys.exit(1)
+
+    if args.apic_oobm_ip and is_valid_ip(args.apic_oobm_ip) is False:
+        err("Invalid apic-oobm-ip address: " + args.apic_oobm_ip)
         sys.exit(1)
 
     success = True

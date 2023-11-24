@@ -1760,6 +1760,7 @@ def get_args(**overrides):
         # the APIC
         "infra_vlan": None,
         "dpu": None,
+        "apic_oobm_ip": None,
         "test_run": True,
         "compare_kube_yaml_aci_op_cm_in_plain_text": True
     }
