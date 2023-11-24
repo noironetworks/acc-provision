@@ -3747,4 +3747,292 @@ metadata:
 spec:
   vlans:
   {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
+{% if config.chained_cni_config.auto_insertion_for_nad %}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aci-containers-webhook
+  namespace: aci-containers-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aci-containers-webhook
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - '*'
+- apiGroups:
+  - k8s.cni.cncf.io
+  resources:
+  - network-attachment-definitions
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - list
+  - get
+  - create
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - '*'
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers-webhook
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers-webhook
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-webhook
+  namespace: aci-containers-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+  namespace: aci-containers-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aci-containers-webhook
+  template:
+    metadata:
+      labels:
+        app: aci-containers-webhook
+    spec:
+      containers:
+      - name: aci-containers-webhook
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/aci-containers-webhook@sha256:{{ config.registry.aci_containers_webhook_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/aci-containers-webhook:{{ config.registry.aci_containers_webhook_version }}
+        {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        ports:
+        - name: webhook-server
+          containerPort: 8443
+        - name: health-probe
+          containerPort: 8081
+        env:
+        - name: WATCH_NAMESPACE
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        {% if config.chained_cni_config.require_annotation_for_nad_mutation_webhook %}
+        - name: REQUIRE_NAD_ANNOTATION
+          value: "True"
+        {% endif %}
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: Content-Type
+              value: application/json
+            path: /readyz
+            port: health-probe
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs/
+          name: tls-key-pair
+          readOnly: true
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      serviceAccount: aci-containers-webhook
+      serviceAccountName: aci-containers-webhook
+      volumes:
+      - name: tls-key-pair
+        secret:
+          defaultMode: 420
+          secretName: aci-containers-webhook
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+  namespace: aci-containers-system
+  {% if not config.chained_cni_config.local_cert_manager_enabled %}
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name:  aci-containers-webhook
+  {% endif %}
+spec:
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: aci-containers-webhook
+  type: ClusterIP
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+  {% if not config.chained_cni_config.local_cert_manager_enabled %}
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  {% endif %}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /mutate-nad
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: network-attachment-definitions.k8s.cni.cncf.io
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - k8s.cni.cncf.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - network-attachment-definitions
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+{% if config.chained_cni_config.local_cert_manager_enabled %}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: aci-containers-certmanager
+  name: aci-containers-certmanager
+  namespace: aci-containers-system
+spec:
+  selector:
+    matchLabels:
+      app: aci-containers-certmanager
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        description: aci-containers-certmanager rotate webhook certs
+      labels:
+        app: aci-containers-certmanager
+        name: aci-containers-certmanager
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+            weight: 10
+          - preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: Exists
+            weight: 1
+      containers:
+      - env:
+        - name: WATCH_NAMESPACE
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: ENABLE_PROFILER
+          value: "False"
+        - name: PROFILER_PORT
+          value: "6060"
+        - name: CA_ROTATE_INTERVAL
+          value: 8760h0m0s
+        - name: CA_OVERLAP_INTERVAL
+          value: 24h0m0s
+        - name: CERT_ROTATE_INTERVAL
+          value: 4380h0m0s
+        - name: CERT_OVERLAP_INTERVAL
+          value: 24h0m0s
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/aci-containers-certmanager@sha256:{{ config.registry.aci_containers_certmanager_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/aci-containers-certmanager:{{ config.registry.aci_containers_certmanager_version }}
+        {% endif %}
+        imagePullPolicy: {{ config.kube_config.image_pull_policy }}
+        name: aci-containers-certmanager
+        resources:
+          requests:
+            cpu: 30m
+            memory: 30Mi
+      priorityClassName: system-cluster-critical
+      serviceAccount: aci-containers-webhook
+      serviceAccountName: aci-containers-webhook
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+{% endif %}
+{% endif %}
 {% endif %}
