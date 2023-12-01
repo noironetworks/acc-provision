@@ -1460,6 +1460,9 @@ data:
         {% if config.kube_config.snat_operator.sleep_time_snat_global_info_sync %}
         "sleep-time-snat-global-info-sync": {{ config.kube_config.snat_operator.sleep_time_snat_global_info_sync|json }},
         {% endif %}
+        {% if config.kube_config.node_snat_redirect_exclude %}
+        "node-snat-redirect-exclude": {{ config.kube_config.node_snat_redirect_exclude|json|indent(width=8) }},
+        {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
