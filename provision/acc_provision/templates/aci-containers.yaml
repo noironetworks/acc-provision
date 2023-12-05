@@ -2535,6 +2535,10 @@ spec:
         - name: SSL_MODE
           value: disabled
         {% endif %}
+        {% if config.kube_config.opflex_openssl_compat %}
+        - name: OPENSSL_CONF
+          value: "/etc/pki/tls/openssl11.cnf"
+        {% endif %}
         {% if config.registry.use_digest %}
         image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
         {% else %}
