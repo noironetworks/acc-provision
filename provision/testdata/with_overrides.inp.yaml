@@ -99,6 +99,7 @@ kube_config:
   aci_containers_operator_memory_request: "256Mi"
   aci_containers_operator_memory_limit: "5Gi"
   toleration_seconds: 100
+  opflex_openssl_compat: true
 
 registry:
   image_prefix: noiro
