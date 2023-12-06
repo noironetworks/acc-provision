@@ -1415,6 +1415,9 @@ data:
         {% if config.kube_config.aci_multipod %}
         "aci-multipod": {{config.kube_config.aci_multipod|json}},
         {% endif %}
+        {% if config.kube_config.enable_opflex_agent_reconnect  %}
+        "enable-opflex-agent-reconnect": {{config.kube_config.enable_opflex_agent_reconnect|json}},
+        {% endif %}
         {% if config.kube_config.opflex_device_reconnect_wait_timeout %}
         "opflex-device-reconnect-wait-timeout": {{ config.kube_config.opflex_device_reconnect_wait_timeout|json }},
         {% endif %}
@@ -1607,6 +1610,9 @@ data:
         "dhcp-delay": {{ config.kube_config.dhcp_delay|json}},
         {% endif %}
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
+        {% if config.kube_config.enable_opflex_agent_reconnect  %}
+        "enable-opflex-agent-reconnect": {{config.kube_config.enable_opflex_agent_reconnect|json}},
+        {% endif %}
         "log-level": {{config.logging.hostagent_log_level|json}},
         "aci-snat-namespace": "{{ config.kube_config.snat_operator.snat_namespace }}",
         {% if config.flavor != "k8s-overlay" %}
