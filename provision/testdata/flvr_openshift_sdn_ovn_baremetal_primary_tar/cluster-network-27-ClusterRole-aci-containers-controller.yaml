@@ -186,7 +186,7 @@ rules:
   resources:
   - nodefabricnetworkattachments
   - nadvlanmaps
-  - staticfabricnetworkattachments
+  - networkfabricconfigurations
   - fabricvlanpools
   verbs:
   - get
