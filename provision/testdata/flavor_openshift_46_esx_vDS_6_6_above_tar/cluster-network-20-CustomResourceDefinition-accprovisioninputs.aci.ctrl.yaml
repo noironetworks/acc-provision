@@ -151,6 +151,10 @@ spec:
                         type: boolean
                     type: object
                 type: object
+              config:
+                type: string
+              flavor:
+                type: string
             type: object
           status:
             description: AccProvisionInputStatus defines the successful completion

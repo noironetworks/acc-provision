@@ -1273,6 +1273,10 @@ spec:
                             type: string
                           disable_periodic_snat_global_info_sync:
                             type: boolean
+              config:
+                type: string
+              flavor:
+                type: string
             type: object
           status:
             description: AccProvisionInputStatus defines the successful completion of AccProvisionInput
