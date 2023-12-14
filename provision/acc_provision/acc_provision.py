@@ -2362,6 +2362,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--apic-oobm-ip', default=None, metavar='ip',
         help='APIC out of band management IP for day0 configuration')
+    parser.add_argument(
+        '--skip-app-profile-check', action='store_true', default=False,
+        help='skip app profiles presence check while tenant deletion')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -2642,6 +2645,9 @@ def provision(args, apic_file, no_random):
             "save_to": args.test_data_out,
             "skip-kafka-certs": args.skip_kafka_certs,
         },
+        "unprovision": {
+            "skip_app_profile_check": args.skip_app_profile_check,
+        },
         "operator_mode": args.operator_mode,
     }
 
@@ -2919,6 +2925,10 @@ def main(args=None, apic_file=None, no_random=False):
 
     if args.apic_oobm_ip and is_valid_ip(args.apic_oobm_ip) is False:
         err("Invalid apic-oobm-ip address: " + args.apic_oobm_ip)
+        sys.exit(1)
+
+    if args.skip_app_profile_check and not args.delete:
+        err("Invalid configuration for skip_app_profile_check: To be used with the -d option.")
         sys.exit(1)
 
     success = True
