@@ -470,11 +470,12 @@ class Apic(object):
                 dbg("%s: %s" % (ap_path, resp.text))
 
         # Clean the cluster tenant iff it has our annotation and does
-        # not have any application profiles
+        # not have any application profiles when --skip-app-profile-check flag is not provided,
         # considering it's not a pre_existing_tenant which is manually created on the APIC
         if not pre_existing_tenant:
-            if self.check_valid_annotation(cluster_tenant_path) and self.check_no_ap(cluster_tenant_path):
-                self.delete(cluster_tenant_path)
+            if self.check_valid_annotation(cluster_tenant_path):
+                if cfg["unprovision"]["skip_app_profile_check"] or self.check_no_ap(cluster_tenant_path):
+                    self.delete(cluster_tenant_path)
 
         # Finally clean any stray resources in common
         self.clean_tagged_resources(system_id, vrf_tenant)

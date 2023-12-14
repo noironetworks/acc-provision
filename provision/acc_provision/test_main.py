@@ -1762,7 +1762,8 @@ def get_args(**overrides):
         "dpu": None,
         "apic_oobm_ip": None,
         "test_run": True,
-        "compare_kube_yaml_aci_op_cm_in_plain_text": True
+        "compare_kube_yaml_aci_op_cm_in_plain_text": True,
+        "skip_app_profile_check": False
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
