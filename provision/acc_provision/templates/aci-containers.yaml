@@ -1491,6 +1491,10 @@ data:
         {% else %}
         "aci-vrf": {{config.aci_config.vrf.name|json}},
         {% endif %}
+        "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
+        {% if config.kube_config.add_external_contract_to_default_epg %}
+        "add-external-contract-to-default-epg": {{ config.kube_config.add_external_contract_to_default_epg|json }},
+        {% endif %}
         "default-endpoint-group": {
             "policy-space": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.aci_config.capic %}

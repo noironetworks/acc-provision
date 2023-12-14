@@ -102,6 +102,7 @@ kube_config:
   opflex_openssl_compat: true
   enable_opflex_agent_reconnect: true
   opflex_agent_statistics: false
+  add_external_contract_to_default_epg: True
 
 registry:
   image_prefix: noiro

@@ -1249,6 +1249,7 @@ data:
         "lb-type": "None",
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
+        "app-profile": "kubernetes",
         "default-endpoint-group": {
             "policy-space": "kube",
             "name": "kubernetes|kube-default"
