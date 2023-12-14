@@ -101,6 +101,7 @@ kube_config:
   toleration_seconds: 100
   opflex_openssl_compat: true
   enable_opflex_agent_reconnect: true
+  opflex_agent_statistics: false
 
 registry:
   image_prefix: noiro
