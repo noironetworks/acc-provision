@@ -1729,6 +1729,42 @@ def test_flavor_openshift_invalid_systemid():
             assert tmperr.read() == stderr.read()
 
 
+@in_testdir
+def test_apic_oobm_ip():
+    run_provision(
+        "apic_oobm_ip.inp.yaml",
+        None,
+        None,
+        None,
+        "apic_oobm_ip.apic.txt",
+        overrides={"apic_oobm_ip": "10.30.120.101"}
+    )
+
+
+@in_testdir
+def test_invalid_apic_oobm_ip():
+    with tempfile.NamedTemporaryFile("w+") as tmperr:
+        sys.stderr = tmperr
+        try:
+            run_provision(
+                "apic_oobm_ip.inp.yaml",
+                None,
+                None,
+                None,
+                None,
+                overrides={"apic_oobm_ip": "10.30.120.101/24"}
+            )
+        except SystemExit:
+            # expected to exit with errors
+            pass
+        finally:
+            tmperr.flush()
+            sys.stderr = sys.__stderr__
+            tmperr.seek(0)
+        with open("invalid_apic_oobm_ip.stdout.txt", "r") as stderr:
+            assert tmperr.read() == stderr.read()
+
+
 def get_args(**overrides):
     arg = {
         "config": None,
