@@ -2249,6 +2249,7 @@ rules:
   - "aci.fabricattachment"
   resources:
   - nodefabricnetworkattachments
+  - nodefabricnetworkattachments/status
   verbs:
   - "*"
 - apiGroups:
@@ -3689,6 +3690,46 @@ spec:
                       type: array
                     vlans:
                       type: string
+                    epg:
+                      type: object
+                      required:
+                      - bd
+                      properties:
+                        name:
+                          type: string
+                        tenant:
+                          type: string
+                        contracts:
+                          type: object
+                          properties:
+                            consumer:
+                              type: array
+                              items:
+                                type: string
+                            provider:
+                              type: array
+                              items:
+                                type: string
+                        bd:
+                          type: object
+                          required:
+                          - vrf
+                          properties:
+                            name:
+                              type: string
+                            common-tenant:
+                              type: boolean
+                            subnets:
+                              type: array
+                              items:
+                                type: string
+                            vrf:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                common-tenant:
+                                  type: boolean
                   required:
                   - aeps
                   - vlans

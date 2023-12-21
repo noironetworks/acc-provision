@@ -133,6 +133,7 @@ rules:
   - aci.fabricattachment
   resources:
   - nodefabricnetworkattachments
+  - nodefabricnetworkattachments/status
   verbs:
   - '*'
 - apiGroups:
