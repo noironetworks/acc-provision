@@ -4423,11 +4423,11 @@ flavors:
     status: null
     hidden: false
     order: 55
-  RKE-1.5.2:
-    desc: Rancher Kubernetes Engine min version 1.5.2
+  RKE-1.5.3:
+    desc: Rancher Kubernetes Engine min version 1.5.3
     default_version: 6.0
     options:
-      template_generator: generate_rancher_1_5_2_yaml
+      template_generator: generate_rancher_1_5_3_yaml
     config:
       rke_config:
         contracts:
