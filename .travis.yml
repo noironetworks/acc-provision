@@ -14,7 +14,9 @@ jobs:
         - pip install flake8 coverage coveralls boto3
         - python provision/setup.py install
       script:
-        - cd provision; coverage run --source=. -m pytest acc_provision; coveralls
+        - cd provision
+        - coverage run --source=. -m pytest acc_provision
+        - coveralls
     - stage: push-package
       if: tag IS present
       go: 1.20.x
