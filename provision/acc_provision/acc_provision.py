@@ -1622,7 +1622,7 @@ def generate_sample(filep, flavor):
         data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
     elif flavor == "aks":
         data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
-    elif flavor == "calico-3.23.2":
+    elif flavor == "calico-3.26.3":
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
     elif flavor == "openshift-sdn-ovn-baremetal":
         data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')

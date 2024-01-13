@@ -5397,16 +5397,16 @@ flavors:
             
     status: Experimental
     hidden: true
-    order: 70
-  calico-3.23.2:
-    desc: calico-3.23.2
-    default_version: 5.2.3.3
+    order: 68
+  calico-3.26.3:
+    desc: calico-3.26.3
+    default_version: 6.0.3.3
     calico_cni: True
     options:
       template_generator: generate_calico_deployment_files
-    status: Experimental
     hidden: False
-    order: 71
+    status: null
+    order: 69
   openshift-sdn-ovn-baremetal:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.0
@@ -5435,4 +5435,4 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 72
+    order: 70

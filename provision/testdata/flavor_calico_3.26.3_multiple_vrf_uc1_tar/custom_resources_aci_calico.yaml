@@ -86,7 +86,7 @@ spec:
   serviceAccountName: calicoctl
   containers:
   - name: calicoctl
-    image: calico/ctl:v3.23.2
+    image: calico/ctl:v3.26.4
     command:
       - /calicoctl
     args:
@@ -233,8 +233,8 @@ data:
                     "10.30.120.100"
                 ],
                 "vrf": {
-                    "name": "mykube_vrf",
-                    "tenant": "test"
+                    "name": "external_vrf",
+                    "tenant": "common"
                 },
                 "cluster_l3out": {
                     "aep": "kube-cluster",
@@ -253,6 +253,10 @@ data:
                         "secondary_ip": "2.100.101.254/24",
                         "type": "floating",
                         "vlan_id": 13
+                    },
+                    "vrf": {
+                        "name": "calico_vrf",
+                        "tenant": "calico_tenant"
                     }
                 },
                 "l3out": {
@@ -314,6 +318,6 @@ data:
                         }
                     ]
             },
-            "flavor": "calico-3.23.2"
+            "flavor": "calico-3.26.3"
         }
      }
