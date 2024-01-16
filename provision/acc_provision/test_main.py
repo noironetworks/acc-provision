@@ -910,6 +910,30 @@ def test_chained_mode_nad_vlan_map():
 
 
 @in_testdir
+def test_automatic_chaining_insertion_with_local_cert_manager():
+    run_provision(
+        "automatic_chaining_insertion_with_local_cert_manager.inp.yaml",
+        "automatic_chaining_insertion_with_local_cert_manager.kube.yaml",
+        None,
+        None,
+        "automatic_chaining_insertion_with_local_cert_manager.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
+def test_automatic_chaining_insertion_without_local_cert_manager():
+    run_provision(
+        "automatic_chaining_insertion_without_local_cert_manager.inp.yaml",
+        "automatic_chaining_insertion_without_local_cert_manager.kube.yaml",
+        None,
+        None,
+        "automatic_chaining_insertion_without_local_cert_manager.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",

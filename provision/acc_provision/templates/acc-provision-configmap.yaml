@@ -211,6 +211,15 @@ data:
                 {% if config.user_config.chained_cni_config.primary_cni_path %}
                 "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}}
                 {% endif %}
+                {% if config.user_config.chained_cni_config.auto_insertion_for_nad %}
+                "auto_insertion_for_nad": {{config.chained_cni_config.auto_insertion_for_nad|json}},
+                {% endif %}
+                {% if config.user_config.chained_cni_config.local_cert_manager_enabled %}
+                "local_cert_manager_enabled": {{config.chained_cni_config.local_cert_manager_enabled|json}},
+                {% endif %}
+                {% if config.chained_cni_config.require_annotation_for_nad_mutation_webhook %}
+                "require_annotation_for_nad_mutation_webhook": {{config.chained_cni_config.require_annotation_for_nad_mutation_webhook|json}}
+                {% endif %}
             },
             {% endif %}
             {% if config.user_config.net_config %}

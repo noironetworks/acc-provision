@@ -64,4 +64,6 @@ versions:
     opflex_agent_version: 6.0.4.1.81c2369
     opflex_server_version: 6.0.4.1.81c2369
     gbp_version: 6.0.4.1.81c2369
+    aci_containers_webhook_version: 6.0.4.1.81c2369
+    aci_containers_certmanager_version: 6.0.4.1.81c2369
 

@@ -23,6 +23,8 @@ def modify_yaml(opt0, opt1, opt2, opt3, opt4, data):
     data['versions'][float(opt0)]['aci_containers_host_version'] = opt1
     data['versions'][float(opt0)]['aci_containers_operator_version'] = opt1
     data['versions'][float(opt0)]['gbp_version'] = opt4
+    data['versions'][float(opt0)]['aci_containers_webhook_version'] = opt1
+    data['versions'][float(opt0)]['aci_containers_certmanager_version'] = opt1
     return data
 
 
