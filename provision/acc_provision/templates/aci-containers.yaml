@@ -36,7 +36,7 @@ apiVersion: scheduling.k8s.io/v1
 {% set major_version = flavor_version[1].split('.')[0] | int %}
 {% set minor_version = flavor_version[1].split('.')[1] | int %}
 {% if (major_version >= 4 and  minor_version >= 9
-       and flavor_version[2] in ["openstack", "esx", "baremetal"]) %}
+       and flavor_version[2] in ["openstack", "agent-based", "esx", "baremetal"]) %}
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 apiVersion: scheduling.k8s.io/v1beta1
@@ -1565,7 +1565,10 @@ data:
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
-        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and config.agent_based_installer is not defined %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and config.agent_based_installer is defined and not config.agent_based_installer.enable|default(false) %}
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
         {% endif %}
@@ -1624,7 +1627,10 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         {% endif %}
-        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and config.agent_based_installer is not defined %}
+        "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
+        {% endif %}
+        {% if config.aci_config.vmm_domain.nested_inside.duplicate_file_router_default_svc and config.agent_based_installer is defined and not config.agent_based_installer.enable|default(false) %}
         "installer-provisioned-lb-ip": {{config.aci_config.vmm_domain.nested_inside.installer_provisioned_lb_ip|json}},
         {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
@@ -2288,6 +2294,37 @@ subjects:
 - kind: ServiceAccount
   name: aci-containers-host-agent
   namespace: {{ config.kube_config.system_namespace }}
+---
+{% endif %}
+{% if config.kube_config.use_openshift_security_context_constraints_414 %}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: aci-cni-role
+  namespace: aci-containers-system
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aci-cni-rolebinding
+  namespace: aci-containers-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: aci-cni-role
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-host-agent
+  namespace: aci-containers-system
 ---
 {% endif %}
 {% if config.kube_config.use_openshift_security_context_constraints %}

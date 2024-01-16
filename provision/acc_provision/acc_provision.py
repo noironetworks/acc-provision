@@ -1422,7 +1422,7 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
              required)
 
-    if not is_chained_mode(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+    if not is_chained_mode(config) and not is_agent_based_installer(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
         checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
@@ -1447,6 +1447,10 @@ def config_validate(flavor_opts, config):
             err("Invalid configuration for %s: %s" % (k, e))
             ret = False
     return ret
+
+
+def is_agent_based_installer(config):
+    return True if config.get("agent_based_installer") and config["agent_based_installer"]["enable"] else False
 
 
 def chained_config_validate_preexisting(config, prov_apic):
