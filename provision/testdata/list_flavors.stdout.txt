@@ -28,6 +28,7 @@ INFO: openshift-4.9-esx:	Red Hat OpenShift Container Platform 4.9 on ESX
 INFO: openshift-4.8-esx:	Red Hat OpenShift Container Platform 4.8 on ESX
 INFO: openshift-4.7-esx:	Red Hat OpenShift Container Platform 4.7 on ESX
 INFO: openshift-4.6-esx:	Red Hat OpenShift Container Platform 4.6 on ESX
+INFO: kubernetes-1.29:	Kubernetes 1.29
 INFO: kubernetes-1.28:	Kubernetes 1.28
 INFO: kubernetes-1.27:	Kubernetes 1.27
 INFO: kubernetes-1.26:	Kubernetes 1.26
