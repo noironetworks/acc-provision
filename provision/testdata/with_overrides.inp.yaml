@@ -104,6 +104,7 @@ kube_config:
   opflex_agent_statistics: false
   add_external_contract_to_default_epg: True
   apic_connection_retry_limit: 10
+  disable_hpp_rendering: True
 
 registry:
   image_prefix: noiro

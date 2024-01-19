@@ -95,6 +95,7 @@ registry:
   # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
   # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
   # hpp_optimization: True #override if needed, default is False
+  # disable_hpp_rendering: False              # set to true to disable HPP rendering which disables k8s network policies functionality, default is false
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False
   # service_graph_endpoint_add_delay:
         # delay: 30                     #Delay in seconds
