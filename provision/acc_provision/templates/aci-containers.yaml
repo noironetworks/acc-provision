@@ -1468,6 +1468,9 @@ data:
         {% if config.kube_config.node_snat_redirect_exclude %}
         "node-snat-redirect-exclude": {{ config.kube_config.node_snat_redirect_exclude|json|indent(width=8) }},
         {% endif %}
+        {% if config.kube_config.apic_connection_retry_limit %}
+        "apic-connection-retry-limit": {{ config.kube_config.apic_connection_retry_limit|json}},
+        {% endif %}
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
