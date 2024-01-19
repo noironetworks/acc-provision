@@ -1280,6 +1280,9 @@ data:
                 "start": "10.2.56.2"
             }
         ],
+        "pod-subnet": [
+            "10.2.56.1/21"
+        ],
         "pod-subnet-chunk-size": 32,
         "node-service-ip-pool": [
             {

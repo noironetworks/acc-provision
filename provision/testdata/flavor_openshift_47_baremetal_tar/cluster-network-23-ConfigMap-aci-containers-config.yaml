@@ -36,8 +36,9 @@ data:
     ,\n            \"start\": \"10.3.0.2\"\n        }\n    ],\n    \"extern-dynamic\"\
     : [\"10.3.0.1/24\"],\n    \"snat-contract-scope\": \"global\",\n    \"static-service-ip-pool\"\
     : [],\n    \"pod-ip-pool\": [\n        {\n            \"end\": \"10.2.255.254\"\
-    ,\n            \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"pod-subnet-chunk-size\"\
-    : 32,\n    \"node-service-ip-pool\": [\n        {\n            \"end\": \"10.5.0.254\"\
+    ,\n            \"start\": \"10.2.0.2\"\n        }\n    ],\n    \"pod-subnet\"\
+    : [\n        \"10.2.0.1/16\"\n    ],\n    \"pod-subnet-chunk-size\": 32,\n   \
+    \ \"node-service-ip-pool\": [\n        {\n            \"end\": \"10.5.0.254\"\
     ,\n            \"start\": \"10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\"\
     : [\n        \"10.5.0.1/24\"\n    ]\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-4.7-baremetal\",\n    \"app-profile\"\
