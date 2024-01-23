@@ -22,15 +22,14 @@ spec:
           API
         properties:
           apiVersion:
-            description: '''APIVersion defines the versioned schema of this representation
+            description: 'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'''
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: '''Kind is a string value representing the REST resource
-              this object represents. Servers may infer this from the endpoint the
-              client submits requests to. Cannot be updated. In CamelCase. More info:
-              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'''
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -77,15 +76,17 @@ spec:
                     - key
                     - nadVlanMap
                     type: object
+                  mode:
+                    type: string
                   vlanList:
                     type: string
                 type: object
               networkRef:
-                description: '''INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "operator-sdk generate k8s" to regenerate code after
                   modifying this file Add custom validation using kubebuilder tags:
                   https://book.kubebuilder.io/beyond_basics/generating_crd.html NetworkRef
-                  is the ns/net-att-def name, used as part of the epg ns-<NetworkName>'''
+                  is the ns/net-att-def name, used as part of the epg ns-<NetworkName>'
                 properties:
                   name:
                     type: string
@@ -98,7 +99,7 @@ spec:
               nodeName:
                 type: string
               primaryCni:
-                description: 'informational: primaryCNI sriov/macvlan'
+                description: 'informational: primaryCNI sriov/macvlan/ipvlan/bridge'
                 type: string
             required:
             - networkRef
@@ -108,10 +109,10 @@ spec:
               FabricAttachment
             properties:
               state:
-                description: '''INSERT ADDITIONAL STATUS FIELD - define observed state
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "operator-sdk generate k8s" to regenerate
                   code after modifying this file7 Add custom validation using kubebuilder
-                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'''
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
                 type: string
             required:
             - state
