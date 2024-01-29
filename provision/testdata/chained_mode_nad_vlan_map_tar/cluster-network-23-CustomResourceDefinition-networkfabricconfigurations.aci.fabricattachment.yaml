@@ -56,6 +56,46 @@ spec:
                       items:
                         type: string
                       type: array
+                    epg:
+                      properties:
+                        bd:
+                          properties:
+                            common-tenant:
+                              type: boolean
+                            name:
+                              type: string
+                            subnets:
+                              items:
+                                type: string
+                              type: array
+                            vrf:
+                              properties:
+                                common-tenant:
+                                  type: boolean
+                                name:
+                                  type: string
+                              type: object
+                          required:
+                          - vrf
+                          type: object
+                        contracts:
+                          properties:
+                            consumer:
+                              items:
+                                type: string
+                              type: array
+                            provider:
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        name:
+                          type: string
+                        tenant:
+                          type: string
+                      required:
+                      - bd
+                      type: object
                     vlans:
                       type: string
                   required:
