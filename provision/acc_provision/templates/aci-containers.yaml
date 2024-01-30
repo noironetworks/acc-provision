@@ -1447,6 +1447,9 @@ data:
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
         {% endif %}
+        {% if config.kube_config.disable_hpp_rendering %}
+        "disable-hpp-rendering": {{ config.kube_config.disable_hpp_rendering|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
@@ -1652,6 +1655,9 @@ data:
         {% endif %}
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
+        {% endif %}
+        {% if config.kube_config.disable_hpp_rendering %}
+        "disable-hpp-rendering": {{ config.kube_config.disable_hpp_rendering|json }},
         {% endif %}
         "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
         "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
