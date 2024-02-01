@@ -21,7 +21,7 @@ from . import fake_apic
 from ruamel.yaml import YAML
 yml = YAML()
 yml.allow_duplicate_keys = True
-yml.width = 1000
+yml.width = float("inf")
 yml.preserve_quotes = True
 
 debug = False
@@ -2060,17 +2060,18 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
         tar.close()
 
         # 4 Compare generated and expected *-ConfigMap-aci-operator-config.yaml and other files in the tar folder
-        assert prepare_gen_yamls_list == prepare_exp_yamls_list, cleanupFunc()
-
         os.chdir(cwd)
         result = filecmp.dircmp(expected, tmp_dir, ignore=ignore_files_list)
         test_left = len(result.left_only)
         test_right = len(result.right_only)
         test_diff = len(result.diff_files)
-        shutil.rmtree(tmp_dir)
-        assert test_left == 0, cleanupFunc()
-        assert test_right == 0, cleanupFunc()
-        assert test_diff == 0, cleanupFunc()
+        try:
+            assert prepare_gen_yamls_list == prepare_exp_yamls_list, cleanupFunc()
+            assert test_left == 0, cleanupFunc()
+            assert test_right == 0, cleanupFunc()
+            assert test_diff == 0, cleanupFunc()
+        finally:
+            shutil.rmtree(tmp_dir)
 
 
 def return_false():
