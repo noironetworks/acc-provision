@@ -161,6 +161,7 @@ registry:
 
 #drop_log_config:
   # enable: False         # default is True
+  # disable_events: True  # default is False
 
 #multus:
   # disable: False       # default is True

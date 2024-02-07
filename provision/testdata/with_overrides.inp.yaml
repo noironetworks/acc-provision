@@ -119,3 +119,6 @@ logging:
 
 nodepodif_config:
   enable: true
+
+drop_log_config:
+  disable_events: True
