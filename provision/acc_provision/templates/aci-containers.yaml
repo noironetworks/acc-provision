@@ -1602,6 +1602,9 @@ data:
         {% else %}
         "enable-drop-log": false,
         {% endif %}
+        {% if config.drop_log_config.disable_events %}
+        "packet-event-notification-socket": "",
+        {% endif %}
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true,
         {% endif %}
@@ -1694,6 +1697,9 @@ data:
         "enable-drop-log": true,
         {% else %}
         "enable-drop-log": false,
+        {% endif %}
+        {% if config.drop_log_config.disable_events %}
+        "packet-event-notification-socket": "",
         {% endif %}
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true,
