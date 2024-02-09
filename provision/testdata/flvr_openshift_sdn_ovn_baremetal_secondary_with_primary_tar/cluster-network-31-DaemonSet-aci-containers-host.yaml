@@ -40,7 +40,7 @@ spec:
           value: /mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf
         - name: CHAINED_MODE_SECONDARY
           value: 'false'
-        image: noiro/aci-containers-host:6.0.3.3.81c2369
+        image: noiro/aci-containers-host:6.0.3.4.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
