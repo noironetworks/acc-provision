@@ -2457,10 +2457,18 @@ spec:
       {% endif %}
       containers:
       - name: aci-containers-host
+        {% if config.chained_cni_config.enable_ovs_cni_support %}
+        {% if config.registry.use_digest %}
+        image: {{ config.registry.image_prefix }}/aci-containers-host-ovscni@sha256:{{ config.registry.aci_containers_host_ovscni_version }}
+        {% else %}
+        image: {{ config.registry.image_prefix }}/aci-containers-host-ovscni:{{ config.registry.aci_containers_host_ovscni_version }}
+        {% endif %}
+        {% else %}
         {% if config.registry.use_digest %}
         image: {{ config.registry.image_prefix }}/aci-containers-host@sha256:{{ config.registry.aci_containers_host_version }}
         {% else %}
         image: {{ config.registry.image_prefix }}/aci-containers-host:{{ config.registry.aci_containers_host_version }}
+        {% endif %}
         {% endif %}
         imagePullPolicy: {{ config.kube_config.image_pull_policy }}
         {% if config.kube_config.aci_containers_host_memory_limit or config.kube_config.aci_containers_host_memory_request %}
