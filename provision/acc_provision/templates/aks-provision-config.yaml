@@ -44,6 +44,7 @@ net_config:
 #  aci_containers_controller_version: <version>
 #  aci_containers_webhook_version: <version> # Used in case of chained mode
 #  aci_containers_certmanager_version: <version> # Used in case of chained mode
+#  aci_containers_host_ovscni_version: <version> # Used in case of chained mode
 
   # image_pull_secret: secret_name      # (if needed)
 

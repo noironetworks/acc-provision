@@ -934,6 +934,18 @@ def test_automatic_chaining_insertion_without_local_cert_manager():
 
 
 @in_testdir
+def test_chained_mode_ovs_cni_support():
+    run_provision(
+        "chained_mode_ovs_cni_support.inp.yaml",
+        "chained_mode_ovs_cni_support.kube.yaml",
+        "chained_mode_ovs_cni_support_tar",
+        None,
+        "chained_mode_ovs_cni_support.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",

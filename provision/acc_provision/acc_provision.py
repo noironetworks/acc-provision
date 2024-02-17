@@ -56,6 +56,7 @@ VERSION_FIELDS = [
     "openvswitch_version",
     "aci_containers_webhook_version",
     "aci_containers_certmanager_version",
+    "aci_containers_host_ovscni_version",
 ]
 
 
@@ -401,6 +402,7 @@ def config_default():
             "auto_insertion_for_nad": False,
             "local_cert_manager_enabled": False,
             "require_annotation_for_nad_mutation_webhook": False,
+            "enable_ovs_cni_support": False,
         }
     }
     return default_config

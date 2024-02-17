@@ -121,5 +121,6 @@ chained_cni_config:                                                  # Contains 
   # auto_insertion_for_nad: True                                     # default is False
   # local_cert_manager_enabled: True                                 # default is False
   # require_annotation_for_nad_mutation_webhook: True                # default is False
+  # enable_ovs_cni_support: True                                     # default is False
 
 
