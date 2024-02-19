@@ -47,6 +47,7 @@ drop_log_config:
 ```
 
 Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
+
 `acc-provision -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml`
 
 Delete old aci_deployment.yaml and wait till all the pods in the `aci-containers-system` namespace are deleted
@@ -157,6 +158,7 @@ drop_log_config:
 ```
 
 Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
+
 `acc-provision -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml`
 
 Delete old aci_deployment.yaml and wait till all the pods in the `aci-containers-system` namespace are deleted
