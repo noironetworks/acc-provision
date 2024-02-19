@@ -686,6 +686,7 @@ class ApicKubeConfig(object):
                     update(data, self.l3out_contract(l3out_instp))
             update(data, self.kube_user())
             update(data, self.kube_cert())
+            update(data, self.chained_mode_common_ap())
             return data
         elif "calico" not in self.config['flavor']:
             update(data, self.pdom_pool())
@@ -3875,6 +3876,33 @@ class ApicKubeConfig(object):
                     else:
                         prov[idx1] = self.ACI_PREFIX + prov[idx1]
                 config["aci_config"]["items"][idx]["provided"] = prov
+
+    def chained_mode_common_ap(self):
+        ap_name = 'netop-common'
+        path = "/api/mo/uni/tn-common/ap-%s.json" % ap_name
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvAp",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [("name", ap_name), ("dn", "uni/tn-common/ap-%s" % ap_name)]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        return path, data
 
     def chained_mode_kube_tn(self):
         system_id = self.config["aci_config"]["system_id"]
