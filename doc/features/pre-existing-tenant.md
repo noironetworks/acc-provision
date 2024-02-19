@@ -24,7 +24,8 @@ acc-provision support 2 mode of handling tenant:
 
 Depending on the mode the following behaviours are expected when the config is de-provisioned by using the `-d` option -
 
-1. The whole tenant is deleted
+1. The whole tenant is deleted. However there is an inconsistent behaviour where if and only if an Application Profiles is present the whole tenant is not deleted. To address this issue user can pass option `--skip-app-profile-check` during de-provisioning. This option will delete whole tenant even if any Application Profile exists under it.
+
 2. Only the config added by acc-provision is deleted
 
 In case 1 scenario, if the "tenant name" is not specified in the acc provision input file the whole tenant should be deleted as everything is handled by acc-provision.
