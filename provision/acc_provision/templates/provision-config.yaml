@@ -147,7 +147,8 @@ registry:
   # enable_opflex_agent_reconnect: True                 # default is False, set it as True to enable opflex agent reconnect after vm migration
   # opflex_agent_statistics: False                      # default is True, set this to False if statistics load is very high
   # add_external_contract_to_default_epg: True          # override if needed, default is False
-  # apic_connection_retry_limit: 5                     # number of times the controller tries to communicate with APIC before switching to next APIC if unsuccessful, default is 5
+  # apic_connection_retry_limit: 5                      # number of times the controller tries to communicate with APIC before switching to next APIC if unsuccessful, default is 5
+  # taint_not_ready_node: True                          # default is False, set to True if you want to make the node in not ready state unschedulable till the host agent initalization is complete.
 
 #
 # Configuration for ACI CNI Operator

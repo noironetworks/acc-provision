@@ -105,6 +105,7 @@ kube_config:
   add_external_contract_to_default_epg: True
   apic_connection_retry_limit: 10
   disable_hpp_rendering: True
+  taint_not_ready_node: True
 
 registry:
   image_prefix: noiro
