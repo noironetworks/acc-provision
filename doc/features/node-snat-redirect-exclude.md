@@ -13,7 +13,7 @@
 When a SNAT policy is created and if a pod is associated with that SNAT policy, the SNAT redirect policy created in APIC has all the nodes in the cluster​. Suppose a cluster has following nodes:​
 
 ```sh
-noiro@k8s20-ext-rtr:~/akhila/demo$ kubectl get nodes
+$ kubectl get nodes
 NAME                     STATUS   ROLES                     AGE    VERSION
 k8s20-node-1.local.lan   Ready    control-plane,master      158d   v1.27.3
 k8s20-node-2.local.lan   Ready    worker                    158d   v1.27.3
@@ -57,7 +57,7 @@ The nodes which match all the labels in any group will be excluded from the SNAT
 Let’s consider an example with nodes in a cluster having below roles
 
 ```sh
-noiro@k8s20-ext-rtr:~/akhila/demo$ kubectl get nodes
+$ kubectl get nodes
 NAME                     STATUS   ROLES                     AGE    VERSION
 k8s20-node-1.local.lan   Ready    control-plane,master      158d   v1.27.3
 k8s20-node-2.local.lan   Ready    worker                    158d   v1.27.3
@@ -83,7 +83,7 @@ kube_config:
 Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
 
 ```sh
-acc-provision -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml
+$ acc-provision -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml
 ```
 
 Delete old aci_deployment.yaml and wait till all the pods in the `aci-containers-system` namespace are deleted
