@@ -136,9 +136,20 @@ def prepare_nadvlanmap(file_path):
                 "label": network,
                 "vlans": vlan_id.split('.')[0]
             }
-            all_resources[resource_header].append(resource_item)
+            # Check if label is already present then update the vlans
+            item_updated = False
+            for resource_details in all_resources[resource_header]:
+                if resource_details['label'] == network:
+                    modified_vlans = resource_details['vlans'] + ',' + resource_item['vlans']
+                    vlans_list = list(set(modified_vlans.split(',')))
+                    resource_details.update({'vlans': ','.join(vlans_list)})
+                    item_updated = True
+                    break
+            if not item_updated:
+                all_resources[resource_header].append(resource_item)
     except Exception as ex:
-        print("Error while preparing yaml contents from given CSV %s file. Error: %s" % (file_path, ex))
+        print("Error while preparing yaml contents from given CSV %s"
+            " file. Error: %s" % (file_path, ex))
         all_resources = {}
     return all_resources
 
