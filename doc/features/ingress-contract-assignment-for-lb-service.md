@@ -52,7 +52,7 @@ kube_config:
       selector:
         namespace: pktest
       snatIp:
-        - 22.1.153.133
+      - 22.1.153.133
     ```
 
 #### Create Service of type LoadBalancer
@@ -88,7 +88,7 @@ kube_config:
         protocol: TCP
         port: 80
         targetPort: http-web-svc
-     type: LoadBalancer
+      type: LoadBalancer
     ```
 
 2. Create another namespace `pktest` and create Pod(pktest-test) in this namespace
