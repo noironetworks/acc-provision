@@ -1,4 +1,4 @@
-# Pre-existing Tenant Feature
+# Multipod VM Migration
 
 # Table of Contents
 
@@ -13,7 +13,7 @@
 
 ## 1. Overview
 
-This feature is introduced to support VM migrations across aci pods on a multi pod setup. When a node VM is migrated from one ACI pod to another, the IP address on infra VLAN subinterface, the anycast IP addresses used by the opflex agent pod, should be updated with the IP addresses from the destination ACI Pod and communication should be reestablished. This feature enables this and is supported for the nodes with OS Ubuntu and RedHat.
+This feature is introduced to support VM migrations across ACI pods on a multi pod setup. When a node VM is migrated from one ACI pod to another, the IP address on infra VLAN subinterface, the anycast IP addresses used by the opflex agent pod, should be updated with the IP addresses from the destination ACI Pod and communication should be reestablished. This feature enables this and is supported for the nodes with OS Ubuntu and RedHat.
 
 ## 2. Motivation
 
@@ -21,7 +21,7 @@ When VMs are migrated across ACI pods on a multi pod ACI setup, the IP address a
 
 ## 3. Mechanism
 
-If the setup is a multipod aci setup, the following configuration should be set in acc_provision_input yaml file:
+If the setup is a multipod ACI setup, the following configuration should be set in acc_provision_input yaml file:
 
 ```yaml
 kube_config: 
