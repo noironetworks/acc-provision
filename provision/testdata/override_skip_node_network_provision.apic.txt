@@ -71,3 +71,14 @@
         ]
     }
 }
+/api/mo/uni/tn-common/ap-netop-common.json
+{
+    "fvAp": {
+        "attributes": {
+            "name": "netop-common",
+            "dn": "uni/tn-common/ap-netop-common",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": []
+    }
+}

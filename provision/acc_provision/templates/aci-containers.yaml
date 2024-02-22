@@ -3718,8 +3718,6 @@ spec:
                       type: string
                     epg:
                       type: object
-                      required:
-                      - bd
                       properties:
                         name:
                           type: string
@@ -3738,8 +3736,6 @@ spec:
                                 type: string
                         bd:
                           type: object
-                          required:
-                          - vrf
                           properties:
                             name:
                               type: string
@@ -3757,7 +3753,6 @@ spec:
                                 common-tenant:
                                   type: boolean
                   required:
-                  - aeps
                   - vlans
                   type: object
                 type: array

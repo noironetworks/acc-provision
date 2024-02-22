@@ -75,8 +75,6 @@ spec:
                                 name:
                                   type: string
                               type: object
-                          required:
-                          - vrf
                           type: object
                         contracts:
                           properties:
@@ -93,13 +91,10 @@ spec:
                           type: string
                         tenant:
                           type: string
-                      required:
-                      - bd
                       type: object
                     vlans:
                       type: string
                   required:
-                  - aeps
                   - vlans
                   type: object
                 type: array
