@@ -168,8 +168,6 @@ spec:
                   istio_config:
                     type: object
                     properties:
-                      install_istio:
-                        type: boolean
                       install_profile:
                         type: string
                   multus:

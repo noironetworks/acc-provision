@@ -47,8 +47,6 @@ spec:
                     type: object
                   istio_config:
                     properties:
-                      install_istio:
-                        type: boolean
                       install_profile:
                         type: string
                     type: object
