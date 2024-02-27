@@ -1,4 +1,4 @@
-# Use system node critical priority class for ACI pods
+# Exclude cluster nodes from snat redirect
 
 # Table of contents
 * [Overview](#overview)
