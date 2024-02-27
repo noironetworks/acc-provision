@@ -156,10 +156,6 @@ registry:
 # operator_managed_config: 
     #enable_updates: True # Default is False
 
-#istio_config:
-  # install_istio: False         # default is True
-  # install_profile: "default"   # override if needed, default is "demo"
-
 #drop_log_config:
   # enable: False         # default is True
   # disable_events: True  # default is False

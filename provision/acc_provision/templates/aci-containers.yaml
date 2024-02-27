@@ -1289,6 +1289,11 @@ spec:
                   ipProto:
                     type: integer
 ---
+{# Commenting code to disable the install_istio flag as the functionality
+is disabled to remove dependency from istio.io/istio package.
+Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+and aci-containers-operator images for istio.io/istio package
+
 {% if config.istio_config.install_istio %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1336,7 +1341,7 @@ spec:
             type: object
         type: object
 ---
-{% endif %}
+{% endif %} #}
 {% endif %}
 apiVersion: v1
 kind: ConfigMap
@@ -1474,10 +1479,16 @@ data:
         {% if config.kube_config.apic_connection_retry_limit %}
         "apic-connection-retry-limit": {{ config.kube_config.apic_connection_retry_limit|json}},
         {% endif %}
+{#
+        Commenting code to disable the install_istio flag as the functionality
+        is disabled to remove dependency from istio.io/istio package.
+        Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+        and aci-containers-operator images for istio.io/istio package
+
         {% if config.istio_config.install_istio %}
         "install-istio": {{ config.istio_config.install_istio|json }},
         "istio-profile": {{ config.istio_config.install_profile|json }},
-        {% endif %}
+        {% endif %} #}
         {% if not config.aci_config.capic and config.flavor != "k8s-overlay" %}
         "aci-podbd-dn": {{config.aci_config.pod_bd_dn|json}},
         "aci-nodebd-dn": {{config.aci_config.node_bd_dn|json}},
@@ -1904,6 +1915,12 @@ rules:
   - clusterrolebindings
   verbs:
   - '*'
+{#
+Commenting code to disable the install_istio flag as the functionality
+is disabled to remove dependency from istio.io/istio package.
+Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+and aci-containers-operator images for istio.io/istio package
+
 {% if config.istio_config.install_istio %}
 - apiGroups:
   - "install.istio.io"
@@ -1919,7 +1936,7 @@ rules:
   - aciistiooperator
   verbs:
   - '*'
-{% endif %}
+{% endif %} #}
 - apiGroups:
   - "{{ config.kube_config.use_netpol_apigroup }}"
   resources:

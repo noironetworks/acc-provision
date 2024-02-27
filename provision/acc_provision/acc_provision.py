@@ -149,7 +149,7 @@ def prepare_nadvlanmap(file_path):
                 all_resources[resource_header].append(resource_item)
     except Exception as ex:
         print("Error while preparing yaml contents from given CSV %s"
-            " file. Error: %s" % (file_path, ex))
+              " file. Error: %s" % (file_path, ex))
         all_resources = {}
     return all_resources
 
@@ -363,7 +363,11 @@ def config_default():
             "acicni_priority_class_value": 1000000000,
         },
         "istio_config": {
-            "install_istio": False,
+            # Commenting code to disable the install_istio flag as the functionality
+            # is disabled to remove dependency from istio.io/istio package.
+            # Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+            # and aci-containers-operator images for istio.io/istio package
+            # "install_istio": False,
             "install_profile": "demo",
             "istio_ns": "istio-system",
             "istio_operator_ns": "istio-operator"
@@ -920,8 +924,12 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
         adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
 
-    if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
-        adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
+    # Commenting code to disable the install_istio flag as the functionality
+    # is disabled to remove dependency from istio.io/istio package.
+    # Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+    # and aci-containers-operator images for istio.io/istio package
+    # if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
+    #     adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
 
     if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
         adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]

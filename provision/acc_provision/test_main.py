@@ -1222,16 +1222,20 @@ def test_conflicting_infravlan():
         overrides={"infra_vlan": 4093}
     )
 
+# Commenting code to disable the install_istio flag as the functionality
+# is disabled to remove dependency from istio.io/istio package.
+# Vulnerabilties were detected by quay.io security scan of aci-containers-controller
+# and aci-containers-operator images for istio.io/istio package
 
-@in_testdir
-def test_with_no_istio():
-    run_provision(
-        "with_no_install_istio.inp.yaml",
-        "with_no_install_istio.kube.yaml",
-        None,
-        None,
-        "base_case.apic.txt"
-    )
+# @in_testdir
+# def test_with_no_istio():
+#     run_provision(
+#         "with_no_install_istio.inp.yaml",
+#         "with_no_install_istio.kube.yaml",
+#         None,
+#         None,
+#         "base_case.apic.txt"
+#     )
 
 
 @in_testdir
