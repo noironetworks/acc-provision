@@ -1,0 +1,76 @@
+aci_config:
+  system_id: rke2
+  use_legacy_kube_naming_convention: False
+  apic_hosts:
+    - 10.30.120.100
+    - 10.30.120.101
+    - 10.30.120.102
+  apic_login:
+    username: admin
+    password: dummy
+  apic_version: "5.1"
+  aep: rke2-aep
+  vrf:
+    name: rke2
+    tenant: common
+  l3out:
+    name: l3out
+    external_networks:
+    - default
+    - test_ext_net
+  sync_login:
+    certfile: user.crt
+    keyfile: user.key
+  vmm_domain:
+    encap_type: vxlan
+    mcast_range:
+        start: 225.2.1.1
+        end: 225.2.255.255
+  opflex_device_reconnect_wait_timeout: 10
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  pod_subnet: 10.2.0.1/16
+  extern_dynamic: 10.3.0.1/24
+  extern_static: 10.4.0.1/24
+  node_svc_subnet: 10.5.0.1/24
+  pod_subnet_chunk_size: 256
+  kubeapi_vlan: 4001
+  service_vlan: 4003
+  infra_vlan: 4093
+
+logging:
+  controller_log_level: info
+  hostagent_log_level: info
+  opflexagent_log_level: info
+
+rke2_config:
+  logging_namespace: "cattle-logging-system"
+  monitoring_namespace: "cattle-monitoring-system"
+
+registry:
+  use_digest: true
+  aci_containers_controller_version: "a3b8516b1dd3c2d467bc7c432a9f87615f5dbaebde3fcd3f4b390f2fe5bdaacc"
+  aci_containers_host_version: "4d86f55b3a6d4c9ce8fbf1651a441722f37affe9b4cff9a88ad128148fdbcbe7"
+  cnideploy_version: "29338b98f0ac8e75eb2446bfefa3e129519a8462eab2611eeffbd071937c6fad"
+  opflex_agent_version: "dd9b4fbff059b8a67742ac908ff6ae4213e6951330ec2b321e4a7212ac23829b"
+  openvswitch_version: "229b47f73d4b518c21394c2d052081ee77bf15bf7ccb26f20fa817373c15529e"
+  aci_containers_operator_version: "7f05a54c5501a18591edff1ed9b0d846a7a79ba0f49942dd76e1b16c691586d4"
+  acc_provision_operator_version: "98f975bb072c62b35f249eee5d618499b93831c6395c402a10bdd4333154570a"
+
+kube_config:
+  use_system_node_priority_class: true
+  aci_containers_controller_memory_request: "256Mi"
+  aci_containers_controller_memory_limit: "2Gi"
+  aci_containers_host_memory_request: "200Mi"
+  aci_containers_host_memory_limit: "2Gi"
+  mcast_daemon_memory_request: "300Mi"
+  mcast_daemon_memory_limit: "1Gi"
+  opflex_agent_memory_request: "256Mi"
+  opflex_agent_memory_limit: "2Gi"
+  acc_provision_operator_memory_request: "256Mi"
+  acc_provision_operator_memory_limit: "1Gi"
+  aci_containers_operator_memory_request: "256Mi"
+  aci_containers_operator_memory_limit: "3Gi"
+  ovs_memory_request: "256Mi"
+  ovs_memory_limit: "2Gi"
