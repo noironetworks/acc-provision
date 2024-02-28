@@ -19,7 +19,8 @@
     - [Log level](aci-pods-log-level.md)
     - [Memory request and limit](aci-pods-memory-request-limit.md)
     - [Priority Class](aci-pods-priority-class.md)
-    - [Toleration Seconds Configuration](toleration-seconds.md) 
+    - [Toleration Seconds Configuration](toleration-seconds.md)
+    - [Image registry](aci-pods-image-registry.md)
 - APIC
     - [ACI day-zero provision using APIC Out Of Band management IP](apic-oobm-ip.md)
     - [APIC refresh time and refresh ticker](apic-refresh-time-ticker.md)
