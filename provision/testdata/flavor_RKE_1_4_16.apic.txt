@@ -1,0 +1,1370 @@
+/api/mo/uni/infra/vlanns-[rke-pool]-static.json
+{
+    "fvnsVlanInstP": {
+        "attributes": {
+            "name": "rke-pool",
+            "allocMode": "static",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvnsEncapBlk": {
+                    "attributes": {
+                        "allocMode": "static",
+                        "from": "vlan-4001",
+                        "to": "vlan-4001",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "fvnsEncapBlk": {
+                    "attributes": {
+                        "allocMode": "static",
+                        "from": "vlan-4003",
+                        "to": "vlan-4003",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra/maddrns-rke-mpool.json
+{
+    "fvnsMcastAddrInstP": {
+        "attributes": {
+            "name": "rke-mpool",
+            "dn": "uni/infra/maddrns-rke-mpool",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "fvnsMcastAddrBlk": {
+                    "attributes": {
+                        "from": "225.2.1.1",
+                        "to": "225.2.255.255",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/phys-rke-pdom.json
+{
+    "physDomP": {
+        "attributes": {
+            "dn": "uni/phys-rke-pdom",
+            "name": "rke-pdom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[rke-pool]-static",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/vmmp-Kubernetes/dom-rke.json
+{
+    "vmmDomP": {
+        "attributes": {
+            "name": "rke",
+            "mode": "rancher",
+            "enfPref": "sw",
+            "encapMode": "vxlan",
+            "prefEncapMode": "vxlan",
+            "mcastAddr": "225.1.2.3",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "vmmCtrlrP": {
+                    "attributes": {
+                        "name": "rke",
+                        "mode": "rancher",
+                        "scope": "kubernetes",
+                        "hostOrIp": "1.1.1.1",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "vmmRsDomMcastAddrNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/maddrns-rke-mpool",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra.json
+{
+    "infraAttEntityP": {
+        "attributes": {
+            "name": "rke-aep",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/vmmp-Kubernetes/dom-rke",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "infraRsDomP": {
+                    "attributes": {
+                        "tDn": "uni/phys-rke-pdom",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            },
+            {
+                "infraProvAcc": {
+                    "attributes": {
+                        "name": "provacc",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "infraRsFuncToEpg": {
+                                "attributes": {
+                                    "encap": "vlan-4093",
+                                    "mode": "regular",
+                                    "tDn": "uni/tn-infra/ap-access/epg-default",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "dhcpInfraProvP": {
+                                "attributes": {
+                                    "mode": "controller",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "infraGeneric": {
+                    "attributes": {
+                        "name": "default",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "infraRsFuncToEpg": {
+                                "attributes": {
+                                    "tDn": "uni/tn-tenant-1/ap-aci-containers-rke/epg-aci-containers-nodes",
+                                    "encap": "vlan-4001",
+                                    "mode": "regular",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/infra/attentp-rke-aep/rsdomP-[uni/vmmp-Kubernetes/dom-rke].json
+None
+/api/mo/uni/infra/attentp-rke-aep/rsdomP-[uni/phys-rke-pdom].json
+None
+/api/mo/uni/infra/attentp-rke-aep/gen-default/rsfuncToEpg-[uni/tn-tenant-1/ap-aci-containers-rke/epg-aci-containers-nodes].json
+None
+/api/mo/uni/infra.json
+{
+    "infraSetPol": {
+        "attributes": {
+            "opflexpAuthenticateClients": "no",
+            "opflexpUseSsl": "yes",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/node/mo/comp/prov-Kubernetes/ctrlr-[rke]-rke/injcont/info.json
+{
+    "vmmInjectedClusterInfo": {
+        "attributes": {
+            "name": "rke",
+            "accountName": "tenant-1",
+            "type": "RKE",
+            "provider": "Rancher"
+        },
+        "children": [
+            {
+                "vmmInjectedClusterDetails": {
+                    "attributes": {
+                        "accProvisionInput": "aci_config:\n  system_id: rke\n  #use_legacy_kube_naming_convention: False\n  tenant:\n    name: tenant-1\n  apic_hosts:\n  - 10.30.120.100\n  - 10.30.120.101\n  - 10.30.120.102\n  apic_login:\n    username: admin\n    \n  apic_version: \"5.1\"\n  aep: rke-aep\n  vrf:\n    name: rke\n    tenant: common\n  l3out:\n    name: l3out\n    external_networks:\n    - default\n    - test_ext_net\n  sync_login:\n    certfile: user.crt\n    keyfile: user.key\n  vmm_domain:\n    encap_type: vxlan\n    mcast_range:\n        start: 225.2.1.1\n        end: 225.2.255.255\n  apic_refreshticker_adjust: 1\n  apic_subscription_delay: 1\n  opflex_device_delete_timeout: 1\n\nnet_config:\n  node_subnet:\n  - 10.1.0.1/16\n  - 11.1.0.1/16\n  pod_subnet:\n  - 10.2.0.1/16\n  - 12.3.0.1/16\n  extern_dynamic:\n  - 10.3.0.1/24\n  extern_static: 10.4.0.1/24\n  node_svc_subnet: 10.5.0.1/24\n  kubeapi_vlan: 4001\n  service_vlan: 4003\n  infra_vlan: 4093\n  disable_wait_for_network: True\n  duration_wait_for_network: 200\n  interface_mtu_headroom: 51\n\nkube_config:\n  aci_multipod: True\n  aci_multipod_ubuntu: True\n  dhcp_renew_max_retry_count: 12\n  dhcp_delay: 12\n  use_cluster_role: False\n  no_wait_for_service_ep_readiness: True\n  service_graph_endpoint_add_delay:\n    delay: 30 \n    services:\n    - name: \"service-name-1\"\n      namespace: \"service-ns-1\"\n    - name: \"service-name-2\"\n      namespace: \"service-ns-2\"\n      delay: 60\n  add_external_subnets_to_rdconfig: True\n  snat_operator:\n    disable_periodic_snat_global_info_sync: True\n    sleep_time_snat_global_info_sync: 60\n  hpp_optimization: True\n  opflex_agent_opflex_asyncjson_enabled: True\n  opflex_agent_ovs_asyncjson_enabled: True\n  opflex_agent_policy_retry_delay_timer: 90\n  opflex_device_reconnect_wait_timeout: 10\n  use_system_node_priority_class: False\n  aci_containers_controller_memory_limit: \"5Gi\"\n  aci_containers_controller_memory_request: \"256Mi\"\n  aci_containers_host_memory_limit: \"5Gi\"\n  aci_containers_host_memory_request: \"256Mi\"\n  mcast_daemon_memory_limit: \"5Gi\"\n  mcast_daemon_memory_request: \"256Mi\"\n  opflex_agent_memory_limit: \"5Gi\"\n  opflex_agent_memory_request: \"256Mi\"\n  aci_containers_memory_limit: \"2Gi\"\n  aci_containers_memory_request: \"256Mi\"\n  ovs_memory_limit: \"2Gi\"\n  ovs_memory_request: \"256Mi\"\n  opflex_agent_statistics: False\n  add_external_contract_to_default_epg: True\n  enable_opflex_agent_reconnect: True\n  opflex_openssl_compat: True\n  toleration_seconds: 100\n  node_snat_redirect_exclude:\n  - group: router\n    labels:\n    - worker\n    - router\n    - infra\n  - group: infra\n    labels:\n    - infra\n    - router\n  disable_hpp_rendering: True\n  apic_connection_retry_limit: 10\n  taint_not_ready_node: True\n\nregistry:\n  image_prefix: quay.io/noiro\n  use_digest: True\n  aci_containers_controller_version: 375c61f113c207b152f70b4c1abc8390f23dedb73245e3d67b99c6a00dbd6bca\n  aci_containers_host_version: d37de5ac9093dff471c0602a79064a7cbac85f6513785ed86eb037ef8740ceed\n  cnideploy_version: 96f1df66843660905fa2cb07b058d8ecc5cb956c4799d661459cc0bfdfd291d2\n  opflex_agent_version: 6ae620eb8ba66a627a9c96b0e34b5d31b05aa22c9196b1885362c6273b0b76e4\n  openvswitch_version: 71d04aa713ff90ce26382bc234941beff9e51a365b3f85c76666a524b7384766\n\nlogging:\n  controller_log_level: info\n  hostagent_log_level: info\n  opflexagent_log_level: info\n\nsriov_config:\n  enable: True\n\nnodepodif_config:\n  enable: True\n\ndrop_log_config:\n  disable_events: True",
+                        "userKey": "dummy\n",
+                        "userCert": "dummy\n"
+                    }
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common.json
+{
+    "fvTenant": {
+        "attributes": {
+            "name": "common",
+            "dn": "uni/tn-common"
+        },
+        "children": [
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "rke-allow-all-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "allow-all",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "rke-l3out-allow-all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "allow-all-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "rke-allow-all-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/flt-rke-allow-all-filter.json
+None
+/api/mo/uni/tn-common/brc-rke-l3out-allow-all.json
+None
+/api/mo/uni/tn-tenant-1.json
+{
+    "fvTenant": {
+        "attributes": {
+            "name": "tenant-1",
+            "dn": "uni/tn-tenant-1"
+        },
+        "children": [
+            {
+                "fvAp": {
+                    "attributes": {
+                        "name": "aci-containers-rke",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "aci-containers-default",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-Kubernetes/dom-rke",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "aci-containers-rke-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "rke-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "aci-containers-system",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "rke-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-Kubernetes/dom-rke",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "aci-containers-rke-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-prometheus-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "aci-containers-nodes",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "rke-l3out-allow-all",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-Kubernetes/dom-rke",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "aci-containers-rke-node-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "encap": "vlan-4001",
+                                                "tDn": "uni/phys-rke-pdom",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-prometheus-opflex-agent",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "fvAEPg": {
+                                "attributes": {
+                                    "name": "aci-containers-istio",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-istio",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-api",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-icmp",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsProv": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-health-check",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-dns",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsDomAtt": {
+                                            "attributes": {
+                                                "tDn": "uni/vmmp-Kubernetes/dom-rke",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsBd": {
+                                            "attributes": {
+                                                "tnFvBDName": "aci-containers-rke-pod-bd",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "fvRsCons": {
+                                            "attributes": {
+                                                "tnVzBrCPName": "aci-containers-rke-prometheus-monitoring",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "fvBD": {
+                    "attributes": {
+                        "name": "aci-containers-rke-node-bd",
+                        "arpFlood": "yes",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "fvRsCtx": {
+                                "attributes": {
+                                    "tnFvCtxName": "rke",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "10.1.0.1/16",
+                                    "scope": "public",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "11.1.0.1/16",
+                                    "scope": "public",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "fvBD": {
+                    "attributes": {
+                        "name": "aci-containers-rke-pod-bd",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "fvRsCtx": {
+                                "attributes": {
+                                    "tnFvCtxName": "rke",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvRsBDToOut": {
+                                "attributes": {
+                                    "tnL3extOutName": "l3out",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "10.2.0.1/16",
+                                    "scope": "public",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "fvSubnet": {
+                                "attributes": {
+                                    "ip": "12.3.0.1/16",
+                                    "scope": "public",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-icmp-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "icmp",
+                                    "etherT": "ipv4",
+                                    "prot": "icmp",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "icmp6",
+                                    "etherT": "ipv6",
+                                    "prot": "icmpv6",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-health-check-filter-in",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "health-check",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-health-check-filter-out",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "health-check",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "stateful": "no",
+                                    "tcpRules": "est",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-dns-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-udp",
+                                    "etherT": "ip",
+                                    "prot": "udp",
+                                    "dFromPort": "dns",
+                                    "dToPort": "dns",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "dns-tcp",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "dns",
+                                    "dToPort": "dns",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-api-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "aci-containers-api",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "6443",
+                                    "dToPort": "6443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "aci-containers-api2",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "8443",
+                                    "dToPort": "8443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "metrics-kubelet",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10250",
+                                    "dToPort": "10250",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "monitoring-node",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9796",
+                                    "dToPort": "9796",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "monitoring-ingress",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "10254",
+                                    "dToPort": "10254",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "rancher-ui",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "443",
+                                    "dToPort": "443",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-istio-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-9080",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "sFromPort": "9080",
+                                    "sToPort": "9080",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-mixer-9090:91",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9090",
+                                    "dToPort": "9091",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-prometheus-15090",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "sFromPort": "15090",
+                                    "sToPort": "15090",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-pilot-15010:12",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "15010",
+                                    "dToPort": "15012",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        },
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "istio-pilot2-15014",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "15014",
+                                    "dToPort": "15014",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-api",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "aci-containers-api-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-api-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-health-check",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "health-check-subj",
+                                    "revFltPorts": "yes",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzOutTerm": {
+                                            "attributes": {
+                                                "name": "",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            },
+                                            "children": [
+                                                {
+                                                    "vzRsFiltAtt": {
+                                                        "attributes": {
+                                                            "tnVzFilterName": "aci-containers-rke-health-check-filter-out",
+                                                            "annotation": "orchestrator:aci-containers-controller"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "vzInTerm": {
+                                            "attributes": {
+                                                "name": "",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            },
+                                            "children": [
+                                                {
+                                                    "vzRsFiltAtt": {
+                                                        "attributes": {
+                                                            "tnVzFilterName": "aci-containers-rke-health-check-filter-in",
+                                                            "annotation": "orchestrator:aci-containers-controller"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-dns",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "dns-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-dns-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-icmp",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "icmp-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-icmp-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-istio",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "istio-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-istio-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-prometheus-monitoring",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "aci-containers-rke-prometheus-monitoring-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-access-prometheus",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-access-prometheus",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "http",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "8080",
+                                    "dToPort": "8080",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-rke-prometheus-opflex-agent-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "prometheus-opflex-agent",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "9612",
+                                    "dToPort": "9612",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-rke-prometheus-opflex-agent",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "prometheus-opflex-agent-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-rke-prometheus-opflex-agent-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/tn-common/out-l3out/instP-default.json
+{
+    "fvRsProv": {
+        "attributes": {
+            "matchT": "AtleastOne",
+            "tnVzBrCPName": "rke-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-l3out/instP-default/rsprov-rke-l3out-allow-all.json
+None
+/api/mo/uni/tn-common/out-l3out/instP-test_ext_net.json
+{
+    "fvRsProv": {
+        "attributes": {
+            "matchT": "AtleastOne",
+            "tnVzBrCPName": "rke-l3out-allow-all",
+            "annotation": "orchestrator:aci-containers-controller"
+        }
+    }
+}
+/api/mo/uni/tn-common/out-l3out/instP-test_ext_net/rsprov-rke-l3out-allow-all.json
+None
+/api/node/mo/uni/userext/user-rke.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "rke",
+            "accountStatus": "active",
+            "pwd": "NotRandom!",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserDomain": {
+                    "attributes": {
+                        "name": "all",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "aaaUserRole": {
+                                "attributes": {
+                                    "name": "admin",
+                                    "privType": "writePriv",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+/api/node/mo/uni/userext/user-rke.json
+{
+    "aaaUser": {
+        "attributes": {
+            "name": "rke",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "aaaUserCert": {
+                    "attributes": {
+                        "name": "rke.crt",
+                        "data": "dummy\n",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
+                }
+            }
+        ]
+    }
+}
