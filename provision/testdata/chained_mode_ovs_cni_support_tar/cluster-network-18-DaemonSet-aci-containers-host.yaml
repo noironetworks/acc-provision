@@ -38,7 +38,7 @@ spec:
           value: 'true'
         - name: PRIMARY_CNI_PATH
           value: /mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf
-        image: noiro/aci-containers-host-ovscni:6.0.4.1.81c2369
+        image: noiro/aci-containers-host-ovscni:6.0.4.2.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
