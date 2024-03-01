@@ -137,6 +137,7 @@ spec:
         volumeMounts:
         - mountPath: /mnt/cni-bin
           name: cni-bin
+      priorityClassName: system-cluster-critical
       restartPolicy: Always
       serviceAccountName: aci-containers-host-agent
       tolerations:

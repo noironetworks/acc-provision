@@ -63,6 +63,7 @@ spec:
       hostIPC: true
       hostNetwork: true
       hostPID: true
+      priorityClassName: system-cluster-critical
       restartPolicy: Always
       serviceAccountName: aci-containers-host-agent
       tolerations:
