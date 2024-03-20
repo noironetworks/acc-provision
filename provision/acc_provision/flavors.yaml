@@ -6184,3 +6184,16 @@ flavors:
     status: null
     hidden: false
     order: 81
+  k8s-aci-cilium:
+    desc: Chained CNI for Kubernertes 1.29
+    default_version: 6.0
+    config:
+      kube_config:
+        allow_kube_api_default_epg: True
+        use_host_netns_volume: True
+      multus:
+        disable: False
+    hidden: False
+    status: Experimental
+    order: 82
+

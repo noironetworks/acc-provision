@@ -1782,6 +1782,7 @@ def generate_operator_tar(tar_path, cont_docs, config):
     def gen_file_list(docs, counter, filenames):
         for doc in docs:
             filename = "cluster-network-" + str(counter).zfill(2) + "-" + doc['kind'] + "-" + doc['metadata']['name'] + ".yaml"
+
             filenames.append(os.path.basename(filename))
             with open(filename, 'w') as outfile:
                 yaml.safe_dump(doc, outfile, default_flow_style=False, encoding="utf-8")
@@ -2273,7 +2274,14 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
             acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
-            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+
+            if config["flavor"] != "k8s-aci-cilium":
+                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            else:
+                cilium_template = get_jinja_template('cilium.yaml')
+                cilium_temp = ''.join(cilium_template.stream(config=config))
+                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [
+                    acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template] + [cilium_temp]
 
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:
