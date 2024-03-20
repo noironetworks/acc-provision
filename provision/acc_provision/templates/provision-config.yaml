@@ -176,6 +176,9 @@ registry:
     # ovsdb_socket_port: "" # default is "6640"
     # masterNodeIp: ""
 
+#cilium_chaining:
+  # enable: True     # default is False
+
 #nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
 
