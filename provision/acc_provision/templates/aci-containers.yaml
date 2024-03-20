@@ -2546,6 +2546,10 @@ spec:
         - name: MULTUS
           value: 'True'
         {% endif %}
+        {% if config.flavor == "k8s-aci-cilium" %}
+        - name: GENERIC_VETH_MODE
+          value: 'True'
+        {% endif %}
         {% if config.net_config.disable_wait_for_network %}
         - name: DISABLE_WAIT_FOR_NETWORK
           value: 'True'
@@ -4159,3 +4163,4 @@ spec:
 {% endif %}
 {% endif %}
 {% endif %}
+

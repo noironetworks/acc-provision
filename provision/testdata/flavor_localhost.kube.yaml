@@ -2148,3 +2148,4 @@ spec:
     defaultRequest:
       memory: 128Mi
     type: Container
+
