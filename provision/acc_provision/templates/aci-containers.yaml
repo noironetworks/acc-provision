@@ -2989,6 +2989,19 @@ spec:
       {% endif %}
       tolerations:
       - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        {% if config.kube_config.toleration_seconds %}
+        tolerationSeconds: {{ config.kube_config.toleration_seconds }}
+        {% else %}
+        {% if config.flavor.startswith("RKE") %}
+        tolerationSeconds: 600
+        {% else %}
+        tolerationSeconds: 60
+        {% endif %}
+        {% endif %}
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
         operator: Exists
         {% if config.kube_config.toleration_seconds %}
         tolerationSeconds: {{ config.kube_config.toleration_seconds }}
@@ -3005,10 +3018,24 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
         operator: Exists
-      {% if config.flavor.startswith("RKE2") %}
+      {% if config.flavor.startswith("RKE") %}
       - effect: NoSchedule
+        {% if config.flavor.startswith("RKE-1") %}
+        key: node-role.kubernetes.io/controlplane
+        value: "true"
+        operator: Equal
+        {% else %}
         key: node-role.kubernetes.io/control-plane
         operator: Exists
+        {% endif %}
+      - effect: NoExecute
+        key: node-role.kubernetes.io/etcd
+        {% if config.flavor.startswith("RKE-1") %}
+        value: "true"
+        operator: Equal
+        {% else %}
+        operator: Exists
+        {% endif %}
       {% endif %}
       {% if config.kube_config.use_system_node_priority_class %}
       priorityClassName: system-node-critical
