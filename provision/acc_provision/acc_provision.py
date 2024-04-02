@@ -2777,7 +2777,8 @@ def provision(args, apic_file, no_random):
         config['aci_config']['apic_oobm_ip'] = args.apic_oobm_ip
 
     if upgrade_cluster:
-        output_tar = "/dev/null"
+        if args.output_tar == "-":
+            output_tar = "/dev/null"
         config["provision"]["upgrade_cluster"] = True
 
     # infra_vlan is not part of command line input, but we do
