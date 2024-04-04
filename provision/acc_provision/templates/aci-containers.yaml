@@ -3763,6 +3763,11 @@ spec:
                     epg:
                       type: object
                       properties:
+                        applicationProfile:
+                          type: string
+                        lldpDiscovery:
+                          default: true
+                          type: boolean
                         name:
                           type: string
                         tenant:
