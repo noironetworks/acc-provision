@@ -3766,7 +3766,6 @@ spec:
                         applicationProfile:
                           type: string
                         lldpDiscovery:
-                          default: true
                           type: boolean
                         name:
                           type: string

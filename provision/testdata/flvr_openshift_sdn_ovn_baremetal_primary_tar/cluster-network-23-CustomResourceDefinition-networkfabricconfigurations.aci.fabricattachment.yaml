@@ -90,7 +90,6 @@ spec:
                               type: array
                           type: object
                         lldpDiscovery:
-                          default: true
                           type: boolean
                         name:
                           type: string
