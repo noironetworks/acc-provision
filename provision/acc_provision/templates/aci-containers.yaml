@@ -1208,6 +1208,170 @@ spec:
         type: object
 ---
 {% endif %} #}
+{% if config.kube_config.enable_hpp_direct %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hostprotpols.aci.hpp
+spec:
+  group: aci.hpp
+  names:
+    kind: HostprotPol
+    listKind: HostprotPolList
+    plural: hostprotpols
+    singular: hostprotpol
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this
+              representation of an object.Servers should convert recognized
+              schemas to the latest internal value, and may reject
+              unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource
+              this object represents. Servers may infer this from the endpoint
+              the client submits requests to. Cannot be updated. In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              networkPolicies:
+                type: array
+                items:
+                  type: string
+              hostprotSubj:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    hostprotRule:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          protocol:
+                            type: string
+                            description: Protocol
+                          rsRemoteIpContainer:
+                            type: array
+                            items:
+                              type: string
+                          toPort:
+                            type: string
+                            description: ToPort
+                          connTrack:
+                            type: string
+                            description: ConnTrack
+                          direction:
+                            type: string
+                            description: Direction
+                          ethertype:
+                            type: string
+                            description: Ethertype
+                          fromPort:
+                            type: string
+                            description: FromPort
+                          hostprotServiceRemoteIps:
+                            type: array
+                            items:
+                              type: string
+                          hostprotFilterContainer:
+                            type: object
+                            properties:
+                              hostprotFilter:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      type: array
+                                      items:
+                                        type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hostprotremoteipcontainers.aci.hpp
+spec:
+  group: aci.hpp
+  names:
+    kind: HostprotRemoteIpContainer
+    listKind: HostprotRemoteIpContainerList
+    plural: hostprotremoteipcontainers
+    singular: hostprotremoteipcontainer
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              hostprotRemoteIp:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addr:
+                      type: string
+                    hppEpLabel:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+---
+{% endif %}
 {% endif %}
 {% if config.sriov_config.enable or config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 apiVersion: apiextensions.k8s.io/v1
@@ -2374,6 +2538,9 @@ data:
         {% if config.kube_config.disable_hpp_rendering %}
         "disable-hpp-rendering": {{ config.kube_config.disable_hpp_rendering|json }},
         {% endif %}
+        {% if config.kube_config.enable_hpp_direct %}
+        "enable-hpp-direct": {{ config.kube_config.enable_hpp_direct|json }},
+        {% endif %}
         {% if config.kube_config.no_wait_for_service_ep_readiness %}
         "no-wait-for-service-ep-readiness": {{ config.kube_config.no_wait_for_service_ep_readiness|json }},
         {% endif %}
@@ -2587,6 +2754,9 @@ data:
         {% if config.kube_config.disable_hpp_rendering %}
         "disable-hpp-rendering": {{ config.kube_config.disable_hpp_rendering|json }},
         {% endif %}
+        {% if config.kube_config.enable_hpp_direct %}
+        "enable-hpp-direct": {{ config.kube_config.enable_hpp_direct|json }},
+        {% endif %}
         "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
         "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
         "encap-type": {{ config.node_config.encap_type|json }},
@@ -2661,6 +2831,9 @@ data:
                     "switch-sync-dynamic": {{ config.kube_config.opflex_switch_sync_dynamic|json }}
             },
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
+          {% if config.kube_config.enable_hpp_direct %}
+            ,"enable-local-netpol": {{ config.kube_config.enable_hpp_direct|json }}
+          {% endif %}
           {% if not config.aci_config.client_ssl %}
             ,"ssl": { "mode": "disabled" }
           {% endif %}
@@ -2996,6 +3169,20 @@ and aci-containers-operator images for istio.io/istio package
   - update
   - patch
 {% endif %}
+{% if config.kube_config.enable_hpp_direct %}
+- apiGroups:
+  - "aci.hpp"
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -3176,6 +3363,17 @@ rules:
   - get
   - list
   - watch
+{% endif %}
+{% if config.kube_config.enable_hpp_direct %}
+- apiGroups:
+  - "aci.hpp"
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
 {% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
