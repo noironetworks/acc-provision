@@ -4,6 +4,8 @@ usage: acc_provision.py [-h] [-v] [--release] [--debug] [--sample] [-c file]
                         [-t token] [--upgrade]
                         [--disable-multus disable_multus] [-s file]
                         [--apic-oobm-ip ip] [--skip-app-profile-check]
+                        [--create-service-graph-instances]
+                        [--delete-service-graph-instances] [-j file]
 
 Provision an ACI/Kubernetes installation
 
@@ -39,3 +41,8 @@ optional arguments:
   --apic-oobm-ip ip     APIC out of band management IP for day0 configuration
   --skip-app-profile-check
                         skip app profiles presence check while tenant deletion
+  --create-service-graph-instances
+                        Create service graph instances
+  --delete-service-graph-instances
+                        Delete service graph instances
+  -j, --dumpjson file   output file for your apic config

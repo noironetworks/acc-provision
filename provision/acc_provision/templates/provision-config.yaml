@@ -41,7 +41,12 @@ aci_config:
   #custom_epgs:                 # List of additional endpoint-group names
   #  - custom_group1            # to configure for use with annotations
   #  - custom_group2
-
+  
+  # service_graph_config:
+  #   lb_iface_paths:                                  # List of interfaces to be used for service graph, default is None
+  #     - "topology/pod-1/protpaths-101-102/pathep-[bosch_sq_repro_dummy_vpc_1]"
+  #     - "topology/pod-2/protpaths-101-102/pathep-[bosch_sq_repro_dummy_vpc_1]"
+  #   service_graph_count: 2                            # Number of service graph instances to be created, default is 1
 
 #
 # Networks used by ACI containers
