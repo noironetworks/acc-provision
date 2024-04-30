@@ -409,7 +409,7 @@ registry:
             name: myvmware
         ```
 
-    Refer section [ACC provision features and configuration options](#acc-provision-features-and-configuration-options) to check more available options
+    Refer section [Feature and Configuration Details](#feature-and-configuration-details) to check more available options
 
 ## Preparing the Kubernetes Nodes
 After you provision Cisco Application Centric Infrastructure (ACI), you prepare networking for the Kubernetes nodes.
