@@ -1343,6 +1343,432 @@ spec:
 ---
 {% endif %} #}
 {% endif %}
+{% if config.sriov_config.enable or config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: network-attachment-definitions.k8s.cni.cncf.io
+spec:
+  group: k8s.cni.cncf.io
+  scope: Namespaced
+  names:
+    plural: network-attachment-definitions
+    singular: network-attachment-definition
+    kind: NetworkAttachmentDefinition
+    shortNames:
+    - net-attach-def
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: >-
+          'NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
+          Working Group to express the intent for attaching pods to one or more logical or physical
+          networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec'
+        type: object
+        properties:
+          apiVersion:
+            description: >-
+              'APIVersion defines the versioned schema of this represen
+              tation of an object. Servers should convert recognized schemas to the
+              latest internal value, and may reject unrecognized values. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: >-
+              'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: 'NetworkAttachmentDefinition spec defines the desired state of a network attachment'
+            type: object
+            properties:
+              config:
+                description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
+                type: string
+---
+{% endif %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: nodefabricnetworkattachments.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NodeFabricNetworkAttachment
+    listKind: NodeFabricNetworkAttachmentList
+    plural: nodefabricnetworkattachments
+    shortNames:
+    - nfna
+    singular: nodefabricnetworkattachment
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NodeFabricAttachment is the Schema for the FabricAttachments
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NodeFabricAttachmentSpec defines the desired state of network
+              attachment to the fabric
+            properties:
+              aciTopology:
+                additionalProperties:
+                  properties:
+                    fabricLink:
+                      items:
+                        type: string
+                      type: array
+                    pods:
+                      items:
+                        properties:
+                          localIface:
+                            type: string
+                          podRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            required:
+                            - name
+                            - namespace
+                            type: object
+                        type: object
+                      type: array
+                  type: object
+                description: Map of iface to fabricLink
+                type: object
+              encapVlan:
+                properties:
+                  encapRef:
+                    properties:
+                      key:
+                        type: string
+                      nadVlanMap:
+                        type: string
+                    required:
+                    - key
+                    - nadVlanMap
+                    type: object
+                  mode:
+                    type: string
+                  vlanList:
+                    type: string
+                type: object
+              networkRef:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "operator-sdk generate k8s" to regenerate code after
+                  modifying this file Add custom validation using kubebuilder tags:
+                  https://book.kubebuilder.io/beyond_basics/generating_crd.html NetworkRef
+                  is the ns/net-att-def name, used as part of the epg ns-<NetworkName>'
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              nodeName:
+                type: string
+              primaryCni:
+                description: 'informational: primaryCNI sriov/macvlan/ipvlan/bridge'
+                type: string
+            required:
+            - networkRef
+            type: object
+          status:
+            description: NodeFabricAttachmentStatus defines the observed state of
+              FabricAttachment
+            properties:
+              state:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                  code after modifying this file7 Add custom validation using kubebuilder
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
+                type: string
+            required:
+            - state
+            type: object
+        type: object
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: nadvlanmaps.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NadVlanMap
+    listKind: NadVlanMapList
+    plural: nadvlanmaps
+    singular: nadvlanmap
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NadVlanMap is the Schema for FabricAttachments NAD name to vlan mapping API
+        properties:
+          apiVersion:
+            description: >-
+              'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: >-
+              'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              nadVlanMapping:
+                additionalProperties:
+                  items:
+                    properties:
+                      label:
+                        type: string
+                      vlans:
+                        type: string
+                    required:
+                    - vlans
+                    type: object
+                  type: array
+                description: NAD namespace/name to vlan list mapping
+                type: object
+            required:
+            - nadVlanMapping
+            type: object
+          status:
+            properties:
+              status:
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'nad-vlan-map'"
+          message: "Only one instance with name nad-vlan-map allowed"
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: networkfabricconfigurations.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NetworkFabricConfiguration
+    listKind: NetworkFabricConfigurationList
+    plural: networkfabricconfigurations
+    singular: networkfabricconfiguration
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NetworkFabricConfiguration allows additional configuration on
+          NAD based and regular vlans created by aci controller
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              nadVlanRefs:
+                description: Refer to a NADVlanLabel defined in NadVlanMap CR
+                items:
+                  properties:
+                    aeps:
+                      items:
+                        type: string
+                      type: array
+                    nadVlanLabel:
+                      type: string
+                  required:
+                  - aeps
+                  - nadVlanLabel
+                  type: object
+                type: array
+              vlans:
+                description: Refer to vlan/s directly
+                items:
+                  properties:
+                    aeps:
+                      items:
+                        type: string
+                      type: array
+                    vlans:
+                      type: string
+                    epg:
+                      type: object
+                      properties:
+                        applicationProfile:
+                          type: string
+                        lldpDiscovery:
+                          type: boolean
+                        name:
+                          type: string
+                        tenant:
+                          type: string
+                        contracts:
+                          type: object
+                          properties:
+                            consumer:
+                              type: array
+                              items:
+                                type: string
+                            provider:
+                              type: array
+                              items:
+                                type: string
+                        bd:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            common-tenant:
+                              type: boolean
+                            subnets:
+                              type: array
+                              items:
+                                type: string
+                            vrf:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                common-tenant:
+                                  type: boolean
+                  required:
+                  - vlans
+                  type: object
+                type: array
+            type: object
+          status:
+            description: NetworkFabricConfigurationStatus defines the observed state
+              of NetworkFabricConfiguration
+            properties:
+              state:
+                type: string
+            type: object
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'networkfabricconfiguration'"
+          message: "Only one instance with name networkfabricconfiguration allowed"
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: fabricvlanpools.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: FabricVlanPool
+    listKind: FabricVlanPoolList
+    plural: fabricvlanpools
+    singular: fabricvlanpool
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: FabricVlanPool is the Schema for the fabricattachments vlanpool API
+        properties:
+          apiVersion:
+            description: >-
+              'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: >-
+              'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FabricVlanPoolSpec defines the list of vlans in the fabric vlan pool
+            properties:
+              vlans:
+                items:
+                  type: string
+                type: array
+            type: object
+          status:
+            description: FabricVlanPoolStatus defines the observed state of FabricVlanPool
+            properties:
+              error:
+                type: string
+              state:
+                description: >-
+                  'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                  code after modifying this file7 Add custom validation using kubebuilder
+                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+{% endif %}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -2408,6 +2834,28 @@ volumes:
 priority: 100
 ---
 {% endif %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+{% if config.chained_cni_config.vlans_file %}
+apiVersion: aci.fabricattachment/v1
+kind: NadVlanMap
+metadata:
+  name: nad-vlan-map
+  namespace: aci-containers-system
+spec:
+  nadVlanMapping:
+    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
+---
+{% endif %}
+apiVersion: aci.fabricattachment/v1
+kind: FabricVlanPool
+metadata:
+  name: default
+  namespace: aci-containers-system
+spec:
+  vlans:
+  {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
+---
+{% endif %}
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
 metadata:
@@ -3423,54 +3871,6 @@ data:
                  }
         ]
     }
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: network-attachment-definitions.k8s.cni.cncf.io
-spec:
-  group: k8s.cni.cncf.io
-  scope: Namespaced
-  names:
-    plural: network-attachment-definitions
-    singular: network-attachment-definition
-    kind: NetworkAttachmentDefinition
-    shortNames:
-    - net-attach-def
-  versions:
-  - name: v1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        description: >-
-          'NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
-          Working Group to express the intent for attaching pods to one or more logical or physical
-          networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec'
-        type: object
-        properties:
-          apiVersion:
-            description: >-
-              'APIVersion defines the versioned schema of this represen
-              tation of an object. Servers should convert recognized schemas to the
-              latest internal value, and may reject unrecognized values. More info:
-              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: >-
-              'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: 'NetworkAttachmentDefinition spec defines the desired state of a network attachment'
-            type: object
-            properties:
-              config:
-                description: 'NetworkAttachmentDefinition config is a JSON-formatted CNI configuration'
-                type: string
 {% endif %}
 {% if config.dpu_config.enable == True %}
 ---
@@ -3507,400 +3907,6 @@ spec:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
 {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
-  name: nodefabricnetworkattachments.aci.fabricattachment
-spec:
-  group: aci.fabricattachment
-  names:
-    kind: NodeFabricNetworkAttachment
-    listKind: NodeFabricNetworkAttachmentList
-    plural: nodefabricnetworkattachments
-    shortNames:
-    - nfna
-    singular: nodefabricnetworkattachment
-  scope: Namespaced
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: NodeFabricAttachment is the Schema for the FabricAttachments
-          API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: NodeFabricAttachmentSpec defines the desired state of network
-              attachment to the fabric
-            properties:
-              aciTopology:
-                additionalProperties:
-                  properties:
-                    fabricLink:
-                      items:
-                        type: string
-                      type: array
-                    pods:
-                      items:
-                        properties:
-                          localIface:
-                            type: string
-                          podRef:
-                            properties:
-                              name:
-                                type: string
-                              namespace:
-                                type: string
-                            required:
-                            - name
-                            - namespace
-                            type: object
-                        type: object
-                      type: array
-                  type: object
-                description: Map of iface to fabricLink
-                type: object
-              encapVlan:
-                properties:
-                  encapRef:
-                    properties:
-                      key:
-                        type: string
-                      nadVlanMap:
-                        type: string
-                    required:
-                    - key
-                    - nadVlanMap
-                    type: object
-                  mode:
-                    type: string
-                  vlanList:
-                    type: string
-                type: object
-              networkRef:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "operator-sdk generate k8s" to regenerate code after
-                  modifying this file Add custom validation using kubebuilder tags:
-                  https://book.kubebuilder.io/beyond_basics/generating_crd.html NetworkRef
-                  is the ns/net-att-def name, used as part of the epg ns-<NetworkName>'
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              nodeName:
-                type: string
-              primaryCni:
-                description: 'informational: primaryCNI sriov/macvlan/ipvlan/bridge'
-                type: string
-            required:
-            - networkRef
-            type: object
-          status:
-            description: NodeFabricAttachmentStatus defines the observed state of
-              FabricAttachment
-            properties:
-              state:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
-                  code after modifying this file7 Add custom validation using kubebuilder
-                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
-                type: string
-            required:
-            - state
-            type: object
-        type: object
-    served: true
-    storage: true
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
-  name: nadvlanmaps.aci.fabricattachment
-spec:
-  group: aci.fabricattachment
-  names:
-    kind: NadVlanMap
-    listKind: NadVlanMapList
-    plural: nadvlanmaps
-    singular: nadvlanmap
-  scope: Cluster
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: NadVlanMap is the Schema for FabricAttachments NAD name to vlan mapping API
-        properties:
-          apiVersion:
-            description: >-
-              'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: >-
-              'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            properties:
-              nadVlanMapping:
-                additionalProperties:
-                  items:
-                    properties:
-                      label:
-                        type: string
-                      vlans:
-                        type: string
-                    required:
-                    - vlans
-                    type: object
-                  type: array
-                description: NAD namespace/name to vlan list mapping
-                type: object
-            required:
-            - nadVlanMapping
-            type: object
-          status:
-            properties:
-              status:
-                type: string
-            type: object
-        required:
-        - spec
-        type: object
-        x-kubernetes-validations:
-        - rule: "self.metadata.name == 'nad-vlan-map'"
-          message: "Only one instance with name nad-vlan-map allowed"
-    served: true
-    storage: true
-    subresources:
-      status: {}
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
-  name: networkfabricconfigurations.aci.fabricattachment
-spec:
-  group: aci.fabricattachment
-  names:
-    kind: NetworkFabricConfiguration
-    listKind: NetworkFabricConfigurationList
-    plural: networkfabricconfigurations
-    singular: networkfabricconfiguration
-  scope: Cluster
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: NetworkFabricConfiguration allows additional configuration on
-          NAD based and regular vlans created by aci controller
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            properties:
-              nadVlanRefs:
-                description: Refer to a NADVlanLabel defined in NadVlanMap CR
-                items:
-                  properties:
-                    aeps:
-                      items:
-                        type: string
-                      type: array
-                    nadVlanLabel:
-                      type: string
-                  required:
-                  - aeps
-                  - nadVlanLabel
-                  type: object
-                type: array
-              vlans:
-                description: Refer to vlan/s directly
-                items:
-                  properties:
-                    aeps:
-                      items:
-                        type: string
-                      type: array
-                    vlans:
-                      type: string
-                    epg:
-                      type: object
-                      properties:
-                        applicationProfile:
-                          type: string
-                        lldpDiscovery:
-                          type: boolean
-                        name:
-                          type: string
-                        tenant:
-                          type: string
-                        contracts:
-                          type: object
-                          properties:
-                            consumer:
-                              type: array
-                              items:
-                                type: string
-                            provider:
-                              type: array
-                              items:
-                                type: string
-                        bd:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            common-tenant:
-                              type: boolean
-                            subnets:
-                              type: array
-                              items:
-                                type: string
-                            vrf:
-                              type: object
-                              properties:
-                                name:
-                                  type: string
-                                common-tenant:
-                                  type: boolean
-                  required:
-                  - vlans
-                  type: object
-                type: array
-            type: object
-          status:
-            description: NetworkFabricConfigurationStatus defines the observed state
-              of NetworkFabricConfiguration
-            properties:
-              state:
-                type: string
-            type: object
-        type: object
-        x-kubernetes-validations:
-        - rule: "self.metadata.name == 'networkfabricconfiguration'"
-          message: "Only one instance with name networkfabricconfiguration allowed"
-    served: true
-    storage: true
-    subresources:
-      status: {}
-{% if config.chained_cni_config.vlans_file %}
----
-apiVersion: aci.fabricattachment/v1
-kind: NadVlanMap
-metadata:
-  name: nad-vlan-map
-  namespace: aci-containers-system
-spec:
-  nadVlanMapping:
-    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
-{% endif %}
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
-  name: fabricvlanpools.aci.fabricattachment
-spec:
-  group: aci.fabricattachment
-  names:
-    kind: FabricVlanPool
-    listKind: FabricVlanPoolList
-    plural: fabricvlanpools
-    singular: fabricvlanpool
-  scope: Namespaced
-  versions:
-  - name: v1
-    schema:
-      openAPIV3Schema:
-        description: FabricVlanPool is the Schema for the fabricattachments vlanpool API
-        properties:
-          apiVersion:
-            description: >-
-              'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: >-
-              'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: FabricVlanPoolSpec defines the list of vlans in the fabric vlan pool
-            properties:
-              vlans:
-                items:
-                  type: string
-                type: array
-            type: object
-          status:
-            description: FabricVlanPoolStatus defines the observed state of FabricVlanPool
-            properties:
-              error:
-                type: string
-              state:
-                description: >-
-                  'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "operator-sdk generate k8s" to regenerate
-                  code after modifying this file7 Add custom validation using kubebuilder
-                  tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
-                type: string
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
----
-apiVersion: aci.fabricattachment/v1
-kind: FabricVlanPool
-metadata:
-  name: default
-  namespace: aci-containers-system
-spec:
-  vlans:
-  {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
 {% if config.chained_cni_config.auto_insertion_for_nad %}
 ---
 apiVersion: v1
