@@ -1049,6 +1049,7 @@ This section explains features / configuration options available in acc provisio
     - [Openssl compatibility](opflex-agent-openssl-compatibility.md)
     - [Policy retry delay timer](opflex-agent-policy-retry-delay-timer.md)
     - [Enable opflex agent reconnect after vm migration is complete](enable-opflex-agent-reconnect.md)
+    - [OpFlex support for ERSPAN with OVS](opflex-agent-erspan.md)
 - ACI Pod
     - [Log level](aci-pods-log-level.md)
     - [Memory request and limit](aci-pods-memory-request-limit.md)
