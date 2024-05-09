@@ -2,7 +2,7 @@
    :alt: Build Status
    :target: https://travis-ci.com/noironetworks/acc-provision
 .. image:: https://coveralls.io/repos/github/noironetworks/acc-provision/badge.svg?branch=master
-   :alt Coverage Status
+   :alt: Coverage Status
    :target: https://coveralls.io/github/noironetworks/acc-provision?branch=master
 
 acc-provision

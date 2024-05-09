@@ -11,7 +11,7 @@ jobs:
     - stage: run-unit-tests
       if: tag IS NOT present
       install:
-        - pip install flake8 coverage coveralls boto3
+        - pip install flake8 coverage coveralls
         - python provision/setup.py install
       script:
         - cd provision
@@ -34,7 +34,6 @@ jobs:
         - pip install jq pyyaml pytz || travis_terminate 1
         - /tmp/cicd/travis/show-image-tags.sh || travis_terminate 1
         - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
-        - pip install boto3 || travis_terminate 1
         - python provision/setup.py install || travis_terminate 1
         - /tmp/cicd/travis/clone-aci-containers-repo.sh || travis_terminate 1
         - pushd /tmp/noironetworks/aci-containers
