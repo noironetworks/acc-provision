@@ -129,6 +129,16 @@ registry:
   # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
   # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
+  # opflex_startup_enabled: True                # To allow the opflex agent to start with policy state that was persisted prior to the 
+  #                                             # agent restart. Default value is False
+  # opflex_startup_policy_duration: 80          # How long to use the policy file  during startup after agent connects to the leaf
+  #                                             # default value is 60
+  # opflex_startup_resolve_aft_conn: True       # Wait till opflex connects to leaf before using the local policy
+  #                                             # default value is False
+  # opflex_switch_sync_delay: 10                # How long to wait from PlatformConfig resolution to start the switch sync
+  #                                             # default value is 5
+  # opflex_switch_sync_dynamic: 5               # Subsequent switch sync delay
+  #                                             # default value is 10 
   # use_system_node_priority_class: True        # override if needed, default is False
   # aci_containers_controller_memory_request: "256Mi"   # override if needed, default is aci_containers_memory_request
   # aci_containers_controller_memory_limit: "5Gi"       # override if needed, default is aci_containers_memory_limit

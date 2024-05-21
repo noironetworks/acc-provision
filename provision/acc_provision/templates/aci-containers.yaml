@@ -2170,15 +2170,25 @@ data:
         },
         "opflex": {
             "notif" : { "enabled" : "false" },
+            "startup": {
+                    "enabled": {{ config.kube_config.opflex_startup_enabled|json }},
+                    "policy-file": {{ config.kube_config.opflex_startup_policy_file|json }},
+                    "policy-duration": {{ config.kube_config.opflex_startup_policy_duration|json }},
+                    "resolve-aft-conn": {{ config.kube_config.opflex_startup_resolve_aft_conn|json }}
+            },
+            "timers" : {
+                    {% if config.kube_config.opflex_agent_policy_retry_delay_timer %}
+                    "policy-retry-delay" : {{ config.kube_config.opflex_agent_policy_retry_delay_timer|json }},
+                    {% endif %}
+                    "switch-sync-delay": {{ config.kube_config.opflex_switch_sync_delay|json }},
+                    "switch-sync-dynamic": {{ config.kube_config.opflex_switch_sync_dynamic|json }}
+            },
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
           {% if not config.aci_config.client_ssl %}
             ,"ssl": { "mode": "disabled" }
           {% endif %}
           {% if config.kube_config.run_gbp_container or config.kube_config.opflex_agent_statistics == False %}
             ,"statistics" : { "mode" : "off" }
-          {% endif %}
-          {% if config.kube_config.opflex_agent_policy_retry_delay_timer %}
-            ,"timers" : { "policy-retry-delay" : {{ config.kube_config.opflex_agent_policy_retry_delay_timer|json }} }
           {% endif %}
         },
         "ovs": {
