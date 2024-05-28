@@ -1346,6 +1346,16 @@ data:
         },
         "opflex": {
             "notif" : { "enabled" : "false" },
+            "startup": {
+                    "enabled": false,
+                    "policy-file": "/usr/local/var/lib/opflex-agent-ovs/startup/pol.json",
+                    "policy-duration": 60,
+                    "resolve-aft-conn": false
+            },
+            "timers" : {
+                    "switch-sync-delay": 5,
+                    "switch-sync-dynamic": 10
+            },
             "asyncjson": { "enabled" : "false" }
             ,"statistics" : { "mode" : "off" }
         },

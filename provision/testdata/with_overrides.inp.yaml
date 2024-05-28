@@ -102,6 +102,11 @@ kube_config:
   opflex_openssl_compat: true
   enable_opflex_agent_reconnect: true
   opflex_agent_statistics: false
+  opflex_startup_enabled: true
+  opflex_startup_policy_duration: 20
+  opflex_startup_resolve_aft_conn: true
+  opflex_switch_sync_delay: 10
+  opflex_switch_sync_dynamic: 20
   add_external_contract_to_default_epg: True
   apic_connection_retry_limit: 10
   disable_hpp_rendering: True
