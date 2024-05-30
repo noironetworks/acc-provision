@@ -1566,6 +1566,42 @@ def test_flavor_RKE_1_5_6_base():
 
 
 @in_testdir
+def test_flavor_RKE_1_4_20_base():
+    run_provision(
+        "flavor_RKE_1_4_20.inp.yaml",
+        "flavor_RKE_1_4_20.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_4_20.apic.txt",
+        overrides={"flavor": "RKE-1.4.20"}
+    )
+
+
+@in_testdir
+def test_flavor_RKE_1_5_11_base():
+    run_provision(
+        "flavor_RKE_1_5_11.inp.yaml",
+        "flavor_RKE_1_5_11.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_5_11.apic.txt",
+        overrides={"flavor": "RKE-1.5.11"}
+    )
+
+
+@in_testdir
+def test_flavor_RKE_1_6_0_base():
+    run_provision(
+        "flavor_RKE_1_6_0.inp.yaml",
+        "flavor_RKE_1_6_0.rke.yaml",
+        None,
+        None,
+        "flavor_RKE_1_6_0.apic.txt",
+        overrides={"flavor": "RKE-1.6.0"}
+    )
+
+
+@in_testdir
 def test_sample():
     with tempfile.NamedTemporaryFile("wb") as tmpout:
         sys.stdout = tmpout
