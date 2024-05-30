@@ -1651,8 +1651,8 @@ spec:
                       properties:
                         applicationProfile:
                           type: string
-                        lldpDiscovery:
-                          type: boolean
+                        discoveryType:
+                          type: string
                         name:
                           type: string
                         tenant:
