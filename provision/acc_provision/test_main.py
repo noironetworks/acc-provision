@@ -1758,6 +1758,41 @@ def test_flvr_calico_3_26_3_multiple_vrf_uc1():
 
 
 @in_testdir
+def test_flavor_k8s_aci_cilium():
+    run_provision(
+        "flavor_k8s_aci_cilium.inp.yaml",
+        "flavor_k8s_aci_cilium.kube.yaml",
+        "flavor_k8s_aci_cilium_tar",
+        None,
+        "flavor_k8s_aci_cilium.apic.txt",
+        overrides={"flavor": "k8s-aci-cilium"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_414_aci_cilium_esx():
+    run_provision(
+        "flavor_openshift_414_aci_cilium_esx.inp.yaml",
+        "flavor_openshift_414_aci_cilium_esx.kube.yaml",
+        "flavor_openshift_414_aci_cilium_esx_tar",
+        None,
+        "flavor_openshift_414_aci_cilium_esx.apic.txt",
+        overrides={"flavor": "openshift-4.14-aci-cilium-esx"}
+    )
+
+
+@in_testdir
+def test_aci_cilium_chaining():
+    run_provision(
+        "enable_aci_cilium_chaining.inp.yaml",
+        "enable_aci_cilium_chaining.kube.yaml",
+        None,
+        None,
+        "enable_aci_cilium_chaining.apic.txt",
+    )
+
+
+@in_testdir
 def test_flvr_calico_3_26_3_multiple_vrf_uc2():
     run_provision(
         "flavor_calico_3.26.3_multiple_vrf_uc2.inp.yaml",

@@ -1481,6 +1481,10 @@ def config_validate(flavor_opts, config):
     return ret
 
 
+def is_cilium_chaining_enabled(config):
+    return True if config.get("cilium_chaining") and config["cilium_chaining"]["enable"] else False
+
+
 def is_agent_based_installer(config):
     return True if config.get("agent_based_installer") and config["agent_based_installer"]["enable"] else False
 
@@ -2348,7 +2352,14 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
             acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
-            new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+
+            if not is_cilium_chaining_enabled(config):
+                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+            else:
+                cilium_template = get_jinja_template('cilium.yaml')
+                cilium_temp = ''.join(cilium_template.stream(config=config))
+                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [
+                    acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template] + [cilium_temp]
 
             new_deployment_file = '---'.join(new_parsed_yaml)
         else:

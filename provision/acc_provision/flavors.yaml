@@ -6352,3 +6352,171 @@ flavors:
     status: null
     hidden: false
     order: 84
+  k8s-aci-cilium:
+    desc: Chained CNI for Kubernertes
+    default_version: 6.0
+    config:
+      kube_config:
+        allow_kube_api_default_epg: True
+        use_host_netns_volume: True
+      multus:
+        disable: False
+      aci_config:
+        items:
+          - name: hubble-peer
+            range:
+              - [ 4244, 4244 ]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["nodes"]
+            consumed: ["system"]
+    hidden: False
+    status: Experimental
+    order: 85
+  openshift-4.14-aci-cilium-esx:
+    desc: Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX
+    default_version: 6.0
+    config:
+      net_config:
+        second_kubeapi_portgroup: True
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        no_physdom_for_node_epg: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+          - name: hubble-peer
+            range:
+              - [ 4542, 4542 ]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: [ "nodes" ]
+            consumed: [ "system" ]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: Experimental
+    hidden: false
+    order: 86

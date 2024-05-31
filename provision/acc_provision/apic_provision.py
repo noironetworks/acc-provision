@@ -6638,6 +6638,8 @@ class ApicKubeConfig(object):
                 dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
             elif flavor.startswith("RKE"):
                 rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+            elif flavor == "k8s-aci-cilium":
+                k8s_cilium_aci_specific_handling(self.ACI_PREFIX, old_naming, data, items)
 
         # Adding prometheus opflex-agent contract for all flavors
         add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)
@@ -9568,6 +9570,255 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
             )
             filt_entry['vzFilter']['children'].append(filt_child)
             data['fvTenant']['children'].append(filt_entry)
+
+
+def k8s_cilium_aci_specific_handling(aci_prefix, old_naming, data, items):
+    if items is None or len(items) == 0:
+        err("Error in getting items for flavor")
+    # add new contract
+    for item in items:
+        provide_os_contract = collections.OrderedDict(
+            [
+                (
+                    "fvRsProv",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "tnVzBrCPName",
+                                            item['name'],
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        consume_os_contract = collections.OrderedDict(
+            [
+                (
+                    "fvRsCons",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "tnVzBrCPName",
+                                            item['name'],
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        if old_naming:
+            # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
+            if 'kube-default' in item['consumed']:
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+            if 'kube-system' in item['consumed']:
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+            if 'kube-nodes' in item['consumed']:
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+
+            if 'kube-default' in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+            if 'kube-system' in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+            if 'kube-nodes' in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+
+        else:
+            # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
+            if ('%sdefault' % "aci_prefix") in item['consumed']:
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+            if ('%ssystem' % aci_prefix) in item['consumed']:
+                print("Here in consume contract")
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+            if ('%snodes' % aci_prefix) in item['consumed']:
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+
+            if ('%sdefault' % aci_prefix) in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+            if ('%ssystem' % aci_prefix) in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+            if ('%snodes' % aci_prefix) in item['provided']:
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+
+    # add new contract and subject
+    for item in items:
+        os_contract = collections.OrderedDict(
+            [
+                (
+                    "vzBrCP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [("name", item['name'])]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzSubj",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "name",
+                                                                        item['name'] + "-subj",
+                                                                    ),
+                                                                    (
+                                                                        "consMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    (
+                                                                        "provMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vzRsSubjFiltAtt",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "tnVzFilterName",
+                                                                                                    item[
+                                                                                                        'name'] + "-filter",
+                                                                                                )
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                )
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        data['fvTenant']['children'].append(os_contract)
+
+    # add filter and entries to that subject
+    for item in items:
+        os_filter = collections.OrderedDict(
+            [
+                (
+                    "vzFilter",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "name",
+                                            item['name'] + "-filter",
+                                        )
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        for port in item['range']:
+            child = collections.OrderedDict(
+                [
+                    (
+                        "vzEntry",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "name",
+                                                item["name"] + '-' + str(port[0]),
+                                            ),
+                                            (
+                                                "etherT",
+                                                item["etherT"],
+                                            ),
+                                            (
+                                                "prot",
+                                                item["prot"],
+                                            ),
+                                            (
+                                                "dFromPort",
+                                                str(port[0]),
+                                            ),
+                                            (
+                                                "dToPort",
+                                                str(port[1]),
+                                            ),
+                                            (
+                                                "stateful",
+                                                str(item["stateful"]),
+                                            ),
+                                            (
+                                                "tcpRules",
+                                                "",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            os_filter['vzFilter']['children'].append(child)
+
+        data['fvTenant']['children'].append(os_filter)
 
 
 if __name__ == "__main__":
