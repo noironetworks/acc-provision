@@ -20,10 +20,10 @@ kube_config:
   opflex_switch_sync_dynamic: 5
 ```
 1. If we set the opflex_startup_enabled to True, it will enable the opflex-agent to use the startup db to resolve the policies. Agent will look for policy file under the /usr/local/var/lib/opflex-agent-ovs/startup/ path. This policy file is the policy state that persisted prior to the agent restart and this policy file is used to build the startup db. Default value is False.
-2. opflex_startup_policy_duration is the duration for which agent should keep using policy file during startup after agent connects to the leaf. Default value is 60.
+2. opflex_startup_policy_duration is the duration for which agent should keep using policy file during startup after agent connects to the leaf. Default value is 60 seconds.
 3. opflex_startup_resolve_aft_conn is to wait till the opflex-agent connects to leaf before using the local policy. Default value is False. 
-4. opflex_switch_sync_delay is the duration for which opflex-agent has to wait to start the switch sync from the PlatformConfig resolution. Default value is 5
-5. opflex_switch_sync_dynamic is the Subsequent switch sync delay. Default value is 10
+4. opflex_switch_sync_delay is the duration for which opflex-agent has to wait to start the switch sync from the PlatformConfig resolution. Default value is 5 seconds
+5. opflex_switch_sync_dynamic is the Subsequent switch sync delay. For any pending policy resolves, the max retries is hardcoded to 5. Default value is 10 seconds
 
 ## Troubleshooting
 
