@@ -1,0 +1,118 @@
+'---apiVersion': v1
+apiVersion: apps/v1
+data:
+  cni-config: "{\n  \"name\": \"generic-veth\",\n  \"cniVersion\": \"0.3.1\",\n  \"\
+    plugins\": [\n    {\n      \"cniVersion\": \"0.3.1\",\n      \"supportedVersions\"\
+    : [ \"0.3.0\", \"0.3.1\", \"0.4.0\" ],\n      \"type\": \"opflex-agent-cni\",\n\
+    \      \"wait-for-network\": true,\n      \"wait-for-network-duration\": 210,\n\
+    \      \"ipam\": {\"type\": \"opflex-agent-cni-ipam\"}\n    },\n    {\n      \"\
+    type\": \"portmap\",\n      \"snat\": true,\n      \"capabilities\": {\"portMappings\"\
+    : true}\n    },\n    {\n      \"type\": \"cilium-cni\"\n    }\n  ]\n}"
+kind: ConfigMap
+metadata:
+  name: cni-configuration
+  namespace: kube-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: aci-containers-operator
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: aci-containers-operator
+        network-plugin: aci-containers
+      name: aci-containers-operator
+      namespace: kube-system
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: preferred-node
+                operator: In
+                values:
+                - aci-containers-operator-2577247291
+            weight: 1
+      containers:
+      - env:
+        - name: SYSTEM_NAMESPACE
+          value: kube-system
+        - name: ACC_PROVISION_FLAVOR
+          value: k8s-aci-cilium
+        - name: OPERATOR_LOGGING_LEVEL
+          value: info
+        image: noiro/aci-containers-operator:6.0.4.2.81c2369
+        imagePullPolicy: Always
+        name: aci-containers-operator
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/local/etc/aci-containers/
+          name: aci-operator-config
+        - mountPath: /usr/local/etc/acc-provision/
+          name: acc-provision-config
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
+      - env:
+        - name: ANSIBLE_GATHERING
+          value: explicit
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ACC_PROVISION_FLAVOR
+          value: k8s-aci-cilium
+        - name: ACC_PROVISION_INPUT_CR_NAME
+          value: accprovisioninput
+        image: noiro/acc-provision-operator:6.0.4.2.81c2369
+        imagePullPolicy: Always
+        name: acc-provision-operator
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: aci-containers-operator
+      serviceAccountName: aci-containers-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - configMap:
+          items:
+          - key: spec
+            path: aci-operator.conf
+          name: aci-operator-config
+        name: aci-operator-config
+      - configMap:
+          items:
+          - key: spec
+            path: acc-provision-operator.conf
+          name: acc-provision-config
+        name: acc-provision-config
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker

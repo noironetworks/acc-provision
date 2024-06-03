@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cni-configuration
+  namespace: kube-system
+data:
+  cni-config: |-
+    {
+      "name": "generic-veth",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "cniVersion": "0.3.1",
+          "supportedVersions": [ "0.3.0", "0.3.1", "0.4.0" ],
+          "type": "opflex-agent-cni",
+          "wait-for-network": true,
+          "wait-for-network-duration": 210,
+          "ipam": {"type": "opflex-agent-cni-ipam"}
+        },
+        {
+          "type": "portmap",
+          "snat": true,
+          "capabilities": {"portMappings": true}
+        },
+        {
+          "type": "cilium-cni"
+        }
+      ]
+    }
