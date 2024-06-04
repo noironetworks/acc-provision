@@ -620,7 +620,7 @@ Uninstall the CNI plug-in using the following command E.g:
 
 # Upgrade the CNI Plug-in
 
-Refer document [ACI CNI Plugin upgrade](aci-cni-plugin-upgrade.md) to upgrade the cni plug-in.
+Refer document [ACI CNI Plugin upgrade](aci-cni-plugin-upgrade.md) to upgrade the cni plug-in and [Generate tar.gz for cluster upgrade](generate-tar-for-upgrade.md) to generate tar.gz while doing cluster upgrade.
 
 # Using Policy
 
@@ -1043,6 +1043,7 @@ This section explains features / configuration options available in acc provisio
 - [Exclude cluster nodes from snat redirect](node-snat-redirect-exclude.md)
 - [VMWare vSphere DVS ELAG](vsphere-dvs-elag.md)
 - [Host Protection Policies Optimization](hpp-optimization.md)
+- [Generate tar.gz for cluster upgrade](generate-tar-for-upgrade.md)
 - Opflex Agent
     - [Drop Log](opflex-agent-drop-log.md)
     - [Asyncjson](opflex-agent-asyncjson.md)
