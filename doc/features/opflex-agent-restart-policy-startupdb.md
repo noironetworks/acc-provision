@@ -7,7 +7,7 @@ This feature allows the opflex-agent to resolve policies with the startup db whi
 
 ## Motivation
 
-We saw an issue on a customer setup where if we changed the opflex-agent configuration, it resulted in datapath outage. The issue is not specific to configuration but the fact that all the opflex-agent gets restarted simultaneously to get the new configuration. This restart created a lot of stress on leaf which delayed the policies to be downloaded and hence the connection to complete. By enabling this feature, if all of the opflex-agent is restarted simultaneouly, the agent will start resolving the policies using the policy file and complete the ovs db sync and once the leaf connects, it will catch up with the leaf gradually. 
+In the face of heavy load, if the opflex-agent restarts (due to upgrade or other reasons), it may not be able to download all policy instantenously after connecting with the leaf. This can lead to partial programming of the data path until full policy is downloaded. By enabling this feature, the oflex-agent upon restart will start resolving the policies using a previously persisted policy file (most likely from the time just before it was restarted) and complete the OVS flow programming. Once sufficient time has elapsed (the time is configurable), the agent will assume it now has had time to catch up with the full policy in the leaf and it will start updating the OVS flows to reflect that. 
 
 ## Mechanism
 
