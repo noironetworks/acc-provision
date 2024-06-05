@@ -376,7 +376,7 @@ def check_service_bd_routing_disable(
         err("Error in getting %s: %s: " % (path, str(e)))
 
 
-def set_service_bd_routing_disable(apic, config, service_bd_routing_disable_true_count):
+def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disable_true_count):
     for apic_id in range(apic_count):
         apic = get_apic(config, apic_id)
         if apic is None:
@@ -444,7 +444,7 @@ def main(args=None):
     while True:
         try:
             service_bd_routing_disable_true_count = 0
-            service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic,
+            service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic_count,
                     config, service_bd_routing_disable_true_count)
             if service_bd_routing_disable_true_count == apic_count:
                 info(
