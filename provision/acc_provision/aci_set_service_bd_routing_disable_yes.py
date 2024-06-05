@@ -376,6 +376,27 @@ def check_service_bd_routing_disable(
         err("Error in getting %s: %s: " % (path, str(e)))
 
 
+def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disable_true_count):
+    for apic_id in range(apic_count):
+        apic = get_apic(config, apic_id)
+        if apic is None:
+            raise Exception("Failed to connect to APIC")
+        for apic_version in apic.apic_versions:
+            if StrictVersion(apic_version) >= StrictVersion("6.0.4"):
+                dbg(
+                    "APIC IP: {}, APIC Version: {}. Version is 6.0(4a) or higher".format(
+                        config["aci_config"]["apic_hosts"][apic_id],
+                        apic_version,
+                    )
+                )
+                service_bd_routing_disable_true_count = (
+                    check_service_bd_routing_disable(
+                        config, apic, service_bd_routing_disable_true_count
+                    )
+                )
+                break
+    return service_bd_routing_disable_true_count
+
 # Main function
 def main(args=None):
     if args is None:
@@ -423,24 +444,8 @@ def main(args=None):
     while True:
         try:
             service_bd_routing_disable_true_count = 0
-            for apic_id in range(apic_count):
-                apic = get_apic(config, apic_id)
-                if apic is None:
-                    raise Exception("Failed to connect to APIC")
-                for apic_version in apic.apic_versions:
-                    if StrictVersion(apic_version) >= StrictVersion("6.0.4"):
-                        dbg(
-                            "APIC IP: {}, APIC Version: {}. Version is 6.0(4a) or higher".format(
-                                config["aci_config"]["apic_hosts"][apic_id],
-                                apic_version,
-                            )
-                        )
-                        service_bd_routing_disable_true_count = (
-                            check_service_bd_routing_disable(
-                                config, apic, service_bd_routing_disable_true_count
-                            )
-                        )
-                        break
+            service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic_count,
+                    config, service_bd_routing_disable_true_count)
             if service_bd_routing_disable_true_count == apic_count:
                 info(
                     "All APICs have version 6.0(4a) or higher and serviceBdRoutingDisable set to yes. Exiting the script"
