@@ -33,8 +33,8 @@ try:
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-except Exception as ex:
-    print("%s") % ex
+except Exception as e:
+    print(f"Error: {e}")
 
 apic_debug = False
 apic_cookies = {}
@@ -376,6 +376,23 @@ def check_service_bd_routing_disable(
         err("Error in getting %s: %s: " % (path, str(e)))
 
 
+def set_service_bd_routing_disable(apic, config, service_bd_routing_disable_true_count, apic_id):
+    for apic_version in apic.apic_versions:
+        if StrictVersion(apic_version) >= StrictVersion("6.0.4"):
+            dbg(
+                "APIC IP: {}, APIC Version: {}. Version is 6.0(4a) or higher".format(
+                    config["aci_config"]["apic_hosts"][apic_id],
+                    apic_version,
+                )
+            )
+            service_bd_routing_disable_true_count = (
+                check_service_bd_routing_disable(
+                    config, apic, service_bd_routing_disable_true_count
+                )
+            )
+            break
+    return service_bd_routing_disable_true_count
+
 # Main function
 def main(args=None):
     if args is None:
@@ -385,8 +402,8 @@ def main(args=None):
         err("Invalid apic-oobm-ip address: " + args.apic_oobm_ip)
         sys.exit(1)
 
-    global http_debug, apic_debug
-    apic_debug = http_debug = args.debug
+    global apic_debug
+    apic_debug = args.debug
 
     config_file = args.config
     timeout = None
@@ -427,20 +444,8 @@ def main(args=None):
                 apic = get_apic(config, apic_id)
                 if apic is None:
                     raise Exception("Failed to connect to APIC")
-                for apic_version in apic.apic_versions:
-                    if StrictVersion(apic_version) >= StrictVersion("6.0.4"):
-                        dbg(
-                            "APIC IP: {}, APIC Version: {}. Version is 6.0(4a) or higher".format(
-                                config["aci_config"]["apic_hosts"][apic_id],
-                                apic_version,
-                            )
-                        )
-                        service_bd_routing_disable_true_count = (
-                            check_service_bd_routing_disable(
-                                config, apic, service_bd_routing_disable_true_count
-                            )
-                        )
-                        break
+                service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic,
+                    config, service_bd_routing_disable_true_count, apic_id)
             if service_bd_routing_disable_true_count == apic_count:
                 info(
                     "All APICs have version 6.0(4a) or higher and serviceBdRoutingDisable set to yes. Exiting the script"
