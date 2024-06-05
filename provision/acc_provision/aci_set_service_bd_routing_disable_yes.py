@@ -33,8 +33,8 @@ try:
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-except Exception:
-    pass
+except Exception as ex:
+    print("%s") % ex
 
 apic_debug = False
 apic_cookies = {}
