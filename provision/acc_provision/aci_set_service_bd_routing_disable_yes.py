@@ -1,3 +1,10 @@
+# Script to set serviceBdRoutingDisable attribute of service BD as yes
+#
+# Run python3 aci_set_service_bd_routing_disable_yes.py --help for usage
+#
+# eg: python3 aci_set_service_bd_routing_disable_yes.py -c <acc-provision input yaml file>
+#     -u <APIC username> -p <APIC password>
+
 from __future__ import print_function, unicode_literals
 import collections
 import json
