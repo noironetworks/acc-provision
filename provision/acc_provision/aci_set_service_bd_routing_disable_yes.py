@@ -119,6 +119,19 @@ class Apic(object):
         dbg("posting {}".format(json.dumps(args)))
         return requests.post(self.url(path), **args)
 
+    def refresh(self):
+        args = dict(data=None, cookies=self.cookies, verify=self.verify)
+        path = "/api/aaaRefresh.json"
+        req = requests.get(self.url(path), **args)
+        if req.status_code == 200:
+            resp = json.loads(req.text)
+            dbg("Refresh resp: {}".format(req.text))
+            token = resp["imdata"][0]["aaaLogin"]["attributes"]["token"]
+            self.cookies = collections.OrderedDict([("APIC-Cookie", token)])
+            apic_cookies[(self.addr, self.username, self.ssl)] = self.cookies
+        else:
+            print("Refresh failed - {}".format(req.text))
+
     def login(self):
         data = '{"aaaUser":{"attributes":{"name": "%s", "pwd": "%s"}}}' % (
             self.username,
@@ -128,6 +141,7 @@ class Apic(object):
         req = requests.post(self.url(path), data=data, verify=False)
         if req.status_code == 200:
             resp = json.loads(req.text)
+            info("Login Success for %s " % self.addr)
             dbg("Login resp: {}".format(req.text))
             token = resp["imdata"][0]["aaaLogin"]["attributes"]["token"]
             self.cookies = collections.OrderedDict([("APIC-Cookie", token)])
@@ -158,8 +172,11 @@ class Apic(object):
                 else:
                     ret = respj["imdata"][0]
         except Exception as e:
-            self.errors += 1
-            err("Error in getting %s: %s: " % (path, str(e)))
+            if "Token was invalid" in str(e):
+                apic_cookies[(self.addr, self.username, self.ssl)] = None
+            else:
+                self.errors += 1
+                err("Error in getting %s: %s: " % (path, str(e)))
         return ret
 
     def process_apic_version_string(self, raw):
@@ -186,7 +203,7 @@ class Apic(object):
         return versions
 
 
-def get_apic(config, apic_id=0):
+def get_apic(config, refresh, apic_id=0):
     if config["aci_config"].get("apic_oobm_ip"):
         apic_host = config["aci_config"]["apic_oobm_ip"]
     else:
@@ -204,6 +221,8 @@ def get_apic(config, apic_id=0):
         timeout=timeout,
         debug=apic_debug,
     )
+    if refresh:
+        apic.refresh()
     if apic.cookies is None:
         return None
     return apic
@@ -383,9 +402,10 @@ def check_service_bd_routing_disable(
         err("Error in getting %s: %s: " % (path, str(e)))
 
 
-def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disable_true_count):
+def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disable_true_count,
+        refresh):
     for apic_id in range(apic_count):
-        apic = get_apic(config, apic_id)
+        apic = get_apic(config, refresh, apic_id)
         if apic is None:
             raise Exception("Failed to connect to APIC")
         for apic_version in apic.apic_versions:
@@ -448,11 +468,16 @@ def main(args=None):
     deep_merge(config, user_config)
 
     apic_count = len(config["aci_config"]["apic_hosts"])
+    timeout = time.time() + 60*5
     while True:
         try:
+            refresh = False
+            if time.time() > timeout:
+                refresh = True
+                timeout = time.time() + 60*5
             service_bd_routing_disable_true_count = 0
             service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic_count,
-                    config, service_bd_routing_disable_true_count)
+                    config, service_bd_routing_disable_true_count, refresh)
             if service_bd_routing_disable_true_count == apic_count:
                 info(
                     "All APICs have version 6.0(4a) or higher and serviceBdRoutingDisable set to yes. Exiting the script"
