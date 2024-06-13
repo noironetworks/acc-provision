@@ -36,7 +36,7 @@ spec:
           value: 'True'
         - name: DURATION_WAIT_FOR_NETWORK
           value: '210'
-        image: noiro/aci-containers-host:6.0.4.3.81c2369
+        image: noiro/aci-containers-host:6.1.1.1.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
@@ -89,7 +89,7 @@ spec:
       - env:
         - name: REBOOT_WITH_OVS
           value: 'true'
-        image: noiro/opflex:6.0.4.3.81c2369
+        image: noiro/opflex:6.1.1.1.81c2369
         imagePullPolicy: Always
         name: opflex-agent
         securityContext:
@@ -111,7 +111,7 @@ spec:
         - /usr/local/bin/launch-mcastdaemon.sh
         command:
         - /bin/sh
-        image: noiro/opflex:6.0.4.3.81c2369
+        image: noiro/opflex:6.1.1.1.81c2369
         imagePullPolicy: Always
         name: mcast-daemon
         volumeMounts:

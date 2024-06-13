@@ -2711,7 +2711,7 @@ spec:
           value: "eks"
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: "accprovisioninput"
-        image: noirolabs/acc-provision-operator:6.0.4.3.81c2369
+        image: noirolabs/acc-provision-operator:6.1.1.1.81c2369
         imagePullPolicy: Always
         name: acc-provision-operator
         terminationMessagePath: /dev/termination-log

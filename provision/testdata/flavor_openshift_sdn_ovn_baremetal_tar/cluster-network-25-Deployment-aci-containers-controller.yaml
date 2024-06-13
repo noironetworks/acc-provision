@@ -27,7 +27,7 @@ spec:
       - env:
         - name: SYSTEM_NAMESPACE
           value: aci-containers-system
-        image: noiro/aci-containers-controller:6.0.4.3.81c2369
+        image: noiro/aci-containers-controller:6.1.1.1.81c2369
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
