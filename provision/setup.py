@@ -45,7 +45,6 @@ setup(
           'jinja2',
           'pyopenssl',
           'MarkupSafe',
-          'boto3',
           'ruamel.yaml',
     ],
 )

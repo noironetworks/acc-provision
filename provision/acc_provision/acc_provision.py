@@ -31,10 +31,8 @@ from jinja2 import Environment, PackageLoader
 from os.path import exists
 if __package__ is None or __package__ == '':
     from apic_provision import Apic, ApicKubeConfig
-    from cloud_provision import CloudProvision
 else:
     from .apic_provision import Apic, ApicKubeConfig
-    from .cloud_provision import CloudProvision
 
 
 # This black magic forces pyyaml to load YAML strings as unicode rather
@@ -1295,7 +1293,7 @@ def config_validate(flavor_opts, config):
                 get(("aci_config", "vmm_domain", "domain")), required)
             checks["aci_config/vmm_domain/type"] = (
                 get(("aci_config", "vmm_domain", "type")), required)
-    elif not isOverlay(config["flavor"]) or config["aci_config"]["capic"]:
+    elif not isOverlay(config["flavor"]):
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
@@ -1333,12 +1331,7 @@ def config_validate(flavor_opts, config):
                                        required),
         }
     if isOverlay(config["flavor"]):
-        if (config["aci_config"]["capic"]):
-            extra_checks = {
-                "aci_config/vrf/region": (get(("aci_config", "vrf", "region")), required),
-            }
-        else:
-            extra_checks = {}
+        extra_checks = {}
     elif is_chained_mode(config):
         extra_checks = {
             "aci_config/secondary_aep": (get(("aci_config", "secondary_aep")), required),
@@ -1658,11 +1651,7 @@ def calico_config_validate_preexisting(config, prov_apic):
 
 
 def generate_sample(filep, flavor):
-    if flavor in ["cloud", "eks"]:
-        data = pkgutil.get_data('acc_provision', 'templates/overlay-provision-config.yaml')
-    elif flavor == "aks":
-        data = pkgutil.get_data('acc_provision', 'templates/aks-provision-config.yaml')
-    elif flavor == "calico-3.26.3":
+    if flavor == "calico-3.26.3":
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
     elif flavor == "openshift-sdn-ovn-baremetal":
         data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
@@ -2465,13 +2454,12 @@ def get_apic(config):
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
     save_to = config["provision"]["save_to"]
-    capic = config["aci_config"]["capic"]
 
     if config["aci_config"]["apic_proxy"]:
         apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug, capic=capic, save_to=save_to)
+        timeout=timeout, debug=debug, save_to=save_to)
     if apic.cookies is None:
         return None
     return apic
@@ -2548,12 +2536,6 @@ def parse_args(show_help):
     parser.add_argument(
         '--apic-proxy', default=None, metavar='addr',
         help=argparse.SUPPRESS)
-    parser.add_argument(
-        '--test-data-out', default=None, metavar='file',
-        help='capture apic responses for test replay. E.g. ../testdata/apic_xx.json')
-    parser.add_argument(
-        '--skip-kafka-certs', action='store_true', default=False,
-        help='skip kafka certificate generation')
     parser.add_argument(
         '--upgrade', action='store_true', default=False,
         help='generate kubernetes deployment file for cluster upgrade')
@@ -2844,14 +2826,11 @@ def provision(args, apic_file, no_random):
         "aci_config": {
             "apic_login": {
             },
-            "capic": False,
             "apic_proxy": args.apic_proxy,
         },
         "provision": {
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
-            "save_to": args.test_data_out,
-            "skip-kafka-certs": args.skip_kafka_certs,
         },
         "unprovision": {
             "skip_app_profile_check": args.skip_app_profile_check,
@@ -3052,19 +3031,6 @@ def provision(args, apic_file, no_random):
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
         config["registry"]["acc_provision_operator_version"] = config["registry"]["aci_cni_operator_version"]
-
-    if flavor in ["cloud", "aks", "eks"]:
-        if prov_apic is None:
-            return True
-        print("Configuring cAPIC")
-        config["aci_config"]["capic"] = True
-
-        apic = get_apic(config)
-        if apic is None:
-            print("APIC login failed")
-            return False
-        cloud_prov = CloudProvision(apic, config, args)
-        return cloud_prov.Run(flavor_opts, generate_kube_yaml)
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)

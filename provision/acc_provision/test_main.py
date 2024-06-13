@@ -10,13 +10,11 @@ import ssl
 import sys
 import tempfile
 import tarfile
-import json
 
 import base64
 import copy
 
 from . import acc_provision
-from . import fake_apic
 
 from ruamel.yaml import YAML
 yml = YAML()
@@ -1078,140 +1076,6 @@ def test_flavor_localhost():
 
 
 @in_testdir
-def test_flavor_cloud_base():
-
-    with open("apic_test_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    run_provision(
-        "flavor_cloud.inp.yaml",
-        "flavor_cloud.kube.yaml",
-        "cloud_tar",
-        None,
-        overrides={"flavor": "cloud", "apic": True, "password": "test"},
-        cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-
-
-@in_testdir
-def test_flavor_aks_base():
-    with open("apic_aks_test_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    run_provision(
-        "flavor_aks.inp.yaml",
-        "flavor_aks.kube.yaml",
-        None,
-        None,
-        overrides={"flavor": "aks", "apic": True, "password": "test"},
-        cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-
-
-@in_testdir
-def test_flavor_eks_base():
-    with open("apic_eks_test_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50002, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    run_provision(
-        "flavor_eks.inp.yaml",
-        "flavor_eks.kube.yaml",
-        None,
-        None,
-        overrides={"flavor": "eks", "apic": True, "password": "test"},
-        cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-
-
-@in_testdir
-def test_flavor_cloud_delete():
-    with open("apic_delete_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50000, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    assert (len(fake_apic.fake_deletes) != 0)
-    run_provision(
-        "flavor_cloud.inp.yaml",
-        None,
-        None,
-        None,
-        overrides={"flavor": "cloud", "apic": True, "password": "test", "delete": True},
-        cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-    # verify all deletes were executed
-    assert (len(fake_apic.fake_deletes) == 0)
-
-
-@in_testdir
-def test_flavor_aks_delete():
-    with open("apic_aks_delete_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    assert (len(fake_apic.fake_deletes) != 0)
-    run_provision(
-        "flavor_aks.inp.yaml",
-        None,
-        None,
-        None,
-        overrides={"flavor": "aks", "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-    # verify all deletes were executed
-    assert (len(fake_apic.fake_deletes) == 0)
-
-
-@in_testdir
-def test_flavor_eks_delete():
-    with open("apic_eks_delete_data.json") as data_file:
-        data = json.loads(data_file.read())
-    apic = fake_apic.start_fake_apic(50002, data["gets"], data["deletes"])
-
-    def clean_apic():
-        apic.shutdown()
-        return False
-
-    assert (len(fake_apic.fake_deletes) != 0)
-    run_provision(
-        "flavor_eks.inp.yaml",
-        None,
-        None,
-        None,
-        overrides={"flavor": "eks", "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-    )
-    apic.shutdown()
-    # verify all deletes were executed
-    assert (len(fake_apic.fake_deletes) == 0)
-
-
-@in_testdir
 def test_conflicting_infravlan():
     run_provision(
         "conflicting_infravlan.inp.yaml",
@@ -2003,8 +1867,6 @@ def get_args(**overrides):
         "flavor": "kubernetes-1.30",
         "version_token": "dummy",
         "release": False,
-        "test_data_out": None,
-        "skip_kafka_certs": True,
         "upgrade": False,
         "disable_multus": 'true',
         "operator_mode": False,

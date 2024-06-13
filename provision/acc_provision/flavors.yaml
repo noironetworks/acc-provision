@@ -6011,319 +6011,6 @@ flavors:
     status: Experimental
     hidden: true
     order: 80
-  aks:
-    desc: Azure Kubernetes Service
-    default_version: 6.1
-    overlay: True
-    config:
-      net_config:
-        max_csr_tunnels: 0
-        csr_list: ""
-      cloud:
-        provider: azure
-      kube_config:
-        no_priority_class: True
-        system_namespace: aci-containers-system
-        use_aci_anywhere_crd: True
-        pod_exec_resources_controller: True
-        skip_namespace_resource_hostagent: False
-        skip_replicationcontroller_resource_hostagent: False
-        all_access_controller_clusterrole: True
-        no_hostagent_networking_clusterrole: False
-        no_hostagent_deployment_clusterrole: False
-        run_opflex_server_container: True
-        run_gbp_container: True
-        use_opflex_server_volume: True
-        use_cnideploy_initcontainer: True
-        generate_cnet_file: True
-        ep_registry: k8s
-        opflex_mode: overlay
-      aci_config:
-        contracts:
-          - name: allow-all-out
-            underlay: True
-            filter: match-all
-            provided: ["inet-ext"]
-            consumed: ["ul-nodes"]
-          - name: allow-LB
-            underlay: True
-            filter: match-tcp
-            provided: ["ul-nodes"]
-            consumed: ["inet-ext"]
-          - name: allow-kube
-            underlay: False
-            filter: match-all
-            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-          - name: allow-inet-out
-            filter: match-all
-            provided: ["aci-containers-inet-out"]
-            consumed: ["aci-containers-default"]
-        filters:
-            - name: match-all
-              entries:
-                - name: ent1
-            - name: match-tcp
-              entries:
-                - name: ent1
-                  prot: tcp
-    status: Experimental
-    hidden: true
-    order: 81
-  cloud:
-    desc: Openshift IPI/AWS
-    default_version: 6.1
-    overlay: True
-    config:
-      net_config:
-        max_csr_tunnels: 0
-        csr_list: ""
-      cloud:
-        provider: aws
-      kube_config:
-        no_priority_class: True
-        use_openshift_run_level: True
-        system_namespace: aci-containers-system
-        use_aci_anywhere_crd: True
-        pod_exec_resources_controller: True
-        skip_namespace_resource_hostagent: False
-        skip_replicationcontroller_resource_hostagent: False
-        all_access_controller_clusterrole: True
-        no_hostagent_networking_clusterrole: False
-        no_hostagent_deployment_clusterrole: False
-        run_opflex_server_container: True
-        run_gbp_container: True
-        use_opflex_server_volume: True
-        use_cnideploy_initcontainer: True
-        host_agent_cni_bin_path: /var/lib
-        host_agent_cni_conf_path: /etc/kubernetes
-        generate_cnet_file: True
-        opflex_mode: overlay
-      aci_config:
-        contracts:
-          - name: allow-all-out
-            underlay: True
-            filter: match-all
-            provided: ["inet-ext"]
-            consumed: ["ul-nodes", "ul-boot"]
-          - name: allow-boot
-            underlay: True
-            filter: match-boot
-            provided: ["ul-boot"]
-            consumed: ["inet-ext"]
-          - name: allow-cidr
-            underlay: True
-            filter: match-oshift
-            provided: ["ul-boot", "ul-nodes"]
-            consumed: ["cidr-ext"]
-          - name: allow-kube
-            underlay: False
-            filter: match-all
-            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-          - name: allow-inet-out
-            filter: match-all
-            provided: ["aci-containers-inet-out"]
-            consumed: ["aci-containers-default"]
-        filters:
-            - name: match-all
-              entries:
-                - name: ent1
-            - name: match-boot
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [22, 22]
-                - name: ent2
-                  prot: tcp
-                  range: [19531, 19531]
-            - name: match-kube-api
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [80, 80]
-                - name: ent2
-                  prot: tcp
-                  range: [443, 443]
-                - name: ent3
-                  prot: tcp
-                  range: [6443, 6443]
-            - name: match-oshift
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [22, 22]
-                - name: ent2
-                  prot: tcp
-                  range: [2379, 2380]
-                - name: ent3
-                  prot: tcp
-                  range: [6443, 6443]
-                - name: ent4
-                  prot: tcp
-                  range: [6641, 6642]
-                - name: ent5
-                  prot: tcp
-                  range: [9000, 9999]
-                - name: ent6
-                  prot: tcp
-                  range: [10250, 10250]
-                - name: ent7
-                  prot: tcp
-                  range: [10257, 10257]
-                - name: ent8
-                  prot: tcp
-                  range: [10259, 10259]
-                - name: ent9
-                  prot: tcp
-                  range: [22623, 22623]
-                - name: ent10
-                  prot: tcp
-                  range: [30000, 32767]
-                - name: ent11
-                  prot: udp
-                  range: [4789, 4789]
-                - name: ent12
-                  prot: udp
-                  range: [6081, 6081]
-                - name: ent13
-                  prot: udp
-                  range: [9000, 9999]
-                - name: ent14
-                  prot: udp
-                  range: [30000, 32767]
-                - name: ent15
-                  prot: icmp
-
-    status: Experimental
-    hidden: true
-    order: 82
-  eks:
-    desc: Elastic Kubernetes Service (aws)
-    default_version: 6.1
-    overlay: True
-    config:
-      net_config:
-        max_csr_tunnels: 0
-        csr_list: ""
-        node_subnet: "172.0.0.1/24"
-      cloud:
-        provider: aws
-      kube_config:
-        no_priority_class: True
-        system_namespace: aci-containers-system
-        use_aci_anywhere_crd: True
-        pod_exec_resources_controller: True
-        skip_namespace_resource_hostagent: False
-        skip_replicationcontroller_resource_hostagent: False
-        all_access_controller_clusterrole: True
-        no_hostagent_networking_clusterrole: False
-        no_hostagent_deployment_clusterrole: False
-        run_opflex_server_container: True
-        run_gbp_container: True
-        use_opflex_server_volume: True
-        use_cnideploy_initcontainer: True
-        generate_cnet_file: True
-        opflex_mode: overlay
-      aci_config:
-        contracts:
-          - name: allow-all-out
-            underlay: True
-            filter: match-all
-            provided: ["inet-ext"]
-            consumed: ["ul-private", "ul-public"]
-          - name: allow-all-in
-            underlay: True
-            filter: match-all
-            consumed: ["inet-ext"]
-            provided: ["ul-private", "ul-public"]
-          - name: allow-cidr
-            underlay: True
-            filter: match-oshift
-            provided: ["ul-private"]
-            consumed: ["cidr-ext"]
-          - name: allow-kube
-            underlay: False
-            filter: match-all
-            provided: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-            consumed: ["aci-containers-default", "aci-containers-nodes", "aci-containers-system"]
-          - name: allow-inet-out
-            filter: match-all
-            provided: ["aci-containers-inet-out"]
-            consumed: ["aci-containers-default"]
-        filters:
-            - name: match-all
-              entries:
-                - name: ent1
-            - name: match-boot
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [22, 22]
-                - name: ent2
-                  prot: tcp
-                  range: [19531, 19531]
-            - name: match-kube-api
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [80, 80]
-                - name: ent2
-                  prot: tcp
-                  range: [443, 443]
-                - name: ent3
-                  prot: tcp
-                  range: [6443, 6443]
-            - name: match-oshift
-              entries:
-                - name: ent1
-                  prot: tcp
-                  range: [22, 22]
-                - name: ent2
-                  prot: tcp
-                  range: [2379, 2380]
-                - name: ent3
-                  prot: tcp
-                  range: [6443, 6443]
-                - name: ent4
-                  prot: tcp
-                  range: [6641, 6642]
-                - name: ent5
-                  prot: tcp
-                  range: [9000, 9999]
-                - name: ent6
-                  prot: tcp
-                  range: [10250, 10250]
-                - name: ent7
-                  prot: tcp
-                  range: [10257, 10257]
-                - name: ent8
-                  prot: tcp
-                  range: [10259, 10259]
-                - name: ent9
-                  prot: tcp
-                  range: [22623, 22623]
-                - name: ent10
-                  prot: tcp
-                  range: [30000, 32767]
-                - name: ent11
-                  prot: udp
-                  range: [4789, 4789]
-                - name: ent12
-                  prot: udp
-                  range: [6081, 6081]
-                - name: ent13
-                  prot: udp
-                  range: [9000, 9999]
-                - name: ent14
-                  prot: udp
-                  range: [30000, 32767]
-                - name: ent15
-                  prot: icmp
-
-    status: Experimental
-    hidden: true
-    order: 83
   calico-3.26.3:
     desc: calico-3.26.3
     default_version: 6.1.3.3
@@ -6332,7 +6019,7 @@ flavors:
       template_generator: generate_calico_deployment_files
     hidden: False
     status: null
-    order: 84
+    order: 81
   openshift-sdn-ovn-baremetal:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.1
@@ -6361,7 +6048,7 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 85
+    order: 82
   k8s-aci-cilium:
     desc: Chained CNI for Kubernertes
     default_version: 6.1
@@ -6383,7 +6070,7 @@ flavors:
             consumed: ["system"]
     hidden: False
     status: Experimental
-    order: 86
+    order: 83
   openshift-4.14-aci-cilium-esx:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX
     default_version: 6.1
@@ -6529,4 +6216,4 @@ flavors:
         disable: True
     status: Experimental
     hidden: false
-    order: 87
+    order: 84
