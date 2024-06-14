@@ -352,7 +352,11 @@ def check_service_bd_routing_disable(
                 % service_bd_routing_disable_true_count
             )
         else:
-            info("serviceBdRoutingDisable is set to no for APIC with IP: {}, setting it to yes".format(apic.addr))
+            info(
+                "serviceBdRoutingDisable is set to no for APIC with IP: {}, setting it to yes".format(
+                    apic.addr
+                )
+            )
             data = collections.OrderedDict(
                 [
                     (
@@ -402,8 +406,9 @@ def check_service_bd_routing_disable(
         err("Error in getting %s: %s: " % (path, str(e)))
 
 
-def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disable_true_count,
-        refresh):
+def set_service_bd_routing_disable(
+    apic_count, config, service_bd_routing_disable_true_count, refresh
+):
     for apic_id in range(apic_count):
         apic = get_apic(config, refresh, apic_id)
         if apic is None:
@@ -423,6 +428,7 @@ def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disabl
                 )
                 break
     return service_bd_routing_disable_true_count
+
 
 # Main function
 def main(args=None):
@@ -468,16 +474,17 @@ def main(args=None):
     deep_merge(config, user_config)
 
     apic_count = len(config["aci_config"]["apic_hosts"])
-    timeout = time.time() + 60*5
+    timeout = time.time() + 60 * 5
     while True:
         try:
             refresh = False
             if time.time() > timeout:
                 refresh = True
-                timeout = time.time() + 60*5
+                timeout = time.time() + 60 * 5
             service_bd_routing_disable_true_count = 0
-            service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic_count,
-                    config, service_bd_routing_disable_true_count, refresh)
+            service_bd_routing_disable_true_count = set_service_bd_routing_disable(
+                apic_count, config, service_bd_routing_disable_true_count, refresh
+            )
             if service_bd_routing_disable_true_count == apic_count:
                 info(
                     "All APICs have version 6.0(4a) or higher and serviceBdRoutingDisable set to yes. Exiting the script"
