@@ -90,8 +90,7 @@ class Apic(object):
         ssl=True,
         verify=False,
         timeout=None,
-        debug=False,
-        save_to=None
+        debug=False
     ):
         global apic_debug
         apic_debug = debug
@@ -104,10 +103,6 @@ class Apic(object):
         self.verify = verify
         self.timeout = timeout if timeout else apic_default_timeout
         self.debug = debug
-        # this is for generating replay data for tests
-        self.save_to = save_to
-        self.saved_responses = {}
-        self.saved_deletes = {}
 
         if self.cookies is None:
             self.login()
@@ -125,8 +120,6 @@ class Apic(object):
         args.update(timeout=self.timeout)
         dbg("getting path: {} {}".format(path, json.dumps(args)))
         resp = requests.get(self.url(path), **args)
-        if self.save_to:
-            self.saved_responses[path] = json.loads(resp.content)
         return resp
 
     def post(self, path, data):
@@ -139,8 +132,6 @@ class Apic(object):
     def delete(self, path, data=None):
         args = dict(data=data, cookies=self.cookies, verify=self.verify)
         args.update(timeout=self.timeout)
-        if self.save_to:
-            self.saved_deletes[path] = True
         dbg("Deleting: {}".format(path))
         return requests.delete(self.url(path), **args)
 
@@ -160,17 +151,6 @@ class Apic(object):
             print("Login failed - {}".format(req.text))
             print("Addr: {} u: {} p: {}".format(self.addr, self.username, self.password))
         return req
-
-    def save(self):
-        if self.save_to:
-            apic_data = {
-                "gets": self.saved_responses,
-                "deletes": self.saved_deletes,
-            }
-
-            with open(self.save_to, "w") as write_file:
-                json.dump(apic_data, write_file)
-                write_file.close()
 
     def check_resp(self, resp):
         respj = json.loads(resp.text)
