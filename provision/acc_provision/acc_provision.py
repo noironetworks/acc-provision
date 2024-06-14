@@ -2453,13 +2453,12 @@ def get_apic(config):
     apic_password = config["aci_config"]["apic_login"]["password"]
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
-    save_to = config["provision"]["save_to"]
 
     if config["aci_config"]["apic_proxy"]:
         apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug, save_to=save_to)
+        timeout=timeout, debug=debug)
     if apic.cookies is None:
         return None
     return apic
