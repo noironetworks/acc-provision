@@ -586,8 +586,6 @@ def config_adjust_chained_mode(args, config, no_random):
                 "cert_reused": False,
             },
             "node_bd_dn": node_bd_dn,
-            "kafka": {
-            },
             "subnet_dn": {
             },
             "vrf_dn": {
@@ -789,8 +787,6 @@ def config_adjust(args, config, prov_apic, no_random):
             },
             "node_bd_dn": node_bd_dn,
             "pod_bd_dn": pod_bd_dn,
-            "kafka": {
-            },
             "subnet_dn": {
             },
             "vrf_dn": {
@@ -2909,10 +2905,6 @@ def provision(args, apic_file, no_random):
     user_config = config_user(flavor, config_file)
     if 'aci_config' in user_config and 'use_legacy_kube_naming_convention' in user_config['aci_config'] and 'tenant' in user_config['aci_config']:
         err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
-        return False
-
-    if flavor == "cloud" and 'use_legacy_kube_naming_convention' in user_config['aci_config']:
-        err("use_legacy_kube_naming_convention not allowed in cloud flavor")
         return False
 
     if user_config:
