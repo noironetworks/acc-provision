@@ -2396,7 +2396,7 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                 new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [
                     acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template] + [cilium_temp]
 
-            new_deployment_file = '---'.join(new_parsed_yaml)
+            new_deployment_file = '\n---\n'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
 

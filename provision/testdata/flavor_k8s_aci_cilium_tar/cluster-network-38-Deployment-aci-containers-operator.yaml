@@ -1,16 +1,11 @@
-'---apiVersion': v1
 apiVersion: apps/v1
-data:
-  cni-config: "{\n  \"name\": \"generic-veth\",\n  \"cniVersion\": \"0.3.1\",\n  \"\
-    plugins\": [\n    {\n      \"cniVersion\": \"0.3.1\",\n      \"supportedVersions\"\
-    : [ \"0.3.0\", \"0.3.1\", \"0.4.0\" ],\n      \"type\": \"opflex-agent-cni\",\n\
-    \      \"wait-for-network\": true,\n      \"wait-for-network-duration\": 210,\n\
-    \      \"ipam\": {\"type\": \"opflex-agent-cni-ipam\"}\n    },\n    {\n      \"\
-    type\": \"portmap\",\n      \"snat\": true,\n      \"capabilities\": {\"portMappings\"\
-    : true}\n    },\n    {\n      \"type\": \"cilium-cni\"\n    }\n  ]\n}"
-kind: ConfigMap
+kind: Deployment
 metadata:
-  name: cni-configuration
+  labels:
+    aci-containers-config-version: dummy
+    name: aci-containers-operator
+    network-plugin: aci-containers
+  name: aci-containers-operator
   namespace: kube-system
 spec:
   progressDeadlineSeconds: 600
@@ -28,7 +23,7 @@ spec:
         name: aci-containers-operator
         network-plugin: aci-containers
       name: aci-containers-operator
-      namespace: aci-containers-system
+      namespace: kube-system
     spec:
       affinity:
         nodeAffinity:
@@ -43,9 +38,9 @@ spec:
       containers:
       - env:
         - name: SYSTEM_NAMESPACE
-          value: aci-containers-system
+          value: kube-system
         - name: ACC_PROVISION_FLAVOR
-          value: openshift-4.14-aci-cilium-esx
+          value: k8s-aci-cilium
         - name: OPERATOR_LOGGING_LEVEL
           value: info
         image: noiro/aci-containers-operator:6.1.1.1.81c2369
@@ -75,7 +70,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: ACC_PROVISION_FLAVOR
-          value: openshift-4.14-aci-cilium-esx
+          value: k8s-aci-cilium
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
         image: noiro/acc-provision-operator:6.1.1.1.81c2369

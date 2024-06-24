@@ -168,6 +168,8 @@ Arguments Description
 - cni.confPath=/etc/kubernetes/cni/net.d: Setting custom cni conf path for openshift 
 - kubeProxyReplacement="false" – This is needed for openshift, because  right now CNO (Cluster Network Operator) is deployed with kubeproxy which  runs on each node and is managed by the Cluster Network Operator (CNO). kube-proxy maintains network rules for forwarding connections for endpoints associated with services.Currently all our installation have kube-proxy enabled. If we disable the functionality via cilium then pods will start crashing and network connectivity gets lost.  
 
+**Restart openshift-dns pods**
+
 **Restart pods under tests to enforce Cilium CNI.**
 
 # Hubble
