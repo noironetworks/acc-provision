@@ -71,7 +71,7 @@ This configuration enables the addition of Cilium custom configuration required 
 acc-provision -a -c acc_provision_input.yaml  -f kubernetes-1.27 -u <user> -p <password> -o aci_deployment.yaml -z aci deployment.yaml.tar.gz
 ```
 
-**Replace opflex conf file** 
+**Replace opflex conf file (Skip for new install)** 
 
 Rename the file "01-opflex.conf" to "10-opflex.conf" in the directory "/etc/cni/net.d" on each node. This ensures that the kubelet picks the configuration file lexicographically and once cilum 05-cilium.conflist is deployed , it will be picked first which have cni-chaining configuration. 
 
@@ -133,7 +133,7 @@ The above configuration enables the addition of cilium custom configuration requ
 acc-provision -a -c acc_provision_input.yaml  -f openshift-4.14 -esx -u <user> -p <password> -o aci_deployment.yaml -z aci deployment.yaml.tar.gz 
 ```
 
-**Replace opflex conf file** 
+**Replace opflex conf file (Skip for new install)** 
 
 Rename the file "01-opflex.conf" to "10-opflex.conf" in the directory "/etc/cni/net.d" on each node. This ensures that the kubelet picks the configuration file lexicographically and once cilum 05-cilium.conflist is deployed , it will be picked first which have cni-chaining configuration. 
 
