@@ -564,7 +564,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "hubble-peer",
+                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -572,7 +572,7 @@ None
                                     {
                                         "fvRsCons": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "aci-containers-kube-hubble-peer",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -670,7 +670,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "hubble-peer",
+                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -678,7 +678,7 @@ None
                                     {
                                         "fvRsProv": {
                                             "attributes": {
-                                                "tnVzBrCPName": "aci-containers-kube-prometheus-opflex-agent",
+                                                "tnVzBrCPName": "aci-containers-kube-hubble-peer",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }
@@ -1414,36 +1414,6 @@ None
                 }
             },
             {
-                "vzBrCP": {
-                    "attributes": {
-                        "name": "hubble-peer",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    },
-                    "children": [
-                        {
-                            "vzSubj": {
-                                "attributes": {
-                                    "name": "hubble-peer-subj",
-                                    "consMatchT": "AtleastOne",
-                                    "provMatchT": "AtleastOne",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                },
-                                "children": [
-                                    {
-                                        "vzRsSubjFiltAtt": {
-                                            "attributes": {
-                                                "tnVzFilterName": "hubble-peer-filter",
-                                                "annotation": "orchestrator:aci-containers-controller"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            },
-            {
                 "vzFilter": {
                     "attributes": {
                         "name": "openshift-svc-catalog-filter",
@@ -1760,30 +1730,6 @@ None
             {
                 "vzFilter": {
                     "attributes": {
-                        "name": "hubble-peer-filter",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    },
-                    "children": [
-                        {
-                            "vzEntry": {
-                                "attributes": {
-                                    "name": "hubble-peer-4542",
-                                    "etherT": "ip",
-                                    "prot": "tcp",
-                                    "dFromPort": "4542",
-                                    "dToPort": "4542",
-                                    "stateful": "no",
-                                    "tcpRules": "",
-                                    "annotation": "orchestrator:aci-containers-controller"
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "vzFilter": {
-                    "attributes": {
                         "name": "aci-containers-kube-prometheus-opflex-agent-filter",
                         "annotation": "orchestrator:aci-containers-controller"
                     },
@@ -1825,6 +1771,60 @@ None
                                         "vzRsSubjFiltAtt": {
                                             "attributes": {
                                                 "tnVzFilterName": "aci-containers-kube-prometheus-opflex-agent-filter",
+                                                "annotation": "orchestrator:aci-containers-controller"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzFilter": {
+                    "attributes": {
+                        "name": "aci-containers-kube-hubble-peer-filter",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzEntry": {
+                                "attributes": {
+                                    "name": "hubble-peer",
+                                    "etherT": "ip",
+                                    "prot": "tcp",
+                                    "dFromPort": "4244",
+                                    "dToPort": "4244",
+                                    "stateful": "no",
+                                    "tcpRules": "",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "vzBrCP": {
+                    "attributes": {
+                        "name": "aci-containers-kube-hubble-peer",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    },
+                    "children": [
+                        {
+                            "vzSubj": {
+                                "attributes": {
+                                    "name": "hubble-peer-subj",
+                                    "consMatchT": "AtleastOne",
+                                    "provMatchT": "AtleastOne",
+                                    "annotation": "orchestrator:aci-containers-controller"
+                                },
+                                "children": [
+                                    {
+                                        "vzRsSubjFiltAtt": {
+                                            "attributes": {
+                                                "tnVzFilterName": "aci-containers-kube-hubble-peer-filter",
                                                 "annotation": "orchestrator:aci-containers-controller"
                                             }
                                         }

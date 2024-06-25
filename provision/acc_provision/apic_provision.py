@@ -5864,6 +5864,12 @@ class ApicKubeConfig(object):
         # Adding prometheus opflex-agent contract for all flavors
         add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)
 
+        if self.config.get("cilium_chaining"):
+            if self.config["cilium_chaining"].get("enable"):
+                if self.config["cilium_chaining"]["enable"]:
+                    # Adding hubble-peer contract for all flavors
+                    add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix)
+
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
 
@@ -7997,6 +8003,218 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
     )
     data['fvTenant']['children'].append(contract)
 
+def add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix):
+    consumer_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsCons",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "%shubble-peer" % contract_prefix
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+    for epg in ["%ssystem" % epg_prefix]:
+        for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+            if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                break
+
+    provider_contract = collections.OrderedDict(
+        [
+            (
+                "fvRsProv",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "tnVzBrCPName",
+                                        "%shubble-peer" % contract_prefix,
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+        ]
+    )
+    for epg in ["%snodes" % epg_prefix]:
+        for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
+            if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provider_contract)
+                break
+
+    filters = collections.OrderedDict(
+        [
+            (
+                "vzFilter",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "name",
+                                        "%shubble-peer-filter" % filter_prefix,
+                                    )
+                                ]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "vzEntry",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "attributes",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "name",
+                                                                    "hubble-peer",
+                                                                ),
+                                                                (
+                                                                    "etherT",
+                                                                    "ip",
+                                                                ),
+                                                                (
+                                                                    "prot",
+                                                                    "tcp",
+                                                                ),
+                                                                (
+                                                                    "dFromPort",
+                                                                    "4244",
+                                                                ),
+                                                                (
+                                                                    "dToPort",
+                                                                    "4244",
+                                                                ),
+                                                                (
+                                                                    "stateful",
+                                                                    "no",
+                                                                ),
+                                                                (
+                                                                    "tcpRules",
+                                                                    "",
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    )
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                )
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    data['fvTenant']['children'].append(filters)
+
+    contract = collections.OrderedDict(
+        [
+            (
+                "vzBrCP",
+                collections.OrderedDict(
+                    [
+                        (
+                            "attributes",
+                            collections.OrderedDict(
+                                [("name", "%shubble-peer" % contract_prefix)]
+                            ),
+                        ),
+                        (
+                            "children",
+                            [
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "vzSubj",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "attributes",
+                                                        collections.OrderedDict(
+                                                            [
+                                                                (
+                                                                    "name",
+                                                                    "hubble-peer-subj",
+                                                                ),
+                                                                (
+                                                                    "consMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                                (
+                                                                    "provMatchT",
+                                                                    "AtleastOne",
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ),
+                                                    (
+                                                        "children",
+                                                        [
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "vzRsSubjFiltAtt",
+                                                                        collections.OrderedDict(
+                                                                            [
+                                                                                (
+                                                                                    "attributes",
+                                                                                    collections.OrderedDict(
+                                                                                        [
+                                                                                            (
+                                                                                                "tnVzFilterName",
+                                                                                                "%shubble-peer-filter" % filter_prefix,
+                                                                                            )
+                                                                                        ]
+                                                                                    ),
+                                                                                )
+                                                                            ]
+                                                                        ),
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ],
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                )
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+    data['fvTenant']['children'].append(contract)
 
 def add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix):
     consumer_contract = collections.OrderedDict(

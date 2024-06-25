@@ -6611,16 +6611,6 @@ flavors:
         use_host_netns_volume: True
       multus:
         disable: False
-      aci_config:
-        items:
-          - name: hubble-peer
-            range:
-              - [ 4244, 4244 ]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-            provided: ["nodes"]
-            consumed: ["system"]
     hidden: False
     status: Experimental
     order: 89
@@ -6709,14 +6699,6 @@ flavors:
             stateful: "no"
             provided: ["system","default","nodes"]
             consumed: ["system","default"]
-          - name: hubble-peer
-            range:
-              - [ 4542, 4542 ]
-            etherT: ip
-            prot: tcp
-            stateful: "no"
-            provided: [ "nodes" ]
-            consumed: [ "system" ]
         kube_api_entries:
           - name: etcd1
             range: [2379, 2379]
