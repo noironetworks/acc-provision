@@ -46,11 +46,9 @@ The steps are executed as post-installation procedures once the cluster is opera
 **Install Accprovision**
 ```sh
 git clone https://github.com/noironetworks/acc-provision.git
-git checkout aci-cilium-chaining
 cd acc-provision/provision/
 python3 setup.py install
 ```
-The branch consists of changes required on host-agent daemonset, adding Cilium CNI configuration configmap, and contracts needed to run Hubble.
 
 **Configuration**
 
@@ -110,11 +108,9 @@ Arguments Description
 
 ```sh
 git clone https://github.com/noironetworks/acc-provision.git
-git checkout aci-cilium-chaining
 cd acc-provision/provision/
 python3 setup.py install
 ```
-The branch consists of changes required on host-agent daemonset, adding Cilium CNI configuration configmap, and contracts needed to run Hubble.
 
 **Configuration**
 
