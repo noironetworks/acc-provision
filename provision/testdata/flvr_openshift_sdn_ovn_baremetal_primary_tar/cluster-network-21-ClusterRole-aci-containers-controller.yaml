@@ -188,6 +188,7 @@ rules:
   - nadvlanmaps
   - networkfabricconfigurations
   - fabricvlanpools
+  - nodefabricl3configurations
   verbs:
   - get
   - list
@@ -195,8 +196,15 @@ rules:
 - apiGroups:
   - aci.fabricattachment
   resources:
+  - nodefabricnetworkl3peers
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.fabricattachment
+  resources:
   - nadvlanmaps/status
   - fabricvlanpools/status
+  - nodefabricl3configurations/status
   verbs:
   - get
   - list

@@ -1766,6 +1766,639 @@ spec:
     subresources:
       status: {}
 ---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: nodefabricnetworkl3peers.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NodeFabricNetworkL3Peer
+    listKind: NodeFabricNetworkL3PeerList
+    plural: nodefabricnetworkl3peers
+    singular: nodefabricnetworkl3peer
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NodeFabricNetworkL3Peers displays the status of L3 peers on svis
+          created by aci controller
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          status:
+            properties:
+              nadRefs:
+                items:
+                  properties:
+                    nad:
+                      properties:
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                      required:
+                      - name
+                      - namespace
+                      type: object
+                    nodes:
+                      items:
+                        properties:
+                          fabricL3Peers:
+                            items:
+                              properties:
+                                encap:
+                                  type: integer
+                                fabricNodeIds:
+                                  items:
+                                    type: integer
+                                  type: array
+                                podId:
+                                  type: integer
+                              required:
+                              - encap
+                              - fabricNodeIds
+                              - podId
+                              type: object
+                            type: array
+                          nodeName:
+                            type: string
+                        required:
+                        - nodeName
+                        type: object
+                      type: array
+                  required:
+                  - nad
+                  type: object
+                type: array
+              peeringInfo:
+                items:
+                  properties:
+                    asn:
+                      type: integer
+                    encap:
+                      type: integer
+                    fabricNodes:
+                      items:
+                        properties:
+                          nodeRef:
+                            properties:
+                              nodeId:
+                                type: integer
+                              podId:
+                                type: integer
+                            required:
+                            - nodeId
+                            - podId
+                            type: object
+                          primaryAddress:
+                            type: string
+                          secondaryAddresses:
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - nodeRef
+                        - primaryAddress
+                        type: object
+                      type: array
+                    secret:
+                      properties:
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                      required:
+                      - name
+                      - namespace
+                      type: object
+                  required:
+                  - asn
+                  - encap
+                  type: object
+                type: array
+            required:
+            - nadRefs
+            - peeringInfo
+            type: object
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'nodefabricnetworkl3peer'"
+          message: "Only one instance with name nodefabricnetworkl3peer"
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: networkfabricl3configurations.aci.fabricattachment
+spec:
+  group: aci.fabricattachment
+  names:
+    kind: NetworkFabricL3Configuration
+    listKind: NetworkFabricL3ConfigurationList
+    plural: networkfabricl3configurations
+    singular: networkfabricl3configuration
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: NetworkFabricL3Configuration allows additional configuration
+          on NAD based and regular vlans created by aci controller
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              vrfs:
+                items:
+                  properties:
+                    directlyConnectedNetworks:
+                      items:
+                        properties:
+                          bgpPeerPolicy:
+                            properties:
+                              ctrl:
+                                type: string
+                              enabled:
+                                type: boolean
+                              localASN:
+                                type: integer
+                              localASNConfig:
+                                type: string
+                              peerASN:
+                                type: integer
+                              peerCtl:
+                                type: string
+                              prefix:
+                                type: string
+                              prefixPolicy:
+                                type: string
+                              secret:
+                                description: Refers to a k8s secret which has the
+                                  BGP password in data field
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                required:
+                                - name
+                                - namespace
+                                type: object
+                            required:
+                            - peerASN
+                            type: object
+                          encap:
+                            type: integer
+                          l3OutName:
+                            type: string
+                          l3OutOnCommonTenant:
+                            type: boolean
+                          maxNodes:
+                            type: integer
+                          nodes:
+                            items:
+                              properties:
+                                nodeRef:
+                                  properties:
+                                    nodeId:
+                                      type: integer
+                                    podId:
+                                      type: integer
+                                  required:
+                                  - nodeId
+                                  - podId
+                                  type: object
+                                primaryAddress:
+                                  type: string
+                                secondaryAddresses:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - nodeRef
+                              - primaryAddress
+                              - secondaryAddresses
+                              type: object
+                            type: array
+                          primarySubnet:
+                            type: string
+                          subnets:
+                            items:
+                              properties:
+                                connectedSubnet:
+                                  type: string
+                                floatingAddress:
+                                  type: string
+                                secondaryAddress:
+                                  type: string
+                              required:
+                              - connectedSubnet
+                              type: object
+                            type: array
+                          sviType:
+                            type: string
+                          useExistingL3Out:
+                            type: boolean
+                        required:
+                        - encap
+                        - l3OutName
+                        - primarySubnet
+                        type: object
+                      type: array
+                    tenants:
+                      items:
+                        properties:
+                          bgpInstances:
+                            items:
+                              properties:
+                                action:
+                                  type: string
+                                maxPrefixes:
+                                  type: integer
+                                name:
+                                  type: string
+                              required:
+                              - maxPrefixes
+                              - name
+                              type: object
+                            type: array
+                          commonTenant:
+                            type: boolean
+                          l3OutInstances:
+                            items:
+                              properties:
+                                externalEpgs:
+                                  items:
+                                    properties:
+                                      contracts:
+                                        properties:
+                                          consumer:
+                                            items:
+                                              type: string
+                                            type: array
+                                          provider:
+                                            items:
+                                              type: string
+                                            type: array
+                                        type: object
+                                      name:
+                                        type: string
+                                      policyPrefixes:
+                                        items:
+                                          properties:
+                                            aggregate:
+                                              type: string
+                                            scope:
+                                              type: string
+                                            subnet:
+                                              type: string
+                                          required:
+                                          - subnet
+                                          type: object
+                                        type: array
+                                    required:
+                                    - name
+                                    - policyPrefixes
+                                    type: object
+                                  type: array
+                                name:
+                                  type: string
+                                podRef:
+                                  properties:
+                                    podId:
+                                      type: integer
+                                  required:
+                                  - podId
+                                  type: object
+                                rtCtrl:
+                                  type: string
+                                rtrNodes:
+                                  items:
+                                    properties:
+                                      nodeRef:
+                                        properties:
+                                          nodeId:
+                                            type: integer
+                                          podId:
+                                            type: integer
+                                        required:
+                                        - nodeId
+                                        - podId
+                                        type: object
+                                      rtrId:
+                                        type: string
+                                      staticRoutes:
+                                        items:
+                                          properties:
+                                            ctrl:
+                                              type: string
+                                            nextHops:
+                                              items:
+                                                properties:
+                                                  addr:
+                                                    type: string
+                                                  preference:
+                                                    type: integer
+                                                required:
+                                                - addr
+                                                type: object
+                                              type: array
+                                            prefix:
+                                              type: string
+                                          required:
+                                          - nextHops
+                                          - prefix
+                                          type: object
+                                        type: array
+                                    required:
+                                    - nodeRef
+                                    type: object
+                                  type: array
+                              required:
+                              - name
+                              - podRef
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    vrf:
+                      properties:
+                        common-tenant:
+                          type: boolean
+                        name:
+                          type: string
+                      type: object
+                  required:
+                  - vrf
+                  type: object
+                type: array
+            type: object
+          status:
+            properties:
+              vrfs:
+                items:
+                  properties:
+                    directlyConnectedNetworks:
+                      items:
+                        properties:
+                          bgpPeerPolicy:
+                            properties:
+                              ctrl:
+                                type: string
+                              enabled:
+                                type: boolean
+                              localASN:
+                                type: integer
+                              localASNConfig:
+                                type: string
+                              peerASN:
+                                type: integer
+                              peerCtl:
+                                type: string
+                              prefix:
+                                type: string
+                              prefixPolicy:
+                                type: string
+                              secret:
+                                description: Refers to a k8s secret which has the
+                                  BGP password in data field
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                required:
+                                - name
+                                - namespace
+                                type: object
+                            required:
+                            - peerASN
+                            type: object
+                          encap:
+                            type: integer
+                          l3OutName:
+                            type: string
+                          l3OutOnCommonTenant:
+                            type: boolean
+                          maxNodes:
+                            type: integer
+                          nodes:
+                            items:
+                              properties:
+                                nodeRef:
+                                  properties:
+                                    nodeId:
+                                      type: integer
+                                    podId:
+                                      type: integer
+                                  required:
+                                  - nodeId
+                                  - podId
+                                  type: object
+                                primaryAddress:
+                                  type: string
+                                secondaryAddresses:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - nodeRef
+                              - primaryAddress
+                              - secondaryAddresses
+                              type: object
+                            type: array
+                          primarySubnet:
+                            type: string
+                          subnets:
+                            items:
+                              properties:
+                                connectedSubnet:
+                                  type: string
+                                floatingAddress:
+                                  type: string
+                                secondaryAddress:
+                                  type: string
+                              required:
+                              - connectedSubnet
+                              type: object
+                            type: array
+                          sviType:
+                            type: string
+                          useExistingL3Out:
+                            type: boolean
+                        required:
+                        - encap
+                        - l3OutName
+                        - primarySubnet
+                        type: object
+                      type: array
+                    status:
+                      type: string
+                    tenants:
+                      items:
+                        properties:
+                          bgpInstances:
+                            items:
+                              properties:
+                                action:
+                                  type: string
+                                maxPrefixes:
+                                  type: integer
+                                name:
+                                  type: string
+                              required:
+                              - maxPrefixes
+                              - name
+                              type: object
+                            type: array
+                          commonTenant:
+                            type: boolean
+                          l3OutInstances:
+                            items:
+                              properties:
+                                externalEpgs:
+                                  items:
+                                    properties:
+                                      contracts:
+                                        properties:
+                                          consumer:
+                                            items:
+                                              type: string
+                                            type: array
+                                          provider:
+                                            items:
+                                              type: string
+                                            type: array
+                                        type: object
+                                      name:
+                                        type: string
+                                      policyPrefixes:
+                                        items:
+                                          properties:
+                                            aggregate:
+                                              type: string
+                                            scope:
+                                              type: string
+                                            subnet:
+                                              type: string
+                                          required:
+                                          - subnet
+                                          type: object
+                                        type: array
+                                    required:
+                                    - name
+                                    - policyPrefixes
+                                    type: object
+                                  type: array
+                                name:
+                                  type: string
+                                podRef:
+                                  properties:
+                                    podId:
+                                      type: integer
+                                  required:
+                                  - podId
+                                  type: object
+                                rtCtrl:
+                                  type: string
+                                rtrNodes:
+                                  items:
+                                    properties:
+                                      nodeRef:
+                                        properties:
+                                          nodeId:
+                                            type: integer
+                                          podId:
+                                            type: integer
+                                        required:
+                                        - nodeId
+                                        - podId
+                                        type: object
+                                      rtrId:
+                                        type: string
+                                      staticRoutes:
+                                        items:
+                                          properties:
+                                            ctrl:
+                                              type: string
+                                            nextHops:
+                                              items:
+                                                properties:
+                                                  addr:
+                                                    type: string
+                                                  preference:
+                                                    type: integer
+                                                required:
+                                                - addr
+                                                type: object
+                                              type: array
+                                            prefix:
+                                              type: string
+                                          required:
+                                          - nextHops
+                                          - prefix
+                                          type: object
+                                        type: array
+                                    required:
+                                    - nodeRef
+                                    type: object
+                                  type: array
+                              required:
+                              - name
+                              - podRef
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    vrf:
+                      properties:
+                        common-tenant:
+                          type: boolean
+                        name:
+                          type: string
+                      type: object
+                  required:
+                  - vrf
+                  type: object
+                type: array
+            type: object
+        type: object
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'networkfabricl3configuration'"
+          message: "Only one instance with name networkfabricl3configuration allowed"
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
 {% endif %}
 apiVersion: v1
 kind: ConfigMap
@@ -2479,12 +3112,13 @@ and aci-containers-operator images for istio.io/istio package
   - delete
 {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
-  - "aci.fabricattachment"
+  - aci.fabricattachment
   resources:
   - nodefabricnetworkattachments
   - nadvlanmaps
   - networkfabricconfigurations
   - fabricvlanpools
+  - nodefabricl3configurations
   verbs:
   - get
   - list
@@ -2492,8 +3126,15 @@ and aci-containers-operator images for istio.io/istio package
 - apiGroups:
   - aci.fabricattachment
   resources:
+  - nodefabricnetworkl3peers
+  verbs:
+  - '*'
+- apiGroups:
+  - aci.fabricattachment
+  resources:
   - nadvlanmaps/status
   - fabricvlanpools/status
+  - nodefabricl3configurations/status
   verbs:
   - get
   - list
@@ -2657,7 +3298,7 @@ rules:
 {% endif %}
 {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
-  - "aci.fabricattachment"
+  - aci.fabricattachment
   resources:
   - nodefabricnetworkattachments
   - nodefabricnetworkattachments/status
@@ -3860,6 +4501,23 @@ rules:
   - securitycontextconstraints
   verbs:
   - use
+- apiGroups:
+  - aci.fabricattachment
+  resources:
+  - nodefabricnetworkl3peers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -3919,6 +4577,10 @@ spec:
         {% if config.chained_cni_config.require_annotation_for_nad_mutation_webhook %}
         - name: REQUIRE_NAD_ANNOTATION
           value: "True"
+        {% endif %}
+        {% if config.chained_cni_config.named_container_for_fabric_bgp_peer_insertion %}
+        - name: CONTAINER_FOR_ENVVARS
+          value: {{ config.chained_cni_config.named_container_for_fabric_bgp_peer_insertion }}
         {% endif %}
         readinessProbe:
           failureThreshold: 3
@@ -3996,7 +4658,7 @@ webhooks:
       port: 443
   failurePolicy: Fail
   matchPolicy: Equivalent
-  name: network-attachment-definitions.k8s.cni.cncf.io
+  name: aci-containers-webhook-mutate-nad.netop-cni.cisco.com
   namespaceSelector: {}
   objectSelector: {}
   reinvocationPolicy: Never
@@ -4010,6 +4672,32 @@ webhooks:
     - UPDATE
     resources:
     - network-attachment-definitions
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /mutate-pod
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-mutate-pod.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - pods
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
