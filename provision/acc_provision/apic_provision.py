@@ -8003,6 +8003,7 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
     )
     data['fvTenant']['children'].append(contract)
 
+
 def add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix):
     consumer_contract = collections.OrderedDict(
         [
@@ -8215,6 +8216,7 @@ def add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix):
         ]
     )
     data['fvTenant']['children'].append(contract)
+
 
 def add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix):
     consumer_contract = collections.OrderedDict(

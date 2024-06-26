@@ -422,6 +422,7 @@ def config_default():
             "local_cert_manager_enabled": False,
             "require_annotation_for_nad_mutation_webhook": False,
             "enable_ovs_cni_support": False,
+            "named_container_for_fabric_bgp_peer_insertion": "fabric-peer",
         }
     }
     return default_config
@@ -2390,13 +2391,13 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
             if not is_cilium_chaining_enabled(config):
                 new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+                new_deployment_file = '---'.join(new_parsed_yaml)
             else:
                 cilium_template = get_jinja_template('cilium.yaml')
                 cilium_temp = ''.join(cilium_template.stream(config=config))
                 new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [
                     acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template] + [cilium_temp]
-
-            new_deployment_file = '\n---\n'.join(new_parsed_yaml)
+                new_deployment_file = '\n---\n'.join(new_parsed_yaml)
         else:
             new_deployment_file = temp
 
