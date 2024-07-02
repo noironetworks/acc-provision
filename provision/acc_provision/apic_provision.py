@@ -669,7 +669,6 @@ class ApicKubeConfig(object):
             update(data, self.mcast_pool())
             phys_name = self.config["aci_config"]["physical_domain"]["domain"]
             pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
-            update(data, self.phys_dom(phys_name, pool_name))
             update(data, self.kube_dom(apic_version))
             update(data, self.nested_dom())
             update(data, self.associate_aep())
@@ -682,6 +681,7 @@ class ApicKubeConfig(object):
             update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
             update(data, self.add_apivlan_for_second_portgroup())
             update(data, self.nested_dom_second_portgroup())
+            update(data, self.phys_dom(phys_name, pool_name))
 
         else:
             cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()

@@ -51,26 +51,6 @@
         ]
     }
 }
-/api/mo/uni/phys-kube-pdom.json
-{
-    "physDomP": {
-        "attributes": {
-            "dn": "uni/phys-kube-pdom",
-            "name": "kube-pdom",
-            "annotation": "orchestrator:aci-containers-controller"
-        },
-        "children": [
-            {
-                "infraRsVlanNs": {
-                    "attributes": {
-                        "tDn": "uni/infra/vlanns-[kube-pool]-static",
-                        "annotation": "orchestrator:aci-containers-controller"
-                    }
-                }
-            }
-        ]
-    }
-}
 /api/mo/uni/vmmp-Kubernetes/dom-kube.json
 {
     "vmmDomP": {
@@ -1104,6 +1084,26 @@ None
                             }
                         }
                     ]
+                }
+            }
+        ]
+    }
+}
+/api/mo/uni/phys-kube-pdom.json
+{
+    "physDomP": {
+        "attributes": {
+            "dn": "uni/phys-kube-pdom",
+            "name": "kube-pdom",
+            "annotation": "orchestrator:aci-containers-controller"
+        },
+        "children": [
+            {
+                "infraRsVlanNs": {
+                    "attributes": {
+                        "tDn": "uni/infra/vlanns-[kube-pool]-static",
+                        "annotation": "orchestrator:aci-containers-controller"
+                    }
                 }
             }
         ]
