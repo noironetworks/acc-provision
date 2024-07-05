@@ -188,7 +188,7 @@ rules:
   - nadvlanmaps
   - networkfabricconfigurations
   - fabricvlanpools
-  - nodefabricl3configurations
+  - networkfabricl3configurations
   verbs:
   - get
   - list
@@ -204,7 +204,7 @@ rules:
   resources:
   - nadvlanmaps/status
   - fabricvlanpools/status
-  - nodefabricl3configurations/status
+  - networkfabricl3configurations/status
   verbs:
   - get
   - list
