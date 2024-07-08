@@ -8,6 +8,8 @@ import urllib3
 import ipaddress
 from distutils.version import StrictVersion
 
+import yaml
+
 debug_http = False
 if debug_http:
     import logging
@@ -827,7 +829,8 @@ class ApicKubeConfig(object):
         vmm_name = self.config["aci_config"]["vmm_domain"]["domain"]
         vmm_inj_cluster_type = self.config["aci_config"]["vmm_domain"]["injected_cluster_type"]
         vmm_inj_cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
-        accProvisionInput = self.config["user_input"]
+        input_yaml = yaml.safe_load(self.config["user_input"])
+        accProvisionInput = yaml.safe_dump(input_yaml, sort_keys=False)
         key_data = cert_data = ''
         if self.config["aci_config"]["sync_login"]["key_data"]:
             key_data = self.config["aci_config"]["sync_login"]["key_data"].decode('ascii')

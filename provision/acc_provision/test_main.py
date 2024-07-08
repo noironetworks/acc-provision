@@ -14,6 +14,8 @@ import tarfile
 import base64
 import copy
 
+import yaml
+
 from . import acc_provision
 
 from ruamel.yaml import YAML
@@ -2190,3 +2192,17 @@ def create_certificate(input_file, cert_file, **overrides):
         assert cert_data['issuer'][1][0][1] == 'Cisco Systems'
     finally:
         os.chdir(old_working_directory)
+
+
+@in_testdir
+def test_yaml_strip():
+    # test that yaml.safe_load/yaml.safe_dump strips whitespace and
+    # comments as expected. This pattern will be used to reduce
+    # the size of vmmInjectedClusterDetails.accProvisionInput
+    # posted to APIC as it's limited to 8192 chars
+    config_file = "flavor_localhost.inp.yaml"
+    user_config = acc_provision.config_user("", config_file)
+    input_yaml = yaml.safe_load(user_config["user_input"])
+    acc_provision_input = yaml.safe_dump(input_yaml, sort_keys=False)
+    assert len(user_config["user_input"]) > len(acc_provision_input)
+    assert acc_provision_input != user_config["user_input"]
