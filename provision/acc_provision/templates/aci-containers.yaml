@@ -55,97 +55,6 @@ description: "This priority class is used for ACI-CNI resources"
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: epgs.aci.aw
-spec:
-  group: aci.aw
-  names:
-    kind: Epg
-    listKind: EpgList
-    plural: epgs
-    singular: epg
-  scope: Namespaced
-  versions:
-  - name: v1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        description: Epg describes a group of network endpoints
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: EpgSpec is the spec for an epg
-            properties:
-              consumed-contracts:
-                items:
-                  type: string
-                type: array
-              name:
-                type: string
-              provided-contracts:
-                items:
-                  type: string
-                type: array
-            type: object
-        type: object
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: contracts.aci.aw
-spec:
-  group: aci.aw
-  names:
-    kind: Contract
-    listKind: ContractList
-    plural: contracts
-    singular: contract
-  scope: Namespaced
-  versions:
-  - name: v1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        description: Contract describe a policy between two endpoint groups
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: ContractSpec is the spec for a Contract resource
-            properties:
-              allow-list:
-                items:
-                  description: WLRules are implicit allow
-                  properties:
-                    ports:
-                      properties:
-                        end:
-                          type: integer
-                        start:
-                          type: integer
-                      type: object
-                    protocol:
-                      type: string
-                  type: object
-                type: array
-              name:
-                type: string
-            type: object
-        type: object
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
   name: podifs.aci.aw
 spec:
   group: aci.aw
@@ -519,6 +428,7 @@ spec:
             type: object
         type: object
 ---
+{% if config.flavor != "k8s-overlay" %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -949,6 +859,7 @@ status:
   conditions: []
   storedVersions: []
 ---
+{% endif %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2457,9 +2368,6 @@ data:
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% endif %}
-        {% if config.flavor == "k8s-overlay" %}
-        "lb-type": "None",
-        {% endif %}
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
         {% endif %}
@@ -2914,15 +2822,6 @@ and aci-containers-operator images for istio.io/istio package
   - watch
   - get
 {% if config.kube_config.use_aci_anywhere_crd %}
-- apiGroups:
-  - "aci.aw"
-  resources:
-  - epgs
-  - contracts
-  verbs:
-  - list
-  - watch
-  - get
 - apiGroups:
   - "aci.aw"
   resources:
