@@ -3073,7 +3073,7 @@ and aci-containers-operator images for istio.io/istio package
   - nadvlanmaps
   - networkfabricconfigurations
   - fabricvlanpools
-  - nodefabricl3configurations
+  - networkfabricl3configurations
   verbs:
   - get
   - list
@@ -3089,7 +3089,7 @@ and aci-containers-operator images for istio.io/istio package
   resources:
   - nadvlanmaps/status
   - fabricvlanpools/status
-  - nodefabricl3configurations/status
+  - networkfabricl3configurations/status
   verbs:
   - get
   - list
