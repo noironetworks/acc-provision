@@ -587,8 +587,6 @@ def config_adjust_chained_mode(args, config, no_random):
                 "cert_reused": False,
             },
             "node_bd_dn": node_bd_dn,
-            "kafka": {
-            },
             "subnet_dn": {
             },
             "vrf_dn": {
@@ -790,8 +788,6 @@ def config_adjust(args, config, prov_apic, no_random):
             },
             "node_bd_dn": node_bd_dn,
             "pod_bd_dn": pod_bd_dn,
-            "kafka": {
-            },
             "subnet_dn": {
             },
             "vrf_dn": {
