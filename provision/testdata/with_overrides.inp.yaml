@@ -111,6 +111,7 @@ kube_config:
   apic_connection_retry_limit: 10
   disable_hpp_rendering: True
   taint_not_ready_node: True
+  enable_hpp_direct: True
 
 registry:
   image_prefix: noiro
