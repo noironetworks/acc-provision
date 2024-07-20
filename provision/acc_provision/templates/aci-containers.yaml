@@ -4748,8 +4748,10 @@ webhooks:
     - v1
     operations:
     - CREATE
+    - DELETE
     resources:
     - pods
+    - pods/binding
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
