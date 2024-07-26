@@ -3020,9 +3020,6 @@ data:
         {% if config.drop_log_config.disable_events %}
         "packet-event-notification-socket": "",
         {% endif %}
-        {% if config.kube_config.enable_endpointslice %}
-        "enable_endpointslice": true,
-        {% endif %}
         {% if config.nodepodif_config.enable %}
         "enable-nodepodif": true
         {% else %}
@@ -3116,9 +3113,6 @@ data:
         {% endif %}
         {% if config.drop_log_config.disable_events %}
         "packet-event-notification-socket": "",
-        {% endif %}
-        {% if config.kube_config.enable_endpointslice %}
-        "enable_endpointslice": true,
         {% endif %}
         {% if config.nodepodif_config.enable %}
         "enable-nodepodif": true,
