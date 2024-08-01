@@ -12,19 +12,19 @@ jobs:
       if: tag IS NOT present
       install:
         - pip install flake8 coverage coveralls
-        - python provision/setup.py install
+        - pip install ./provision
       script:
         - cd provision
         - coverage run --source=. -m pytest acc_provision
         - coveralls
     - stage: push-package
       if: tag IS present
-      go: 1.20.x
+      go: 1.22.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:
         - export UPSTREAM_ID=81c2369
-        - eval "$(GIMME_GO_VERSION=1.20.4 gimme)"
-        - export TRAVIS_GO_VERSION=1.20.4
+        - eval "$(GIMME_GO_VERSION=1.22.5 gimme)"
+        - export TRAVIS_GO_VERSION=1.22.5
         - export TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/aci-containers
         - export TRAVIS_BUILD_USER="$(curl -s "https://api.travis-ci.com/v3/build/$TRAVIS_BUILD_ID" | jq -r .created_by.login)"
         - go version
@@ -34,7 +34,7 @@ jobs:
         - pip install jq pyyaml pytz || travis_terminate 1
         - /tmp/cicd/travis/show-image-tags.sh || travis_terminate 1
         - /tmp/cicd/travis/check-git-tag.sh; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 140 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
-        - python provision/setup.py install || travis_terminate 1
+        - pip install ./provision || travis_terminate 1
         - /tmp/cicd/travis/clone-aci-containers-repo.sh || travis_terminate 1
         - pushd /tmp/noironetworks/aci-containers
         - git checkout -qf ${TRAVIS_TAG}
