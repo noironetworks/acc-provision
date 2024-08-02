@@ -355,7 +355,6 @@ def config_default():
             "generate_cnet_file": False,
             "generate_apic_file": False,
             "use_host_netns_volume": False,
-            "enable_endpointslice": False,
             "opflex_startup_enabled": False,
             "opflex_startup_policy_file": "/usr/local/var/lib/opflex-agent-ovs/startup/pol.json",
             "opflex_startup_policy_duration": 60,
@@ -708,7 +707,6 @@ def config_adjust(args, config, prov_apic, no_random):
     istio_profile = config["istio_config"]["install_profile"]
     istio_namespace = config["istio_config"]["istio_ns"]
     istio_operator_ns = config["istio_config"]["istio_operator_ns"]
-    enable_endpointslice = config["kube_config"]["enable_endpointslice"]
     token = str(uuid.uuid4())
     # Have tenant name in acc provision input file under aci_config section if tenant is manually created on the APIC before provisioning
     if (config["aci_config"]["tenant"]["name"]):
@@ -839,7 +837,6 @@ def config_adjust(args, config, prov_apic, no_random):
                 node_svc_subnet,
             ],
             "opflex_mode": opflex_mode,
-            "enable_endpointslice": enable_endpointslice,
         },
         "registry": {
             "configuration_version": token,
