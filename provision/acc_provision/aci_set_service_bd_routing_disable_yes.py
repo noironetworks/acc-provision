@@ -404,6 +404,7 @@ def set_service_bd_routing_disable(apic_count, config, service_bd_routing_disabl
                 break
     return service_bd_routing_disable_true_count
 
+
 # Main function
 def main(args=None):
     if args is None:
@@ -451,8 +452,8 @@ def main(args=None):
     while True:
         try:
             service_bd_routing_disable_true_count = 0
-            service_bd_routing_disable_true_count = set_service_bd_routing_disable(apic_count,
-                    config, service_bd_routing_disable_true_count)
+            service_bd_routing_disable_true_count = set_service_bd_routing_disable(
+                apic_count, config, service_bd_routing_disable_true_count)
             if service_bd_routing_disable_true_count == apic_count:
                 info(
                     "All APICs have version 6.0(4a) or higher and serviceBdRoutingDisable set to yes. Exiting the script"
