@@ -418,9 +418,8 @@ def config_default():
             "skip_node_network_provisioning": False,
             "use_global_scope_vlan": False,
             "secondary_vlans": None,
-            "auto_insertion_for_nad": False,
             "local_cert_manager_enabled": False,
-            "require_annotation_for_nad_mutation_webhook": False,
+            "require_annotation_for_nad_mutation_webhook": True,
             "enable_ovs_cni_support": False,
             "named_container_for_fabric_bgp_peer_insertion": "fabric-peer",
         }

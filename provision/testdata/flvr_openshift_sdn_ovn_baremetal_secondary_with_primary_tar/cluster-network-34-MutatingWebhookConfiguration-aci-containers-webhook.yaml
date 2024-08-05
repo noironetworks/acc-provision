@@ -1,0 +1,64 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    service.beta.openshift.io/inject-cabundle: 'true'
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /mutate-nad
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-mutate-nad.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - k8s.cni.cncf.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - network-attachment-definitions
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /mutate-pod
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-mutate-pod.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - ''
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - DELETE
+    resources:
+    - pods
+    - pods/binding
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10

@@ -20,8 +20,9 @@ data:
     \    \"secondary_interface_chaining\": true,\n            \"secondary_vlans\"\
     : [\n                \"4002-4007\",\n                \"4009\"\n            ],\n\
     \            \"primary_cni_path\": \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\"\
-    \n        },\n        \"net_config\": {\n            \"kubeapi_vlan\": 4001,\n\
-    \            \"node_subnet\": \"10.1.0.1/16\",\n        }\n    }\n }"
+    \n            \"require_annotation_for_nad_mutation_webhook\": true\n        },\n\
+    \        \"net_config\": {\n            \"kubeapi_vlan\": 4001,\n            \"\
+    node_subnet\": \"10.1.0.1/16\",\n        }\n    }\n }"
 kind: ConfigMap
 metadata:
   labels:

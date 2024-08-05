@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aci-containers-webhook
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aci-containers-webhook
+subjects:
+- kind: ServiceAccount
+  name: aci-containers-webhook
+  namespace: aci-containers-system
