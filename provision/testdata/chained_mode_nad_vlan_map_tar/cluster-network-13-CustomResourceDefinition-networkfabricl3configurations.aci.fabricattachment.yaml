@@ -102,11 +102,12 @@ spec:
                               required:
                               - nodeRef
                               - primaryAddress
-                              - secondaryAddresses
                               type: object
                             type: array
                           primarySubnet:
                             type: string
+                          requirePodToProvision:
+                            type: boolean
                           subnets:
                             items:
                               properties:
@@ -329,10 +330,13 @@ spec:
                               required:
                               - nodeRef
                               - primaryAddress
-                              - secondaryAddresses
                               type: object
                             type: array
                           primarySubnet:
+                            type: string
+                          requirePodToProvision:
+                            type: boolean
+                          status:
                             type: string
                           subnets:
                             items:
@@ -370,6 +374,8 @@ spec:
                                 maxPrefixes:
                                   type: integer
                                 name:
+                                  type: string
+                                status:
                                   type: string
                               required:
                               - maxPrefixes
@@ -468,11 +474,15 @@ spec:
                                     - nodeRef
                                     type: object
                                   type: array
+                                status:
+                                  type: string
                               required:
                               - name
                               - podRef
                               type: object
                             type: array
+                          status:
+                            type: string
                         type: object
                       type: array
                     vrf:
