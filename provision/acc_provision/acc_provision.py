@@ -2597,6 +2597,14 @@ def parse_args(show_help):
     parser.add_argument(
         '--skip-app-profile-check', action='store_true', default=False,
         help='skip app profiles presence check while tenant deletion')
+    parser.add_argument(
+        '--create-service-graph-instances', action='store_true', default=False,
+        help='Create service graph instances')
+    parser.add_argument(
+        '--delete-service-graph-instances', action='store_true', default=False,
+        help='Delete service graph instances')
+    parser.add_argument('-j', '--dumpjson', default="", metavar='file',
+                        help='output file for your apic config')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -2834,9 +2842,9 @@ def provision(args, apic_file, no_random):
     upgrade_cluster = args.upgrade
 
     prov_apic = None
-    if args.apic:
+    if args.apic or args.create_service_graph_instances:
         prov_apic = True
-    if args.delete:
+    if args.delete or args.delete_service_graph_instances:
         prov_apic = False
 
     timeout = None
@@ -2873,9 +2881,11 @@ def provision(args, apic_file, no_random):
         "provision": {
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
+            "create_service_graph_instances": args.create_service_graph_instances,
         },
         "unprovision": {
             "skip_app_profile_check": args.skip_app_profile_check,
+            "delete_service_graph_instances": args.delete_service_graph_instances,
         },
         "operator_mode": args.operator_mode,
     }
@@ -3147,6 +3157,9 @@ def main(args=None, apic_file=None, no_random=False):
     if args.skip_app_profile_check and not args.delete:
         err("Invalid configuration for skip_app_profile_check: To be used with the -d option.")
         sys.exit(1)
+
+    if args.dumpjson:
+        apic_file = args.dumpjson
 
     success = True
     if args.debug:

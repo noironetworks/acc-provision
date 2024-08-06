@@ -357,7 +357,8 @@ class Apic(object):
             else:
                 for path, config in data:
                     if path.split("/")[-1].startswith("instP-"):
-                        continue
+                        if not cfg["unprovision"]["delete_service_graph_instances"] and "_svc_" not in path.split("/")[-1]:
+                            continue
                     if path not in shared_resources:
                         resp = self.delete(path)
                         self.check_resp(resp)
@@ -666,6 +667,21 @@ class ApicKubeConfig(object):
             update(data, self.chained_mode_common_ap())
             return data
         elif "calico" not in self.config['flavor']:
+            if self.config["provision"]["create_service_graph_instances"] or \
+                    self.config["unprovision"]["delete_service_graph_instances"]:
+                sg_count = self.config["aci_config"]["service_graph_config"]["service_graph_count"]
+                update(data, self.service_graph_template())
+                update(data, self.lb_device_vip())
+                update(data, self.service_graph_bridge_domain())
+                for i in range(1, sg_count + 1):
+                    update(data, self.service_redirect_policy(i))
+                    update(data, self.service_graph_contract(i))
+                    update(data, self.device_selection_policies(i))
+                    update(data, self.service_graph_vzfilter(i))
+                    update(data, self.service_graph_external_epg(i))
+                    update(data, self.service_graph_fvrscons(i))
+                return data
+
             update(data, self.pdom_pool())
             update(data, self.vdom_pool())
             update(data, self.mcast_pool())
@@ -7789,6 +7805,2311 @@ class ApicKubeConfig(object):
             ]
         )
         self.annotateApicObjects(data)
+        return path, data
+
+    def service_graph_template(self):
+        print("INFO: Creating Service Graph Template Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-%s/AbsGraph-%s_svc_global.json" % (vrf_tn, system_id)
+        dn = "uni/tn-%s/AbsGraph-%s_svc_global" % (vrf_tn, system_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vnsAbsGraph",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("descr", ""),
+                                        ("dn", dn),
+                                        ("filterBetweenNodes", "allow-all"),
+                                        ("name", "{system_id}_svc_global".format(system_id=system_id)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("svcRuleType", "vrf"),
+                                        ("type", "legacy"),
+                                        ("uiTemplateType", "UNSPECIFIED"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsAbsTermNodeProv",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    ("name", "T2"),
+                                                                    ("nameAlias", ""),
+                                                                    ("ownerKey", ""),
+                                                                    ("ownerTag", ""),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsOutTerm",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsInTerm",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsAbsTermConn",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "attNotify",
+                                                                                                    "no",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "deviceLIfName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerKey",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerTag",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsAbsTermNodeCon",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    ("name", "T1"),
+                                                                    ("nameAlias", ""),
+                                                                    ("ownerKey", ""),
+                                                                    ("ownerTag", ""),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsOutTerm",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsInTerm",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsAbsTermConn",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "attNotify",
+                                                                                                    "no",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "deviceLIfName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerKey",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerTag",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsAbsConnection",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("adjType", "L3"),
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("connDir", "provider"),
+                                                                    (
+                                                                        "connType",
+                                                                        "external",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    ("directConnect", "no"),
+                                                                    ("name", "C1"),
+                                                                    ("nameAlias", ""),
+                                                                    ("ownerKey", ""),
+                                                                    ("ownerTag", ""),
+                                                                    ("unicastRoute", "yes"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsAbsConnectionConns",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{vrf_tn}/AbsGraph-{system_id}_svc_global/AbsTermNodeCon-T1/AbsTConn".format(vrf_tn=vrf_tn, system_id=system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsAbsConnectionConns",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{vrf_tn}/AbsGraph-{system_id}_svc_global/AbsNode-loadbalancer/AbsFConn-consumer".format(vrf_tn=vrf_tn, system_id=system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsAbsConnection",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("adjType", "L3"),
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("connDir", "provider"),
+                                                                    (
+                                                                        "connType",
+                                                                        "external",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    ("directConnect", "no"),
+                                                                    ("name", "C2"),
+                                                                    ("nameAlias", ""),
+                                                                    ("ownerKey", ""),
+                                                                    ("ownerTag", ""),
+                                                                    ("unicastRoute", "yes"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsAbsConnectionConns",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{vrf_tn}/AbsGraph-{system_id}_svc_global/AbsTermNodeProv-T2/AbsTConn".format(vrf_tn=vrf_tn, system_id=system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsAbsConnectionConns",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{vrf_tn}/AbsGraph-{system_id}_svc_global/AbsNode-loadbalancer/AbsFConn-provider".format(vrf_tn=vrf_tn, system_id=system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsAbsNode",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    (
+                                                                        "funcTemplateType",
+                                                                        "OTHER",
+                                                                    ),
+                                                                    ("funcType", "GoTo"),
+                                                                    ("isCopy", "no"),
+                                                                    ("managed", "no"),
+                                                                    (
+                                                                        "name",
+                                                                        "loadbalancer",
+                                                                    ),
+                                                                    ("nameAlias", ""),
+                                                                    ("ownerKey", ""),
+                                                                    ("ownerTag", ""),
+                                                                    (
+                                                                        "routingMode",
+                                                                        "Redirect",
+                                                                    ),
+                                                                    ("sequenceNumber", "0"),
+                                                                    ("shareEncap", "no"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsNodeToLDev",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{vrf_tn}/lDevVip-{system_id}_svc_global".format(system_id=system_id, vrf_tn=vrf_tn),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsAbsFuncConn",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "attNotify",
+                                                                                                    "no",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "connType",
+                                                                                                    "none",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "deviceLIfName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "consumer",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerKey",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerTag",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsAbsFuncConn",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "attNotify",
+                                                                                                    "no",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "connType",
+                                                                                                    "none",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "descr",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "deviceLIfName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "name",
+                                                                                                    "provider",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "nameAlias",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerKey",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "ownerTag",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def lb_device_vip(self):
+        print("INFO: Creating Load Balancer Device VIP Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-%s/lDevVip-%s_svc_global.json" % (vrf_tn, system_id)
+        iface_paths = self.config["aci_config"]["service_graph_config"]["lb_iface_paths"]
+        iface_count = len(iface_paths)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vnsLDevVip",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("activeActive", "no"),
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("contextAware", "single-Context"),
+                                        ("devtype", "PHYSICAL"),
+                                        (
+                                            "dn",
+                                            "uni/tn-{vrf_tn}/lDevVip-{system_id}_svc_global".format(vrf_tn=vrf_tn, system_id=system_id),
+                                        ),
+                                        ("funcType", "GoTo"),
+                                        ("isCopy", "no"),
+                                        ("managed", "no"),
+                                        ("mode", "legacy-Mode"),
+                                        ("name", "{system_id}_svc_global".format(system_id=system_id)),
+                                        ("promMode", "no"),
+                                        ("svcType", "OTHERS"),
+                                        ("trunking", "no"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsRsALDevToPhysDomP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "tDn",
+                                                                        "uni/phys-{system_id}-pdom".format(system_id=system_id),
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsLIf",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "encap",
+                                                                        "vlan-{}".format(self.config["net_config"]["service_vlan"]),
+                                                                    ),
+                                                                    (
+                                                                        "name",
+                                                                        "interface",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        for i in range(iface_count):
+            vnsRsCIfAttN = collections.OrderedDict(
+                [
+                    (
+                        "vnsRsCIfAttN",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "annotation",
+                                                "orchestrator:aci-containers-controller",
+                                            ),
+                                            (
+                                                "tDn",
+                                                "uni/tn-{vrf_tn}/lDevVip-{system_id}_svc_global/cDev-{system_id}-node-{i}/cIf-[interface]".format(
+                                                    system_id=system_id, vrf_tn=vrf_tn, i=i
+                                                ),
+                                            ),
+                                            (
+                                                "userdom",
+                                                ":all:",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+
+            vnsCDev = collections.OrderedDict(
+                [
+                    (
+                        "vnsCDev",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "annotation",
+                                                "orchestrator:aci-containers-controller",
+                                            ),
+                                            (
+                                                "cloneCount",
+                                                "0",
+                                            ),
+                                            (
+                                                "isCloneOperation",
+                                                "no",
+                                            ),
+                                            (
+                                                "isTemplate",
+                                                "no",
+                                            ),
+                                            (
+                                                "name",
+                                                "{system_id}-node-{i}".format(system_id=system_id, i=i),
+                                            ),
+                                            (
+                                                "userdom",
+                                                ":all:",
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "children",
+                                    [
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "vnsCIf",
+                                                    collections.OrderedDict(
+                                                        [
+                                                            (
+                                                                "attributes",
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "annotation",
+                                                                            "orchestrator:aci-containers-controller",
+                                                                        ),
+                                                                        (
+                                                                            "encap",
+                                                                            "unknown",
+                                                                        ),
+                                                                        (
+                                                                            "name",
+                                                                            "interface",
+                                                                        ),
+                                                                        (
+                                                                            "userdom",
+                                                                            ":all:",
+                                                                        ),
+                                                                    ]
+                                                                ),
+                                                            ),
+                                                            (
+                                                                "children",
+                                                                [
+                                                                    collections.OrderedDict(
+                                                                        [
+                                                                            (
+                                                                                "vnsRsCIfPathAtt",
+                                                                                collections.OrderedDict(
+                                                                                    [
+                                                                                        (
+                                                                                            "attributes",
+                                                                                            collections.OrderedDict(
+                                                                                                [
+                                                                                                    (
+                                                                                                        "annotation",
+                                                                                                        "orchestrator:aci-containers-controller",
+                                                                                                    ),
+                                                                                                    (
+                                                                                                        "tDn",
+                                                                                                        iface_paths[i],
+                                                                                                    ),
+                                                                                                    (
+                                                                                                        "userdom",
+                                                                                                        ":all:",
+                                                                                                    ),
+                                                                                                ]
+                                                                                            ),
+                                                                                        )
+                                                                                    ]
+                                                                                ),
+                                                                            )
+                                                                        ]
+                                                                    )
+                                                                ],
+                                                            ),
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        )
+                                    ],
+                                ),
+                            ]
+                        ),
+                    )
+                ]
+            )
+
+            data["vnsLDevVip"]["children"].append(vnsCDev)
+            data["vnsLDevVip"]["children"][1]["vnsLIf"]["children"].append(vnsRsCIfAttN)
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_redirect_policy(self, index):
+        print("INFO: Creating Service Redirect Policy Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/svcCont/svcRedirectPol-{}_svc_ns_svc{}.json".format(vrf_tn, system_id, index)
+        iface_paths = self.config["aci_config"]["service_graph_config"]["lb_iface_paths"]
+        iface_count = len(iface_paths)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vnsSvcRedirectPol",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("AnycastEnabled", "no"),
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("descr", ""),
+                                        ("destType", "L3"),
+                                        (
+                                            "dn",
+                                            "uni/tn-{vrf_tn}/svcCont/svcRedirectPol-{system_id}_svc_ns_svc{index}".format(
+                                                vrf_tn=vrf_tn, system_id=system_id, index=index
+                                            ),
+                                        ),
+                                        ("hashingAlgorithm", "sip-dip-prototype"),
+                                        ("maxThresholdPercent", "0"),
+                                        ("minThresholdPercent", "0"),
+                                        ("name", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("programLocalPodOnly", "no"),
+                                        ("resilientHashEnabled", "no"),
+                                        ("srcMacRewriteEnabled", "no"),
+                                        ("thresholdDownAction", "deny"),
+                                        ("thresholdEnable", "no"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        for i in range(iface_count):
+            vnsRedirectDest = collections.OrderedDict(
+                [
+                    (
+                        "vnsRedirectDest",
+                        collections.OrderedDict(
+                            [
+                                (
+                                    "attributes",
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "annotation",
+                                                "orchestrator:aci-containers-controller",
+                                            ),
+                                            (
+                                                "descr",
+                                                "bosch_sg_repro_1-node-{i}".format(i=i),
+                                            ),
+                                            ("destName", ""),
+                                            ("ip", "{}".format(ipaddress.ip_network(self.config["net_config"]["node_svc_subnet"], strict=False).network_address + 2 + i)),
+                                            ("ip2", "0.0.0.0"),
+                                            (
+                                                "mac",
+                                                ':'.join(['%02X' % ((int(part, 16) + i) % 256) for part in "FA:16:3E:6A:81:4D".split(':')]),
+                                            ),
+                                            ("name", ""),
+                                            ("nameAlias", ""),
+                                            ("podId", "1"),
+                                            (
+                                                "userdom",
+                                                ":all:",
+                                            ),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    )
+                ]
+            )
+            data["vnsSvcRedirectPol"]["children"].append(vnsRedirectDest)
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_graph_contract(self, index):
+        print("INFO: Creating Service Graph Contract Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/brc-{}_svc_ns_svc{}.json".format(vrf_tn, system_id, index)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzBrCP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        (
+                                            "dn",
+                                            "uni/tn-{}/brc-{}_svc_ns_svc{}".format(vrf_tn, system_id, index),
+                                        ),
+                                        ("intent", "install"),
+                                        ("name", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("prio", "unspecified"),
+                                        ("scope", "context"),
+                                        ("targetDscp", "unspecified"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzSubj",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "consMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    (
+                                                                        "name",
+                                                                        "loadbalancedservice",
+                                                                    ),
+                                                                    ("nameAlias", ""),
+                                                                    ("prio", "unspecified"),
+                                                                    (
+                                                                        "provMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    ("revFltPorts", "yes"),
+                                                                    (
+                                                                        "targetDscp",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vzRsSubjGraphAtt",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tnVnsAbsGraphName",
+                                                                                                    "{}_svc_global".format(system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vzRsSubjFiltAtt",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "action",
+                                                                                                    "permit",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "directives",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "priorityOverride",
+                                                                                                    "default",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tnVzFilterName",
+                                                                                                    "{}_svc_ns_svc{}".format(system_id, index),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def device_selection_policies(self, index):
+        print("INFO: Creating Device Selection Policy Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{vrf_tn}/ldevCtx-c-{system_id}_svc_ns_svc{index}-g-{system_id}_svc_global-n-loadbalancer.json".format(vrf_tn=vrf_tn, system_id=system_id, index=index)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vnsLDevCtx",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("context", ""),
+                                        ("ctrctNameOrLbl", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("descr", ""),
+                                        (
+                                            "dn",
+                                            "uni/tn-{vrf_tn}/ldevCtx-c-{system_id}_svc_ns_svc{index}-g-{system_id}_svc_global-n-loadbalancer".format(vrf_tn=vrf_tn, system_id=system_id, index=index),
+                                        ),
+                                        ("graphNameOrLbl", "{}_svc_global".format(system_id)),
+                                        ("name", ""),
+                                        ("nameAlias", ""),
+                                        ("nodeNameOrLbl", "loadbalancer"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsRsLDevCtxToLDev",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "tDn",
+                                                                        "uni/tn-{}/lDevVip-{}_svc_global".format(vrf_tn, system_id),
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsLIfCtx",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "connNameOrLbl",
+                                                                        "consumer",
+                                                                    ),
+                                                                    ("l3Dest", "yes"),
+                                                                    ("permitLog", "no"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToSvcRedirectPol",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/svcCont/svcRedirectPol-{}_svc_ns_svc{}".format(vrf_tn, system_id, index),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToLIf",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/lDevVip-{}_svc_global/lIf-interface".format(vrf_tn, system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToCustQosPol",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tnQosCustomPolName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    "all",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToBD",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/BD-{}_bd_kubernetes-service".format(vrf_tn, system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vnsLIfCtx",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "connNameOrLbl",
+                                                                        "provider",
+                                                                    ),
+                                                                    ("l3Dest", "yes"),
+                                                                    ("permitLog", "no"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            [
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToSvcRedirectPol",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/svcCont/svcRedirectPol-{}_svc_ns_svc{}".format(vrf_tn, system_id, index),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToLIf",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/lDevVip-{}_svc_global/lIf-interface".format(vrf_tn, system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToCustQosPol",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tnQosCustomPolName",
+                                                                                                    "",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    "all",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                                collections.OrderedDict(
+                                                                    [
+                                                                        (
+                                                                            "vnsRsLIfCtxToBD",
+                                                                            collections.OrderedDict(
+                                                                                [
+                                                                                    (
+                                                                                        "attributes",
+                                                                                        collections.OrderedDict(
+                                                                                            [
+                                                                                                (
+                                                                                                    "annotation",
+                                                                                                    "orchestrator:aci-containers-controller",
+                                                                                                ),
+                                                                                                (
+                                                                                                    "tDn",
+                                                                                                    "uni/tn-{}/BD-{}_bd_kubernetes-service".format(vrf_tn, system_id),
+                                                                                                ),
+                                                                                                (
+                                                                                                    "userdom",
+                                                                                                    ":all:",
+                                                                                                ),
+                                                                                            ]
+                                                                                        ),
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                        )
+                                                                    ]
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_graph_bridge_domain(self):
+        print("INFO: Creating Bridge Domain Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/BD-{}_bd_kubernetes-service.json".format(vrf_tn, system_id)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvBD",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("OptimizeWanBandwidth", "no"),
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("arpFlood", "yes"),
+                                        (
+                                            "dn",
+                                            "uni/tn-{}/BD-{}_bd_kubernetes-service".format(vrf_tn, system_id),
+                                        ),
+                                        ("epClear", "no"),
+                                        ("hostBasedRouting", "no"),
+                                        ("intersiteBumTrafficAllow", "no"),
+                                        ("intersiteL2Stretch", "no"),
+                                        ("ipLearning", "no"),
+                                        ("ipv6McastAllow", "no"),
+                                        ("limitIpLearnToSubnets", "yes"),
+                                        ("mac", "00:22:BD:F8:19:FF"),
+                                        ("mcastARPDrop", "yes"),
+                                        ("mcastAllow", "no"),
+                                        ("multiDstPktAct", "bd-flood"),
+                                        ("name", "{}_bd_kubernetes-service".format(system_id)),
+                                        ("type", "regular"),
+                                        ("unicastRoute", "yes"),
+                                        ("unkMacUcastAct", "flood"),
+                                        ("unkMcastAct", "flood"),
+                                        ("userdom", ":"),
+                                        ("v6unkMcastAct", "flood"),
+                                        ("vmac", "not-applicable"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("ctrl", "nd"),
+                                                                    ("ip", "{}".format(self.config["net_config"]["node_svc_subnet"])),
+                                                                    (
+                                                                        "ipDPLearning",
+                                                                        "enabled",
+                                                                    ),
+                                                                    ("preferred", "no"),
+                                                                    ("scope", "private"),
+                                                                    ("userdom", ":"),
+                                                                    ("virtual", "no"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsMldsn",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnMldSnoopPolName",
+                                                                        "",
+                                                                    ),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsIgmpsn",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnIgmpSnoopPolName",
+                                                                        "",
+                                                                    ),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsCtx",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "tnFvCtxName",
+                                                                        "{}".format(self.config["aci_config"]["vrf"]["name"]),
+                                                                    ),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBdToEpRet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "resolveAct",
+                                                                        "resolve",
+                                                                    ),
+                                                                    (
+                                                                        "tnFvEpRetPolName",
+                                                                        "",
+                                                                    ),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBDToOut",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    (
+                                                                        "tnL3extOutName",
+                                                                        "{}".format(self.config["aci_config"]["l3out"]["name"]),
+                                                                    ),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBDToNdP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    ("tnNdIfPolName", ""),
+                                                                    ("userdom", ":"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_graph_vzfilter(self, index):
+        print("INFO: Creating vzFilter Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/flt-{}_svc_ns_svc{}.json".format(vrf_tn, system_id, index)
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzFilter",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        (
+                                            "dn",
+                                            "uni/tn-{}/flt-{}_svc_ns_svc{}".format(vrf_tn, system_id, index),
+                                        ),
+                                        ("name", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzEntry",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("applyToFrag", "no"),
+                                                                    (
+                                                                        "arpOpc",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("dFromPort", "http"),
+                                                                    ("dToPort", "http"),
+                                                                    ("etherT", "ip"),
+                                                                    (
+                                                                        "icmpv4T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "icmpv6T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "matchDscp",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("name", "0"),
+                                                                    ("prot", "tcp"),
+                                                                    (
+                                                                        "sFromPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "sToPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("stateful", "no"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzEntry",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("applyToFrag", "no"),
+                                                                    (
+                                                                        "arpOpc",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("dFromPort", "https"),
+                                                                    ("dToPort", "https"),
+                                                                    ("etherT", "ip"),
+                                                                    (
+                                                                        "icmpv4T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "icmpv6T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "matchDscp",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("name", "1"),
+                                                                    ("prot", "tcp"),
+                                                                    (
+                                                                        "sFromPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "sToPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("stateful", "no"),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_graph_external_epg(self, index):
+        print("INFO: Creating External EPG Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/out-{}/instP-{}_svc_ns_svc{}.json".format(vrf_tn, self.config['aci_config']['l3out']['name'], system_id, index)
+        data = collections.OrderedDict(
+            [
+                (
+                    "l3extInstP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        ("descr", ""),
+                                        (
+                                            "dn",
+                                            "uni/tn-{}/out-{}/instP-{}_svc_ns_svc{}".format(vrf_tn, self.config['aci_config']['l3out']['name'], system_id, index),
+                                        ),
+                                        ("floodOnEncap", "disabled"),
+                                        ("matchT", "AtleastOne"),
+                                        ("name", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("pcEnfPref", "unenforced"),
+                                        ("prefGrMemb", "exclude"),
+                                        ("prio", "unspecified"),
+                                        ("targetDscp", "unspecified"),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsProv",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("intent", "install"),
+                                                                    (
+                                                                        "matchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    ("prio", "unspecified"),
+                                                                    (
+                                                                        "tnVzBrCPName",
+                                                                        "{}_svc_ns_svc{}".format(system_id, index),
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "l3extSubnet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("aggregate", ""),
+                                                                    (
+                                                                        "annotation",
+                                                                        "orchestrator:aci-containers-controller",
+                                                                    ),
+                                                                    ("ip", "{}/32".format(ipaddress.ip_network(self.config["net_config"]["extern_dynamic"][0], strict=False).network_address + 1 + index)),
+                                                                    (
+                                                                        "scope",
+                                                                        "import-security",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsCustQosPol",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnQosCustomPolName",
+                                                                        "",
+                                                                    ),
+                                                                    ("userdom", "all"),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def service_graph_fvrscons(self, index):
+        print("INFO: Creating fvRsCons Object", file=sys.stderr)
+        system_id = self.config["aci_config"]["system_id"]
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/out-{}/instP-default/rscons-{}_svc_ns_svc{}.json".format(vrf_tn, self.config['aci_config']['l3out']['name'], system_id, index)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvRsCons",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "annotation",
+                                            "orchestrator:aci-containers-controller",
+                                        ),
+                                        (
+                                            "dn",
+                                            "uni/tn-{}/out-{}/instP-default/rscons-{}_svc_ns_svc{}".format(vrf_tn, self.config['aci_config']['l3out']['name'], system_id, index),
+                                        ),
+                                        ("intent", "install"),
+                                        ("prio", "unspecified"),
+                                        ("tnVzBrCPName", "{}_svc_ns_svc{}".format(system_id, index)),
+                                        ("userdom", ":all:"),
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
         return path, data
 
 

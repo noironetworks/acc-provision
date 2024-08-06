@@ -1954,7 +1954,10 @@ def get_args(**overrides):
         "apic_oobm_ip": None,
         "test_run": True,
         "compare_kube_yaml_aci_op_cm_in_plain_text": True,
-        "skip_app_profile_check": False
+        "skip_app_profile_check": False,
+        "create_service_graph_instances": False,
+        "delete_service_graph_instances": False,
+        "dumpjson": ""
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
