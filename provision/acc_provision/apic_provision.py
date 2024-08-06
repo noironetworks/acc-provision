@@ -456,7 +456,8 @@ class Apic(object):
                     self.delete(cluster_tenant_path)
 
         # Finally clean any stray resources in common
-        self.clean_tagged_resources(system_id, vrf_tenant)
+        if not (cfg["unprovision"]["delete_service_graph_instances"] or cfg["unprovision"]["delete_ap_epgs"]):
+            self.clean_tagged_resources(system_id, vrf_tenant)
 
     def process_apic_version_string(self, raw):
         # Given the APIC version for example 5.2(3e), convert it to 5.2.3 for comparison
@@ -680,6 +681,29 @@ class ApicKubeConfig(object):
                     update(data, self.service_graph_vzfilter(i))
                     update(data, self.service_graph_external_epg(i))
                     update(data, self.service_graph_fvrscons(i))
+                return data
+            if self.config["provision"]["create_ap_epgs"] or \
+                    self.config["unprovision"]["delete_ap_epgs"]:
+                common_name = self.config["aci_config"]["create_ap_epgs_config"]["name"]
+                contract_count = self.config["aci_config"]["create_ap_epgs_config"]["contract_count"]
+                filter_count = self.config["aci_config"]["create_ap_epgs_config"]["filters_count"]
+                l3outs_present = self.config["aci_config"]["create_ap_epgs_config"]["l3outs_present"]
+                epgs_to_create = self.config["aci_config"]["create_ap_epgs_config"]["epgs_to_create"]
+                for flt_num in range(1, filter_count+1):
+                    update(data, self.contract_filter_template(common_name, flt_num))
+                for contract_num in range(1, contract_count + 1):
+                    update(data, self.contract_template(common_name, filter_count, contract_num))
+                for l3out_num in range(1, l3outs_present + 1):
+                    epg_dn = self.get_epg_dn(l3out_num)
+                    if not epg_dn:
+                        raise Exception("Failed to get EPG DN")
+                    update(data, self.l3out_contract_provider_template(common_name, l3out_num, l3out_num, epg_dn))
+                    # for contract_num in range(1, contract_count + 1):
+                    #     update(data, self.l3out_contract_provider_template(common_name, l3out_num, contract_num, epg_dn))
+                for l3out_num in range(1, l3outs_present + 1):
+                    update(data, self.bd_template(common_name, l3out_num))
+                for l3out_num in range(1, l3outs_present + 1):
+                    update(data, self.ap_template(common_name, l3out_num, epgs_to_create, contract_count))
                 return data
 
             update(data, self.pdom_pool())
@@ -7805,6 +7829,941 @@ class ApicKubeConfig(object):
             ]
         )
         self.annotateApicObjects(data)
+        return path, data
+
+    def ap_template(self, common_name, l3out_num, epgs_to_create, contract_count):
+        print("INFO: Creating Application Profile Template Object", file=sys.stderr)
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        ap_name = "{}-{}".format(common_name, l3out_num)
+        path = "/api/node/mo/uni/tn-{}/ap-{}.json".format(vrf_tn, ap_name)
+        bd_name = "{}-{}".format(common_name, l3out_num)
+
+        fv_aepg_list = []
+        for i in range(1, epgs_to_create + 1):
+            epg_name = "{}-{}{}".format(common_name, l3out_num, i)
+            fv_aepg_children_list = []
+            fv_aepg_children_list.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvRsBd",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "annotation",
+                                                    "",
+                                                ),
+                                                (
+                                                    "tnFvBDName",
+                                                    "{}".format(
+                                                        bd_name
+                                                    ),
+                                                ),
+                                                (
+                                                    "userdom",
+                                                    ":all:common:",
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+            fv_aepg_children_list.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvRsCustQosPol",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "annotation",
+                                                    "",
+                                                ),
+                                                (
+                                                    "tnQosCustomPolName",
+                                                    "",
+                                                ),
+                                                (
+                                                    "userdom",
+                                                    ":all:common:",
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+
+            for j in range(1, contract_count + 1):
+                contract_name = "{}-{}".format(common_name, j)
+                fv_aepg_children_list.append(
+                    collections.OrderedDict(
+                        [
+                            (
+                                "fvRsCons",
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "attributes",
+                                            collections.OrderedDict(
+                                                [
+                                                    (
+                                                        "annotation",
+                                                        "",
+                                                    ),
+                                                    (
+                                                        "intent",
+                                                        "install",
+                                                    ),
+                                                    (
+                                                        "prio",
+                                                        "unspecified",
+                                                    ),
+                                                    (
+                                                        "tnVzBrCPName",
+                                                        "{}".format(contract_name),
+                                                    ),
+                                                    (
+                                                        "userdom",
+                                                        ":all:common:",
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ]
+                    )
+                )
+
+            fv_aepg_children_list.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvRsDomAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "annotation",
+                                                    "",
+                                                ),
+                                                (
+                                                    "apiMode",
+                                                    "mgmt",
+                                                ),
+                                                (
+                                                    "bindingType",
+                                                    "none",
+                                                ),
+                                                (
+                                                    "classPref",
+                                                    "encap",
+                                                ),
+                                                (
+                                                    "customEpgName",
+                                                    "",
+                                                ),
+                                                (
+                                                    "delimiter",
+                                                    "",
+                                                ),
+                                                (
+                                                    "encap",
+                                                    "unknown",
+                                                ),
+                                                (
+                                                    "encapMode",
+                                                    "auto",
+                                                ),
+                                                (
+                                                    "epgCos",
+                                                    "Cos0",
+                                                ),
+                                                (
+                                                    "epgCosPref",
+                                                    "disabled",
+                                                ),
+                                                (
+                                                    "instrImedcy",
+                                                    "lazy",
+                                                ),
+                                                (
+                                                    "ipamDhcpOverride",
+                                                    "0.0.0.0",
+                                                ),
+                                                (
+                                                    "ipamEnabled",
+                                                    "no",
+                                                ),
+                                                (
+                                                    "ipamGateway",
+                                                    "0.0.0.0",
+                                                ),
+                                                (
+                                                    "lagPolicyName",
+                                                    "",
+                                                ),
+                                                (
+                                                    "netflowDir",
+                                                    "both",
+                                                ),
+                                                (
+                                                    "netflowPref",
+                                                    "disabled",
+                                                ),
+                                                (
+                                                    "numPorts",
+                                                    "0",
+                                                ),
+                                                (
+                                                    "portAllocation",
+                                                    "none",
+                                                ),
+                                                (
+                                                    "primaryEncap",
+                                                    "unknown",
+                                                ),
+                                                (
+                                                    "primaryEncapInner",
+                                                    "unknown",
+                                                ),
+                                                (
+                                                    "resImedcy",
+                                                    "immediate",
+                                                ),
+                                                (
+                                                    "secondaryEncapInner",
+                                                    "unknown",
+                                                ),
+                                                (
+                                                    "switchingMode",
+                                                    "native",
+                                                ),
+                                                (
+                                                    "tDn",
+                                                    "uni/phys-phys",
+                                                ),
+                                                (
+                                                    "untagged",
+                                                    "no",
+                                                ),
+                                                (
+                                                    "userdom",
+                                                    ":all:common:",
+                                                ),
+                                                (
+                                                    "vnetOnly",
+                                                    "no",
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+
+            fv_aepg_list.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvAEPg",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("annotation", ""),
+                                                ("descr", ""),
+                                                (
+                                                    "exceptionTag",
+                                                    "",
+                                                ),
+                                                (
+                                                    "floodOnEncap",
+                                                    "disabled",
+                                                ),
+                                                ("fwdCtrl", ""),
+                                                (
+                                                    "hasMcastSource",
+                                                    "no",
+                                                ),
+                                                (
+                                                    "isAttrBasedEPg",
+                                                    "no",
+                                                ),
+                                                (
+                                                    "matchT",
+                                                    "AtleastOne",
+                                                ),
+                                                (
+                                                    "name",
+                                                    "{}".format(epg_name),
+                                                ),
+                                                ("nameAlias", ""),
+                                                (
+                                                    "pcEnfPref",
+                                                    "unenforced",
+                                                ),
+                                                (
+                                                    "prefGrMemb",
+                                                    "exclude",
+                                                ),
+                                                ("prio", "level3"),
+                                                ("shutdown", "no"),
+                                                (
+                                                    "userdom",
+                                                    ":all:common:",
+                                                ),
+                                            ]
+                                        ),
+                                    ),
+                                    (
+                                        "children",
+                                        fv_aepg_children_list,
+                                    ),
+                                ]
+                            ),
+                        )
+                    ]
+                ),
+            )
+
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvAp",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("annotation", ""),
+                                        ("descr", ""),
+                                        ("dn", "uni/tn-{}/ap-{}".format(vrf_tn, ap_name)),
+                                        ("name", "{}".format(ap_name)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("prio", "unspecified"),
+                                        ("userdom", ":all:common:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                fv_aepg_list,
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def bd_template(self, common_name, l3out_num):
+        print("INFO: Creating Bridge Domain Template Object", file=sys.stderr)
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        bd_name = "{}-{}".format(common_name, l3out_num)
+        path = "/api/node/mo/uni/tn-{}/BD-{}.json".format(vrf_tn, bd_name)
+
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvBD",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("OptimizeWanBandwidth", "no"),
+                                        ("annotation", ""),
+                                        ("arpFlood", "yes"),
+                                        ("descr", ""),
+                                        ("dn", "uni/tn-{}/BD-{}".format(vrf_tn, bd_name)),
+                                        ("enableRogueExceptMac", "no"),
+                                        ("epClear", "no"),
+                                        ("epMoveDetectMode", ""),
+                                        ("hostBasedRouting", "no"),
+                                        ("intersiteBumTrafficAllow", "no"),
+                                        ("intersiteL2Stretch", "no"),
+                                        ("ipLearning", "yes"),
+                                        ("ipv6McastAllow", "no"),
+                                        ("limitIpLearnToSubnets", "yes"),
+                                        ("llAddr", "::"),
+                                        ("mac", "00:22:BD:F8:19:FF"),
+                                        ("mcastARPDrop", "yes"),
+                                        ("mcastAllow", "no"),
+                                        ("multiDstPktAct", "bd-flood"),
+                                        ("name", "{}".format(bd_name)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("serviceBdRoutingDisable", "no"),
+                                        ("type", "regular"),
+                                        ("unicastRoute", "yes"),
+                                        ("unkMacUcastAct", "proxy"),
+                                        ("unkMcastAct", "flood"),
+                                        ("userdom", ":all:common:"),
+                                        ("v6unkMcastAct", "flood"),
+                                        ("vmac", "not-applicable"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBDToNdP",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnNdIfPolName",
+                                                                        "",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBDToOut",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnL3extOutName",
+                                                                        "l3out-{}".format(l3out_num),
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsBdToEpRet",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "resolveAct",
+                                                                        "resolve",
+                                                                    ),
+                                                                    (
+                                                                        "tnFvEpRetPolName",
+                                                                        "",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsCtx",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnFvCtxName",
+                                                                        "l3out_{}_vrf".format(l3out_num),
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsIgmpsn",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnIgmpSnoopPolName",
+                                                                        "",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "fvRsMldsn",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "tnMldSnoopPolName",
+                                                                        "",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def get_epg_dn(self, l3out_num):
+        if self.config["aci_config"].get("apic_oobm_ip"):
+            apic_host = self.config["aci_config"]["apic_oobm_ip"]
+        else:
+            apic_host = self.config["aci_config"]["apic_hosts"][0]
+        apic_username = self.config["aci_config"]["apic_login"]["username"]
+        apic_password = self.config["aci_config"]["apic_login"]["password"]
+
+        cookies = apic_cookies.get((apic_host, apic_username, True))
+
+        if cookies is None:
+            data = '{"aaaUser":{"attributes":{"name": "%s", "pwd": "%s"}}}' % (
+                apic_username,
+                apic_password,
+            )
+            path = "/api/aaaLogin.json"
+            req = requests.post(
+                "https://%s%s" % (apic_host, path), data=data, verify=False
+            )
+            if req.status_code == 200:
+                resp = json.loads(req.text)
+                dbg("Login resp: {}".format(req.text))
+                token = resp["imdata"][0]["aaaLogin"]["attributes"]["token"]
+                cookies = collections.OrderedDict([("APIC-Cookie", token)])
+            else:
+                print("Login failed - {}".format(req.text))
+                print(
+                    "Addr: {} u: {} p: {}".format(
+                        apic_host, apic_username, apic_password
+                    )
+                )
+            if cookies is not None:
+                apic_cookies[(apic_host, apic_username, True)] = cookies
+
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        path = "/api/node/mo/uni/tn-{}/out-l3out-{}.json?query-target=subtree".format(
+            vrf_tn, l3out_num
+        )
+        args = dict(data=None, cookies=cookies, verify=False, params=None)
+        args.update(timeout=self.config["aci_config"]["apic_login"]["timeout"])
+        dbg("getting path: {} {}".format(path, json.dumps(args)))
+        resp = requests.get("https://%s%s" % (apic_host, path), **args)
+        respj = json.loads(resp.text)
+        for item in respj["imdata"]:
+            if item.get("l3extInstP", None):
+                if "l3out" in item["l3extInstP"]["attributes"]["name"]:
+                    return item["l3extInstP"]["attributes"]["dn"]
+        return None
+
+    def l3out_contract_provider_template(self, common_name, l3out_num, contract_num, epg_dn):
+        print("INFO: Creating L3Out Contract Provider Template Object", file=sys.stderr)
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        contract_name = "{}-{}".format(common_name, contract_num)
+
+        path = "/api/node/mo/%s/rsprov-%s.json" % (epg_dn, contract_name)
+        data = collections.OrderedDict(
+            [
+                (
+                    "fvRsProv",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("annotation", ""),
+                                        (
+                                            "dn",
+                                            "{}/rsprov-{}".format(epg_dn, contract_name),
+                                        ),
+                                        ("intent", "install"),
+                                        ("matchT", "AtleastOne"),
+                                        ("prio", "unspecified"),
+                                        ("tnVzBrCPName", "{}".format(contract_name)),
+                                        ("userdom", ":all:common:"),
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        )
+
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def contract_template(self, common_name, filter_count, contract_num):
+        print("INFO: Creating Contract Template Object", file=sys.stderr)
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        contract_name = "{}-{}".format(common_name, contract_num)
+        path = "/api/node/mo/uni/tn-%s/brc-%s.json" % (vrf_tn, contract_name)
+        vz_rs_subj_filt_att = []
+        for i in range(1, filter_count + 1):
+            filter_name = "{}-{}".format(common_name, i)
+            vz_rs_subj_filt_att.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "vzRsSubjFiltAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                (
+                                                    "action",
+                                                    "permit",
+                                                ),
+                                                (
+                                                    "annotation",
+                                                    "",
+                                                ),
+                                                (
+                                                    "directives",
+                                                    "",
+                                                ),
+                                                (
+                                                    "priorityOverride",
+                                                    "default",
+                                                ),
+                                                (
+                                                    "tnVzFilterName",
+                                                    "{}".format(filter_name),
+                                                ),
+                                                (
+                                                    "userdom",
+                                                    ":all:common:",
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
+            )
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzBrCP",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("annotation", ""),
+                                        ("descr", ""),
+                                        ("dn", "uni/tn-{}/brc-{}".format(vrf_tn, contract_name)),
+                                        ("intent", "install"),
+                                        ("name", "{}".format(contract_name)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("prio", "unspecified"),
+                                        ("scope", "context"),
+                                        ("targetDscp", "unspecified"),
+                                        ("userdom", ":all:common:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzSubj",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "consMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    (
+                                                                        "name",
+                                                                        "{}".format(contract_name),
+                                                                    ),
+                                                                    ("nameAlias", ""),
+                                                                    (
+                                                                        "prio",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "provMatchT",
+                                                                        "AtleastOne",
+                                                                    ),
+                                                                    (
+                                                                        "revFltPorts",
+                                                                        "yes",
+                                                                    ),
+                                                                    (
+                                                                        "targetDscp",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        (
+                                                            "children",
+                                                            vz_rs_subj_filt_att
+                                                        ),
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
+        return path, data
+
+    def contract_filter_template(self, common_name, flt_num):
+        print("INFO: Creating filter Template Object", file=sys.stderr)
+        vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
+        filter_name = "{}-{}".format(common_name, flt_num)
+        path = "/api/node/mo/uni/tn-%s/flt-%s.json" % (vrf_tn, filter_name)
+        d_from_port = 22
+        d_to_port = 22
+        data = collections.OrderedDict(
+            [
+                (
+                    "vzFilter",
+                    collections.OrderedDict(
+                        [
+                            (
+                                "attributes",
+                                collections.OrderedDict(
+                                    [
+                                        ("annotation", ""),
+                                        ("descr", ""),
+                                        ("dn", "uni/tn-{}/flt-{}".format(vrf_tn, filter_name)),
+                                        ("name", "{}".format(filter_name)),
+                                        ("nameAlias", ""),
+                                        ("ownerKey", ""),
+                                        ("ownerTag", ""),
+                                        ("userdom", ":all:common:"),
+                                    ]
+                                ),
+                            ),
+                            (
+                                "children",
+                                [
+                                    collections.OrderedDict(
+                                        [
+                                            (
+                                                "vzEntry",
+                                                collections.OrderedDict(
+                                                    [
+                                                        (
+                                                            "attributes",
+                                                            collections.OrderedDict(
+                                                                [
+                                                                    ("annotation", ""),
+                                                                    (
+                                                                        "applyToFrag",
+                                                                        "no",
+                                                                    ),
+                                                                    (
+                                                                        "arpOpc",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "dFromPort",
+                                                                        "{}".format(d_from_port + flt_num),
+                                                                    ),
+                                                                    (
+                                                                        "dToPort",
+                                                                        "{}".format(d_to_port + flt_num),
+                                                                    ),
+                                                                    ("descr", ""),
+                                                                    (
+                                                                        "etherT",
+                                                                        "ip",
+                                                                    ),
+                                                                    (
+                                                                        "icmpv4T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "icmpv6T",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "matchDscp",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "name",
+                                                                        "{}".format(filter_name),
+                                                                    ),
+                                                                    ("nameAlias", ""),
+                                                                    (
+                                                                        "prot",
+                                                                        "tcp",
+                                                                    ),
+                                                                    (
+                                                                        "sFromPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    (
+                                                                        "sToPort",
+                                                                        "unspecified",
+                                                                    ),
+                                                                    ("stateful", "no"),
+                                                                    ("tcpRules", ""),
+                                                                    (
+                                                                        "userdom",
+                                                                        ":all:common:",
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        )
+                                                    ]
+                                                ),
+                                            )
+                                        ]
+                                    )
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        self.annotateApicObjects(data)
+        dbg("{}".format(json.dumps(data, indent=4)))
         return path, data
 
     def service_graph_template(self):

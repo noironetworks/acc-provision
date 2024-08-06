@@ -2605,6 +2605,12 @@ def parse_args(show_help):
         help='Delete service graph instances')
     parser.add_argument('-j', '--dumpjson', default="", metavar='file',
                         help='output file for your apic config')
+    parser.add_argument(
+        '--create-ap-epgs', action='store_true', default=False,
+        help='Create contacts')
+    parser.add_argument(
+        '--delete-ap-epgs', action='store_true', default=False,
+        help='Delete contracts')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -2842,9 +2848,9 @@ def provision(args, apic_file, no_random):
     upgrade_cluster = args.upgrade
 
     prov_apic = None
-    if args.apic or args.create_service_graph_instances:
+    if args.apic or args.create_service_graph_instances or args.create_ap_epgs:
         prov_apic = True
-    if args.delete or args.delete_service_graph_instances:
+    if args.delete or args.delete_service_graph_instances or args.delete_ap_epgs:
         prov_apic = False
 
     timeout = None
@@ -2882,10 +2888,12 @@ def provision(args, apic_file, no_random):
             "prov_apic": prov_apic,
             "debug_apic": args.debug,
             "create_service_graph_instances": args.create_service_graph_instances,
+            "create_ap_epgs": args.create_ap_epgs,
         },
         "unprovision": {
             "skip_app_profile_check": args.skip_app_profile_check,
             "delete_service_graph_instances": args.delete_service_graph_instances,
+            "delete_ap_epgs": args.delete_ap_epgs,
         },
         "operator_mode": args.operator_mode,
     }

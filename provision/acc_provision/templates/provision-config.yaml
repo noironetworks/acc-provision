@@ -48,6 +48,13 @@ aci_config:
   #     - "topology/pod-2/protpaths-101-102/pathep-[bosch_sq_repro_dummy_vpc_1]"
   #   service_graph_count: 2                            # Number of service graph instances to be created, default is 1
 
+  # create_ap_epgs_config:
+  #   name: flt-test
+  #   contract_count: 200
+  #   filters_count: 10
+  #   l3outs_present: 6
+  #   epgs_to_create: 18
+
 #
 # Networks used by ACI containers
 #
