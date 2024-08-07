@@ -1583,7 +1583,17 @@ def test_helpmsg():
         finally:
             sys.stdout = origout
         tmpout.flush()
-        assert filecmp.cmp(tmpout.name, "help.stdout.txt", shallow=False)
+
+        with open(tmpout.name, "r") as f:
+            tmpout_content = f.readlines()
+
+        with open("help.stdout.txt", "r") as f:
+            reference_content = f.readlines()
+        
+        print("Captured Output:\n", ''.join(tmpout_content))
+        print("Reference Output:\n", ''.join(reference_content))
+        
+        assert tmpout_content == reference_content, "The contents of the files do not match."
 
 
 @in_testdir
@@ -1957,7 +1967,9 @@ def get_args(**overrides):
         "skip_app_profile_check": False,
         "create_service_graph_instances": False,
         "delete_service_graph_instances": False,
-        "dumpjson": ""
+        "dumpjson": "",
+        "create_ap_epgs": False,
+        "delete_ap_epgs": False
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
