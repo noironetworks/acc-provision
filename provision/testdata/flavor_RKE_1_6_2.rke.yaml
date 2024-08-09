@@ -75,6 +75,7 @@ network:
     opflex_startup_resolve_aft_conn: "true"
     opflex_switch_sync_delay: "10"
     opflex_switch_sync_dynamic: "5"
+    unknown_mac_unicast_action: "flood"
 services:
   kube-controller:
     cluster_cidr: "10.2.0.1/16,12.3.0.1/16"

@@ -110,6 +110,7 @@ kube_config:
   opflex_startup_resolve_aft_conn: True
   opflex_switch_sync_delay: 10
   opflex_switch_sync_dynamic: 5
+  unknown_mac_unicast_action: "flood"
 
 registry:
   image_prefix: quay.io/noiro
