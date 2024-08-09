@@ -1516,26 +1516,26 @@ def test_flavor_RKE_1_6_0_base():
 
 
 @in_testdir
-def test_flavor_RKE_1_5_12_base():
+def test_flavor_RKE_1_5_13_base():
     run_provision(
-        "flavor_RKE_1_5_12.inp.yaml",
-        "flavor_RKE_1_5_12.rke.yaml",
+        "flavor_RKE_1_5_13.inp.yaml",
+        "flavor_RKE_1_5_13.rke.yaml",
         None,
         None,
-        "flavor_RKE_1_5_12.apic.txt",
-        overrides={"flavor": "RKE-1.5.12"}
+        "flavor_RKE_1_5_13.apic.txt",
+        overrides={"flavor": "RKE-1.5.13"}
     )
 
 
 @in_testdir
-def test_flavor_RKE_1_6_1_base():
+def test_flavor_RKE_1_6_2_base():
     run_provision(
-        "flavor_RKE_1_6_1.inp.yaml",
-        "flavor_RKE_1_6_1.rke.yaml",
+        "flavor_RKE_1_6_2.inp.yaml",
+        "flavor_RKE_1_6_2.rke.yaml",
         None,
         None,
-        "flavor_RKE_1_6_1.apic.txt",
-        overrides={"flavor": "RKE-1.6.1"}
+        "flavor_RKE_1_6_2.apic.txt",
+        overrides={"flavor": "RKE-1.6.2"}
     )
 
 
