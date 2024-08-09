@@ -1540,8 +1540,6 @@ spec:
                   code after modifying this file7 Add custom validation using kubebuilder
                   tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html'
                 type: string
-            required:
-            - state
             type: object
         type: object
     served: true
@@ -1682,6 +1680,10 @@ spec:
                         applicationProfile:
                           type: string
                         discoveryType:
+                          enum:
+                          - LLDP
+                          - AEP
+                          - ""
                           type: string
                         name:
                           type: string
@@ -1730,8 +1732,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - rule: "self.metadata.name == 'networkfabricconfiguration'"
-          message: "Only one instance with name networkfabricconfiguration allowed"
+        - message: Only one instance with name networkfabricconfiguration allowed
+          rule: self.metadata.name == '
     served: true
     storage: true
     subresources:
@@ -1973,18 +1975,45 @@ spec:
                         properties:
                           bgpPeerPolicy:
                             properties:
+                              allowedSelfASCount:
+                                minimum: 1
+                                type: integer
                               ctrl:
-                                type: string
+                                items:
+                                  enum:
+                                  - AllowSelfAS
+                                  - ASOverride
+                                  - DisablePeerASCheck
+                                  - Next-hopSelf
+                                  - SendCommunity
+                                  - SendExtendedCommunity
+                                  - SendDomainPath
+                                  - BFD
+                                  - DisableConnectedCheck
+                                  - RemovePrivateAS
+                                  - RemoveAllPrivateAS
+                                  - ReplacePrivateASWithLocalAS
+                                  type: string
+                                type: array
+                              eBGPTTL:
+                                maximum: 255
+                                minimum: 1
+                                type: integer
                               enabled:
                                 type: boolean
                               localASN:
+                                minimum: 1
                                 type: integer
                               localASNConfig:
+                                enum:
+                                - noPrepend+replace-as+dual-as
+                                - no-prepend
+                                - no-options
+                                - no-prepend+replace-as
                                 type: string
                               peerASN:
+                                minimum: 1
                                 type: integer
-                              peerCtl:
-                                type: string
                               prefix:
                                 type: string
                               prefixPolicy:
@@ -2001,6 +2030,10 @@ spec:
                                 - name
                                 - namespace
                                 type: object
+                              weight:
+                                maximum: 65535
+                                minimum: 0
+                                type: integer
                             required:
                             - peerASN
                             type: object
@@ -2011,6 +2044,7 @@ spec:
                           l3OutOnCommonTenant:
                             type: boolean
                           maxNodes:
+                            minimum: 2
                             type: integer
                           nodes:
                             items:
@@ -2054,6 +2088,10 @@ spec:
                               type: object
                             type: array
                           sviType:
+                            default: floating_svi
+                            enum:
+                            - floating_svi
+                            - svi
                             type: string
                           useExistingL3Out:
                             type: boolean
@@ -2105,9 +2143,25 @@ spec:
                                         items:
                                           properties:
                                             aggregate:
-                                              type: string
+                                              items:
+                                                enum:
+                                                - export-rtctrl
+                                                - import-rtctrl
+                                                - shared-rtctrl
+                                                type: string
+                                              maxItems: 3
+                                              type: array
                                             scope:
-                                              type: string
+                                              items:
+                                                enum:
+                                                - export-rtctrl
+                                                - import-rtctrl
+                                                - shared-rtctrl
+                                                - shared-security
+                                                - import-security
+                                                type: string
+                                              maxItems: 5
+                                              type: array
                                             subnet:
                                               type: string
                                           required:
@@ -2129,6 +2183,9 @@ spec:
                                   - podId
                                   type: object
                                 rtCtrl:
+                                  enum:
+                                  - export
+                                  - export,import
                                   type: string
                                 rtrNodes:
                                   items:
@@ -2201,18 +2258,45 @@ spec:
                         properties:
                           bgpPeerPolicy:
                             properties:
+                              allowedSelfASCount:
+                                minimum: 1
+                                type: integer
                               ctrl:
-                                type: string
+                                items:
+                                  enum:
+                                  - AllowSelfAS
+                                  - ASOverride
+                                  - DisablePeerASCheck
+                                  - Next-hopSelf
+                                  - SendCommunity
+                                  - SendExtendedCommunity
+                                  - SendDomainPath
+                                  - BFD
+                                  - DisableConnectedCheck
+                                  - RemovePrivateAS
+                                  - RemoveAllPrivateAS
+                                  - ReplacePrivateASWithLocalAS
+                                  type: string
+                                type: array
+                              eBGPTTL:
+                                maximum: 255
+                                minimum: 1
+                                type: integer
                               enabled:
                                 type: boolean
                               localASN:
+                                minimum: 1
                                 type: integer
                               localASNConfig:
+                                enum:
+                                - noPrepend+replace-as+dual-as
+                                - no-prepend
+                                - no-options
+                                - no-prepend+replace-as
                                 type: string
                               peerASN:
+                                minimum: 1
                                 type: integer
-                              peerCtl:
-                                type: string
                               prefix:
                                 type: string
                               prefixPolicy:
@@ -2229,6 +2313,10 @@ spec:
                                 - name
                                 - namespace
                                 type: object
+                              weight:
+                                maximum: 65535
+                                minimum: 0
+                                type: integer
                             required:
                             - peerASN
                             type: object
@@ -2239,6 +2327,7 @@ spec:
                           l3OutOnCommonTenant:
                             type: boolean
                           maxNodes:
+                            minimum: 2
                             type: integer
                           nodes:
                             items:
@@ -2284,6 +2373,10 @@ spec:
                               type: object
                             type: array
                           sviType:
+                            default: floating_svi
+                            enum:
+                            - floating_svi
+                            - svi
                             type: string
                           useExistingL3Out:
                             type: boolean
@@ -2339,9 +2432,25 @@ spec:
                                         items:
                                           properties:
                                             aggregate:
-                                              type: string
+                                              items:
+                                                enum:
+                                                - export-rtctrl
+                                                - import-rtctrl
+                                                - shared-rtctrl
+                                                type: string
+                                              maxItems: 3
+                                              type: array
                                             scope:
-                                              type: string
+                                              items:
+                                                enum:
+                                                - export-rtctrl
+                                                - import-rtctrl
+                                                - shared-rtctrl
+                                                - shared-security
+                                                - import-security
+                                                type: string
+                                              maxItems: 5
+                                              type: array
                                             subnet:
                                               type: string
                                           required:
@@ -2363,6 +2472,9 @@ spec:
                                   - podId
                                   type: object
                                 rtCtrl:
+                                  enum:
+                                  - export
+                                  - export,import
                                   type: string
                                 rtrNodes:
                                   items:
@@ -2431,8 +2543,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - rule: "self.metadata.name == 'networkfabricl3configuration'"
-          message: "Only one instance with name networkfabricl3configuration allowed"
+        - message: Only one instance with name networkfabricl3configuration allowed
+          rule: self.metadata.name == 'networkfabricl3configuration'
     served: true
     storage: true
     subresources:
@@ -4516,7 +4628,6 @@ spec:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
 {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
-{% if config.chained_cni_config.auto_insertion_for_nad %}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -4570,6 +4681,8 @@ rules:
   - aci.fabricattachment
   resources:
   - nodefabricnetworkl3peers
+  - networkfabricconfigurations
+  - networkfabricl3configurations
   verbs:
   - get
   - list
@@ -4768,6 +4881,68 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /validate-networkfabricconfiguration
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-validate-networkfabricconfiguration.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - aci.fabricattachment
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - networkfabricconfigurations
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /validate-networkfabricl3configuration
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-validate-networkfabricl3configuration.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - aci.fabricattachment
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - networkfabricl3configurations
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
 {% if config.chained_cni_config.local_cert_manager_enabled %}
 ---
 apiVersion: apps/v1
@@ -4851,6 +5026,5 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/control-plane
         operator: Exists
-{% endif %}
 {% endif %}
 {% endif %}

@@ -211,9 +211,6 @@ data:
                 {% if config.user_config.chained_cni_config.primary_cni_path %}
                 "primary_cni_path": {{config.chained_cni_config.primary_cni_path|json}}
                 {% endif %}
-                {% if config.user_config.chained_cni_config.auto_insertion_for_nad %}
-                "auto_insertion_for_nad": {{config.chained_cni_config.auto_insertion_for_nad|json}},
-                {% endif %}
                 {% if config.user_config.chained_cni_config.local_cert_manager_enabled %}
                 "local_cert_manager_enabled": {{config.chained_cni_config.local_cert_manager_enabled|json}},
                 {% endif %}

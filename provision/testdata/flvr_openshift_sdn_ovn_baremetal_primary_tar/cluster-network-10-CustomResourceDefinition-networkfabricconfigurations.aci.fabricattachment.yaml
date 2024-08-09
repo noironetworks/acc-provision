@@ -90,6 +90,10 @@ spec:
                               type: array
                           type: object
                         discoveryType:
+                          enum:
+                          - LLDP
+                          - AEP
+                          - ''
                           type: string
                         name:
                           type: string
@@ -113,7 +117,7 @@ spec:
         type: object
         x-kubernetes-validations:
         - message: Only one instance with name networkfabricconfiguration allowed
-          rule: self.metadata.name == 'networkfabricconfiguration'
+          rule: self.metadata.name == '
     served: true
     storage: true
     subresources:

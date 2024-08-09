@@ -24,7 +24,6 @@ net_config:
 chained_cni_config:
   secondary_interface_chaining: true
   primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
-  auto_insertion_for_nad: true
   local_cert_manager_enabled: true
   require_annotation_for_nad_mutation_webhook: true
   secondary_vlans:

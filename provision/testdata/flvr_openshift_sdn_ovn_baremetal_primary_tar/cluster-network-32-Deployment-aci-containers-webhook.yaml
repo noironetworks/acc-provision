@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: aci-containers-webhook
+  name: aci-containers-webhook
+  namespace: aci-containers-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aci-containers-webhook
+  template:
+    metadata:
+      labels:
+        app: aci-containers-webhook
+    spec:
+      containers:
+      - env:
+        - name: WATCH_NAMESPACE
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: REQUIRE_NAD_ANNOTATION
+          value: 'True'
+        - name: CONTAINER_FOR_ENVVARS
+          value: fabric-peer
+        image: noiro/aci-containers-webhook:6.1.1.1.81c2369
+        imagePullPolicy: Always
+        name: aci-containers-webhook
+        ports:
+        - containerPort: 8443
+          name: webhook-server
+        - containerPort: 8081
+          name: health-probe
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: Content-Type
+              value: application/json
+            path: /readyz
+            port: health-probe
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs/
+          name: tls-key-pair
+          readOnly: true
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      serviceAccount: aci-containers-webhook
+      serviceAccountName: aci-containers-webhook
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      volumes:
+      - name: tls-key-pair
+        secret:
+          defaultMode: 420
+          secretName: aci-containers-webhook
