@@ -224,6 +224,9 @@ network:
     {% if config.kube_config.opflex_switch_sync_dynamic != 10 %}
     opflex_switch_sync_dynamic: "{{ config.kube_config.opflex_switch_sync_dynamic }}"
     {% endif %}
+    {% if config.kube_config.unknown_mac_unicast_action %}
+    unknown_mac_unicast_action: "{{ config.kube_config.unknown_mac_unicast_action }}"
+    {% endif %}
 services:
   kube-controller:
     {% if config.net_config.pod_subnet %}

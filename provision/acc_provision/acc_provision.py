@@ -2189,9 +2189,9 @@ def generate_rancher_1_6_0_yaml(config, operator_output, operator_tar, operator_
             template.stream(config=config).dump(operator_output)
 
 
-def generate_rancher_1_5_12_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_1_5_13_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-12.yaml')
+        template = get_jinja_template('aci-network-provider-cluster-1-5-13.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2212,9 +2212,9 @@ def generate_rancher_1_5_12_yaml(config, operator_output, operator_tar, operator
             template.stream(config=config).dump(operator_output)
 
 
-def generate_rancher_1_6_1_yaml(config, operator_output, operator_tar, operator_cr_output):
+def generate_rancher_1_6_2_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-1.yaml')
+        template = get_jinja_template('aci-network-provider-cluster-1-6-2.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
