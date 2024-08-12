@@ -111,7 +111,12 @@ kube_config:
   apic_connection_retry_limit: 10
   disable_hpp_rendering: True
   taint_not_ready_node: True
+<<<<<<< HEAD
   unkown_mac_unicast_action: "flood"
+=======
+  enable_hpp_direct: True
+  unknown_mac_unicast_action: "flood"
+>>>>>>> d909d0ee... Fixed typo in unknown-mac-unicast-action
 
 registry:
   image_prefix: noiro

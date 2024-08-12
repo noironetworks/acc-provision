@@ -159,7 +159,12 @@ registry:
   # add_external_contract_to_default_epg: True          # override if needed, default is False
   # apic_connection_retry_limit: 5                      # number of times the controller tries to communicate with APIC before switching to next APIC if unsuccessful, default is 5
   # taint_not_ready_node: True                          # default is False, set to True if you want to make the node in not ready state unschedulable till the host agent initalization is complete.
+<<<<<<< HEAD
   # unkown_mac_unicast_action: "flood"                  # override if needed, default is "proxy"
+=======
+  # enable_hpp_direct: True                             # default is False, set to True to enable HPP distribution via Kubernetes control plane for faster convergence and reduce load on fabric
+  # unknown_mac_unicast_action: "flood"                  # override if needed, default is "proxy"
+>>>>>>> d909d0ee... Fixed typo in unknown-mac-unicast-action
 
 #
 # Configuration for ACI CNI Operator
