@@ -2568,8 +2568,8 @@ data:
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
         "chained-mode": true,
-        {% if config.kube_config.unkown_mac_unicast_action %}
-        "unkown-mac-unicast-action": {{config.kube_config.unkown_mac_unicast_action|json}},
+        {% if config.kube_config.unknown_mac_unicast_action %}
+        "unknown-mac-unicast-action": {{config.kube_config.unknown_mac_unicast_action|json}},
         {% endif %}
         {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{config.chained_cni_config.primary_cni_path|json}},
@@ -2630,8 +2630,8 @@ data:
         {% if config.kube_config.aci_multipod %}
         "aci-multipod": {{config.kube_config.aci_multipod|json}},
         {% endif %}
-        {% if config.kube_config.unkown_mac_unicast_action %}
-        "unkown-mac-unicast-action": {{config.kube_config.unkown_mac_unicast_action|json}},
+        {% if config.kube_config.unknown_mac_unicast_action %}
+        "unknown-mac-unicast-action": {{config.kube_config.unknown_mac_unicast_action|json}},
         {% endif %}
         {% if config.kube_config.enable_opflex_agent_reconnect  %}
         "enable-opflex-agent-reconnect": {{config.kube_config.enable_opflex_agent_reconnect|json}},
