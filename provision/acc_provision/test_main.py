@@ -1817,6 +1817,17 @@ def test_aci_cilium_chaining():
 
 
 @in_testdir
+def test_acc_provision_operator_exclude():
+    run_provision(
+        "acc_provision_operator_exclude.inp.yaml",
+        "acc_provision_operator_exclude.kube.yaml",
+        None,
+        None,
+        None,
+    )
+
+
+@in_testdir
 def test_flvr_calico_3_26_3_multiple_vrf_uc2():
     run_provision(
         "flavor_calico_3.26.3_multiple_vrf_uc2.inp.yaml",
