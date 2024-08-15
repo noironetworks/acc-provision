@@ -231,6 +231,7 @@ spec:
           {% else %}
           value: "info"
           {% endif %}
+      {% if not 'acc_provision_operator' in config or config.acc_provision_operator.exclude != True %}
       - env:
         - name: ANSIBLE_GATHERING
           value: explicit
@@ -266,6 +267,7 @@ spec:
         name: acc-provision-operator
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+      {% endif %}
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
