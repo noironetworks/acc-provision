@@ -162,7 +162,7 @@ Add following configuration in the acc provision input file:
 ```sh
 drop_log_config:
   enable: true
-  disable_event: true
+  disable_events: true
 ```
 
 Run `acc-provision` tool on updated acc provision input file, delete old aci_deployment.yaml and apply newly generated aci_deployment.yaml
