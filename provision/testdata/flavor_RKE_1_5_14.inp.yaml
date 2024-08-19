@@ -26,11 +26,13 @@ aci_config:
   vmm_domain:
     encap_type: vxlan
     mcast_range:
-        start: 225.2.1.1
-        end: 225.2.255.255
+      start: 225.2.1.1
+      end: 225.2.255.255
+    controller: my-controller
   apic_refreshticker_adjust: 1
   apic_subscription_delay: 1
   opflex_device_delete_timeout: 1
+  client_ssl: false
 
 net_config:
   node_subnet:
@@ -49,6 +51,7 @@ net_config:
   disable_wait_for_network: True
   duration_wait_for_network: 200
   interface_mtu_headroom: 51
+  pod_subnet_chunk_size: 64
 
 kube_config:
   aci_multipod: True
@@ -58,7 +61,7 @@ kube_config:
   use_cluster_role: False
   no_wait_for_service_ep_readiness: True
   service_graph_endpoint_add_delay:
-    delay: 30 
+    delay: 30
     services:
     - name: "service-name-1"
       namespace: "service-ns-1"
@@ -69,6 +72,12 @@ kube_config:
   snat_operator:
     disable_periodic_snat_global_info_sync: True
     sleep_time_snat_global_info_sync: 60
+    contract_scope: "tenant"
+    snat_namespace: "my-snat-namespace"
+    port_range:
+      start: 4000
+      end: 60000
+      ports_per_node: 4000
   hpp_optimization: True
   opflex_agent_opflex_asyncjson_enabled: True
   opflex_agent_ovs_asyncjson_enabled: True
@@ -110,9 +119,14 @@ kube_config:
   opflex_startup_resolve_aft_conn: True
   opflex_switch_sync_delay: 10
   opflex_switch_sync_dynamic: 5
-  unknown_mac_unicast_action: "flood"
+  unknown_mac_unicast_action: flood
   enable_hpp_direct: True
   opflex_agent_reset_wait_delay: 60
+  use_acicni_priority_class: true
+  no_priority_class: true
+  max_nodes_svc_graph: 64
+  enable_endpointslice: true
+  use_privileged_containers: true
 
 registry:
   image_prefix: quay.io/noiro
@@ -124,9 +138,9 @@ registry:
   openvswitch_version: 71d04aa713ff90ce26382bc234941beff9e51a365b3f85c76666a524b7384766
 
 logging:
-  controller_log_level: info
-  hostagent_log_level: info
-  opflexagent_log_level: info
+  controller_log_level: debug
+  hostagent_log_level: debug
+  opflexagent_log_level: warn
 
 sriov_config:
   enable: True
@@ -136,3 +150,6 @@ nodepodif_config:
 
 drop_log_config:
   disable_events: True
+
+multus:
+  disable: false
