@@ -1042,8 +1042,11 @@ This section explains features / configuration options available in acc provisio
 - [Automatic ingress contract assignment for service type LoadBalancer](ingress-contract-assignment-for-lb-service.md)
 - [Exclude cluster nodes from snat redirect](node-snat-redirect-exclude.md)
 - [VMWare vSphere DVS ELAG](vsphere-dvs-elag.md)
-- [Host Protection Policies Optimization](hpp-optimization.md)
 - [Generate tar.gz for cluster upgrade](generate-tar-for-upgrade.md)
+- Host Protection Policy
+    - [Host Protection Policies Optimization](hpp-optimization.md)
+    - [Disable Host Protection Policy Rendering](disable-hpp-rendering.md)
+    - [Host Protection Policies Distribution Optimization](hpp-distribution-optimization.md)
 - Opflex Agent
     - [Drop Log](opflex-agent-drop-log.md)
     - [Asyncjson](opflex-agent-asyncjson.md)
@@ -1051,17 +1054,21 @@ This section explains features / configuration options available in acc provisio
     - [Policy retry delay timer](opflex-agent-policy-retry-delay-timer.md)
     - [Enable opflex agent reconnect after vm migration is complete](enable-opflex-agent-reconnect.md)
     - [OpFlex support for ERSPAN with OVS](opflex-agent-erspan.md)
+    - [Opflex agent reset wait delay timer](opflex-agent-reset-wait-delay-timer.md)
 - ACI Pod
     - [Log level](aci-pods-log-level.md)
     - [Memory request and limit](aci-pods-memory-request-limit.md)
     - [Priority Class](aci-pods-priority-class.md)
     - [Toleration Seconds Configuration](toleration-seconds.md)
     - [Image registry](aci-pods-image-registry.md)
+    - [Exclude acc provision operator container](acc-provision-operator-exclude.md)
 - APIC
     - [ACI day-zero provision using APIC Out Of Band management IP](apic-oobm-ip.md)
     - [APIC refresh time and refresh ticker](apic-refresh-time-ticker.md)
 - [PBR tracking for non snat, service monitor interval](pbr-tacking-non-snat-and-service-monitor-interval.md)
 - [SNAT Service Graph Contract Scope](snat-operator-contract-scope.md)
+- [Taint NotReady Node](taint-not-ready-node.md)
+- [Service BD - Unknown MAC unicast action](unknown-mac-unicast-action.md)
 
 
 # Troubleshooting Kubernetes Integration
