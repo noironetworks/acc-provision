@@ -113,6 +113,7 @@ kube_config:
   taint_not_ready_node: True
   enable_hpp_direct: True
   unknown_mac_unicast_action: "flood"
+  opflex_agent_reset_wait_delay: 10
 
 registry:
   image_prefix: noiro
