@@ -52,10 +52,10 @@ network:
     controller_log_level: "{{ config.logging.controller_log_level }}"
     {% endif %}
     {% if config.logging.hostagent_log_level != "info" %}
-    hostagent_log_level: "{{ config.logging.hostagent_log_level }}"
+    host_agent_log_level: "{{ config.logging.hostagent_log_level }}"
     {% endif %}
     {% if config.logging.opflexagent_log_level != "info" %}
-    opflexagent_log_level: "{{ config.logging.opflexagent_log_level }}"
+    opflex_log_level: "{{ config.logging.opflexagent_log_level }}"
     {% endif %}
     {% if config.kube_config.ovs_memory_limit != "1Gi" %}
     ovs_memory_limit: "{{ config.kube_config.ovs_memory_limit }}"
@@ -232,6 +232,54 @@ network:
     {% endif %}
     {% if config.kube_config.opflex_agent_reset_wait_delay %}
     opflex_agent_reset_wait_delay: "{{ config.kube_config.opflex_agent_reset_wait_delay|lower() }}"
+    {% endif %}
+    {% if config.aci_config.vmm_domain.controller != "rke" %}
+    vmm_controller: "{{ config.aci_config.vmm_domain.controller }}"
+    {% endif %}
+    {% if config.kube_config.enable_endpointslice %}
+    enable_endpoint_slice: "{{ config.kube_config.enable_endpointslice|lower() }}"
+    {% endif %}
+    {% if config.kube_config.use_acicni_priority_class  %}
+    use_aci_cni_priority_class: "{{ config.kube_config.use_acicni_priority_class|lower() }}"
+    {% endif %}
+    {% if config.kube_config.no_priority_class %}
+    no_priority_class: "{{ config.kube_config.no_priority_class|lower() }}"
+    {% endif %}
+    {% if config.net_config.pod_subnet_chunk_size != 32 %}
+    pod_subnet_chunk_size: "{{ config.net_config.pod_subnet_chunk_size}}"
+    {% endif %}
+    {% if config.kube_config.max_nodes_svc_graph != 32 %}
+    max_nodes_svc_graph: "{{ config.kube_config.max_nodes_svc_graph }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.contract_scope != "global" %}
+    snat_contract_scope: "{{ config.kube_config.snat_operator.contract_scope }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.snat_namespace != "aci-containers-system" %}
+    snat_namespace: "{{ config.kube_config.snat_operator.snat_namespace }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.port_range.start != 5000 %}
+    snat_port_range_start: "{{ config.kube_config.snat_operator.port_range.start }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.port_range.end != 65000 %}
+    snat_port_range_end: "{{ config.kube_config.snat_operator.port_range.end }}"
+    {% endif %}
+    {% if config.kube_config.snat_operator.port_range.ports_per_node != 3000 %}
+    snat_ports_per_node: "{{ config.kube_config.snat_operator.port_range.ports_per_node }}"
+    {% endif %}
+    {% if config.kube_config.use_privileged_containers %}
+    use_privileged_container: "{{ config.kube_config.use_privileged_containers|lower() }}"
+    {% endif %}
+    {% if config.aci_config.client_ssl != True %}
+    opflex_client_ssl: "{{ config.aci_config.client_ssl|lower() }}"
+    {% endif %}
+    {% if config.multus.disable != True %}
+    multus_disable: "{{ config.multus.disable|lower() }}"
+    {% endif %}
+    {% if config.istio_config.install_istio %}
+    install_istio: "{{ config.istio_config.install_istio }}"
+    {% endif %}
+    {% if config.istio_config.install_profile != "demo" %}
+    istio_profile: "{{ config.istio_config.install_profile }}"
     {% endif %}
 services:
   kube-controller:
