@@ -592,6 +592,7 @@ class ApicKubeConfig(object):
         self.tenant_generator = "kube_tn"
         self.tenant_generator_chained_mode = "chained_mode_kube_tn"
         self.associate_aep_to_nested_inside_domain = False
+        self.available_vlans = set()
 
     def get_nested_domain_type(self):
         inside = self.config["aci_config"]["vmm_domain"].get("nested_inside")
@@ -689,6 +690,13 @@ class ApicKubeConfig(object):
                 filter_count = self.config["aci_config"]["create_ap_epgs_config"]["filters_count"]
                 l3outs_present = self.config["aci_config"]["create_ap_epgs_config"]["l3outs_present"]
                 epgs_to_create = self.config["aci_config"]["create_ap_epgs_config"]["epgs_to_create"]
+
+                # vlan_range1 = range(600, 700)
+                vlan_range2 = range(2100, 3000)
+
+                #self.available_vlans = set(vlan_range1).union(set(vlan_range2))
+                self.available_vlans = set(vlan_range2)
+
                 for flt_num in range(1, filter_count+1):
                     update(data, self.contract_filter_template(common_name, flt_num))
                 for contract_num in range(1, contract_count + 1):
@@ -7831,6 +7839,12 @@ class ApicKubeConfig(object):
         self.annotateApicObjects(data)
         return path, data
 
+    def get_vlan(self):
+        if self.available_vlans:
+            return self.available_vlans.pop()
+        else:
+            return None
+
     def ap_template(self, common_name, l3out_num, epgs_to_create, contract_count):
         print("INFO: Creating Application Profile Template Object", file=sys.stderr)
         vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
@@ -7968,10 +7982,6 @@ class ApicKubeConfig(object):
                                                     "",
                                                 ),
                                                 (
-                                                    "apiMode",
-                                                    "mgmt",
-                                                ),
-                                                (
                                                     "bindingType",
                                                     "none",
                                                 ),
@@ -8006,18 +8016,6 @@ class ApicKubeConfig(object):
                                                 (
                                                     "instrImedcy",
                                                     "lazy",
-                                                ),
-                                                (
-                                                    "ipamDhcpOverride",
-                                                    "0.0.0.0",
-                                                ),
-                                                (
-                                                    "ipamEnabled",
-                                                    "no",
-                                                ),
-                                                (
-                                                    "ipamGateway",
-                                                    "0.0.0.0",
                                                 ),
                                                 (
                                                     "lagPolicyName",
@@ -8061,7 +8059,7 @@ class ApicKubeConfig(object):
                                                 ),
                                                 (
                                                     "tDn",
-                                                    "uni/phys-phys",
+                                                    "uni/phys-phys-cscwk15849",
                                                 ),
                                                 (
                                                     "untagged",
@@ -8083,6 +8081,42 @@ class ApicKubeConfig(object):
                         )
                     ]
                 ),
+            )
+
+            vlan_id = self.get_vlan()
+            if vlan_id is None:
+                raise Exception("Out of VLAN IDs")
+
+            fv_aepg_children_list.append(
+                collections.OrderedDict(
+                    [
+                        (
+                            "fvRsPathAtt",
+                            collections.OrderedDict(
+                                [
+                                    (
+                                        "attributes",
+                                        collections.OrderedDict(
+                                            [
+                                                ("annotation", ""),
+                                                ("descr", ""),
+                                                ("encap", "vlan-{}".format(vlan_id)),
+                                                ("instrImedcy", "lazy"),
+                                                ("mode", "regular"),
+                                                ("primaryEncap", "unknown"),
+                                                (
+                                                    "tDn",
+                                                    "topology/pod-1/protpaths-103-104/pathep-[sauto_vpc_pg_k8s-bm-1_33]",
+                                                ),
+                                                ("userdom", ":all:common:"),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        )
+                    ]
+                )
             )
 
             fv_aepg_list.append(
@@ -8208,7 +8242,6 @@ class ApicKubeConfig(object):
                                         ("arpFlood", "yes"),
                                         ("descr", ""),
                                         ("dn", "uni/tn-{}/BD-{}".format(vrf_tn, bd_name)),
-                                        ("enableRogueExceptMac", "no"),
                                         ("epClear", "no"),
                                         ("epMoveDetectMode", ""),
                                         ("hostBasedRouting", "no"),
@@ -8226,7 +8259,6 @@ class ApicKubeConfig(object):
                                         ("nameAlias", ""),
                                         ("ownerKey", ""),
                                         ("ownerTag", ""),
-                                        ("serviceBdRoutingDisable", "no"),
                                         ("type", "regular"),
                                         ("unicastRoute", "yes"),
                                         ("unkMacUcastAct", "proxy"),
@@ -8280,7 +8312,7 @@ class ApicKubeConfig(object):
                                                                     ("annotation", ""),
                                                                     (
                                                                         "tnL3extOutName",
-                                                                        "l3out-{}".format(l3out_num),
+                                                                        "sauto_k8s-bm-1_l3out-{}".format(l3out_num),
                                                                     ),
                                                                     (
                                                                         "userdom",
@@ -8338,7 +8370,7 @@ class ApicKubeConfig(object):
                                                                     ("annotation", ""),
                                                                     (
                                                                         "tnFvCtxName",
-                                                                        "l3out_{}_vrf".format(l3out_num),
+                                                                        "sauto_k8s-bm-1_l3out-{}_vrf".format(l3out_num),
                                                                     ),
                                                                     (
                                                                         "userdom",
@@ -8452,7 +8484,7 @@ class ApicKubeConfig(object):
                 apic_cookies[(apic_host, apic_username, True)] = cookies
 
         vrf_tn = self.config["aci_config"]["vrf"]["tenant"]
-        path = "/api/node/mo/uni/tn-{}/out-l3out-{}.json?query-target=subtree".format(
+        path = "/api/node/mo/uni/tn-{}/out-sauto_k8s-bm-1_l3out-{}.json?query-target=subtree".format(
             vrf_tn, l3out_num
         )
         args = dict(data=None, cookies=cookies, verify=False, params=None)

@@ -1589,7 +1589,7 @@ def test_helpmsg():
 
         with open("help.stdout.txt", "r") as f:
             reference_content = f.readlines()
-        
+
         print("Captured Output:\n", ''.join(tmpout_content))
         print("Reference Output:\n", ''.join(reference_content))
         
