@@ -37,6 +37,7 @@
       + [Troubleshooting Endpoint Discovery](#troubleshooting-endpoint-discovery)
       + [Troubleshooting Pod Health Check](#troubleshooting-pod-health-check)
       + [Troubleshooting aci-containers-host](#troubleshooting-aci-containers-host)
+      + [Datapath tracing with acikubectl](#datapath_tracing_with_acikubectl)
 
 
 # Overview
@@ -734,11 +735,16 @@ The `acikubectl` command includes a `--help` option that displays descriptions o
 ```sh
 acikubectl -–help
 Available Commands:
-  debug       Commands to help diagnose problems with ACI containers
-  get         Get a value
-  help        Help about any command
-  set         Set a value
-  version     Print the client and server versions for the current context acikubectl version
+  completion       Generate the autocompletion script for the specified shell
+  debug            Commands to help diagnose problems with ACI containers
+  get              Get a value
+  help             Help about any command
+  policy           output the gbp_inspect policies into a file for all the host-agent pods
+  set              Set a value
+  trace_pod_to_ext Trace ip packet's flow in ovs from pod to outside cluster communication
+  trace_pod_to_pod Trace ip packet's flow in ovs for pod to pod communication
+  trace_pod_to_svc Trace ip packet's flow in ovs from pod to service communication
+  version          Print the client and server versions for the current context acikubectl version
 ```
 
 ## Load Balancing External Services
@@ -1145,3 +1151,8 @@ Follow the instructions in this section if the mcast-daemon inside aci-container
     `kubectl -n kube-system logs aci-containers-host-[xxxxx] mcast-daemon`
 
     If the following error message is present `Fatal error: open: Address family not supported by protocol`, ensure that IPv6 support is enabled in the kernel. IPv6 must be enabled in the kernel for the mcast-daemon to start.
+
+---
+
+### Datapath tracing with acikubectl
+Refer the [document](datapath_tracing_with_acikubectl.md) to perform OVS datapath packet trace.
