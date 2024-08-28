@@ -668,6 +668,154 @@ spec:
                   ipProto:
                     type: integer
 ---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hostprotpols.aci.hpp
+spec:
+  group: aci.hpp
+  names:
+    kind: HostprotPol
+    listKind: HostprotPolList
+    plural: hostprotpols
+    singular: hostprotpol
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this representation of an object.Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              networkPolicies:
+                type: array
+                items:
+                  type: string
+              hostprotSubj:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    hostprotRule:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          protocol:
+                            type: string
+                            description: Protocol
+                          rsRemoteIpContainer:
+                            type: array
+                            items:
+                              type: string
+                          toPort:
+                            type: string
+                            description: ToPort
+                          connTrack:
+                            type: string
+                            description: ConnTrack
+                          direction:
+                            type: string
+                            description: Direction
+                          ethertype:
+                            type: string
+                            description: Ethertype
+                          fromPort:
+                            type: string
+                            description: FromPort
+                          hostprotServiceRemoteIps:
+                            type: array
+                            items:
+                              type: string
+                          hostprotFilterContainer:
+                            type: object
+                            properties:
+                              hostprotFilter:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      type: array
+                                      items:
+                                        type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hostprotremoteipcontainers.aci.hpp
+spec:
+  group: aci.hpp
+  names:
+    kind: HostprotRemoteIpContainer
+    listKind: HostprotRemoteIpContainerList
+    plural: hostprotremoteipcontainers
+    singular: hostprotremoteipcontainer
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              hostprotRemoteIp:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addr:
+                      type: string
+                    hppEpLabel:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1022,6 +1170,18 @@ rules:
   - create
   - update
   - delete
+- apiGroups:
+  - "aci.hpp"
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -1149,6 +1309,15 @@ rules:
   - nodepodifs
   verbs:
   - "*"
+- apiGroups:
+  - "aci.hpp"
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
