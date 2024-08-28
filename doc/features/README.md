@@ -1155,4 +1155,4 @@ Follow the instructions in this section if the mcast-daemon inside aci-container
 ---
 
 ### Datapath tracing with acikubectl
-Refer the [document](datapath_tracing_with_acikubectl.md) to perform OVS datapath packet trace.
+Refer the [document](datapath_tracing_with_acikubectl.md) to perform OVS datapath packet trace on host.
