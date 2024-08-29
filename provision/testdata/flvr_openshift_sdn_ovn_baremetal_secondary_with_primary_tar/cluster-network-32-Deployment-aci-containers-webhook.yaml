@@ -32,7 +32,7 @@ spec:
           value: 'True'
         - name: CONTAINER_FOR_ENVVARS
           value: fabric-peer
-        image: noiro/aci-containers-webhook:6.1.1.2.81c2369
+        image: noiro/aci-containers-webhook:6.1.2.1.81c2369
         imagePullPolicy: Always
         name: aci-containers-webhook
         ports:
