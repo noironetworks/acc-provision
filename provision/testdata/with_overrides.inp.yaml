@@ -112,6 +112,7 @@ kube_config:
   disable_hpp_rendering: True
   taint_not_ready_node: True
   unknown_mac_unicast_action: "flood"
+  disable_service_vlan_preprovisioning: True
 
 registry:
   image_prefix: noiro

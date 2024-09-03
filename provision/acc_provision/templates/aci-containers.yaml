@@ -1911,6 +1911,9 @@ data:
         {% if config.kube_config.apic_connection_retry_limit %}
         "apic-connection-retry-limit": {{ config.kube_config.apic_connection_retry_limit|json}},
         {% endif %}
+        {% if config.kube_config.disable_service_vlan_preprovisioning %}
+        "disable-service-vlan-preprovisioning": {{ config.kube_config.disable_service_vlan_preprovisioning|json }},
+        {% endif %}
 {#
         Commenting code to disable the install_istio flag as the functionality
         is disabled to remove dependency from istio.io/istio package.
