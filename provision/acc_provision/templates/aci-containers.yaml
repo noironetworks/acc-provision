@@ -1783,7 +1783,7 @@ spec:
         type: object
         x-kubernetes-validations:
         - message: Only one instance with name networkfabricconfiguration allowed
-          rule: self.metadata.name == '
+          rule: self.metadata.name == 'networkfabricconfiguration'
     served: true
     storage: true
     subresources:
