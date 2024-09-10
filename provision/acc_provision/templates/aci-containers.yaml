@@ -1411,6 +1411,7 @@ spec:
           metadata:
             type: object
           spec:
+            type: object
             properties:
               TunnelEpAdvertisementInterval:
                 type: integer
@@ -1419,7 +1420,11 @@ spec:
                 - Immediate
                 - OnDemand
                 type: string
-            type: object
+        required:
+        - spec
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'proactiveconf'"
+          message: "Only one instance allowed with name proactiveconf"
 ---
 {% endif %}
 {% endif %}
