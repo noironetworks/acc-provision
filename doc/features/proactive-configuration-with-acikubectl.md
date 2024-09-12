@@ -55,7 +55,9 @@ Global Flags:
 # Examples
 If the kubconfig is not present in the default location, it can be explicilty specified using the --kubeconfig argument.
 
-If the acc-provision created certificate and key pair is not available in working directory, the username and password to access the APIC can be explicitly provided using the -u and -p arguments. The APIC user needs to have admin level access to the cluster's tenant.
+If the acc-provision created certificate (user-<sysid>.crt) and key (user-<sysid>.key) are not available in the working directory, 
+then the username and password to access the APIC can be explicitly provided using the -u and -p arguments. 
+The APIC user needs to have admin level access to the cluster's tenant.
 
 ## Create Proactive Policy
 

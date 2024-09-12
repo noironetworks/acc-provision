@@ -38,6 +38,7 @@
       + [Troubleshooting Pod Health Check](#troubleshooting-pod-health-check)
       + [Troubleshooting aci-containers-host](#troubleshooting-aci-containers-host)
       + [Datapath tracing with acikubectl](#datapath_tracing_with_acikubectl)
+      + [Proactive Configuration with acikubectl](#proactive-configuration-with-acikubectl)
 
 
 # Overview
@@ -1156,3 +1157,8 @@ Follow the instructions in this section if the mcast-daemon inside aci-container
 
 ### Datapath tracing with acikubectl
 Refer the [document](datapath_tracing_with_acikubectl.md) to perform OVS datapath packet trace.
+
+---
+
+### Proactive Configuration with acikubectl
+Refer the [document](proactive-configuration-with-acikubectl.md) to perform proactive configuration.
