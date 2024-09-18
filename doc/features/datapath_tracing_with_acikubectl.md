@@ -13,6 +13,8 @@
     - [NetworkPolicy – Deny Ingress](#networkpolicy--deny-ingress)
     - [NetworkPolicy – Deny Egress](#networkpolicy--deny-egress)
   - [Contracts](#contracts)
+- [Tracing DNS Traffic](#tracing-dns-traffic)
+  - [Summary](#summary)
 
 
 
@@ -72,14 +74,19 @@ Trace ip packet's flow in ovs for pod to pod communication
 
 ```
 Usage:
-acikubectl trace_pod_to_pod [src_ns:src_pod] [dest_ns:dest_pod] [flags]
+  acikubectl trace_pod_to_pod [src_ns:src_pod] [dest_ns:dest_pod] [flags]
+
 Examples:
-acikubectl trace_pod_to_pod src_ns:src_pod dest_ns:dest_pod --tcp --tcp_src <source_port> --tcp_dst <destination_port>
+acikubectl trace_pod_to_pod src_ns:src_pod dest_ns:dest_pod
+
 Flags:
   -h, --help          help for trace_pod_to_pod
       --tcp           Specify if the protocol is TCP
       --tcp_dst int   Specify the destination TCP port
       --tcp_src int   Specify the source TCP port
+      --udp           Specify if the protocol is UDP
+      --udp_dst int   Specify the destination UDP port
+      --udp_src int   Specify the source UDP port
   -v, --verbose       Enable verbose output
 
 Args:
@@ -127,19 +134,27 @@ Trace ip packet's flow in ovs from pod to service communication
 
 ```
 Usage:
-acikubectl trace_pod_to_svc [src_ns:src_pod] [dest_ns:dest_svc] [flags]
+  acikubectl trace_pod_to_svc [src_ns:src_pod] [dest_ns:dest_svc] [flags]
+
 Examples:
-acikubectl trace_pod_to_svc src_ns:src_pod dest_ns:dest_svc --tcp --tcp_src <source_port> --tcp_dst <destination_port>
+acikubectl trace_pod_to_svc src_ns:src_pod dest_ns:dest_svc
+
 Flags:
   -h, --help          help for trace_pod_to_svc
       --tcp           Specify if the protocol is TCP
       --tcp_dst int   Specify the destination TCP port
       --tcp_src int   Specify the source TCP port
+      --udp           Specify if the protocol is UDP
+      --udp_dst int   Specify the destination UDP port
+      --udp_src int   Specify the source UDP port
   -v, --verbose       Enable verbose output
 
-Global Flags:
-      --context string      Kubernetes context to use for CLI requests.
-      --kubeconfig string   Path to the kubeconfig file to use for CLI requests. (default "/home/noiro/.kube/config")
+Args:
+src_ns: Source Namespace
+dest_ns: Destination Namespace 
+src_pod: Source Pod
+dest_svc: Destination Service
+
 ```
 
 ```
@@ -181,19 +196,26 @@ acikubectl trace_pod_to_svc default:pod-a testns:nginx-service --tcp --tcp_dst=8
 Trace ip packet's flow in ovs from pod to outside cluster communication
 ```
 Usage:
-acikubectl trace_pod_to_ext [src_ns:src_pod] [dest_ip] [flags]
+  acikubectl trace_pod_to_ext [src_ns:src_pod] [dest_ip] [flags]
+
 Examples:
-acikubectl trace_pod_to_ext src_ns:src_pod dest_ip --tcp --tcp_src <source_port> --tcp_dst <destination_port>
+acikubectl trace_pod_to_ext src_ns:src_pod dest_ip
+
 Flags:
   -h, --help          help for trace_pod_to_ext
       --tcp           Specify if the protocol is TCP
       --tcp_dst int   Specify the destination TCP port
       --tcp_src int   Specify the source TCP port
+      --udp           Specify if the protocol is UDP
+      --udp_dst int   Specify the destination UDP port
+      --udp_src int   Specify the source UDP port
   -v, --verbose       Enable verbose output
+  
+Args:
+src_ns: Source Namespace
+src_pod: Source Pod
+dest_ip: Destination IP
 
-Global Flags:
-      --context string      Kubernetes context to use for CLI requests.
-      --kubeconfig string   Path to the kubeconfig file to use for CLI requests. (default "/home/noiro/.kube/config")
 ```
 
 ```
@@ -438,3 +460,23 @@ acikubectl trace_pod_to_pod default:pod-a  openshift-monitoring:pod-c --tcp --tc
 ![img_28.png](images/acikubectl-trace/img_28.png)
 
 
+# Tracing DNS Traffic
+To trace UDP traffic for a DNS request from the pod to the DNS service running within the cluster, use the following command:
+```
+$ oc get pods pod-b -o wide
+NAME    READY   STATUS    RESTARTS   AGE   IP          NODE             NOMINATED NODE   READINESS GATES
+pod-b   2/2     Running   2          21d   10.2.1.25   ocp412-worker1   <none>           <none>
+```
+```
+$ oc get svc -n openshift-dns dns-default -o wide
+NAME          TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)                  AGE    SELECTOR
+dns-default   ClusterIP   172.30.0.10   <none>        53/UDP,53/TCP,9154/TCP   196d   dns.operator.openshift.io/daemonset-dns=default
+```
+
+```
+acikubectl trace_pod_to_svc default:pod-b  openshift-dns:dns-default --udp --udp_dst=53 --verbose
+```
+
+## Summary
+![img.png](images/acikubectl-trace/img_30.png)
+![img.png](images/acikubectl-trace/img_31.png)
