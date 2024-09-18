@@ -31,25 +31,25 @@ The workflow is as follows:
 
 # Command
 ```
-acikubectl proactive_policy --help
 Do override configuration like changing vmm epg attachment mode
 
 Usage:
-acikubectl proactive_policy create/delete/verify [flags]
+  acikubectl proactive_policy create/delete/verify [flags]
 
 Examples:
-proactive_policy create/delete
+proactive_policy create/delete/verify
 
 Flags:
--a, --apic-hosts strings          APIC Hosts
--p, --apic-passwd string          APIC password
--u, --apic-user string            APIC username
--h, --help                        help for proactive_policy
--e, --vmm-epg-attachment string   Enable immediate/on-demand deployment and resolution immediacy on vmm-epg-attachment (default "immediate")
+  -a, --apic-hosts strings          APIC Hosts
+  -p, --apic-passwd string          APIC password
+  -u, --apic-user string            APIC username
+  -t, --apply-revert-static-paths   Apply static paths on create, so all pv combinations are deployed and revert during delete
+  -h, --help                        help for proactive_policy
+  -e, --vmm-epg-attachment string   Enable immediate/on-demand deployment and resolution immediacy on vmm-epg-attachment (default "immediate")
 
 Global Flags:
---context string      Kubernetes context to use for CLI requests.
---kubeconfig string   Path to the kubeconfig file to use for CLI requests. (default "/home/noiro/kubeconfig")
+      --context string      Kubernetes context to use for CLI requests.
+      --kubeconfig string   Path to the kubeconfig file to use for CLI requests. (default "/home/noiro/kubeconfig")
 ```
 
 # Examples
@@ -70,6 +70,25 @@ The APIC user needs to have admin level access to the cluster's tenant.
 applied!
 ```
 
+#### Command (With Static Paths)
+```acikubectl proactive_policy create -t```
+#### Output
+```
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-6-HX_vC-vpc],node-101,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-6-HX_vC-vpc],node-102,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Found pv attachment(topology/pod-2/protpaths-401-402/pathep-[esx-3-HX_vC-vpc],node-401,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Found pv attachment(topology/pod-2/protpaths-401-402/pathep-[esx-3-HX_vC-vpc],node-402,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esx-1-HX_vC-vpc],node-101,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esx-1-HX_vC-vpc],node-102,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc],node-101,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc],node-102,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-4-HX_vC-vpc],node-101,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-4-HX_vC-vpc],node-102,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-5-HX_vC-vpc],node-101,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Missing pv attachment(topology/pod-1/protpaths-101-102/pathep-[esxi-5-HX_vC-vpc],node-102,uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default)
+Static paths applied! 
+```
+
 ### On-Demand
 #### Command:
 ```acikubectl proactive_policy create -e on-demand```
@@ -87,20 +106,33 @@ acikubectl proactive_policy verify
 
 ### Output
 ```
-Found pv attachment(topology/pod-2/protpaths-401-402/pathep-[esx-3-HX_vC-vpc],node-401,uni/tn-ocp412/ap-aci-containers-mpod4/epg-aci-containers-default)
-Found pv attachment(topology/pod-2/protpaths-401-402/pathep-[esx-3-HX_vC-vpc],node-402,uni/tn-ocp412/ap-aci-containers-mpod4/epg-aci-containers-default)
+Checking epg profile(fvEpP) for uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default...
+Found fvEpP on node-402
+Found fvEpP on node-401
+Found fvEpP on node-101
+Found fvEpP on node-102
 VERIFY SUCCESS!
 ```
 ## Delete proactive policy
 ### Command
-    ```
-    acikubectl proactive_policy delete
-    ```
+```
+acikubectl proactive_policy delete
+```
+
 ### Output
-    ```
-    [{"fvRsDomAtt":{"attributes":{"dn":"uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default/rsdomAtt-[uni/vmmp-OpenShift/dom-ocp412]","instrImedcy":"lazy","resImedcy":"lazy","tDn":"uni/vmmp-OpenShift/dom-ocp412"}}}]
+```
+[{"fvRsDomAtt":{"attributes":{"dn":"uni/tn-ocp412/ap-aci-containers-ocp412/epg-aci-containers-default/rsdomAtt-[uni/vmmp-OpenShift/dom-ocp412]","instrImedcy":"lazy","resImedcy":"lazy","tDn":"uni/vmmp-OpenShift/dom-ocp412"}}}]
     applied!
-    ```
+```
+
+### Command (With Static Paths)
+```
+acikubectl proactive_policy delete -t
+```
+### Output
+```
+Static paths reverted!
+```
 
 ## With username/password
 * ```acikubectl proactive_policy create  -e immediate -u <username> -p <password>```
