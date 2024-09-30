@@ -68,7 +68,25 @@ spec:
                               type: string
                             subnets:
                               items:
-                                type: string
+                                properties:
+                                  control:
+                                    items:
+                                      enum:
+                                      - nd-ra-prefix
+                                      - querier-ip
+                                      - no-default-svi-gateway
+                                      type: string
+                                    type: array
+                                  scope:
+                                    items:
+                                      enum:
+                                      - shared-between-vrfs
+                                      - advertise-externally
+                                      type: string
+                                    type: array
+                                  subnet:
+                                    type: string
+                                type: object
                               type: array
                             vrf:
                               properties:
