@@ -135,7 +135,7 @@ acc-provision -a -c acc_provision_input.yaml  -f openshift-4.14 -esx -u <user> -
 
 **Replace opflex conf file (Skip for new install)** 
 
-Rename the file "01-opflex.conf" to "10-opflex.conf" in the directory "/etc/cni/net.d" on each node. This ensures that the kubelet picks the configuration file lexicographically and once cilum 05-cilium.conflist is deployed , it will be picked first which have cni-chaining configuration. 
+Rename the file "01-opflex.conf" to "10-opflex.conf" in the directory "/etc/kubernetes/cni/net.d" on each node. This ensures that the kubelet picks the configuration file lexicographically and once cilum 05-cilium.conflist is deployed , it will be picked first which have cni-chaining configuration. 
 
 **Apply the aci_deployment.yaml manifest**
 ```
@@ -146,7 +146,7 @@ kubectl apply -f aci_deployment.yaml
 **Run cilium install command**
 
 ```
-cilium install  --version 1.15.3   --set cni.chainingMode=generic-veth --set cni.customConf=true --set cni.configMap=cni-configuration  --set enableIPv4Masquerade=false  --set routingMode=native --set hubble.relay.enabled=true --set hubble.ui.enabled=true --set cni.binPath=/var/lib/cni/bin --set cni.confPath=/etc/kubernetes/cni/net.d --set kubeProxyReplacement="false" 
+cilium install  --version 1.15.3   --set cni.chainingMode=generic-veth --set cni.customConf=true --set cni.configMap=cni-configuration  --set enableIPv4Masquerade=false  --set routingMode=native --set hubble.relay.enabled=true --set hubble.ui.enabled=true --set cni.binPath=/var/lib/cni/bin --set cni.confPath=/etc/kubernetes/cni/net.d 
 ```
 
 
@@ -162,9 +162,6 @@ Arguments Description
 - hubble.ui.enabled=true: Enables Hubble UI.
 - cni.binPath=/var/lib/cni/bin: Setting custom cni binary path for openshift 
 - cni.confPath=/etc/kubernetes/cni/net.d: Setting custom cni conf path for openshift 
-- kubeProxyReplacement="false" – This is needed for openshift, because  right now CNO (Cluster Network Operator) is deployed with kubeproxy which  runs on each node and is managed by the Cluster Network Operator (CNO). kube-proxy maintains network rules for forwarding connections for endpoints associated with services.Currently all our installation have kube-proxy enabled. If we disable the functionality via cilium then pods will start crashing and network connectivity gets lost.  
-
-**Restart openshift-dns pods**
 
 **Restart pods under tests to enforce Cilium CNI.**
 
@@ -249,20 +246,70 @@ Flows/s: 6.75
 Connected Nodes: 4/4
 ```
 
-
 # Troubleshooting
+
+**Issue**: Multus Pods Crashing
+
+**Root Cause**: Multus is not able to pick up 05-cilium-conflist file automatically after cni chaining
+
+**Solution**: Ensure multus mounts on the host has correct conf files:
+
+- OpenShift Platform
+  1. Copy 05-cilium-conflist to /var/run/multus/cni/net.d for every node
+  ```
+  sudo cp /etc/kubernetes/cni/net.d/05-cilium.conflist /var/run/multus/cni/net.d/
+  ```
+  2. Restart multus pods so that it comes up with correct config in `/etc/kubernetes/cni/net.d/00-multus.conf`
+  
+      ```
+      oc logs -f -n openshift-multus multus-md8n5
+      2024-10-01T18:51:57+00:00 [cnibincopy] Successfully copied files in /usr/src/multus-cni/rhel9/bin/ to /host/opt/cni/bin/upgrade_0283ce13-d27b-4255-afc5-6f0b6c1b2796
+      2024-10-01T18:51:57+00:00 [cnibincopy] Successfully moved files in /host/opt/cni/bin/upgrade_0283ce13-d27b-4255-afc5-6f0b6c1b2796 to /host/opt/cni/bin/
+      2024-10-01T18:51:57Z [verbose] multus-daemon started
+      I1001 18:51:57.728330 3828171 certificate_store.go:130] Loading cert/key pair from "/etc/cni/multus/certs/multus-client-current.pem".
+      2024-10-01T18:51:57Z [verbose] Waiting for certificate
+      I1001 18:51:58.729912 3828171 certificate_store.go:130] Loading cert/key pair from "/etc/cni/multus/certs/multus-client-current.pem".
+      2024-10-01T18:51:58Z [verbose] Certificate found!
+      2024-10-01T18:51:58Z [verbose] server configured with chroot: /hostroot
+      2024-10-01T18:51:58Z [verbose] Filtering pod watch for node "ocp412-worker2"
+      2024-10-01T18:51:58Z [verbose] API readiness check
+      2024-10-01T18:51:58Z [verbose] API readiness check done!
+      2024-10-01T18:51:58Z [verbose] Generated MultusCNI config: {"binDir":"/var/lib/cni/bin","capabilities":{"portMappings":true},"cniVersion":"0.3.1","logLevel":"verbose","logToStderr":true,"name":"multus-cni-network","clusterNetwork":"/host/run/multus/cni/net.d/05-cilium.conflist","namespaceIsolation":true,"globalNamespaces":"default,openshift-multus,openshift-sriov-network-operator","type":"multus-shim","daemonSocketDir":"/run/multus/socket"}
+      2024-10-01T18:51:58Z [verbose] started to watch file /host/run/multus/cni/net.d/05-cilium.conflist
+      2024-10-01T18:52:28Z [verbose] DEL starting CNI request ContainerID:"2f727c0743f0e90a7bfa42143433c2eb7f16df638c53d4e82be3a827b4874989" Netns:"/var/run/netns/7b034108-a34a-4aab-9370-79c09752137f" IfName:"eth0" Args:"IgnoreUnknown=1;K8S_POD_NAMESPACE=openshift-image-registry;K8S_POD_NAME=image-pruner-28791360-rzhs7;K8S_POD_INFRA_CONTAINER_ID=2f727c0743f0e90a7bfa42143433c2eb7f16df638c53d4e82be3a827b4874989;K8S_POD_UID=aeb1b83e-f4aa-4ff4-bb71-619d1821718a" Path:""
+      2024-10-01T18:52:28Z [verbose] Del: openshift-image-registry:image-pruner-28791360-rzhs7:aeb1b83e-f4aa-4ff4-bb71-619d1821718a:generic-veth:eth0 {
+      "name": "generic-veth",
+      "cniVersion": "0.3.1",
+      "plugins": [
+      {
+      "cniVersion": "0.3.1",
+      "supportedVersions": [ "0.3.0", "0.3.1", "0.4.0" ],
+      "type": "opflex-agent-cni",
+      "wait-for-network": true,
+      "wait-for-network-duration": 210,
+      "ipam": {"type": "opflex-agent-cni-ipam"}
+      },
+      {
+      "type": "portmap",
+      "snat": true,
+      "capabilities": {"portMappings": true}
+      },
+      {
+      "type": "cilium-cni"
+      }
+      ]
+      }
+     ```
 
 **Issue**: Traffic not getting denied by deny networkpolicy
 
 **Root Cause**: kubelet didn’t picked chaining cni conf. 
 
-**Solution**: Ensure that cni conf files are present as show below on every node:
+**Solution**: Ensure that cni conf files are present as show below on every node
 
 - Kubernetes Platform  
   ```
-  user@k8s24-node-4:~$ cd /etc/cni/net.d/ 
-
-  user@k8s24-node-4:/etc/cni/net.d$ ls 
+  user@k8s24-node-4:ls /etc/cni/net.d/ 
 
   05-cilium.conflist  10-opflex-cni.conf  200-loopback.conf 
   ```
