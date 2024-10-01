@@ -122,10 +122,13 @@ pod-b   1/1     Running   0          12m   10.2.0.232   ocp412-worker2   <none> 
 
 ![img.png](images/acikubectl-trace/img.png)
 ![img_1.png](images/acikubectl-trace/img_1.png)
-![img_2.png](images/acikubectl-trace/img_2.png)
-![img_3.png](images/acikubectl-trace/img_3.png)
-![img_4.png](images/acikubectl-trace/img_4.png)
+![img_2.png](images/acikubectl-trace//img_2.png)
 
+![img_2.1.png](images/acikubectl-trace/img_2.1.png)
+
+![img_3.png](images/acikubectl-trace/img_3.png)
+
+![img_4.png](images/acikubectl-trace/img_4.png)
 
 
 # acikubectl trace_pod_to_svc
@@ -177,7 +180,6 @@ nginx-service   ClusterIP   172.30.105.10   <none>        80/TCP    21s   app=ng
 ```
 acikubectl trace_pod_to_svc default:pod-a testns:nginx-service --tcp --tcp_dst=80  --verbose
 ```
-
 ![img_5.png](images/acikubectl-trace/img_5.png)
 ![img_6.png](images/acikubectl-trace/img_6.png)
 ![img_7.png](images/acikubectl-trace/img_7.png)
@@ -189,7 +191,6 @@ acikubectl trace_pod_to_svc default:pod-a testns:nginx-service --tcp --tcp_dst=8
 ![img_12.png](images/acikubectl-trace/img_12.png)
 ![img_13.png](images/acikubectl-trace/img_13.png)
 ![img_14.png](images/acikubectl-trace/img_14.png)
-
 
 # acikubectl trace_pod_to_ext
 
@@ -229,9 +230,9 @@ acikubectl trace_pod_to_ext default:pod-a 192.168.152.1 --tcp --tcp_dst=80 --ver
 ```
 
 ![img_16.png](images/acikubectl-trace/img_16.png)
-![img_17.png](images/acikubectl-trace/img_17.png)
+![img_32.png](images/acikubectl-trace/img_32.png)
 ![img_18.png](images/acikubectl-trace/img_18.png)
-![img_19.png](images/acikubectl-trace/img_19.png)
+![img_17.png](images/acikubectl-trace/img_17.png)
 
 
 # Tracing Packet Drops
@@ -311,11 +312,9 @@ spec:
 ```
 acikubectl trace_pod_to_pod default:pod-a  default:pod-b --tcp --tcp_dst=80 --verbose
 ```
-
-![img_20.png](images/acikubectl-trace/img_20.png)
+![img_37.png](images/acikubectl-trace/img_37.png)
 
 ![img_21.png](images/acikubectl-trace/img_21.png)
-
 
 ### NetworkPolicy – Deny Egress
 **Example**
@@ -376,7 +375,9 @@ spec:
 acikubectl trace_pod_to_pod default:pod-a  default:pod-b --tcp --tcp_dst=80 --verbose
 ```
 ![img_22.png](images/acikubectl-trace/img_22.png)
+
 ![img_23.png](images/acikubectl-trace/img_23.png)
+
 
 ## Contracts
 **Example**
@@ -445,14 +446,16 @@ pod-c   1/1     Running   0          2m28s   10.2.1.6   ocp412-worker1   <none> 
 ```
 acikubectl trace_pod_to_pod default:pod-a  openshift-monitoring:pod-c --tcp --tcp_dst=5000 --verbose
 ```
-
-![img_24.png](images/acikubectl-trace/img_24.png)
-![img_29.png](images/acikubectl-trace/img_29.png)
+![img_33.png](images/acikubectl-trace/img_33.png)
+![img_34.png](images/acikubectl-trace/img_34.png)
 
 **Create Contract**
 - After applying contract traffic is allowed
-![img_26.png](images/acikubectl-trace/img_26.png)
-![img_27.png](images/acikubectl-trace/img_27.png)
+
+![img_35.png](images/acikubectl-trace/img_35.png)
+
+![img_36.png](images/acikubectl-trace/img_36.png)
+
 ```
 acikubectl trace_pod_to_pod default:pod-a  openshift-monitoring:pod-c --tcp --tcp_dst=5000 --verbose
 ```
