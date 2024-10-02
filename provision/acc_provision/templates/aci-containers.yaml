@@ -1710,7 +1710,27 @@ spec:
                             subnets:
                               type: array
                               items:
-                                type: string
+                                type: array
+                              items:
+                                type: object
+                                properties:
+                                  subnet:
+                                    type: string
+                                  scope:
+                                    type: array
+                                    items:
+                                      type: string
+                                      enum:
+                                        - "shared-between-vrfs"
+                                        - "advertise-externally"
+                                  control:
+                                    type: array
+                                    items:
+                                      type: string
+                                      enum:
+                                        - "nd-ra-prefix"
+                                        - "querier-ip"
+                                        - "no-default-svi-gateway"
                             vrf:
                               type: object
                               properties:
