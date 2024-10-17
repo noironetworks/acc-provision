@@ -3870,6 +3870,13 @@ spec:
         - name: OPENSSL_CONF
           value: "/etc/pki/tls/openssl11.cnf"
         {% endif %}
+        {% if config.drop_log_config.opflex_redirect_drop_logs == "syslog" %}
+        - name: OPFLEXAGENT_DROPLOG_SYSLOG
+          value: "true"
+        {% elif config.drop_log_config.opflex_redirect_drop_logs %}
+        - name: OPFLEXAGENT_DROPLOG_FILE
+          value: "{{ config.drop_log_config.opflex_redirect_drop_logs }}"
+        {% endif %}
         {% if config.registry.use_digest %}
         image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
         {% else %}

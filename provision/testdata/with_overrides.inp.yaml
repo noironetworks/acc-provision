@@ -131,3 +131,4 @@ nodepodif_config:
 
 drop_log_config:
   disable_events: True
+  opflex_redirect_drop_logs: syslog
