@@ -172,8 +172,9 @@ registry:
     #enable_updates: True # Default is False
 
 #drop_log_config:
-  # enable: False         # default is True
-  # disable_events: True  # default is False
+  # enable: False                      # default is True
+  # disable_events: True               # default is False
+  # opflex_redirect_drop_logs: syslog  # to log packet drops to the file or syslog, specify filname to log to file.
 
 #multus:
   # disable: False       # default is True
