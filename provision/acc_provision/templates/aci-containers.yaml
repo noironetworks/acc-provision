@@ -3637,7 +3637,7 @@ subjects:
   namespace: {{ config.kube_config.system_namespace }}
 ---
 {% endif %}
-{% if config.kube_config.use_openshift_security_context_constraints_414 %}
+{% if config.kube_config.use_openshift_security_context_constraints_agent_based_baremetal %}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
