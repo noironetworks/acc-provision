@@ -211,3 +211,15 @@ rules:
   - watch
   - update
   - patch
+- apiGroups:
+  - aci.hpp
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+  - delete
