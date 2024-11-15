@@ -730,6 +730,18 @@ def test_flavor_openshift_412_esx():
 
 
 @in_testdir
+def test_flavor_openshift_416_agent_based_esx():
+    run_provision(
+        "flavor_openshift_416_agent_based_esx.inp.yaml",
+        "flavor_openshift_416_agent_based_esx.kube.yaml",
+        "flavor_openshift_416_agent_based_esx_tar",
+        None,
+        "flavor_openshift_416_agent_based_esx.apic.txt",
+        overrides={"flavor": "openshift-4.16-agent-based-esx"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_415_agent_based_esx():
     run_provision(
         "flavor_openshift_415_agent_based_esx.inp.yaml",
@@ -774,6 +786,18 @@ def test_flv_openshift_414_esx():
         None,
         "flavor_openshift_414_esx.apic.txt",
         overrides={"flavor": "openshift-4.14-esx"}
+    )
+
+
+@in_testdir
+def test_flavor_openshift_416_agent_based_baremetal():
+    run_provision(
+        "flavor_openshift_416_agent_based_baremetal.inp.yaml",
+        "flavor_openshift_416_agent_based_baremetal.kube.yaml",
+        "flavor_openshift_416_agent_based_baremetal_tar",
+        None,
+        "flavor_openshift_416_agent_based_baremetal.apic.txt",
+        overrides={"flavor": "openshift-4.16-agent-based-baremetal"}
     )
 
 
