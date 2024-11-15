@@ -1,4 +1,5 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.16-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.16 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.15 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.14-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.14 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-baremetal:	Red Hat OpenShift Container Platform 4.15 on Baremetal
@@ -21,6 +22,7 @@ INFO: openshift-4.9-openstack:	Red Hat OpenShift Container Platform 4.9 on OpenS
 INFO: openshift-4.8-openstack:	Red Hat OpenShift Container Platform 4.8 on OpenStack
 INFO: openshift-4.7-openstack:	Red Hat OpenShift Container Platform 4.7 on OpenStack
 INFO: openshift-4.6-openstack:	Red Hat OpenShift Container Platform 4.6 on OpenStack
+INFO: openshift-4.16-agent-based-esx:	Red Hat OpenShift Container Platform 4.16 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-agent-based-esx:	Red Hat OpenShift Container Platform 4.15 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.14-agent-based-esx:	Red Hat OpenShift Container Platform 4.14 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-esx:	Red Hat OpenShift Container Platform 4.15 on ESX
