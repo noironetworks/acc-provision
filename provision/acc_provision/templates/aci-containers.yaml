@@ -1208,7 +1208,6 @@ spec:
         type: object
 ---
 {% endif %} #}
-{% if config.kube_config.enable_hpp_direct %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1371,7 +1370,6 @@ spec:
                           value:
                             type: string
 ---
-{% endif %}
 {% if config.kube_config.proactive_conf %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -3379,7 +3377,6 @@ and aci-containers-operator images for istio.io/istio package
   - update
   - patch
 {% endif %}
-{% if config.kube_config.enable_hpp_direct %}
 - apiGroups:
   - "aci.hpp"
   resources:
@@ -3392,7 +3389,6 @@ and aci-containers-operator images for istio.io/istio package
   - create
   - update
   - delete
-{% endif %}
 {% if config.kube_config.proactive_conf %}
 - apiGroups:
   - "aci.pc"
@@ -3584,7 +3580,6 @@ rules:
   - list
   - watch
 {% endif %}
-{% if config.kube_config.enable_hpp_direct %}
 - apiGroups:
   - "aci.hpp"
   resources:
@@ -3594,7 +3589,6 @@ rules:
   - list
   - watch
   - get
-{% endif %}
 {% if config.kube_config.proactive_conf %}
 - apiGroups:
   - "aci.pc"
