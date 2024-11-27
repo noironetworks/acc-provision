@@ -2,6 +2,7 @@ INFO: Available configuration flavors:
 INFO: openshift-4.16-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.16 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.15 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.14-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.14 on Baremetal Agent-based Assisted Installation [Experimental]
+INFO: openshift-4.16-baremetal:	Red Hat OpenShift Container Platform 4.16 on Baremetal
 INFO: openshift-4.15-baremetal:	Red Hat OpenShift Container Platform 4.15 on Baremetal
 INFO: openshift-4.14-baremetal:	Red Hat OpenShift Container Platform 4.14 on Baremetal
 INFO: openshift-4.13-baremetal:	Red Hat OpenShift Container Platform 4.13 on Baremetal
@@ -12,6 +13,7 @@ INFO: openshift-4.9-baremetal:	Red Hat OpenShift Container Platform 4.9 on Barem
 INFO: openshift-4.8-baremetal:	Red Hat OpenShift Container Platform 4.8 on Baremetal
 INFO: openshift-4.7-baremetal:	Red Hat OpenShift Container Platform 4.7 on Baremetal
 INFO: openshift-4.6-baremetal:	Red Hat OpenShift Container Platform 4.6 on Baremetal
+INFO: openshift-4.16-openstack:	Red Hat OpenShift Container Platform 4.16 on OpenStack
 INFO: openshift-4.15-openstack:	Red Hat OpenShift Container Platform 4.15 on OpenStack
 INFO: openshift-4.14-openstack:	Red Hat OpenShift Container Platform 4.14 on OpenStack
 INFO: openshift-4.13-openstack:	Red Hat OpenShift Container Platform 4.13 on OpenStack
@@ -25,6 +27,7 @@ INFO: openshift-4.6-openstack:	Red Hat OpenShift Container Platform 4.6 on OpenS
 INFO: openshift-4.16-agent-based-esx:	Red Hat OpenShift Container Platform 4.16 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.15-agent-based-esx:	Red Hat OpenShift Container Platform 4.15 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.14-agent-based-esx:	Red Hat OpenShift Container Platform 4.14 on ESX Agent-based Assisted Installation [Experimental]
+INFO: openshift-4.16-esx:	Red Hat OpenShift Container Platform 4.16 on ESX
 INFO: openshift-4.15-esx:	Red Hat OpenShift Container Platform 4.15 on ESX
 INFO: openshift-4.14-esx:	Red Hat OpenShift Container Platform 4.14 on ESX
 INFO: openshift-4.13-esx:	Red Hat OpenShift Container Platform 4.13 on ESX
