@@ -4,7 +4,7 @@ metadata:
   labels:
     aci-containers-config-version: dummy
     network-plugin: aci-containers
-  name: aci-containers-controller
+  name: aci-containers-host-agent
 rules:
 - apiGroups:
   - ''
@@ -14,41 +14,27 @@ rules:
   - pods
   - endpoints
   - services
-  - events
   - replicationcontrollers
-  - serviceaccounts
   verbs:
   - list
   - watch
   - get
-  - patch
-  - create
   - update
-  - delete
 - apiGroups:
   - ''
   resources:
-  - configmaps
+  - events
   verbs:
-  - list
-  - watch
-  - get
   - create
-  - update
-  - delete
+  - patch
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  - '*'
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  - clusterrolebindings
-  verbs:
-  - '*'
+  - list
+  - watch
+  - get
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -62,51 +48,20 @@ rules:
   resources:
   - deployments
   - replicasets
-  - daemonsets
-  - statefulsets
   verbs:
-  - '*'
-- apiGroups:
-  - ''
-  resources:
-  - nodes
-  - services/status
-  verbs:
-  - update
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - aci.snat
-  resources:
-  - snatpolicies/finalizers
-  - snatpolicies/status
-  - nodeinfos
-  verbs:
-  - update
-  - create
   - list
   - watch
   - get
-  - delete
 - apiGroups:
   - aci.snat
   resources:
-  - snatglobalinfos
   - snatpolicies
-  - nodeinfos
+  - snatglobalinfos
   - rdconfigs
   verbs:
   - list
   - watch
   - get
-  - create
-  - update
-  - delete
 - apiGroups:
   - aci.qos
   resources:
@@ -120,36 +75,31 @@ rules:
   - delete
   - patch
 - apiGroups:
-  - aci.netflow
+  - aci.droplog
   resources:
-  - netflowpolicies
+  - enabledroplogs
+  - prunedroplogs
   verbs:
   - list
   - watch
   - get
-  - update
 - apiGroups:
-  - aci.erspan
+  - aci.snat
   resources:
-  - erspanpolicies
+  - nodeinfos
+  - snatlocalinfos
   verbs:
+  - create
+  - update
   - list
   - watch
   - get
-  - update
+  - delete
 - apiGroups:
-  - aci.aw
+  - config.openshift.io
   resources:
-  - nodepodifs
+  - infrastructures
   verbs:
-  - '*'
-- apiGroups:
-  - apps.openshift.io
-  resources:
-  - deploymentconfigs
-  verbs:
-  - list
-  - watch
   - get
 - apiGroups:
   - discovery.k8s.io
@@ -167,17 +117,18 @@ rules:
   - get
   - list
   - watch
-  - create
-  - update
-  - delete
 - apiGroups:
-  - aci.dnsnetpol
+  - aci.aw
   resources:
-  - dnsnetworkpolicies
+  - nodepodifs
   verbs:
-  - get
+  - '*'
+- apiGroups:
+  - aci.hpp
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
   - list
   - watch
-  - create
-  - update
-  - delete
+  - get
