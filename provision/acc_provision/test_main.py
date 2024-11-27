@@ -2073,7 +2073,8 @@ def get_args(**overrides):
         "apic_oobm_ip": None,
         "test_run": True,
         "compare_kube_yaml_aci_op_cm_in_plain_text": True,
-        "skip_app_profile_check": False
+        "skip_app_profile_check": False,
+        "old_nad_vlan_map_input": None
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)
