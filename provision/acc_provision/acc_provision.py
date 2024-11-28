@@ -169,20 +169,69 @@ def check_vlans_available_in_file(vlans_file_path):
     return True
 
 
-def prepare_secondary_vlans(config):
-    vlans_file_path = config["chained_cni_config"].get("vlans_file")
-    secondary_vlans = config["chained_cni_config"][
-        "secondary_vlans"] if config["chained_cni_config"].get(
-        "secondary_vlans") else []
+def check_vlan_in_existing_vlan_range(vlan, encap_blocks):
+    for encap_block in encap_blocks:
+        if ',' in encap_block:
+            if vlan in encap_block.replace(' ', '').split(','):
+                return True
+        else:
+            splitted_blocks = encap_block.split('-')
+            vlans_from = int(splitted_blocks[0])
+            vlans_to = int(splitted_blocks[1]) if len(splitted_blocks) > 1 else (
+                int(splitted_blocks[0]))
+            if vlans_from <= int(vlan) <= vlans_to:
+                return True
+    return False
+
+
+def prepare_secondary_vlans_from_file(vlans_file_path, old_encap_blocks):
+    secondary_vlans = []
+    normalized_vlans = []
     if vlans_file_path:
         vlans_from_file = []
         csv_data = get_csv_contents(vlans_file_path)
+
         for resource in csv_data:
             vlan_id = resource.get('VLAN ID')
-            if vlan_id:
+            if vlan_id and not check_vlan_in_existing_vlan_range(
+                    vlan_id.split('.')[0], old_encap_blocks):
                 vlans_from_file.append(vlan_id.split('.')[0])
-        secondary_vlans.extend(vlans_from_file)
-    return secondary_vlans
+
+        normalized_vlans = normalize_vlans(vlans_from_file)
+        secondary_vlans = group_in_ranges(normalized_vlans)
+
+    return secondary_vlans, normalized_vlans
+
+
+def prepare_secondary_vlans(args, config):
+    vlans_from_old_file = []
+    # Get secondary_vlans from acc provision input file
+    # and prepare list of secondary VLANs
+    all_secondary_vlans = [str(vlan) for vlan in config[
+        "chained_cni_config"]["secondary_vlans"]] if config[
+        "chained_cni_config"].get("secondary_vlans") else []
+    new_vlans_file_path = config["chained_cni_config"].get("vlans_file")
+
+    if args.old_nad_vlan_map_input:
+        # Get secondary vlans from old NAD VLAN map input file
+        old_vlans_file_path = args.old_nad_vlan_map_input
+        vlans_from_old_file, _ = prepare_secondary_vlans_from_file(
+            old_vlans_file_path, all_secondary_vlans)
+    else:
+        if config["provision"].get("upgrade_cluster") and new_vlans_file_path:
+            print("WARNING: --old_nad_vlan_map_input not provided."
+                  " There would be a small amount of traffic disruption"
+                  " for existing vlans, if any existing ranges have been altered")
+    # Add VLANs from old NAD VLAN map to secondary VLANs list
+    all_secondary_vlans.extend(vlans_from_old_file)
+    # Get newly added secondary VLANs from new NAD VLAN map input file,
+    # which will not be there either in secondary_vlans from acc provision
+    # input file or old NAD VLAN map input file
+    vlans_from_new_file, normalized_vlans = prepare_secondary_vlans_from_file(
+        new_vlans_file_path, all_secondary_vlans)
+    # Add new added VLANs to secondary VLANs list
+    all_secondary_vlans.extend(vlans_from_new_file)
+    return list(set(all_secondary_vlans)), normalized_vlans
 
 
 def group_in_ranges(vlans):
@@ -2642,6 +2691,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--skip-app-profile-check', action='store_true', default=False,
         help='skip app profiles presence check while tenant deletion')
+    parser.add_argument(
+        '--old-nad-vlan-map-input', default=None, metavar='file',
+        help='Old NAD VLAN map input file used for last provisioning')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -3066,9 +3118,10 @@ def provision(args, apic_file, no_random):
     # Adjust config based on convention/apic data
     if is_chained_mode(config):
         adj_config = config_adjust_chained_mode(args, config, no_random)
-        config["chained_cni_config"]["secondary_vlans"] = prepare_secondary_vlans(config)
-        normalized_vlans = normalize_vlans(config["chained_cni_config"]["secondary_vlans"])
-        config["chained_cni_config"]["secondary_vlans"] = group_in_ranges(normalized_vlans)
+        all_secondary_vlans, normalized_vlans = prepare_secondary_vlans(
+            args, config)
+        all_secondary_vlans.sort()
+        config["chained_cni_config"]["secondary_vlans"] = all_secondary_vlans
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
