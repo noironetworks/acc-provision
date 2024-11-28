@@ -5,5 +5,6 @@ metadata:
   namespace: aci-containers-system
 spec:
   vlans:
-  - 4002-4007
-  - '4009'
+  - '4002'
+  - 4003, 4009
+  - 4004-4007
