@@ -70,19 +70,27 @@ spec:
                               items:
                                 properties:
                                   control:
+                                    default:
+                                    - ''
                                     items:
                                       enum:
                                       - nd-ra-prefix
                                       - querier-ip
                                       - no-default-svi-gateway
+                                      - ''
                                       type: string
+                                    maxItems: 3
                                     type: array
                                   scope:
+                                    default:
+                                    - ''
                                     items:
                                       enum:
                                       - shared-between-vrfs
                                       - advertise-externally
+                                      - ''
                                       type: string
+                                    maxItems: 2
                                     type: array
                                   subnet:
                                     type: string

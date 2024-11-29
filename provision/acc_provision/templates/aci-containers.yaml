@@ -1768,13 +1768,19 @@ spec:
                                   subnet:
                                     type: string
                                   scope:
+                                    default:
+                                      - ""
                                     type: array
                                     items:
                                       type: string
                                       enum:
                                         - "shared-between-vrfs"
                                         - "advertise-externally"
+                                        - ""
+                                    maxItems: 2
                                   control:
+                                    default:
+                                      - ""
                                     type: array
                                     items:
                                       type: string
@@ -1782,6 +1788,8 @@ spec:
                                         - "nd-ra-prefix"
                                         - "querier-ip"
                                         - "no-default-svi-gateway"
+                                        - ""
+                                    maxItems: 3
                             vrf:
                               type: object
                               properties:
