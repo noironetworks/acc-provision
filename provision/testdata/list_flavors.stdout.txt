@@ -44,26 +44,15 @@ INFO: kubernetes-1.28:	Kubernetes 1.28
 INFO: RKE2-kubernetes-1.28:	Rancher Kubernetes Engine Government kubernetes version 1.28
 INFO: RKE2-kubernetes-1.27:	Rancher Kubernetes Engine Government kubernetes version 1.27
 INFO: RKE2-kubernetes-1.26:	Rancher Kubernetes Engine Government kubernetes version 1.26
-INFO: RKE-1.6.3:	Rancher Kubernetes Engine min version 1.6.3 [Experimental]
-INFO: RKE-1.6.2:	Rancher Kubernetes Engine min version 1.6.2 [Experimental]
+INFO: RKE-1.7.1:	Rancher Kubernetes Engine min version 1.7.1
+INFO: RKE-1.6.5:	Rancher Kubernetes Engine min version 1.6.5
+INFO: RKE-1.6.3:	Rancher Kubernetes Engine min version 1.6.3
+INFO: RKE-1.6.2:	Rancher Kubernetes Engine min version 1.6.2
 INFO: RKE-1.6.0:	Rancher Kubernetes Engine min version 1.6.0
-INFO: RKE-1.5.14:	Rancher Kubernetes Engine min version 1.5.14 [Experimental]
-INFO: RKE-1.5.13:	Rancher Kubernetes Engine min version 1.5.13 [Experimental]
+INFO: RKE-1.5.14:	Rancher Kubernetes Engine min version 1.5.14
+INFO: RKE-1.5.13:	Rancher Kubernetes Engine min version 1.5.13
 INFO: RKE-1.5.11:	Rancher Kubernetes Engine min version 1.5.11
 INFO: RKE-1.5.6:	Rancher Kubernetes Engine min version 1.5.6
-INFO: RKE-1.5.3:	Rancher Kubernetes Engine min version 1.5.3
-INFO: RKE-1.4.20:	Rancher Kubernetes Engine min version 1.4.20
-INFO: RKE-1.4.16:	Rancher Kubernetes Engine min version 1.4.16
-INFO: RKE-1.4.13:	Rancher Kubernetes Engine min version 1.4.13
-INFO: RKE-1.4.9:	Rancher Kubernetes Engine min version 1.4.9
-INFO: RKE-1.4.6:	Rancher Kubernetes Engine min version 1.4.6
-INFO: RKE-1.3.24:	Rancher Kubernetes Engine min version 1.3.24
-INFO: RKE-1.3.21:	Rancher Kubernetes Engine min version 1.3.21
-INFO: RKE-1.3.20:	Rancher Kubernetes Engine min version 1.3.20
-INFO: RKE-1.3.18:	Rancher Kubernetes Engine min version 1.3.18
-INFO: RKE-1.3.17:	Rancher Kubernetes Engine min version 1.3.17
-INFO: RKE-1.3.13:	Rancher Kubernetes Engine min version 1.3.13
-INFO: RKE-1.2.3:	Rancher Kubernetes Engine min version 1.2.3
 INFO: calico-3.26.3:	calico-3.26.3
 INFO: openshift-sdn-ovn-baremetal:	Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
 INFO: k8s-aci-cilium:	Chained CNI for Kubernertes [Experimental]
