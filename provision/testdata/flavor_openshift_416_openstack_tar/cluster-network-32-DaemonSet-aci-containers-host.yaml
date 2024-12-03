@@ -1,0 +1,183 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    network-plugin: aci-containers
+  name: aci-containers-host
+  namespace: aci-containers-system
+spec:
+  selector:
+    matchLabels:
+      name: aci-containers-host
+      network-plugin: aci-containers
+  template:
+    metadata:
+      annotations: null
+      labels:
+        name: aci-containers-host
+        network-plugin: aci-containers
+    spec:
+      containers:
+      - env:
+        - name: GOTRACEBACK
+          value: '2'
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: TENANT
+          value: kube
+        - name: NODE_EPG
+          value: kubernetes|kube-nodes
+        - name: DURATION_WAIT_FOR_NETWORK
+          value: '210'
+        image: noiro/aci-containers-host:6.1.1.2.81c2369
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8090
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+        name: aci-containers-host
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - NET_RAW
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+        - mountPath: /mnt/cni-conf
+          name: cni-conf
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+        - mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+          name: opflex-hostconfig-volume
+        - mountPath: /usr/local/etc/aci-containers/
+          name: host-config-volume
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
+        - mountPath: /run/netns
+          mountPropagation: HostToContainer
+          name: host-run-netns
+          readOnly: true
+      - env:
+        - name: REBOOT_WITH_OVS
+          value: 'true'
+        image: noiro/opflex:6.1.1.2.81c2369
+        imagePullPolicy: Always
+        name: opflex-agent
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+          privileged: true
+        volumeMounts:
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+        - mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
+          name: opflex-hostconfig-volume
+        - mountPath: /usr/local/etc/opflex-agent-ovs/conf.d
+          name: opflex-config-volume
+      - args:
+        - /usr/local/bin/launch-mcastdaemon.sh
+        command:
+        - /bin/sh
+        image: noiro/opflex:6.1.1.2.81c2369
+        imagePullPolicy: Always
+        name: mcast-daemon
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /usr/local/var
+          name: hostvar
+        - mountPath: /run
+          name: hostrun
+        - mountPath: /usr/local/run
+          name: hostrun
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - image: noiro/cnideploy:6.1.1.2.81c2369
+        imagePullPolicy: Always
+        name: cnideploy
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+          privileged: true
+        volumeMounts:
+        - mountPath: /mnt/cni-bin
+          name: cni-bin
+      priorityClassName: acicni-priority
+      restartPolicy: Always
+      serviceAccountName: aci-containers-host-agent
+      tolerations:
+      - operator: Exists
+      volumes:
+      - hostPath:
+          path: /var/lib
+        name: cni-bin
+      - hostPath:
+          path: /etc/kubernetes
+        name: cni-conf
+      - hostPath:
+          path: /var
+        name: hostvar
+      - hostPath:
+          path: /run
+        name: hostrun
+      - configMap:
+          items:
+          - key: host-agent-config
+            path: host-agent.conf
+          name: aci-containers-config
+        name: host-config-volume
+      - emptyDir:
+          medium: Memory
+        name: opflex-hostconfig-volume
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker
+      - configMap:
+          items:
+          - key: opflex-agent-config
+            path: local.conf
+          name: aci-containers-config
+        name: opflex-config-volume
+      - hostPath:
+          path: /run/netns
+        name: host-run-netns
+  updateStrategy:
+    type: RollingUpdate
