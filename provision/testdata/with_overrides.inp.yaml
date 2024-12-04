@@ -128,6 +128,9 @@ logging:
 nodepodif_config:
   enable: true
 
+provision:
+  max_retries: 10
+
 drop_log_config:
   disable_events: True
   opflex_redirect_drop_logs: syslog
