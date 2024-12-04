@@ -162,7 +162,8 @@ registry:
   # enable_hpp_direct: True                             # default is False, set to True to enable HPP distribution via Kubernetes control plane for faster convergence and reduce load on fabric
   # unknown_mac_unicast_action: "flood"                 # override if needed, default is "proxy"
   # opflex_agent_reset_wait_delay: 10                   # override if needed, default is 5
-  # disable_service_vlan_preprovisioning : True        # default is False, set to True if you want to disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
+  # disable_service_vlan_preprovisioning : True         # default is False, set to True if you want to disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
+  # proactive_conf: True                                # default is False, set to True to enable proactive configuration
 
 #
 # Configuration for ACI CNI Operator

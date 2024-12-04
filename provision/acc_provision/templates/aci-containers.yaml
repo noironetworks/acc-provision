@@ -1370,6 +1370,61 @@ spec:
                           value:
                             type: string
 ---
+{% if config.kube_config.proactive_conf %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: proactiveconfs.aci.pc
+spec:
+  group: aci.pc
+  names:
+    kind: ProactiveConf
+    listKind: ProactiveConfList
+    plural: proactiveconfs
+    singular: proactiveconf
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              TunnelEpAdvertisementInterval:
+                type: integer
+              VmmEpgDeploymentImmediacy:
+                enum:
+                - Immediate
+                - OnDemand
+                type: string
+        required:
+        - spec
+        x-kubernetes-validations:
+        - rule: "self.metadata.name == 'proactiveconf'"
+          message: "Only one instance allowed with name proactiveconf"
+---
+{% endif %}
 {% endif %}
 {% if config.sriov_config.enable or config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 apiVersion: apiextensions.k8s.io/v1
@@ -2711,6 +2766,9 @@ data:
         {% if config.kube_config.disable_service_vlan_preprovisioning %}
         "disable-service-vlan-preprovisioning": {{ config.kube_config.disable_service_vlan_preprovisioning|json }},
         {% endif %}
+        {% if config.kube_config.proactive_conf %}
+        "proactive-conf": {{ config.kube_config.proactive_conf|json }},
+        {% endif %}
 {#
         Commenting code to disable the install_istio flag as the functionality
         is disabled to remove dependency from istio.io/istio package.
@@ -2902,6 +2960,9 @@ data:
         {% endif %}
         {% if config.kube_config.enable_hpp_direct %}
         "enable-hpp-direct": {{ config.kube_config.enable_hpp_direct|json }},
+        {% endif %}
+        {% if config.kube_config.proactive_conf %}
+        "proactive-conf": {{ config.kube_config.proactive_conf|json }},
         {% endif %}
         "pod-subnet": {{ config.net_config.pod_subnet|json|indent(width=8) }},
         "node-subnet": {{ config.net_config.node_subnet|json|indent(width=8) }},
@@ -3330,6 +3391,16 @@ and aci-containers-operator images for istio.io/istio package
   - create
   - update
   - delete
+{% if config.kube_config.proactive_conf %}
+- apiGroups:
+  - "aci.pc"
+  resources:
+  - proactiveconfs
+  verbs:
+  - get
+  - list
+  - watch
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
@@ -3520,6 +3591,16 @@ rules:
   - list
   - watch
   - get
+{% if config.kube_config.proactive_conf %}
+- apiGroups:
+  - "aci.pc"
+  resources:
+  - proactiveconfs
+  verbs:
+  - get
+  - list
+  - watch
+{% endif %}
 ---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRoleBinding
