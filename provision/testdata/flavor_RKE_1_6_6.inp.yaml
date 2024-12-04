@@ -127,6 +127,7 @@ kube_config:
   max_nodes_svc_graph: 64
   enable_endpointslice: true
   use_privileged_containers: true
+  proactive_conf: True
 
 registry:
   image_prefix: quay.io/noiro

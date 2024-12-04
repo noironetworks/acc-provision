@@ -284,6 +284,9 @@ network:
     {% if config.istio_config.install_profile != "demo" %}
     istio_profile: "{{ config.istio_config.install_profile }}"
     {% endif %}
+    {% if config.kube_config.proactive_conf %}
+    proactive_conf: "{{ config.kube_config.proactive_conf|lower() }}"
+    {% endif %}
 services:
   kube-controller:
     {% if config.net_config.pod_subnet %}
