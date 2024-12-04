@@ -43,7 +43,5 @@ jobs:
         - popd
         - cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl || travis_terminate 1
         - /tmp/cicd/travis/build-acc-provision.sh || travis_terminate 1
-        - git add --all
-        - git commit -m "Changes added by travis build"
         - pip install -U twine
         - /tmp/cicd/travis/push-to-pypi.sh
