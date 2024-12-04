@@ -6,6 +6,7 @@ import re
 import requests
 import urllib3
 import ipaddress
+import time
 from distutils.version import StrictVersion
 
 import yaml
@@ -130,6 +131,27 @@ class Apic(object):
         args.update(timeout=self.timeout)
         dbg("posting {}".format(json.dumps(args)))
         return requests.post(self.url(path), **args)
+
+    def post_with_exponential_backoff(self, path, data, max_retries=5):
+        retries = 0
+        while True:
+            try:
+                resp = self.post(path, data)
+                self.check_resp(resp)
+                return resp
+            except Exception as e:
+                dbg("POST request failed %s: %s" % (path, str(e)))
+
+            if retries == max_retries:
+                break
+
+            delay = 2 ** retries
+            dbg("Retrying in %d time..(Attempt %d of %d)" % (delay, retries + 1, max_retries))
+            time.sleep(delay)
+            retries += 1
+
+        err("Max retries reached for POST request to %s. Giving up." % path)
+        return resp
 
     def delete(self, path, data=None):
         args = dict(data=data, cookies=self.cookies, verify=self.verify)
@@ -290,7 +312,7 @@ class Apic(object):
             nodeid_dict[node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_ids["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
         return nodeid_dict
 
-    def provision(self, data, sync_login):
+    def provision(self, data, sync_login, retries):
         ignore_list = []
         if self.get_user(sync_login):
             warn("User already exists (%s), recreating user" % sync_login)
@@ -303,7 +325,7 @@ class Apic(object):
                 if path in ignore_list:
                     continue
                 if config is not None:
-                    resp = self.post(path, config)
+                    resp = self.post_with_exponential_backoff(path, config, retries)
                     self.check_resp(resp)
                     dbg("%s: %s" % (path, resp.text))
             except Exception as e:

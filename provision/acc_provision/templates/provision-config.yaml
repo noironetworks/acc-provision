@@ -204,6 +204,10 @@ registry:
   # logging_namespace: "cattle-logging" #override if needed, default is "cattle-logging"
   # monitoring_namespace: "cattle-prometheus" #override if needed, default is "cattle-prometheus"
 
+#provision
+  #max_retries: 10     # Maximum number of retries done for POST request to APIC before giving up
+                       # Default is 5
+
 #logging:
   #controller_log_level: debug      # default log level is info
   #hostagent_log_level: debug       # default log level is info
