@@ -154,3 +154,12 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - aci.hpp
+  resources:
+  - hostprotpols
+  - hostprotremoteipcontainers
+  verbs:
+  - list
+  - watch
+  - get
