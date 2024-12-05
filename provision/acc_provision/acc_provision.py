@@ -2522,12 +2522,16 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
 
     ret = True
     sync_login = config["aci_config"]["sync_login"]["username"]
+    if config["provision"].get("max_retries"):
+        retries = config["provision"]["max_retries"]
+    else:
+        retries = 5
     if prov_apic is not None:
         apic = get_apic(config)
         if apic is not None:
             if prov_apic is True:
                 info("Provisioning configuration in APIC")
-                apic.provision(apic_config, sync_login)
+                apic.provision(apic_config, sync_login, retries)
             if prov_apic is False:
                 info("Unprovisioning configuration in APIC")
                 system_id = config["aci_config"]["system_id"]
@@ -3123,9 +3127,9 @@ def provision(args, apic_file, no_random):
                 info("Generating certs for kubernetes controller")
         else:
             if is_calico_flavor(config["flavor"]):
-                info("Reusing existing certs for network-operator")
-            else:
                 info("Reusing existing certs for calico based kubernetes controller")
+            else:
+                info("Reusing existing certs for kubernetes controller")
         key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
