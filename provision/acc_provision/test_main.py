@@ -1410,6 +1410,18 @@ def test_flavor_RKE2_kubernetes_1_27_base():
 
 
 @in_testdir
+def test_flavor_RKE2_kubernetes_1_28_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_28.inp.yaml",
+        "flavor_RKE2_kubernetes_1_28.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_28.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.28"}
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_2_3_base():
     run_provision(
         "flavor_RKE_1_2_3.inp.yaml",

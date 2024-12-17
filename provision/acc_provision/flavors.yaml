@@ -4843,6 +4843,60 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 38
+  RKE2-kubernetes-1.28:
+    desc: Rancher Kubernetes Engine Government kubernetes version 1.28
+    default_version: 6.0
+    config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
+      kube_config:
+        allow_kube_api_default_epg: True
+        use_host_netns_volume: True
+        allow_pods_external_access: True
+        use_cnideploy_initcontainer: True
+      aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        vmm_domain:
+          type: Kubernetes
+          injected_cluster_type: RKE2
+          injected_cluster_provider: Rancher
+      istio_config:
+        install_istio: False
+    status: null
+    hidden: false
+    order: 59
   RKE2-kubernetes-1.27:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.27
     default_version: 6.0
@@ -4896,7 +4950,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 59
+    order: 60
   RKE2-kubernetes-1.26:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.26
     default_version: 6.0
@@ -4950,7 +5004,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 60
+    order: 61
   RKE2-kubernetes-1.25:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.25
     default_version: 6.0
@@ -5003,8 +5057,8 @@ flavors:
       istio_config:
         install_istio: False
     status: null
-    hidden: false
-    order: 61
+    hidden: true
+    order: 62
   RKE2-kubernetes-1.24:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.24
     default_version: 6.0
@@ -5057,8 +5111,8 @@ flavors:
       istio_config:
         install_istio: False
     status: null
-    hidden: false
-    order: 62
+    hidden: true
+    order: 63
   RKE-1.7.1:
     desc: Rancher Kubernetes Engine min version 1.7.1
     default_version: 6.0
@@ -5114,7 +5168,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 63
+    order: 64
   RKE-1.6.5:
     desc: Rancher Kubernetes Engine min version 1.6.5
     default_version: 6.0
@@ -5170,7 +5224,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 64
+    order: 65
   RKE-1.6.2:
     desc: Rancher Kubernetes Engine min version 1.6.2
     default_version: 6.0
@@ -5226,7 +5280,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 65
+    order: 66
   RKE-1.6.0:
     desc: Rancher Kubernetes Engine min version 1.6.0
     default_version: 6.0
@@ -5282,7 +5336,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 66
+    order: 67
   RKE-1.5.13:
     desc: Rancher Kubernetes Engine min version 1.5.13
     default_version: 6.0
@@ -5338,7 +5392,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 67
+    order: 68
   RKE-1.5.11:
     desc: Rancher Kubernetes Engine min version 1.5.11
     default_version: 6.0
@@ -5394,7 +5448,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 68
+    order: 69
   RKE-1.5.6:
     desc: Rancher Kubernetes Engine min version 1.5.6
     default_version: 6.0
@@ -5450,7 +5504,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 69
+    order: 70
   RKE-1.5.3:
     desc: Rancher Kubernetes Engine min version 1.5.3
     default_version: 6.0
@@ -5506,7 +5560,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 70
+    order: 71
   RKE-1.4.20:
     desc: Rancher Kubernetes Engine min version 1.4.20
     default_version: 6.0
@@ -5562,7 +5616,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 71
+    order: 72
   RKE-1.4.16:
     desc: Rancher Kubernetes Engine min version 1.4.16
     default_version: 6.0
@@ -5618,7 +5672,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 72
+    order: 73
   RKE-1.4.13:
     desc: Rancher Kubernetes Engine min version 1.4.13
     default_version: 6.0
@@ -5674,7 +5728,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 73
+    order: 74
   RKE-1.4.9:
     desc: Rancher Kubernetes Engine min version 1.4.9
     default_version: 6.0
@@ -5730,7 +5784,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 74
+    order: 75
   RKE-1.4.6:
     desc: Rancher Kubernetes Engine min version 1.4.6
     default_version: 6.0
@@ -5786,7 +5840,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 75
+    order: 76
   RKE-1.3.24:
     desc: Rancher Kubernetes Engine min version 1.3.24
     default_version: 6.0
@@ -5842,7 +5896,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 76
+    order: 77
   RKE-1.3.21:
     desc: Rancher Kubernetes Engine min version 1.3.21
     default_version: 6.0
@@ -5898,7 +5952,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 77
+    order: 78
   RKE-1.3.20:
     desc: Rancher Kubernetes Engine min version 1.3.20
     default_version: 6.0
@@ -5954,7 +6008,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 78
+    order: 79
   RKE-1.3.18:
     desc: Rancher Kubernetes Engine min version 1.3.18
     default_version: 6.0
@@ -6010,7 +6064,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 79
+    order: 80
   RKE-1.3.17:
     desc: Rancher Kubernetes Engine min version 1.3.17
     default_version: 6.0
@@ -6066,7 +6120,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 80
+    order: 81
   RKE-1.3.13:
     desc: Rancher Kubernetes Engine min version 1.3.13
     default_version: 6.0
@@ -6122,7 +6176,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 81
+    order: 82
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 6.0
@@ -6178,7 +6232,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 82
+    order: 83
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 6.0
@@ -6224,7 +6278,7 @@ flavors:
         enable: true
     status: Experimental
     hidden: true
-    order: 83
+    order: 84
   aks:
     desc: Azure Kubernetes Service
     default_version: 6.0
@@ -6283,7 +6337,7 @@ flavors:
                   prot: tcp
     status: Experimental
     hidden: true
-    order: 84
+    order: 85
   cloud:
     desc: Openshift IPI/AWS
     default_version: 6.0
@@ -6411,7 +6465,7 @@ flavors:
 
     status: Experimental
     hidden: true
-    order: 85
+    order: 86
   eks:
     desc: Elastic Kubernetes Service (aws)
     default_version: 6.0
@@ -6537,7 +6591,7 @@ flavors:
 
     status: Experimental
     hidden: true
-    order: 86
+    order: 87
   calico-3.26.3:
     desc: calico-3.26.3
     default_version: 6.0.3.3
@@ -6546,7 +6600,7 @@ flavors:
       template_generator: generate_calico_deployment_files
     hidden: False
     status: null
-    order: 87
+    order: 88
   openshift-sdn-ovn-baremetal:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.0
@@ -6575,7 +6629,7 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 88
+    order: 89
   k8s-aci-cilium:
     desc: Chained CNI for Kubernertes
     default_version: 6.0
@@ -6597,7 +6651,7 @@ flavors:
             consumed: ["system"]
     hidden: False
     status: Experimental
-    order: 89
+    order: 90
   openshift-4.14-aci-cilium-esx:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX
     default_version: 6.0
@@ -6743,4 +6797,4 @@ flavors:
         disable: True
     status: Experimental
     hidden: false
-    order: 90
+    order: 91
