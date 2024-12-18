@@ -122,4 +122,5 @@ chained_cni_config:                                                  # Contains 
   # require_annotation_for_nad_mutation_webhook: False               # default is True
   # enable_ovs_cni_support: True                                     # default is False
   # named_container_for_fabric_bgp_peer_insertion: fabric-peer       # default is fabric-peer
+  # enable_container_l3_peering_model: True                          # default is False
 

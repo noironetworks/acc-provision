@@ -1126,6 +1126,18 @@ def test_chained_mode_ovs_cni_support():
 
 
 @in_testdir
+def test_override_enable_container_l3_peering_model():
+    run_provision(
+        "override_enable_container_l3_peering_model.inp.yaml",
+        "override_enable_container_l3_peering_model.kube.yaml",
+        None,
+        None,
+        "override_enable_container_l3_peering_model.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",

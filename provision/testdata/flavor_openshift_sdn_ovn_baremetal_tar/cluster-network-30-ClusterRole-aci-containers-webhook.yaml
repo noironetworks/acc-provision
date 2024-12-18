@@ -44,8 +44,8 @@ rules:
   - aci.fabricattachment
   resources:
   - nodefabricnetworkl3peers
-  - networkfabricconfigurations
   - networkfabricl3configurations
+  - networkfabricconfigurations
   verbs:
   - get
   - list

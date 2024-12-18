@@ -4787,8 +4787,8 @@ rules:
   - aci.fabricattachment
   resources:
   - nodefabricnetworkl3peers
-  - networkfabricconfigurations
   - networkfabricl3configurations
+  - networkfabricconfigurations
   verbs:
   - get
   - list
@@ -4959,6 +4959,7 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+{% if config.chained_cni_config.enable_container_l3_peering_model %}
 - admissionReviewVersions:
   - v1
   clientConfig:
@@ -4987,6 +4988,7 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+{% endif %}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -5023,6 +5025,7 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+{% if config.chained_cni_config.enable_container_l3_peering_model %}
 - admissionReviewVersions:
   - v1
   clientConfig:
@@ -5049,6 +5052,7 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+{% endif %}
 {% if config.chained_cni_config.local_cert_manager_enabled %}
 ---
 apiVersion: apps/v1
