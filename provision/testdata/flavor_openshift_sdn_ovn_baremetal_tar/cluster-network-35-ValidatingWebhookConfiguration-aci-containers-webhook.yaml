@@ -33,29 +33,3 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: aci-containers-webhook
-      namespace: aci-containers-system
-      path: /validate-networkfabricl3configuration
-      port: 443
-  failurePolicy: Fail
-  matchPolicy: Equivalent
-  name: aci-containers-webhook-validate-networkfabricl3configuration.netop-cni.cisco.com
-  namespaceSelector: {}
-  objectSelector: {}
-  rules:
-  - apiGroups:
-    - aci.fabricattachment
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - networkfabricl3configurations
-    scope: '*'
-  sideEffects: None
-  timeoutSeconds: 10
