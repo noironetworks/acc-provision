@@ -471,6 +471,7 @@ def config_default():
             "require_annotation_for_nad_mutation_webhook": True,
             "enable_ovs_cni_support": False,
             "named_container_for_fabric_bgp_peer_insertion": "fabric-peer",
+            "enable_container_l3_peering_model": False,
         }
     }
     return default_config

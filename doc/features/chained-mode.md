@@ -98,6 +98,7 @@ chained_cni_config:
   # primary_interface_chaining: false      # (optional) enable CNI chaining for primary CNI – Network Operator will check connectivity to gateway prior allowing Pod to start. Currently not supported by Red Hat.
   # primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf” # (optional) if specified, primary CNI will be chained as well – this is not required by current use-case.
   secondary_vlans: [101,102,103,104,201]   # (optional) definite list of all vlans that should be populated in VLAN Pool for secondary intefaces
+  enable_container_l3_peering_model: true  # (optional) if true, enable CNF L3 model.
 
 registry:                                  # Registry information 
   image_prefix: quay.io/noiro
@@ -125,6 +126,7 @@ aci_config:
 * `chained_cni_config.use_global_scope_vlan` – for a given VLAN one EPG is created even if multiple Network Attachment Definition refers to the same VLAN. If False, for each NAD using the same VLAN unique EPG will be created. 
 * `chained_cni_config.vlans_file` – read CSV file to load VLAN id and create NadVlanMap Custom Resource at Day-0. This feature has been developed to meet specific Customer CNF operation guidance.
 * `chained_cni_config.secondary_vlans` – List of VLANs used by CNO to provision VLAN Pool attached to <system_id>-secondary physical domain. This domain is attached to the EPGs created by CNO. If ip_sheet is specified, the vlan pool can be populated from the excel sheet.
+* `enable_container_l3_peering_model` - Enables CNF L3 model. By default it is disabled.
 
 4. Run acc-provision on the host that has access to APIC. Script will generate output file. 
 
