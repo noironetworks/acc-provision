@@ -1138,6 +1138,18 @@ def test_override_enable_container_l3_peering_model():
 
 
 @in_testdir
+def test_override_include_network_attachment_definition_crd():
+    run_provision(
+        "override_include_network_attachment_definition_crd.inp.yaml",
+        "override_include_network_attachment_definition_crd.kube.yaml",
+        None,
+        None,
+        "override_include_network_attachment_definition_crd.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",
