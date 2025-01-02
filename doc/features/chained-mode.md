@@ -90,7 +90,7 @@ net_config:
   # node_subnet: 10.10.0.1/24         # Subnet to use for nodes IGNORED SINCE WE SET true for skip_node_network_provisioning
   # kubeapi_vlan: 502                 # The VLAN used by the physdom for nodes IGNORED SINCE WE SET true for skip_node_network_provisioning
  
-chained_cni_config: 
+chained_cni_config:
   secondary_interface_chaining: true   # enable chained config
   use_global_scope_vlan: true              # use unique VLANs per leaf switch.
   skip_node_network_provisioning: true     # if true, Cisco CNI do not provision EPG/BD for node network (must be provisioned before Openshift cluster will be installed).
@@ -99,10 +99,11 @@ chained_cni_config:
   # primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf” # (optional) if specified, primary CNI will be chained as well – this is not required by current use-case.
   secondary_vlans: [101,102,103,104,201]   # (optional) definite list of all vlans that should be populated in VLAN Pool for secondary intefaces
   enable_container_l3_peering_model: true  # (optional) if true, enable CNF L3 model.
+  include_network_attachment_definition_crd: False # (optional) if True, NAD CRD will be generated in deployment.
 
-registry:                                  # Registry information 
+registry:                                  # Registry information
   image_prefix: quay.io/noiro
-  aci_containers_host_version: 6.0.3.1.81c2369       # for production use GA image tag 6.0.3.1.81c2369   
+  aci_containers_host_version: 6.0.3.1.81c2369       # for production use GA image tag 6.0.3.1.81c2369
   aci_containers_controller_version: 6.0.3.1.81c2369 # for production use GA image tag 6.0.3.1.81c2369
 ```
 
@@ -123,12 +124,13 @@ aci_config:
   * Phys Dom for secondary CNI interfaces – automatically created with the name: `<system_id>-secondary`
 * `chained_cni_config.secondary_interface_chaining` – enables CNI chaining with MACVLAN and SRIOV CNI plugins for secondary interfaces.
 * `chained_cni_config.skip_node_network_provisioning` - Network provisioning for primary CNI (BD/EPG is specific VRF / Tenant, contract to provided L3out).
-* `chained_cni_config.use_global_scope_vlan` – for a given VLAN one EPG is created even if multiple Network Attachment Definition refers to the same VLAN. If False, for each NAD using the same VLAN unique EPG will be created. 
+* `chained_cni_config.use_global_scope_vlan` – for a given VLAN one EPG is created even if multiple Network Attachment Definition refers to the same VLAN. If False, for each NAD using the same VLAN unique EPG will be created.
 * `chained_cni_config.vlans_file` – read CSV file to load VLAN id and create NadVlanMap Custom Resource at Day-0. This feature has been developed to meet specific Customer CNF operation guidance.
 * `chained_cni_config.secondary_vlans` – List of VLANs used by CNO to provision VLAN Pool attached to <system_id>-secondary physical domain. This domain is attached to the EPGs created by CNO. If ip_sheet is specified, the vlan pool can be populated from the excel sheet.
 * `enable_container_l3_peering_model` - Enables CNF L3 model. By default it is disabled.
+* `include_network_attachment_definition_crd` - Enabling will generate the NAD CRD in deployment. By default it is disabled.
 
-4. Run acc-provision on the host that has access to APIC. Script will generate output file. 
+4. Run acc-provision on the host that has access to APIC. Script will generate output file.
 
    __Warning__: This steps will push configuration to APIC
 
@@ -162,7 +164,7 @@ nodefabricnetworkattachments.aci.fabricattachment                 2023-07-24T22:
 staticfabricnetworkattachments.aci.fabricattachment               2023-08-25T09:32:49Z
 fabricvlanpool.aci.fabricattachment                               2023-09-14T20:13:23Z
 ```
-Depending on configuration, if you provided nad-vlan-file.csv to the input, you should see `nadvlanmap` Custom Resource created and fabricvlanpool. 
+Depending on configuration, if you provided nad-vlan-file.csv to the input, you should see `nadvlanmap` Custom Resource created and fabricvlanpool.
 
 Default FabricVlanPools Custom Resource:
 ```
@@ -187,7 +189,7 @@ nad-vlan-map   19d
 
 1. Create `SriovNetworkNodePolicy`, refer for details how to use SR-IOV Operator in [documentation](https://github.com/openshift/sriov-network-operator).
 
-Example: 
+Example:
 ```yaml
 apiVersion: sriovnetwork.openshift.io/v1
 kind: SriovNetworkNodePolicy
@@ -251,7 +253,7 @@ spec:
 ################################################
 #        ADD THIS SECTION TO THE NAD:          #
 ################################################
-        { 
+        {
             "supportedVersions": [
                 "0.3.0",
                 "0.3.1",
@@ -266,7 +268,7 @@ spec:
     ]
 }
 ```
-Once NAD is created Network Operator creates Bridge Domain / Endpoint Group in Cisco ACI for the VLAN specified in the NetworkAttachmentDefinition. The name of EPG and BD are hardcoded using the following schema: 
+Once NAD is created Network Operator creates Bridge Domain / Endpoint Group in Cisco ACI for the VLAN specified in the NetworkAttachmentDefinition. The name of EPG and BD are hardcoded using the following schema:
 * `secondary-vlan-<vlanID>`
 * `secondary-bd-vlan-<vlanID>`
 
@@ -274,7 +276,7 @@ Once NAD is created Network Operator creates Bridge Domain / Endpoint Group in C
 |:--:|
 | *BD/EPG created in Cisco ACI after NAD deployment* |
 
-`aci-containers-host` watches for NAD creation and creates `NodeFabricNetworkAttachment` (NFNA) Custom Resource per NAD and per Openshift node on which the NetworkAttachmentDefinition applies. 
+`aci-containers-host` watches for NAD creation and creates `NodeFabricNetworkAttachment` (NFNA) Custom Resource per NAD and per Openshift node on which the NetworkAttachmentDefinition applies.
 
 NFNA aggregates information about:
   * Host interface and discovered port on ACI
@@ -334,10 +336,10 @@ spec:
 ```
 
 Pod scheduled on specific worker node (worker1). Network Operator configure Static Path towards the node that runs a Pod attached to the NAD.
-The interface is taken from NodeFabricNetworkAttachment Custom Resource. 
+The interface is taken from NodeFabricNetworkAttachment Custom Resource.
 
 
-| ![Alt text](images/chained-mode/static-port-epg.png) | 
+| ![Alt text](images/chained-mode/static-port-epg.png) |
 | :--: |
 | *Static Port configured under EPG* |
 
@@ -351,7 +353,7 @@ metadata:
   namespace: aci-containers-system
 spec:
   aciTopology:
-    ens1f2:                                       
+    ens1f2:
       fabricLink:
       - topology/pod-1/node-101/pathep-[eth1/41]  # Discovered fabric interface
       pods:
@@ -504,13 +506,13 @@ Based on the Ethernet ports discovered by Network Operator, The Virtual Port Cha
 
 NetworkAttachmentDefinition allows to specify VLAN ID in multiple ways, depending on the defined plugin CNI. For SR-IOV CNI, you can specify vlan ID in the plugins.vlan field - this will configure VLAN ID for the VF on the NIC card directly and NIC card will encapsulate traffic from the attached Pod on the wire.
 
-In many 5G CNF use-cases, encapsulation is done on the Pod itself, and VF should be treated as a trunk allowing list of VLANs. 
+In many 5G CNF use-cases, encapsulation is done on the Pod itself, and VF should be treated as a trunk allowing list of VLANs.
 
 Network Operator allows that configuration through annotation or reference to the resource "nad-vlan-map". The last one has been developed for specific use-case and is described in [Chapter 7.2.1](#721-nadvlanmap-custom-resource).
 
 The standard way of configuring VLAN list for the NAD is done through annotations. Network Operator provisions appropriate network segments on Cisco ACI fabric - for each VLAN pair of BD/EPG.
 
-Example: 
+Example:
 ```yaml
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
@@ -518,7 +520,7 @@ metadata:
   name: sriov-net1
   namespace: default
   annotations:
-    netop-cni.cisco.com/vlans: ‘[100,103,106-108]’ 
+    netop-cni.cisco.com/vlans: ‘[100,103,106-108]’
     k8s.v1.cni.cncf.io/resourceName: openshift.io/<resourceName>
 ```
 
