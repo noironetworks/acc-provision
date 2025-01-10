@@ -3701,28 +3701,6 @@ volumes:
 priority: 100
 ---
 {% endif %}
-{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
-{% if config.chained_cni_config.vlans_file %}
-apiVersion: aci.fabricattachment/v1
-kind: NadVlanMap
-metadata:
-  name: nad-vlan-map
-  namespace: aci-containers-system
-spec:
-  nadVlanMapping:
-    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
----
-{% endif %}
-apiVersion: aci.fabricattachment/v1
-kind: FabricVlanPool
-metadata:
-  name: default
-  namespace: aci-containers-system
-spec:
-  vlans:
-  {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
----
-{% endif %}
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
 metadata:
@@ -5137,4 +5115,24 @@ spec:
         key: node-role.kubernetes.io/control-plane
         operator: Exists
 {% endif %}
+{% if config.chained_cni_config.vlans_file %}
+---
+apiVersion: aci.fabricattachment/v1
+kind: NadVlanMap
+metadata:
+  name: nad-vlan-map
+  namespace: aci-containers-system
+spec:
+  nadVlanMapping:
+    {{ chained_mode_input.nadvlan_map|indent(width=4) }}
+{% endif %}
+---
+apiVersion: aci.fabricattachment/v1
+kind: FabricVlanPool
+metadata:
+  name: default
+  namespace: aci-containers-system
+spec:
+  vlans:
+  {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
 {% endif %}
