@@ -37,7 +37,7 @@ aci_config:
 #
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
-  
+
   # node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
   kubeapi_vlan: 4001            # The VLAN used by the physdom for nodes
                                 #   (Kubernetes only)
@@ -81,7 +81,7 @@ registry:
   # add_external_subnets_to_rdconfig: True               #override if needed, default is False
   # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
   # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
-  
+
   # use_system_node_priority_class: True        # override if needed, default is False
   # aci_containers_controller_memory_request: "256Mi"   # override if needed, default is aci_containers_memory_request
   # aci_containers_controller_memory_limit: "5Gi"       # override if needed, default is aci_containers_memory_limit
@@ -97,7 +97,7 @@ registry:
 #
 # Configuration for ACI CNI Operator
 #
-# operator_managed_config: 
+# operator_managed_config:
     #enable_updates: True # Default is False
 
 
@@ -123,4 +123,5 @@ chained_cni_config:                                                  # Contains 
   # enable_ovs_cni_support: True                                     # default is False
   # named_container_for_fabric_bgp_peer_insertion: fabric-peer       # default is fabric-peer
   # enable_container_l3_peering_model: True                          # default is False
+  # include_network_attachment_definition_crd: True                  # default is False
 
