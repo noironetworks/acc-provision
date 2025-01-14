@@ -17,9 +17,9 @@ INFO: openshift-4.15-esx:	Red Hat OpenShift Container Platform 4.15 on ESX
 INFO: kubernetes-1.30:	Kubernetes 1.30
 INFO: kubernetes-1.29:	Kubernetes 1.29
 INFO: kubernetes-1.28:	Kubernetes 1.28
+INFO: RKE2-kubernetes-1.29:	Rancher Kubernetes Engine Government kubernetes version 1.29
 INFO: RKE2-kubernetes-1.28:	Rancher Kubernetes Engine Government kubernetes version 1.28
 INFO: RKE2-kubernetes-1.27:	Rancher Kubernetes Engine Government kubernetes version 1.27
-INFO: RKE2-kubernetes-1.26:	Rancher Kubernetes Engine Government kubernetes version 1.26
 INFO: RKE-1.7.2:	Rancher Kubernetes Engine min version 1.7.2 [Experimental]
 INFO: RKE-1.7.1:	Rancher Kubernetes Engine min version 1.7.1
 INFO: RKE-1.6.6:	Rancher Kubernetes Engine min version 1.6.6 [Experimental]
