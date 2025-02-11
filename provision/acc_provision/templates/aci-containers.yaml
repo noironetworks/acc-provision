@@ -1275,6 +1275,22 @@ spec:
                             type: array
                             items:
                               type: string
+                          hostprotRemoteIp:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                addr:
+                                  type: string
+                                hppEpLabel:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      key:
+                                        type: string
+                                      value:
+                                        type: string
                           toPort:
                             type: string
                             description: ToPort
