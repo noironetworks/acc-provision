@@ -1113,6 +1113,7 @@ rules:
   - snatpolicies
   - nodeinfos
   - rdconfigs
+  - snatlocalinfos
   verbs:
   - list
   - watch
