@@ -3280,6 +3280,7 @@ and aci-containers-operator images for istio.io/istio package
   - snatpolicies
   - nodeinfos
   - rdconfigs
+  - snatlocalinfos
   verbs:
   - list
   - watch
