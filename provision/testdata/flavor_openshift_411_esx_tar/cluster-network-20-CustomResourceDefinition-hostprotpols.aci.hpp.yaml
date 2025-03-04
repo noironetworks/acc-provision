@@ -48,21 +48,23 @@ spec:
                             description: FromPort
                             type: string
                           hostprotFilterContainer:
-                            properties:
-                              hostprotFilter:
-                                items:
-                                  properties:
-                                    key:
-                                      type: string
-                                    operator:
-                                      type: string
-                                    values:
-                                      items:
+                            items:
+                              properties:
+                                hostprotFilter:
+                                  items:
+                                    properties:
+                                      key:
                                         type: string
-                                      type: array
-                                  type: object
-                                type: array
-                            type: object
+                                      operator:
+                                        type: string
+                                      values:
+                                        items:
+                                          type: string
+                                        type: array
+                                    type: object
+                                  type: array
+                              type: object
+                            type: array
                           hostprotRemoteIp:
                             items:
                               properties:
