@@ -1311,21 +1311,23 @@ spec:
                             items:
                               type: string
                           hostprotFilterContainer:
-                            type: object
-                            properties:
-                              hostprotFilter:
-                                type: array
-                                items:
-                                  type: object
-                                  properties:
-                                    key:
-                                      type: string
-                                    operator:
-                                      type: string
-                                    values:
-                                      type: array
-                                      items:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                hostprotFilter:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      key:
                                         type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -3406,6 +3408,7 @@ and aci-containers-operator images for istio.io/istio package
   - create
   - update
   - delete
+  - deletecollection
 {% if config.kube_config.proactive_conf %}
 - apiGroups:
   - "aci.pc"
