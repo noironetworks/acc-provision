@@ -764,21 +764,23 @@ spec:
                             items:
                               type: string
                           hostprotFilterContainer:
-                            type: object
-                            properties:
-                              hostprotFilter:
-                                type: array
-                                items:
-                                  type: object
-                                  properties:
-                                    key:
-                                      type: string
-                                    operator:
-                                      type: string
-                                    values:
-                                      type: array
-                                      items:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                hostprotFilter:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      key:
                                         type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1199,6 +1201,7 @@ rules:
   - create
   - update
   - delete
+  - deletecollection
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
