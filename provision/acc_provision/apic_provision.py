@@ -152,6 +152,13 @@ class Apic(object):
 
         err("Max retries reached for POST request to %s. Giving up." % path)
         return resp
+    
+    def is_system_id_matching(self, system_id, resource_name):
+        contains_match_pattern = rf".*-\b{system_id}\b-.*"
+        ends_with_pattern = rf".*-\b{system_id}\b$"
+        if(re.match(contains_match_pattern, resource_name) or re.match(ends_with_pattern, resource_name)):
+            return True
+        return False
 
     def delete(self, path, data=None):
         args = dict(data=data, cookies=self.cookies, verify=self.verify)
@@ -399,15 +406,42 @@ class Apic(object):
                                             name = val['attributes']['name']
                                             if is_chained_mode(cfg) and "ap-" in val['attributes']['dn']:
                                                 continue
-                                            if (not old_naming) and (system_id in name):
-                                                resp = self.delete(del_path)
-                                                self.check_resp(resp)
-                                                dbg("%s: %s" % (del_path, resp.text))
+                                            if 'annotation' in val['attributes']:
+                                                annotation = val['attributes']['annotation']
+                                                class_name = list(resp.keys())[0]
+                                                if annotation == aciContainersOwnerAnnotation and self.is_system_id_matching(system_id, name):
+                                                    if class_name == "fvAp":
+                                                        ap_path = "/api/mo/%s.json?query-target=children" % val['attributes']['dn']
+                                                        resp = self.get(ap_path)
+                                                        self.check_resp(resp)
+                                                        resp_json = json.loads(resp.text)
+                                                        resp_json = resp_json["imdata"]
+                                                        delete_ap = True
+                                                        for resp in resp_json:
+                                                            for val in resp.values():
+                                                                 if 'annotation' in val['attributes']:
+                                                                     annotation = val['attributes']['annotation']
+                                                                     if annotation != aciContainersOwnerAnnotation:
+                                                                       delete_ap = False
+                                                                     else:
+                                                                        epg_path = "/api/mo/%s.json" % val['attributes']['dn']
+                                                                        resp = self.delete(epg_path)
+                                                                        self.check_resp(resp)
+                                                                 else:
+                                                                     delete_ap = False
+                                                        if (delete_ap) and (not old_naming):
+                                                            dbg("Deleting resource: %s" % name)
+                                                            resp = self.delete(del_path)
+                                                            self.check_resp(resp)
+                                                    elif (not old_naming):
+                                                        dbg("Deleting resource: %s" % name)
+                                                        resp = self.delete(del_path)
+                                                        self.check_resp(resp)
+                                                        dbg("%s: %s" % (del_path, resp.text))
                                             elif is_chained_mode(cfg) and (name == self.ACI_CHAINED_PREFIX + "nodes"):
                                                 resp = self.delete(del_path)
                                                 self.check_resp(resp)
                                                 dbg("%s: %s" % (del_path, resp.text))
-
             if old_naming:
                 for object in self.TENANT_OBJECTS:
                     del_path = "/api/node/mo/uni/tn-%s/%s.json" % (cluster_tenant, object)
