@@ -106,7 +106,8 @@ def get_csv_contents(file_path):
             for row in csv_reader:
                 csv_data.append(row)
     except Exception as ex:
-        print("Error while getting CSV %s file contents. Error: %s") % (file_path, ex)
+        print("Error while getting CSV %s file contents. Error: %s") % (
+            file_path, ex)
     return csv_data
 
 
@@ -1328,6 +1329,8 @@ def config_validate(flavor_opts, config):
             "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
                                               is_valid_image_pull_policy),
         }
+        import pdb;pdb.set_trace()
+        print("printing checks:", checks)
         if not config["chained_cni_config"]["skip_node_network_provisioning"]:
             # Network Config
             checks["net_config/node_subnet"] = (
@@ -1415,7 +1418,7 @@ def config_validate(flavor_opts, config):
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
                                               required),
         }
-
+    
     else:
         extra_checks = {
             "net_config/node_subnet": (get(("net_config", "node_subnet")),
@@ -1454,7 +1457,7 @@ def config_validate(flavor_opts, config):
             "net_config/service_monitor_interval": (get(("net_config", "service_monitor_interval")),
                                                     is_valid_ipsla_interval)
         }
-
+    
         if (config["aci_config"]["vmm_domain"]["type"] == "OpenShift"):
             del extra_checks["net_config/extern_static"]
 
@@ -1507,17 +1510,25 @@ def config_validate(flavor_opts, config):
             "aci_config/apic_login/password":
             (get(("aci_config", "apic_login", "password")), required),
         })
-
+    import pdb;pdb.set_trace()
+    print("printing extrachecks:", extra_checks)
     checks = deep_merge(checks, extra_checks)
     ret = True
+    import pdb;pdb.set_trace()
+    print("printing keysof checks in sorted order:", sorted(checks.keys()))
     for k in sorted(checks.keys()):
+        print("k value: ", k)
         value, validator = checks[k]
+        print("values: ",value,", validator:  ",validator)
         try:
+            print("check[k]: ", checks[k]," validator(value):  ",validator(value))
             if not validator(value):
                 raise Exception(k)
         except Exception as e:
             err("Invalid configuration for %s: %s" % (k, e))
             ret = False
+    import pdb;pdb.set_trace()
+    print("ret: ,",ret)
     return ret
 
 
@@ -3061,8 +3072,7 @@ def provision(args, apic_file, no_random):
     # command line config
     config = {
         "aci_config": {
-            "apic_login": {
-            },
+            "apic_login": { },
             "apic_proxy": args.apic_proxy,
         },
         "provision": {
@@ -3178,7 +3188,7 @@ def provision(args, apic_file, no_random):
     if config["registry"]["version"] in VERSIONS:
         deep_merge(config,
                    {"registry": VERSIONS[config["registry"]["version"]]})
-
+    import pdb;pdb.set_trace()
     # Discoverd state (e.g. infra-vlan) overrides the config file data
     if isOverlay(flavor):
         config["net_config"]["infra_vlan"] = None
@@ -3186,14 +3196,17 @@ def provision(args, apic_file, no_random):
         config = deep_merge(config_discover(config, prov_apic), config)
 
     # Validate APIC access
+    import pdb;pdb.set_trace()
+    print("prov_apic: ",prov_apic)
     if prov_apic is not None:
         apic = get_apic(config)
+        print("apic: ",apic)
         apic_version = apic.apic_version
         if apic is None:
             err("Not able to login to the APIC, please check username or password")
             return False
         config["aci_config"]["apic_version"] = apic_version
-
+    import pdb;pdb.set_trace()
     # Validate config
     try:
         if not config_validate(flavor_opts, config):
@@ -3206,7 +3219,7 @@ def provision(args, apic_file, no_random):
     if not is_chained_mode(config) and not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
-
+    import pdb;pdb.set_trace()
     # Verify that image_pull_secret is a valid K8s secret name and not a YAML string
     if "registry" in config.keys() and "image_pull_secret" in config["registry"]:
         if not check_image_pull_secret(config):
@@ -3228,7 +3241,9 @@ def provision(args, apic_file, no_random):
         return False
     elif is_chained_mode(config) and not chained_config_validate_preexisting(config, prov_apic):
         return False
+    
     else:
+        import pdb;pdb.set_trace()
         # Advisory checks, including apic checks, ignore failures
         if not config_validate_preexisting(config, prov_apic):
             # Ignore failures, this check is just advisory for now
@@ -3240,6 +3255,7 @@ def provision(args, apic_file, no_random):
     keyfile = config["aci_config"]["sync_login"]["keyfile"]
     key_data, cert_data = None, None
     reused = True
+    import pdb;pdb.set_trace()
     if generate_cert_data:
         if not exists(certfile) or not exists(keyfile):
             if is_calico_flavor(config["flavor"]):
@@ -3262,7 +3278,7 @@ def provision(args, apic_file, no_random):
         if not callable(gen):
             gen = globals()[gen]
         gen(config, output_tar)
-
+        print("prov_apic: ", prov_apic)
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
 
@@ -3295,6 +3311,7 @@ def provision(args, apic_file, no_random):
 
     if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
         config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
+    import pdb;pdb.set_trace()
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 
@@ -3304,7 +3321,7 @@ def main(args=None, apic_file=None, no_random=False):
     # len(sys.argv) == 1 when acc-provision is called w/o arguments
     if args is None:
         args = parse_args(len(sys.argv) == 1)
-
+    
     if args.release:
         try:
             release_file_path = os.path.dirname(os.path.realpath(__file__)) + '/RELEASE-VERSION'
@@ -3327,7 +3344,8 @@ def main(args=None, apic_file=None, no_random=False):
     if args.flavor is None:
         err("Flavor not provided. Use -f to pass a flavor name, --list-flavors to see a list of supported flavors")
         sys.exit(1)
-
+    import pdb; pdb.set_trace()
+    print("flavor: ", args.flavor)
     if args.flavor is not None and args.flavor not in FLAVORS:
         err("Invalid configuration flavor: " + args.flavor)
         sys.exit(1)

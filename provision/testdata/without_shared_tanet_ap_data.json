@@ -1,0 +1,363 @@
+{
+    "gets": {
+        "/api/mo/uni/tn-common/out-l3out.json"
+        :{
+            "totalCount": "0",
+            "imdata": []
+        },
+        "/api/mo/uni/tn-common/ctx-rke.json"
+        :{
+            "totalCount": "0",
+            "imdata": []
+        },
+
+        "/api/mo/uni/infra/attentp-rke2-aep.json"
+        :{
+            "totalCount": "0",
+            "imdata": []
+        },
+        "/api/node/mo/uni/infra/attentp-default/provacc/rsfuncToEpg-%5Buni/tn-infra/ap-access/epg-default%5D.json"
+        :{
+            "totalCount": "1",
+            "imdata": [
+                {
+                    "infraRsFuncToEpg": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "creator": "USER",
+                            "dn": "uni/infra/attentp-default/provacc/rsfuncToEpg-[uni/tn-infra/ap-access/epg-default]",
+                            "encap": "vlan-3301",
+                            "extMngdBy": "",
+                            "forceResolve": "yes",
+                            "instrImedcy": "lazy",
+                            "lcOwn": "local",
+                            "modTs": "2023-02-18T12:54:47.637+00:00",
+                            "mode": "regular",
+                            "monPolDn": "uni/fabric/monfab-default",
+                            "primaryEncap": "unknown",
+                            "rType": "mo",
+                            "state": "formed",
+                            "stateQual": "none",
+                            "status": "",
+                            "tCl": "fvAEPg",
+                            "tDn": "uni/tn-infra/ap-access/epg-default",
+                            "tType": "mo",
+                            "uid": "0",
+                            "userdom": "all"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/node/mo/uni/infra/attentp-default/provacc/rsfuncToEpg-[uni/tn-infra/ap-access/epg-default].json"
+        :{
+            "totalCount": "1",
+            "imdata": [
+                {
+                    "infraRsFuncToEpg": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "creator": "USER",
+                            "dn": "uni/infra/attentp-default/provacc/rsfuncToEpg-[uni/tn-infra/ap-access/epg-default]",
+                            "encap": "vlan-3301",
+                            "extMngdBy": "",
+                            "forceResolve": "yes",
+                            "instrImedcy": "lazy",
+                            "lcOwn": "local",
+                            "modTs": "2023-02-18T12:54:47.637+00:00",
+                            "mode": "regular",
+                            "monPolDn": "uni/fabric/monfab-default",
+                            "primaryEncap": "unknown",
+                            "rType": "mo",
+                            "state": "formed",
+                            "stateQual": "none",
+                            "status": "",
+                            "tCl": "fvAEPg",
+                            "tDn": "uni/tn-infra/ap-access/epg-default",
+                            "tType": "mo",
+                            "uid": "0",
+                            "userdom": "all"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/node/class/firmwareCtrlrRunning.json":          
+            {
+                "totalCount": "3",
+                "imdata": [
+                    {
+                        "firmwareCtrlrRunning": {
+                            "attributes": {
+                                "childAction": "",
+                                "descr": "",
+                                "dn": "topology/pod-1/node-1/sys/ctrlrfwstatuscont/ctrlrrunning",
+                                "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                                "lcOwn": "local",
+                                "modTs": "2025-02-17T16:56:30.846+00:00",
+                                "mode": "normal",
+                                "status": "",
+                                "tpmInUse": "no",
+                                "ts": "2025-02-17T16:56:11.430+00:00",
+                                "type": "controller",
+                                "version": "6.1(2.115a)"
+                            }
+                        }
+                    },
+                    {
+                        "firmwareCtrlrRunning": {
+                            "attributes": {
+                                "childAction": "",
+                                "descr": "",
+                                "dn": "topology/pod-1/node-3/sys/ctrlrfwstatuscont/ctrlrrunning",
+                                "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                                "lcOwn": "local",
+                                "modTs": "2025-02-17T17:49:53.268+00:00",
+                                "mode": "normal",
+                                "status": "",
+                                "tpmInUse": "no",
+                                "ts": "2025-02-17T17:49:33.904+00:00",
+                                "type": "controller",
+                                "version": "6.1(2.115a)"
+                            }
+                        }
+                    },
+                    {
+                        "firmwareCtrlrRunning": {
+                            "attributes": {
+                                "childAction": "",
+                                "descr": "",
+                                "dn": "topology/pod-1/node-2/sys/ctrlrfwstatuscont/ctrlrrunning",
+                                "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                                "lcOwn": "local",
+                                "modTs": "2025-02-17T17:22:48.096+00:00",
+                                "mode": "normal",
+                                "status": "",
+                                "tpmInUse": "no",
+                                "ts": "2025-02-17T17:22:28.809+00:00",
+                                "type": "controller",
+                                "version": "6.1(2.115a)"
+                            }
+                        }
+                    }
+                ]
+            
+        },
+
+        "/api/node/mo/uni/tn-test.json?query-target=self": {            
+                "totalCount": "1",
+                "imdata": [
+                    {
+                        "fvTenant": {
+                            "attributes": {
+                                "annotation": "orchestrator:aci-containers-controller",
+                                "childAction": "",
+                                "descr": "",
+                                "dn": "uni/tn-test",
+                                "extMngdBy": "",
+                                "lcOwn": "local",
+                                "modTs": "2025-03-06T12:13:01.770+00:00",
+                                "monPolDn": "uni/tn-common/monepg-default",
+                                "name": "akhila2",
+                                "nameAlias": "",
+                                "ownerKey": "",
+                                "ownerTag": "",
+                                "status": "",
+                                "uid": "15374",
+                                "userdom": ":all:"
+                            }
+                        }
+                    }
+                ]
+            }
+        ,
+        "/api/node/mo/uni/tn-akhila2/ap-aci-containers-akhila2.json?query-target=self": {
+            
+                "totalCount": "1",
+                "imdata": [
+                    {
+                        "fvAp": {
+                            "attributes": {
+                                "annotation": "orchestrator:aci-containers-controller",
+                                "childAction": "",
+                                "descr": "",
+                                "dn": "uni/tn-akhila2/ap-aci-containers-akhila2",
+                                "extMngdBy": "",
+                                "lcOwn": "local",
+                                "modTs": "2025-03-06T12:16:01.598+00:00",
+                                "monPolDn": "uni/tn-common/monepg-default",
+                                "name": "aci-containers-akhila2",
+                                "nameAlias": "",
+                                "ownerKey": "",
+                                "ownerTag": "",
+                                "prio": "unspecified",
+                                "status": "",
+                                "uid": "15374",
+                                "userdom": ":all:"
+                            }
+                        }
+                    }
+                ]
+            },
+
+            "/api/node/mo/uni/tn-akhila2/ap-aci-containers-akhila2.json?query-target=children": {
+    "totalCount": "4",
+    "imdata": [
+        {
+            "fvAEPg": {
+                "attributes": {
+                    "annotation": "orchestrator:aci-containers-controller",
+                    "childAction": "",
+                    "configIssues": "",
+                    "configSt": "applied",
+                    "descr": "",
+                    "dn": "uni/tn-akhila2/ap-aci-containers-akhila2/epg-aci-containers-nodes",
+                    "exceptionTag": "",
+                    "extMngdBy": "",
+                    "floodOnEncap": "disabled",
+                    "fwdCtrl": "",
+                    "hasMcastSource": "no",
+                    "isAttrBasedEPg": "no",
+                    "isSharedSrvMsiteEPg": "no",
+                    "lcOwn": "local",
+                    "matchT": "AtleastOne",
+                    "modTs": "2025-03-06T12:16:02.105+00:00",
+                    "monPolDn": "uni/tn-common/monepg-default",
+                    "name": "aci-containers-nodes",
+                    "nameAlias": "",
+                    "pcEnfPref": "unenforced",
+                    "pcTag": "16390",
+                    "pcTagAllocSrc": "idmanager",
+                    "prefGrMemb": "exclude",
+                    "prio": "unspecified",
+                    "scope": "2523138",
+                    "shutdown": "no",
+                    "status": "",
+                    "triggerSt": "triggerable",
+                    "txId": "15564440312220997654",
+                    "uid": "15374",
+                    "userdom": ":all:"
+                }
+            }
+        },
+        {
+            "fvAEPg": {
+                "attributes": {
+                    "annotation": "orchestrator:aci-containers-controller",
+                    "childAction": "",
+                    "configIssues": "",
+                    "configSt": "applied",
+                    "descr": "",
+                    "dn": "uni/tn-akhila2/ap-aci-containers-akhila2/epg-aci-containers-system",
+                    "exceptionTag": "",
+                    "extMngdBy": "",
+                    "floodOnEncap": "disabled",
+                    "fwdCtrl": "",
+                    "hasMcastSource": "no",
+                    "isAttrBasedEPg": "no",
+                    "isSharedSrvMsiteEPg": "no",
+                    "lcOwn": "local",
+                    "matchT": "AtleastOne",
+                    "modTs": "2025-03-06T12:16:02.105+00:00",
+                    "monPolDn": "uni/tn-common/monepg-default",
+                    "name": "aci-containers-system",
+                    "nameAlias": "",
+                    "pcEnfPref": "unenforced",
+                    "pcTag": "16391",
+                    "pcTagAllocSrc": "idmanager",
+                    "prefGrMemb": "exclude",
+                    "prio": "unspecified",
+                    "scope": "2523138",
+                    "shutdown": "no",
+                    "status": "",
+                    "triggerSt": "triggerable",
+                    "txId": "15564440312220997654",
+                    "uid": "15374",
+                    "userdom": ":all:"
+                }
+            }
+        },
+        {
+            "fvAEPg": {
+                "attributes": {
+                    "annotation": "orchestrator:aci-containers-controller",
+                    "childAction": "",
+                    "configIssues": "",
+                    "configSt": "applied",
+                    "descr": "",
+                    "dn": "uni/tn-akhila2/ap-aci-containers-akhila2/epg-aci-containers-default",
+                    "exceptionTag": "",
+                    "extMngdBy": "",
+                    "floodOnEncap": "disabled",
+                    "fwdCtrl": "",
+                    "hasMcastSource": "no",
+                    "isAttrBasedEPg": "no",
+                    "isSharedSrvMsiteEPg": "no",
+                    "lcOwn": "local",
+                    "matchT": "AtleastOne",
+                    "modTs": "2025-03-06T12:16:02.105+00:00",
+                    "monPolDn": "uni/tn-common/monepg-default",
+                    "name": "aci-containers-default",
+                    "nameAlias": "",
+                    "pcEnfPref": "unenforced",
+                    "pcTag": "32773",
+                    "pcTagAllocSrc": "idmanager",
+                    "prefGrMemb": "exclude",
+                    "prio": "unspecified",
+                    "scope": "2523138",
+                    "shutdown": "no",
+                    "status": "",
+                    "triggerSt": "triggerable",
+                    "txId": "15564440312220997654",
+                    "uid": "15374",
+                    "userdom": ":all:"
+                }
+            }
+        },
+        {
+            "fvAEPg": {
+                "attributes": {
+                    "annotation": "orchestrator:aci-containers-controller",
+                    "childAction": "",
+                    "configIssues": "",
+                    "configSt": "applied",
+                    "descr": "",
+                    "dn": "uni/tn-akhila2/ap-aci-containers-akhila2/epg-aci-containers-istio",
+                    "exceptionTag": "",
+                    "extMngdBy": "",
+                    "floodOnEncap": "disabled",
+                    "fwdCtrl": "",
+                    "hasMcastSource": "no",
+                    "isAttrBasedEPg": "no",
+                    "isSharedSrvMsiteEPg": "no",
+                    "lcOwn": "local",
+                    "matchT": "AtleastOne",
+                    "modTs": "2025-03-06T12:16:02.105+00:00",
+                    "monPolDn": "uni/tn-common/monepg-default",
+                    "name": "aci-containers-istio",
+                    "nameAlias": "",
+                    "pcEnfPref": "unenforced",
+                    "pcTag": "16392",
+                    "pcTagAllocSrc": "idmanager",
+                    "prefGrMemb": "exclude",
+                    "prio": "unspecified",
+                    "scope": "2523138",
+                    "shutdown": "no",
+                    "status": "",
+                    "triggerSt": "triggerable",
+                    "txId": "15564440312220997654",
+                    "uid": "15374",
+                    "userdom": ":all:"
+                }
+            }
+        }
+    ]
+}
+            
+ 
+       
+    },
+    "deletes": {}
+}

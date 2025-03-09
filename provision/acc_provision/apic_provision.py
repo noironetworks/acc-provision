@@ -732,6 +732,7 @@ class ApicKubeConfig(object):
             update(data, self.associate_aep())
             update(data, self.opflex_cert(apic_version))
             self.apic_version = apic_version
+            import pdb;pdb.set_trace()
             if self.is_newer_version(apic_version, "5.0"):
                 update(data, self.cluster_info())
 
@@ -886,7 +887,7 @@ class ApicKubeConfig(object):
         vmm_inj_cluster_type = self.config["aci_config"]["vmm_domain"]["injected_cluster_type"]
         vmm_inj_cluster_provider = self.config["aci_config"]["vmm_domain"]["injected_cluster_provider"]
         input_yaml = yaml.safe_load(self.config["user_input"])
-        accProvisionInput = yaml.safe_dump(input_yaml, sort_keys=False)
+        accProvisionInput = yaml.safe_dump(input_yaml,sort_keys=False)
         key_data = cert_data = ''
         if self.config["aci_config"]["sync_login"]["key_data"]:
             key_data = self.config["aci_config"]["sync_login"]["key_data"].decode('ascii')
@@ -951,6 +952,7 @@ class ApicKubeConfig(object):
                 )
             ]
         )
+        import pdb;pdb.set_trace()
         return path, data
 
     def pdom_pool_chained(self, pool_name, vlan_list):
