@@ -106,7 +106,8 @@ def get_csv_contents(file_path):
             for row in csv_reader:
                 csv_data.append(row)
     except Exception as ex:
-        print("Error while getting CSV %s file contents. Error: %s") % (file_path, ex)
+        print("Error while getting CSV %s file contents. Error: %s") % (
+            file_path, ex)
     return csv_data
 
 
@@ -3061,8 +3062,7 @@ def provision(args, apic_file, no_random):
     # command line config
     config = {
         "aci_config": {
-            "apic_login": {
-            },
+            "apic_login": { },
             "apic_proxy": args.apic_proxy,
         },
         "provision": {
@@ -3186,8 +3186,11 @@ def provision(args, apic_file, no_random):
         config = deep_merge(config_discover(config, prov_apic), config)
 
     # Validate APIC access
+    import pdb;pdb.set_trace()
+    print("prov_apic: ",prov_apic)
     if prov_apic is not None:
         apic = get_apic(config)
+        print("apic: ",apic)
         apic_version = apic.apic_version
         if apic is None:
             err("Not able to login to the APIC, please check username or password")
@@ -3262,7 +3265,7 @@ def provision(args, apic_file, no_random):
         if not callable(gen):
             gen = globals()[gen]
         gen(config, output_tar)
-
+        print("prov_apic: ", prov_apic)
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
 
@@ -3295,6 +3298,7 @@ def provision(args, apic_file, no_random):
 
     if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
         config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
+    
     ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
     return ret
 
@@ -3304,7 +3308,7 @@ def main(args=None, apic_file=None, no_random=False):
     # len(sys.argv) == 1 when acc-provision is called w/o arguments
     if args is None:
         args = parse_args(len(sys.argv) == 1)
-
+    
     if args.release:
         try:
             release_file_path = os.path.dirname(os.path.realpath(__file__)) + '/RELEASE-VERSION'
@@ -3327,7 +3331,8 @@ def main(args=None, apic_file=None, no_random=False):
     if args.flavor is None:
         err("Flavor not provided. Use -f to pass a flavor name, --list-flavors to see a list of supported flavors")
         sys.exit(1)
-
+    import pdb; pdb.set_trace()
+    print("flavor: ", args.flavor)
     if args.flavor is not None and args.flavor not in FLAVORS:
         err("Invalid configuration flavor: " + args.flavor)
         sys.exit(1)

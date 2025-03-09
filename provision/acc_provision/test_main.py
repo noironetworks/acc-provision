@@ -10,13 +10,14 @@ import ssl
 import sys
 import tempfile
 import tarfile
-
+import json
 import base64
 import copy
 
 import yaml
 
 from . import acc_provision
+from . import fake_apic
 
 from ruamel.yaml import YAML
 yml = YAML()
@@ -41,6 +42,36 @@ def in_testdir(f):
     return wrapper
 
 
+@in_testdir
+def test_acc_unporvision_changes():
+    import pdb; pdb.set_trace()
+    with open("without_shared_tanet_ap_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+    apic_info = {
+        "server_address": apic.server_address,
+        "server_port": apic.server_address[1],
+        "socket_name": apic.socket.getsockname(),
+        
+    }
+
+    print("apicres : ", apic_info)
+   # print("gets: ",data["gets"])
+    
+    def clean_apic():
+        apic.shutdown()
+        return False
+    import pdb; pdb.set_trace()
+    run_provision(
+        "without_shared_tanet_ap.inp.yaml",
+        "without_shared_tanet_ap.kube.yaml",
+        None,
+        None,
+        overrides={"apic": True, "password": "test","delete": True},
+        cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+      
 @in_testdir
 def test_base_case_simple():
     run_provision(
@@ -74,7 +105,7 @@ def test_base_case_operator_mode():
         overrides={"operator_mode": True}
     )
 
-
+    
 @in_testdir
 def test_base_case_upgrade():
     run_provision(
