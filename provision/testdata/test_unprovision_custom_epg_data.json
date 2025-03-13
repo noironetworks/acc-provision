@@ -1,0 +1,495 @@
+{
+    "gets": {
+        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagInst": {
+            "totalCount": "0",
+            "imdata": []
+        },
+        "/api/mo/uni/tn-test.json?query-target=children": {
+            "totalCount": "8",
+            "imdata": [
+                {
+                    "fvAp": {
+                        "attributes": {
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/ap-aci-containers-kube",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-kube",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "prio": "unspecified",
+                            "status": "",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                },
+                {
+                    "fvBD": {
+                        "attributes": {
+                            "OptimizeWanBandwidth": "no",
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "arpFlood": "no",
+                            "bcastP": "225.0.2.32",
+                            "childAction": "",
+                            "configIssues": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/BD-aci-containers-kube-pod-bd",
+                            "enableRogueExceptMac": "no",
+                            "epClear": "no",
+                            "epMoveDetectMode": "",
+                            "extMngdBy": "",
+                            "hostBasedRouting": "no",
+                            "intersiteBumTrafficAllow": "no",
+                            "intersiteL2Stretch": "no",
+                            "ipLearning": "yes",
+                            "ipv6McastAllow": "no",
+                            "lcOwn": "local",
+                            "limitIpLearnToSubnets": "yes",
+                            "llAddr": "::",
+                            "mac": "00:22:BD:F8:19:FF",
+                            "mcastARPDrop": "yes",
+                            "mcastAllow": "no",
+                            "modTs": "2025-02-27T14:43:21.537+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "mtu": "inherit",
+                            "multiDstPktAct": "bd-flood",
+                            "name": "aci-containers-kube-pod-bd",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "pcTag": "49164",
+                            "scope": "3047424",
+                            "seg": "16547722",
+                            "serviceBdRoutingDisable": "no",
+                            "status": "",
+                            "type": "regular",
+                            "uid": "15374",
+                            "unicastRoute": "yes",
+                            "unkMacUcastAct": "proxy",
+                            "unkMcastAct": "flood",
+                            "userdom": ":all:",
+                            "v6unkMcastAct": "flood",
+                            "vmac": "not-applicable"
+                        }
+                    }
+                },
+                {
+                    "fvBD": {
+                        "attributes": {
+                            "OptimizeWanBandwidth": "no",
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "arpFlood": "yes",
+                            "bcastP": "225.1.43.192",
+                            "childAction": "",
+                            "configIssues": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/BD-aci-containers-kube-node-bd",
+                            "enableRogueExceptMac": "no",
+                            "epClear": "no",
+                            "epMoveDetectMode": "",
+                            "extMngdBy": "",
+                            "hostBasedRouting": "no",
+                            "intersiteBumTrafficAllow": "no",
+                            "intersiteL2Stretch": "no",
+                            "ipLearning": "yes",
+                            "ipv6McastAllow": "no",
+                            "lcOwn": "local",
+                            "limitIpLearnToSubnets": "yes",
+                            "llAddr": "::",
+                            "mac": "00:22:BD:F8:19:FF",
+                            "mcastARPDrop": "yes",
+                            "mcastAllow": "no",
+                            "modTs": "2025-02-27T14:43:21.537+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "mtu": "inherit",
+                            "multiDstPktAct": "bd-flood",
+                            "name": "aci-containers-kube-node-bd",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "pcTag": "16387",
+                            "scope": "3047424",
+                            "seg": "15728635",
+                            "serviceBdRoutingDisable": "no",
+                            "status": "",
+                            "type": "regular",
+                            "uid": "15374",
+                            "unicastRoute": "yes",
+                            "unkMacUcastAct": "proxy",
+                            "unkMcastAct": "flood",
+                            "userdom": ":all:",
+                            "v6unkMcastAct": "flood",
+                            "vmac": "not-applicable"
+                        }
+                    }
+                },
+                {
+                    "fvEpTags": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "dn": "uni/tn-test/eptags",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "status": "",
+                            "uid": "0",
+                            "userdom": ":all:"
+                        }
+                    }
+                },
+                {
+                    "fvRsTenantMonPol": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "dn": "uni/tn-test/rsTenantMonPol",
+                            "extMngdBy": "",
+                            "forceResolve": "yes",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "",
+                            "rType": "mo",
+                            "state": "formed",
+                            "stateQual": "default-target",
+                            "status": "",
+                            "tCl": "monEPGPol",
+                            "tContextDn": "",
+                            "tDn": "uni/tn-common/monepg-default",
+                            "tRn": "monepg-default",
+                            "tType": "name",
+                            "tnMonEPGPolName": "",
+                            "uid": "0",
+                            "userdom": ":all:"
+                        }
+                    }
+                },
+                {
+                    "vnsSvcCont": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "dn": "uni/tn-test/svcCont",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "status": "",
+                            "uid": "0",
+                            "userdom": ":all:"
+                        }
+                    }
+                },
+                {
+                    "vzBrCP": {
+                        "attributes": {
+                            "accessPrivilege": "USER",
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "configIssues": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/brc-aci-containers-kube-icmp",
+                            "extMngdBy": "",
+                            "intent": "install",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.532+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-kube-icmp",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "prio": "unspecified",
+                            "reevaluateAll": "no",
+                            "scope": "context",
+                            "status": "",
+                            "targetDscp": "unspecified",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                },
+                {
+                    "vzFilter": {
+                        "attributes": {
+                            "accessPrivilege": "USER",
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/flt-aci-containers-kube-istio-filter",
+                            "extMngdBy": "",
+                            "fwdId": "4",
+                            "id": "implicit",
+                            "lcOwn": "local",
+                            "maxEntryCount": "500",
+                            "modTs": "2025-02-27T14:43:21.532+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-kube-istio-filter",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "revId": "6",
+                            "status": "",
+                            "txId": "14987979559920810987",
+                            "uid": "15374",
+                            "unsupportedEntries": "no",
+                            "unsupportedMgmtEntries": "no",
+                            "userdom": ":all:",
+                            "usesIds": "yes"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/mo/uni/tn-test/ap-aci-containers-kube.json": {
+            "totalCount": "1",
+            "imdata": [
+                {
+                    "fvAp": {
+                        "attributes": {
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/ap-aci-containers-kube",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-kube",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "prio": "unspecified",
+                            "status": "",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/mo/uni/tn-test/ap-aci-containers-kube1.json": {
+            "totalCount": "1",
+            "imdata": [
+                {
+                    "fvAp": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "uni/tn-test/ap-aci-containers-kube1",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-27T14:43:21.255+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-kube",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "prio": "unspecified",
+                            "status": "",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                }
+            ]
+        },
+       
+        "/api/mo/uni/tn-test/ap-aci-containers-kube.json?query-target=children": {
+            "totalCount": "2",
+            "imdata": [
+                {
+                    "fvAEPg": {
+                        "attributes": {
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "configIssues": "",
+                            "configSt": "applied",
+                            "descr": "",
+                            "dn": "uni/tn-test/ap-aci-containers-kube/epg-aci-containers-nodes",
+                            "exceptionTag": "",
+                            "extMngdBy": "",
+                            "floodOnEncap": "disabled",
+                            "fwdCtrl": "",
+                            "hasMcastSource": "no",
+                            "isAttrBasedEPg": "no",
+                            "isSharedSrvMsiteEPg": "no",
+                            "lcOwn": "local",
+                            "matchT": "AtleastOne",
+                            "modTs": "2025-02-27T14:43:21.779+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-nodes",
+                            "nameAlias": "",
+                            "pcEnfPref": "unenforced",
+                            "pcTag": "32779",
+                            "pcTagAllocSrc": "idmanager",
+                            "prefGrMemb": "exclude",
+                            "prio": "unspecified",
+                            "scope": "3047424",
+                            "shutdown": "no",
+                            "status": "",
+                            "triggerSt": "triggerable",
+                            "txId": "14987979559920810987",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                }, {
+                    "fvAEPg": {
+                        "attributes": {
+                            "annotation": "",
+                            "childAction": "",
+                            "configIssues": "",
+                            "configSt": "applied",
+                            "descr": "",
+                            "dn": "uni/tn-test/ap-aci-containers-kube/epg-testepg",
+                            "exceptionTag": "",
+                            "extMngdBy": "",
+                            "floodOnEncap": "disabled",
+                            "fwdCtrl": "",
+                            "hasMcastSource": "no",
+                            "isAttrBasedEPg": "no",
+                            "isSharedSrvMsiteEPg": "no",
+                            "lcOwn": "local",
+                            "matchT": "AtleastOne",
+                            "modTs": "2025-02-27T14:43:21.779+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "aci-containers-nodes",
+                            "nameAlias": "",
+                            "pcEnfPref": "unenforced",
+                            "pcTag": "32779",
+                            "pcTagAllocSrc": "idmanager",
+                            "prefGrMemb": "exclude",
+                            "prio": "unspecified",
+                            "scope": "3047424",
+                            "shutdown": "no",
+                            "status": "",
+                            "triggerSt": "triggerable",
+                            "txId": "14987979559920810987",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/node/class/firmwareCtrlrRunning.json": {
+            "totalCount": "3",
+            "imdata": [
+                {
+                    "firmwareCtrlrRunning": {
+                        "attributes": {
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "topology/pod-1/node-1/sys/ctrlrfwstatuscont/ctrlrrunning",
+                            "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-17T16:56:30.846+00:00",
+                            "mode": "normal",
+                            "status": "",
+                            "tpmInUse": "no",
+                            "ts": "2025-02-17T16:56:11.430+00:00",
+                            "type": "controller",
+                            "version": "6.1(2.115a)"
+                        }
+                    }
+                },
+                {
+                    "firmwareCtrlrRunning": {
+                        "attributes": {
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "topology/pod-1/node-3/sys/ctrlrfwstatuscont/ctrlrrunning",
+                            "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-17T17:49:53.268+00:00",
+                            "mode": "normal",
+                            "status": "",
+                            "tpmInUse": "no",
+                            "ts": "2025-02-17T17:49:33.904+00:00",
+                            "type": "controller",
+                            "version": "6.1(2.115a)"
+                        }
+                    }
+                },
+                {
+                    "firmwareCtrlrRunning": {
+                        "attributes": {
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "topology/pod-1/node-2/sys/ctrlrfwstatuscont/ctrlrrunning",
+                            "internalLabel": "a779e8156387a65a437b28e719dd8bda5774da0e",
+                            "lcOwn": "local",
+                            "modTs": "2025-02-17T17:22:48.096+00:00",
+                            "mode": "normal",
+                            "status": "",
+                            "tpmInUse": "no",
+                            "ts": "2025-02-17T17:22:28.809+00:00",
+                            "type": "controller",
+                            "version": "6.1(2.115a)"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/node/mo/uni/tn-test.json?query-target=self": {
+            "totalCount": "1",
+            "imdata": [
+                {
+                    "fvTenant": {
+                        "attributes": {
+                            "annotation": "orchestrator:aci-containers-controller",
+                            "childAction": "",
+                            "descr": "",
+                            "dn": "uni/tn-test",
+                            "extMngdBy": "",
+                            "lcOwn": "local",
+                            "modTs": "2025-03-06T12:13:01.770+00:00",
+                            "monPolDn": "uni/tn-common/monepg-default",
+                            "name": "akhila2",
+                            "nameAlias": "",
+                            "ownerKey": "",
+                            "ownerTag": "",
+                            "status": "",
+                            "uid": "15374",
+                            "userdom": ":all:"
+                        }
+                    }
+                }
+            ]
+        },
+        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagAnnotation": {
+            "totalCount": "0",
+            "imdata": []
+        }
+    },
+    "deletes":[
+        "/api/mo/uni/infra/vlanns-[kube-pool]-static.json" ,
+        "/api/mo/uni/infra/maddrns-kube-mpool.json",
+        "/api/mo/uni/vmmp-Kubernetes/dom-kube.json",
+        "/api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/vmmp-Kubernetes/dom-kube].json",
+        "/api/mo/uni/infra/attentp-kube-aep/rsdomP-[uni/phys-kube-pdom].json",
+        "/api/mo/uni/infra/attentp-kube-aep/gen-default/rsfuncToEpg-[uni/tn-test/ap-aci-containers-kube/epg-aci-containers-nodes].json",
+        "/api/mo/uni/tn-common/flt-kube-allow-all-filter.json",
+        "/api/mo/uni/tn-common/brc-kube-l3out-allow-all.json",   
+        "/api/node/mo/uni/userext/user-kube.json", 
+        "/api/node/mo/uni/userext/user-kube.json",             
+        "/api/node/mo/uni/tn-test/BD-aci-containers-kube-node-bd.json",
+        "/api/node/mo/uni/tn-test/BD-aci-containers-kube-pod-bd.json",
+        "/api/mo/uni/tn-test/ap-aci-containers-kube/epg-aci-containers-nodes.json",        
+        "/api/mo/uni/tn-common/out-l3out/instP-test_ext_net/rsprov-kube-l3out-allow-all.json",
+        "/api/mo/uni/tn-common/out-l3out/instP-default/rsprov-kube-l3out-allow-all.json" ,
+        "/api/mo/uni/phys-kube-pdom.json" ,
+        "/api/node/mo/uni/tn-test/flt-aci-containers-kube-istio-filter.json" ,
+        "/api/node/mo/uni/tn-test/brc-aci-containers-kube-icmp.json" ,
+        "/api/node/mo/comp/prov-Kubernetes/ctrlr-[kube]-kube/injcont/info.json"
+        
+    ] 
+}

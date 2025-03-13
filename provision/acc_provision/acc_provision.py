@@ -2813,12 +2813,13 @@ def get_apic(config):
     apic_password = config["aci_config"]["apic_login"]["password"]
     timeout = config["aci_config"]["apic_login"]["timeout"]
     debug = config["provision"]["debug_apic"]
+    ssl = config["aci_config"].get("ssl", True)
 
     if config["aci_config"]["apic_proxy"]:
         apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug)
+        timeout=timeout, debug=debug, ssl=ssl)
     if apic.cookies is None:
         return None
     return apic
