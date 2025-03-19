@@ -10,13 +10,14 @@ import ssl
 import sys
 import tempfile
 import tarfile
-
+import json
 import base64
 import copy
 
 import yaml
 
 from . import acc_provision
+from . import fake_apic
 
 from ruamel.yaml import YAML
 yml = YAML()
@@ -39,6 +40,98 @@ def in_testdir(f):
             os.chdir("..")
         return ret
     return wrapper
+
+
+@in_testdir
+def test_unprovision_delete_tenant():
+     with open("test_unprovision_delete_tenant_data.json") as data_file:
+         data = json.loads(data_file.read())
+     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+     def clean_apic():
+         apic.shutdown()
+         apic.server_close()
+         return False
+     assert (len(fake_apic.fake_deletes) != 0)
+     run_provision(
+         "test_unprovision_delete_tenant.inp.yaml",
+         None,
+         None,
+         None,
+         overrides={ "skip_app_profile_check": True, "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+     )
+     apic.shutdown()
+     apic.server_close()
+     # verify all deletes were executed
+     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+
+
+@in_testdir
+def test_unprovision_custom_ap_without_annotation():
+     with open("test_unprovision_custom_ap_without_annotation_data.json") as data_file:
+         data = json.loads(data_file.read())
+     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+     def clean_apic():
+         apic.shutdown()
+         apic.server_close()
+         return False
+     assert (len(fake_apic.fake_deletes) != 0)
+     run_provision(
+         "test_unprovision_custom_ap_without_annotation.inp.yaml",
+         None,
+         None,
+         None,
+         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+     )
+     apic.shutdown()
+     apic.server_close()
+     # verify all deletes were executed
+     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+
+
+@in_testdir
+def test_unprovision_custom_ap_with_annotation():
+     with open("test_unprovision_custom_ap_with_annotation_data.json") as data_file:
+         data = json.loads(data_file.read())
+     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+     def clean_apic():
+         apic.shutdown()
+         apic.server_close()
+         return False
+     assert (len(fake_apic.fake_deletes) != 0)
+     run_provision(
+         "test_unprovision_custom_ap_with_annotation.inp.yaml",
+         None,
+         None,
+         None,
+         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+     )
+     apic.shutdown()
+     apic.server_close()
+     # verify all deletes were executed
+     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+
+
+@in_testdir
+def test_unprovision_custom_epg():
+     with open("test_unprovision_custom_epg_data.json") as data_file:
+         data = json.loads(data_file.read())
+     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+     def clean_apic():
+         apic.shutdown()
+         apic.server_close()
+         return False
+     assert (len(fake_apic.fake_deletes) != 0)
+     run_provision(
+         "test_unprovision_custom_epg.inp.yaml",
+         None,
+         None,
+         None,
+         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+     )
+     apic.shutdown()
+     apic.server_close()
+     # verify all deletes were executed
+     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
 
 
 @in_testdir
