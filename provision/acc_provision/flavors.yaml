@@ -5952,11 +5952,11 @@ flavors:
     status: null
     hidden: true
     order: 75
-  RKE-1.8.1:
-    desc: Rancher Kubernetes Engine min version 1.8.1
+  RKE-1.8.2:
+    desc: Rancher Kubernetes Engine min version 1.8.2
     default_version: 6.1
     options:
-      template_generator: generate_rancher_1_8_1_yaml
+      template_generator: generate_rancher_1_8_2_yaml
     config:
       rke_config:
         contracts:
@@ -6008,11 +6008,11 @@ flavors:
     hidden: False
     status: Experimental
     order: 76
-  RKE-1.7.5:
-    desc: Rancher Kubernetes Engine min version 1.7.5
+  RKE-1.7.6:
+    desc: Rancher Kubernetes Engine min version 1.7.6
     default_version: 6.1
     options:
-      template_generator: generate_rancher_1_7_5_yaml
+      template_generator: generate_rancher_1_7_6_yaml
     config:
       rke_config:
         contracts:
@@ -6176,11 +6176,11 @@ flavors:
     hidden: False
     status: null
     order: 79
-  RKE-1.6.9:
-    desc: Rancher Kubernetes Engine min version 1.6.9
+  RKE-1.6.10:
+    desc: Rancher Kubernetes Engine min version 1.6.10
     default_version: 6.1
     options:
-      template_generator: generate_rancher_1_6_9_yaml
+      template_generator: generate_rancher_1_6_10_yaml
     config:
       rke_config:
         contracts:
