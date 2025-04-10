@@ -1597,6 +1597,30 @@ def test_flavor_RKE2_kubernetes_1_29_base():
 
 
 @in_testdir
+def test_flavor_RKE2_kubernetes_1_30_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_30.inp.yaml",
+        "flavor_RKE2_kubernetes_1_30.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_30.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.30"}
+    )
+
+
+@in_testdir
+def test_flavor_RKE2_kubernetes_1_31_base():
+    run_provision(
+        "flavor_RKE2_kubernetes_1_31.inp.yaml",
+        "flavor_RKE2_kubernetes_1_31.kube.yaml",
+        None,
+        None,
+        "flavor_RKE2_kubernetes_1_31.apic.txt",
+        overrides={"flavor": "RKE2-kubernetes-1.31"}
+    )
+
+
+@in_testdir
 def test_flavor_RKE_1_2_3_base():
     run_provision(
         "flavor_RKE_1_2_3.inp.yaml",
