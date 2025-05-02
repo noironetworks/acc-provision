@@ -14,9 +14,9 @@ INFO: openshift-4.15-agent-based-esx:	Red Hat OpenShift Container Platform 4.15 
 INFO: openshift-4.17-esx:	Red Hat OpenShift Container Platform 4.17 on ESX
 INFO: openshift-4.16-esx:	Red Hat OpenShift Container Platform 4.16 on ESX
 INFO: openshift-4.15-esx:	Red Hat OpenShift Container Platform 4.15 on ESX
+INFO: kubernetes-1.31:	Kubernetes 1.31
 INFO: kubernetes-1.30:	Kubernetes 1.30
 INFO: kubernetes-1.29:	Kubernetes 1.29
-INFO: kubernetes-1.28:	Kubernetes 1.28
 INFO: RKE2-kubernetes-1.31:	Rancher Kubernetes Engine Government kubernetes version 1.31
 INFO: RKE2-kubernetes-1.30:	Rancher Kubernetes Engine Government kubernetes version 1.30
 INFO: RKE2-kubernetes-1.29:	Rancher Kubernetes Engine Government kubernetes version 1.29
