@@ -48,13 +48,13 @@ data:
     \       }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\n\
     \    ]\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-4.15-agent-based-baremetal\"\
-    ,\n    \"app-profile\": \"aci-containers-kube\",\n    \"opflex-mode\": null,\n\
-    \    \"log-level\": \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\"\
-    ,\n    \"aci-vmm-type\": \"OpenShift\",\n    \"aci-vmm-domain\": \"kube\",\n \
-    \   \"aci-vmm-controller\": \"kube\",\n    \"aci-prefix\": \"kube\",\n    \"aci-vrf\"\
-    : \"kube\",\n    \"aci-vrf-tenant\": \"common\",\n    \"service-vlan\": 4003,\n\
-    \    \"kubeapi-vlan\": 4001,\n    \"pod-subnet\": [\n        \"10.2.0.1/16\"\n\
-    \    ],\n    \"node-subnet\": [\n        \"10.1.0.1/16\"\n    ],\n    \"encap-type\"\
+    ,\n    \"app-profile\": \"aci-containers-kube\",\n    \"epg-resolve-prioritize\"\
+    : true,\n    \"opflex-mode\": null,\n    \"log-level\": \"info\",\n    \"aci-snat-namespace\"\
+    : \"aci-containers-system\",\n    \"aci-vmm-type\": \"OpenShift\",\n    \"aci-vmm-domain\"\
+    : \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-prefix\": \"kube\"\
+    ,\n    \"aci-vrf\": \"kube\",\n    \"aci-vrf-tenant\": \"common\",\n    \"service-vlan\"\
+    : 4003,\n    \"kubeapi-vlan\": 4001,\n    \"pod-subnet\": [\n        \"10.2.0.1/16\"\
+    \n    ],\n    \"node-subnet\": [\n        \"10.1.0.1/16\"\n    ],\n    \"encap-type\"\
     : \"vxlan\",\n    \"aci-infra-vlan\": 4093,\n    \"cni-netconfig\": [\n      \
     \  {\n            \"gateway\": \"10.2.0.1\",\n            \"routes\": [\n    \
     \            {\n                    \"dst\": \"0.0.0.0/0\",\n                \
@@ -92,9 +92,9 @@ data:
     policy-duration\": 60,\n                \"resolve-aft-conn\": false\n        },\n\
     \        \"timers\" : {\n                \"switch-sync-delay\": 5,\n         \
     \       \"switch-sync-dynamic\": 10\n        },\n        \"asyncjson\": { \"enabled\"\
-    \ : \"false\" }\n    },\n    \"ovs\": {\n        \"asyncjson\": { \"enabled\"\
-    \ : \"false\" }\n    },\n    \"prometheus\": {\n        \"enabled\": \"false\"\
-    \n    }\n}"
+    \ : \"false\" }\n        ,\"epg-resolve-prioritize\": { \"enabled\": \"true\"\
+    \ }\n    },\n    \"ovs\": {\n        \"asyncjson\": { \"enabled\" : \"false\"\
+    \ }\n    },\n    \"prometheus\": {\n        \"enabled\": \"false\"\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:

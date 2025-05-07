@@ -900,6 +900,7 @@ data:
         "flavor": "k8s-overlay",
         "app-profile": "kubernetes",
         "ep-registry": "k8s",
+        "epg-resolve-prioritize": true,
         "opflex-mode": "overlay",
         "log-level": "debug",
         "aci-snat-namespace": "kube-system",
@@ -958,6 +959,7 @@ data:
                     "switch-sync-dynamic": 10
             },
             "asyncjson": { "enabled" : "false" }
+            ,"epg-resolve-prioritize": { "enabled": "true" }
             ,"statistics" : { "mode" : "off" }
         },
         "ovs": {
