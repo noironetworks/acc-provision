@@ -789,6 +789,7 @@ def config_adjust(args, config, prov_apic, no_random):
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
 
+    epg_resolve_prioritize = config["kube_config"].get("epg_resolve_prioritize", True)
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -889,6 +890,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 node_svc_subnet,
             ],
             "opflex_mode": opflex_mode,
+            "epg_resolve_prioritize": epg_resolve_prioritize,
             "enable_endpointslice": enable_endpointslice,
         },
         "registry": {
