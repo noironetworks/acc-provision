@@ -90,6 +90,8 @@ registry:
 #kube_config:
   # epg_resolve_prioritize: False # Set to False to disable delaying the writing of EP files until the associated EPG is resolved.
                                   # The default value is True.
+  # force_ep_undeclares: False # Set to False to disable sending an undeclare before the endpoint declare request to opflex-proxy.
+                               # The default value is True.
   # aci_multipod: True #override if multipod setup, default is False
   # opflex_device_reconnect_wait_timeout: 10  # Timeout in seconds to wait for reconnect when opflexOdev is diconnected for a node
                                               # before triggering a dhcp release and renew of vlan interface
