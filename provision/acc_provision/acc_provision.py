@@ -790,6 +790,7 @@ def config_adjust(args, config, prov_apic, no_random):
     pod_bd_dn = bd_dn_prefix + "pod-bd"
 
     epg_resolve_prioritize = config["kube_config"].get("epg_resolve_prioritize", True)
+    force_ep_undeclares = config["kube_config"].get("force_ep_undeclares", True)
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -891,6 +892,7 @@ def config_adjust(args, config, prov_apic, no_random):
             ],
             "opflex_mode": opflex_mode,
             "epg_resolve_prioritize": epg_resolve_prioritize,
+            "force_ep_undeclares": force_ep_undeclares,
             "enable_endpointslice": enable_endpointslice,
         },
         "registry": {
