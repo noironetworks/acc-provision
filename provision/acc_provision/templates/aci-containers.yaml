@@ -2940,6 +2940,9 @@ data:
         {% if config.kube_config.dhcp_delay %}
         "dhcp-delay": {{ config.kube_config.dhcp_delay|json}},
         {% endif %}
+        {% if config.kube_config.epg_resolve_prioritize %}
+        "epg-resolve-prioritize": {{config.kube_config.epg_resolve_prioritize|json}},
+        {% endif %}
         "opflex-mode": {{ config.kube_config.opflex_mode|json }},
         {% if config.kube_config.enable_opflex_agent_reconnect  %}
         "enable-opflex-agent-reconnect": {{config.kube_config.enable_opflex_agent_reconnect|json}},
@@ -3059,6 +3062,9 @@ data:
             "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
           {% if config.kube_config.enable_hpp_direct %}
             ,"enable-local-netpol": {{ config.kube_config.enable_hpp_direct|json }}
+          {% endif %}
+          {% if config.kube_config.epg_resolve_prioritize %}
+            ,"epg-resolve-prioritize": { "enabled": "{{ config.kube_config.epg_resolve_prioritize|json }}" }
           {% endif %}
           {% if not config.aci_config.client_ssl %}
             ,"ssl": { "mode": "disabled" }

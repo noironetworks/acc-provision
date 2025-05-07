@@ -88,6 +88,8 @@ registry:
   # use_digest: true   # option to pull images using digest, override if needed, default is false.
 
 #kube_config:
+  # epg_resolve_prioritize: False # Set to False to disable delaying the writing of EP files until the associated EPG is resolved.
+                                  # The default value is True.
   # aci_multipod: True #override if multipod setup, default is False
   # opflex_device_reconnect_wait_timeout: 10  # Timeout in seconds to wait for reconnect when opflexOdev is diconnected for a node
                                               # before triggering a dhcp release and renew of vlan interface
