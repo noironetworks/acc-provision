@@ -128,8 +128,6 @@ kube_config:
   enable_endpointslice: true
   use_privileged_containers: true
   proactive_conf: True
-  epg_resolve_prioritize: false
-  force_ep_undeclares: false
 
 registry:
   image_prefix: quay.io/noiro
