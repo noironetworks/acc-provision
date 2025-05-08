@@ -287,6 +287,12 @@ network:
     {% if config.kube_config.proactive_conf %}
     proactive_conf: "{{ config.kube_config.proactive_conf|lower() }}"
     {% endif %}
+    {% if config.kube_config.epg_resolve_prioritize != True %}
+    epg_resolve_prioritize: "{{ config.kube_config.epg_resolve_prioritize|lower() }}"
+    {% endif %}
+    {% if config.kube_config.force_ep_undeclares != True %}
+    force_ep_undeclares: "{{ config.kube_config.force_ep_undeclares|lower() }}"
+    {% endif %}
 services:
   kube-controller:
     {% if config.net_config.pod_subnet %}
