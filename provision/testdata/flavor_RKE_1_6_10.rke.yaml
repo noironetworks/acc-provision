@@ -97,8 +97,6 @@ network:
     opflex_client_ssl: "false"
     multus_disable: "false"
     proactive_conf: "true"
-    epg_resolve_prioritize: "false"
-    force_ep_undeclares: "false"
 services:
   kube-controller:
     cluster_cidr: "10.2.0.1/16,12.3.0.1/16"

@@ -44,8 +44,8 @@ INFO: kubernetes-1.28:	Kubernetes 1.28
 INFO: RKE2-kubernetes-1.31:	Rancher Kubernetes Engine Government kubernetes version 1.31
 INFO: RKE2-kubernetes-1.30:	Rancher Kubernetes Engine Government kubernetes version 1.30
 INFO: RKE2-kubernetes-1.29:	Rancher Kubernetes Engine Government kubernetes version 1.29
-INFO: RKE-1.8.3:	Rancher Kubernetes Engine min version 1.8.3 [Experimental]
-INFO: RKE-1.7.7:	Rancher Kubernetes Engine min version 1.7.7 [Experimental]
+INFO: RKE-1.8.2:	Rancher Kubernetes Engine min version 1.8.2 [Experimental]
+INFO: RKE-1.7.6:	Rancher Kubernetes Engine min version 1.7.6 [Experimental]
 INFO: RKE-1.7.2:	Rancher Kubernetes Engine min version 1.7.2
 INFO: RKE-1.7.1:	Rancher Kubernetes Engine min version 1.7.1
 INFO: RKE-1.6.10:	Rancher Kubernetes Engine min version 1.6.10 [Experimental]
