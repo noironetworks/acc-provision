@@ -85,9 +85,10 @@ data:
     policy-duration\": 60,\n                \"resolve-aft-conn\": false\n        },\n\
     \        \"timers\" : {\n                \"switch-sync-delay\": 5,\n         \
     \       \"switch-sync-dynamic\": 10\n        },\n        \"asyncjson\": { \"enabled\"\
-    \ : \"false\" }\n        ,\"epg-resolve-prioritize\": { \"enabled\": \"true\"\
-    \ }\n    },\n    \"ovs\": {\n        \"asyncjson\": { \"enabled\" : \"false\"\
-    \ }\n    },\n    \"prometheus\": {\n        \"enabled\": \"false\"\n    }\n}"
+    \ : \"false\" },\n        \"force-ep-undeclares\": { \"enabled\": \"true\" }\n\
+    \        ,\"epg-resolve-prioritize\": { \"enabled\": \"true\" }\n    },\n    \"\
+    ovs\": {\n        \"asyncjson\": { \"enabled\" : \"false\" }\n    },\n    \"prometheus\"\
+    : {\n        \"enabled\": \"false\"\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:

@@ -3061,7 +3061,8 @@ data:
                     "switch-sync-delay": {{ config.kube_config.opflex_switch_sync_delay|json }},
                     "switch-sync-dynamic": {{ config.kube_config.opflex_switch_sync_dynamic|json }}
             },
-            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} }
+            "asyncjson": { "enabled" : {{ config.kube_config.opflex_agent_opflex_asyncjson_enabled|json }} },
+            "force-ep-undeclares": { "enabled": "{{ config.kube_config.force_ep_undeclares|json }}" }
           {% if config.kube_config.enable_hpp_direct %}
             ,"enable-local-netpol": {{ config.kube_config.enable_hpp_direct|json }}
           {% endif %}
