@@ -2657,6 +2657,7 @@ data:
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        "aep" : {{config.aci_config.aep|json}},
         "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
         "chained-mode": true,
         {% if config.kube_config.unknown_mac_unicast_action %}
@@ -2718,6 +2719,7 @@ data:
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
+        "aep" : {{config.aci_config.aep|json}},
         {% if config.kube_config.aci_multipod %}
         "aci-multipod": {{config.kube_config.aci_multipod|json}},
         {% endif %}
