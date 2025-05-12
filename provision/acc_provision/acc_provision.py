@@ -280,6 +280,7 @@ def config_default():
         "aci_config": {
             "apic_version": "1.0",
             "system_id": None,
+            "aep": None,
             "tenant": {
                 "name": None,
             },
