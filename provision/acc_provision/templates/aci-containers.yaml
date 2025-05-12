@@ -2723,6 +2723,8 @@ data:
         {% if config.kube_config.aci_multipod %}
         "aci-multipod": {{config.kube_config.aci_multipod|json}},
         {% endif %}
+        "apic-request-retry-delay": {{config.kube_config.apic_request_retry_delay|json}},
+        "enable-apic-request-retry-delay": {{config.kube_config.enable_apic_request_retry_delay|json}},
         {% if config.kube_config.unknown_mac_unicast_action %}
         "unknown-mac-unicast-action": {{config.kube_config.unknown_mac_unicast_action|json}},
         {% endif %}
