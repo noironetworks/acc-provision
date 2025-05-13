@@ -849,6 +849,8 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "aep" : null,
+        "apic-request-retry-delay": 2,
+        "enable-apic-request-retry-delay": true,
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "app-profile": "kubernetes",
