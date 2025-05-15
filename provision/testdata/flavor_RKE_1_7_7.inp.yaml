@@ -130,6 +130,8 @@ kube_config:
   proactive_conf: True
   epg_resolve_prioritize: false
   force_ep_undeclares: false
+  apic_request_retry_delay: 10
+  enable_apic_request_retry_delay: false
   
 registry:
   image_prefix: quay.io/noiro
