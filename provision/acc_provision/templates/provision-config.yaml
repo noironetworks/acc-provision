@@ -172,6 +172,7 @@ registry:
   # opflex_agent_reset_wait_delay: 10                   # override if needed, default is 5
   # disable_service_vlan_preprovisioning : True         # default is False, set to True if you want to disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
   # proactive_conf: True                                # default is False, set to True to enable proactive configuration
+  # disable_resilient_hashing: True                     # default is False, set to True if you want to disable Resilient Hashing in the L4-L7 Redirect Policy programmed for LoadBalancer services.
 
 #
 # Configuration for ACI CNI Operator
