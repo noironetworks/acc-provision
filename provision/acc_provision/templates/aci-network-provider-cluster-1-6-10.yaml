@@ -294,10 +294,10 @@ network:
     force_ep_undeclares: "{{ config.kube_config.force_ep_undeclares|lower() }}"
     {% endif %}
     {% if config.kube_config.apic_request_retry_delay != 2 %}
-    "apic-request-retry-delay": "{{ config.kube_config.apic_request_retry_delay }}"
+    apic_request_retry_delay: "{{ config.kube_config.apic_request_retry_delay }}"
     {% endif %}
     {% if config.kube_config.enable_apic_request_retry_delay != True %}
-    "enable-apic-request-retry-delay": "{{ config.kube_config.enable_apic_request_retry_delay|lower() }}"
+    enable_apic_request_retry_delay: "{{ config.kube_config.enable_apic_request_retry_delay|lower() }}"
     {% endif %}
 services:
   kube-controller:
