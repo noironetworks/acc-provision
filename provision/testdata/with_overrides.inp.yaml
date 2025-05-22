@@ -120,6 +120,7 @@ kube_config:
   opflex_agent_reset_wait_delay: 10
   disable_service_vlan_preprovisioning: True
   proactive_conf: True
+  disable_resilient_hashing: True
 
 registry:
   image_prefix: noiro
