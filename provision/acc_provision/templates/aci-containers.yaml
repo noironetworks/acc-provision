@@ -2791,6 +2791,9 @@ data:
         {% if config.kube_config.proactive_conf %}
         "proactive-conf": {{ config.kube_config.proactive_conf|json }},
         {% endif %}
+        {% if config.kube_config.disable_resilient_hashing %}
+        "disable-resilient-hashing": {{ config.kube_config.disable_resilient_hashing|json }},
+        {% endif %}
 {#
         Commenting code to disable the install_istio flag as the functionality
         is disabled to remove dependency from istio.io/istio package.
