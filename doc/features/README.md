@@ -1077,6 +1077,7 @@ This section explains features / configuration options available in acc provisio
 - [SNAT Service Graph Contract Scope](snat-operator-contract-scope.md)
 - [Taint NotReady Node](taint-not-ready-node.md)
 - [Service BD - Unknown MAC unicast action](unknown-mac-unicast-action.md)
+- [Resilient Hashing](disable-resilient-hashing.md)
 
 
 # Troubleshooting Kubernetes Integration
