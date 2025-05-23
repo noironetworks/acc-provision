@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    aci-containers-config-version: dummy
+    name: aci-containers-controller
+    network-plugin: aci-containers
+  name: aci-containers-controller
+  namespace: aci-containers-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: aci-containers-controller
+      network-plugin: aci-containers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: aci-containers-controller
+        network-plugin: aci-containers
+      name: aci-containers-controller
+      namespace: aci-containers-system
+    spec:
+      containers:
+      - env:
+        - name: WATCH_NAMESPACE
+          value: ''
+        - name: ACI_SNAT_NAMESPACE
+          value: aci-containers-system
+        - name: ACI_SNAGLOBALINFO_NAME
+          value: snatglobalinfo
+        - name: ACI_RDCONFIG_NAME
+          value: routingdomain-config
+        - name: SYSTEM_NAMESPACE
+          value: aci-containers-system
+        image: noiro/aci-containers-controller:6.1.1.4.81c2369
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /status
+            port: 8091
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+        name: aci-containers-controller
+        volumeMounts:
+        - mountPath: /usr/local/etc/aci-containers/
+          name: controller-config-volume
+        - mountPath: /var/log/pods
+          name: varlogpods
+          readOnly: true
+        - mountPath: /var/log/containers
+          name: varlogcontainers
+          readOnly: true
+        - mountPath: /var/lib/docker
+          name: varlibdocker
+          readOnly: true
+        - mountPath: /usr/local/etc/aci-cert/
+          name: aci-user-cert-volume
+      hostNetwork: true
+      priorityClassName: acicni-priority
+      serviceAccountName: aci-containers-controller
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      volumes:
+      - name: aci-user-cert-volume
+        secret:
+          secretName: aci-user-cert
+      - configMap:
+          items:
+          - key: controller-config
+            path: controller.conf
+          name: aci-containers-config
+        name: controller-config-volume
+      - hostPath:
+          path: /var/log/pods
+        name: varlogpods
+      - hostPath:
+          path: /var/log/containers
+        name: varlogcontainers
+      - hostPath:
+          path: /var/lib/docker
+        name: varlibdocker
