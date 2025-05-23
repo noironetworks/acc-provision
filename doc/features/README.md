@@ -1080,6 +1080,7 @@ This section explains features / configuration options available in acc provisio
 - [User defined Service Graph](user-defined-service-graph.md)
 - [Taint NotReady Node](taint-not-ready-node.md)
 - [Service BD - Unknown MAC unicast action](unknown-mac-unicast-action.md)
+- [Resilient Hashing](disable-resilient-hashing.md)
 
 
 # Troubleshooting Kubernetes Integration
