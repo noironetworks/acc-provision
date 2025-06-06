@@ -2792,6 +2792,9 @@ data:
         {% if config.kube_config.disable_resilient_hashing %}
         "disable-resilient-hashing": {{ config.kube_config.disable_resilient_hashing|json }},
         {% endif %}
+        {% if config.kube_config.filter_opflex_device == False %}
+        "filter-opflex-device": {{ config.kube_config.filter_opflex_device|json }},
+        {% endif %}
 {#
         Commenting code to disable the install_istio flag as the functionality
         is disabled to remove dependency from istio.io/istio package.
