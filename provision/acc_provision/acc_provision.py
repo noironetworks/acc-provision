@@ -794,6 +794,7 @@ def config_adjust(args, config, prov_apic, no_random):
     enable_apic_request_retry_delay = config["kube_config"].get("enable_apic_request_retry_delay", True)
     epg_resolve_prioritize = config["kube_config"].get("epg_resolve_prioritize", True)
     force_ep_undeclares = config["kube_config"].get("force_ep_undeclares", True)
+    filter_opflex_device = config["kube_config"].get("filter_opflex_device", True)
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -898,6 +899,7 @@ def config_adjust(args, config, prov_apic, no_random):
             "enable_apic_request_retry_delay": enable_apic_request_retry_delay,
             "epg_resolve_prioritize": epg_resolve_prioritize,
             "force_ep_undeclares": force_ep_undeclares,
+            "filter_opflex_device": filter_opflex_device,
             "enable_endpointslice": enable_endpointslice,
         },
         "registry": {
