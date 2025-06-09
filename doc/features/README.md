@@ -1061,6 +1061,7 @@ This section explains features / configuration options available in acc provisio
     - [Enable opflex agent reconnect after vm migration is complete](enable-opflex-agent-reconnect.md)
     - [OpFlex support for ERSPAN with OVS](opflex-agent-erspan.md)
     - [Opflex agent reset wait delay timer](opflex-agent-reset-wait-delay-timer.md)
+    - [Opflex agent force EP undeclares](opflex-agent-force-ep-undeclares.md)
 - ACI Pod
     - [Log level](aci-pods-log-level.md)
     - [Memory request and limit](aci-pods-memory-request-limit.md)
@@ -1071,10 +1072,12 @@ This section explains features / configuration options available in acc provisio
 - APIC
     - [ACI day-zero provision using APIC Out Of Band management IP](apic-oobm-ip.md)
     - [APIC refresh time and refresh ticker](apic-refresh-time-ticker.md)
+    - [Enable retries for APIC requests on failure](apic-request-retries.md)
 - [PBR tracking for non snat, service monitor interval](pbr-tacking-non-snat-and-service-monitor-interval.md)
 - [SNAT Service Graph Contract Scope](snat-operator-contract-scope.md)
 - [Taint NotReady Node](taint-not-ready-node.md)
 - [Service BD - Unknown MAC unicast action](unknown-mac-unicast-action.md)
+- [Resilient Hashing](disable-resilient-hashing.md)
 
 
 # Troubleshooting Kubernetes Integration
