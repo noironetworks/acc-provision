@@ -121,6 +121,7 @@ kube_config:
   disable_service_vlan_preprovisioning: True
   proactive_conf: True
   disable_resilient_hashing: True
+  filter_opflex_device: False
 
 registry:
   image_prefix: noiro
