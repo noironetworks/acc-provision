@@ -851,6 +851,7 @@ data:
         "aep" : null,
         "apic-request-retry-delay": 2,
         "enable-apic-request-retry-delay": true,
+        "filter-opflex-device": true,
         "aci-vrf-tenant": "kube",
         "aci-vrf": "defaultVrf",
         "app-profile": "kubernetes",
