@@ -1303,6 +1303,18 @@ def test_override_include_network_attachment_definition_crd():
 
 
 @in_testdir
+def test_override_use_system_id_for_secondary_names():
+    run_provision(
+        "override_use_system_id_for_secondary_names.inp.yaml",
+        "override_use_system_id_for_secondary_names.kube.yaml",
+        None,
+        None,
+        "override_use_system_id_for_secondary_names.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_flavor_openshift_411_baremetal():
     run_provision(
         "flavor_openshift_411_baremetal.inp.yaml",

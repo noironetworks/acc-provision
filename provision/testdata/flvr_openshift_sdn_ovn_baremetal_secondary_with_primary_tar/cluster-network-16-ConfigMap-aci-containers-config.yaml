@@ -8,12 +8,12 @@ data:
     \    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\",\n    \"\
     aci-prefix\": \"kube\",\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\"\
     : \"kube\",\n    \"aci-vmm-controller\": \"kube\",\n    \"aci-use-global-scope-vlan\"\
-    : false,\n    \"aci-policy-tenant\": \"kube\",\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-netop-nodes\"\
-    ,\n    \"aci-service-phys-dom\": \"kube-physdom\",\n    \"aci-service-encap\"\
-    : \"vlan-None\",\n    \"aci-pbr-tracking-non-snat\": false,\n    \"aci-vrf-tenant\"\
-    : \"common\",\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\",\n    \"aci-vrf\"\
-    : \"kube\",\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\": [\n    \
-    \    \"default\"\n    ]\n}"
+    : false,\n    \"aci-use-system-id-for-secondary-names\": false,\n    \"aci-policy-tenant\"\
+    : \"kube\",\n    \"aci-nodebd-dn\": \"uni/tn-kube/BD-netop-nodes\",\n    \"aci-service-phys-dom\"\
+    : \"kube-physdom\",\n    \"aci-service-encap\": \"vlan-None\",\n    \"aci-pbr-tracking-non-snat\"\
+    : false,\n    \"aci-vrf-tenant\": \"common\",\n    \"aci-vrf-dn\": \"uni/tn-common/ctx-kube\"\
+    ,\n    \"aci-vrf\": \"kube\",\n    \"aci-l3out\": \"l3out\",\n    \"aci-ext-networks\"\
+    : [\n        \"default\"\n    ]\n}"
   host-agent-config: "{\n    \"flavor\": \"openshift-sdn-ovn-baremetal\",\n    \"\
     app-profile\": \"netop-kube\",\n    \"chained-mode\": true,\n    \"enable-chained-primary\"\
     : true,\n    \"enable-chained-secondary\": true,\n    \"primary-cni-path\": \"\

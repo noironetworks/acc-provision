@@ -1,0 +1,35 @@
+aci_config:
+  system_id: kube
+  apic_hosts:
+    - 10.30.120.100
+  aep: kube-aep
+  secondary_aep: kube-aep-2
+  physical_domain:
+    domain: kube-physdom # Override if needed.
+    # Otherwise <system_id>-physdom will be created.
+  sync_login:
+    certfile: user.crt
+    keyfile: user.key
+  vrf:
+    name: kube
+    tenant: common
+  l3out:
+    name: l3out
+    external_networks:
+      - default
+  vmm_domain:
+    domain: kube
+    type: Kubernetes
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  kubeapi_vlan: 4001
+
+chained_cni_config:
+  secondary_interface_chaining: true
+  primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
+  use_system_id_for_secondary_names: true
+  secondary_vlans:
+    - 4002
+    - 4003, 4009
+    - 4004-4007
