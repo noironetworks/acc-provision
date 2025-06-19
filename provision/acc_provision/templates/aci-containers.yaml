@@ -2691,6 +2691,11 @@ data:
         {% else %}
         "aci-use-global-scope-vlan": false,
         {% endif %}
+        {% if config.chained_cni_config.use_system_id_for_secondary_names %}
+        "aci-use-system-id-for-secondary-names": true,
+        {% else %}
+        "aci-use-system-id-for-secondary-names": false,
+        {% endif %}
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
