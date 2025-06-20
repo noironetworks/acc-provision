@@ -474,6 +474,7 @@ def config_default():
             "named_container_for_fabric_bgp_peer_insertion": "fabric-peer",
             "enable_container_l3_peering_model": False,
             "include_network_attachment_definition_crd": False,
+            "use_system_id_for_secondary_names": False,
         }
     }
     return default_config

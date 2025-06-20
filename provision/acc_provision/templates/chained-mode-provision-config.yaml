@@ -124,4 +124,5 @@ chained_cni_config:                                                  # Contains 
   # named_container_for_fabric_bgp_peer_insertion: fabric-peer       # default is fabric-peer
   # enable_container_l3_peering_model: True                          # default is False
   # include_network_attachment_definition_crd: True                  # default is False
+  # use_system_id_for_secondary_names: True                          # default is False
 
