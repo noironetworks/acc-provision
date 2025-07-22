@@ -1,4 +1,4 @@
 INFO: Loading configuration from "dualstack_invalid.inp.yaml"
-INFO: Using configuration flavor kubernetes-1.32
+INFO: Using configuration flavor kubernetes-1.33
 ERR:  Please provide a valid Dualstack configuration with both IPv4 and IPv6 addresses for node and pod subnets.
 ERR:  If extern_static 10.4.0.1/24 or extern_dynamic 10.3.0.1/24 1:5:1:1::1/64 configured with IPv6, then pod_subnet 10.2.0.1/24 and node_subnet 10.1.0.1/16 2:2:1:1::1/64 must have IPv6.
