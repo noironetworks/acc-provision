@@ -1,4 +1,4 @@
 INFO: Loading configuration from "dualstack_pod_subnet_invalid.inp.yaml"
-INFO: Using configuration flavor kubernetes-1.32
+INFO: Using configuration flavor kubernetes-1.33
 ERR:  Please provide a valid Dualstack configuration with both IPv4 and IPv6 addresses for node and pod subnets.
 ERR:  Node Subnet 10.1.0.1/16 does not have IPv6
