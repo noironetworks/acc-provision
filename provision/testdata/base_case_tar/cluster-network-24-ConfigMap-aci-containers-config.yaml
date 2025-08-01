@@ -1,6 +1,6 @@
 apiVersion: v1
 data:
-  controller-config: "{\n    \"flavor\": \"kubernetes-1.32\",\n    \"log-level\":\
+  controller-config: "{\n    \"flavor\": \"kubernetes-1.33\",\n    \"log-level\":\
     \ \"info\",\n    \"apic-hosts\": [\n        \"10.30.120.100\"\n    ],\n    \"\
     aep\" : \"kube-aep\",\n    \"apic-request-retry-delay\": 2,\n    \"enable-apic-request-retry-delay\"\
     : true,\n    \"apic-username\": \"kube\",\n    \"apic-private-key-path\": \"/usr/local/etc/aci-cert/user.key\"\
@@ -31,7 +31,7 @@ data:
     : [\n        {\n            \"end\": \"10.5.0.254\",\n            \"start\": \"\
     10.5.0.2\"\n        }\n    ],\n    \"node-service-subnets\": [\n        \"10.5.0.1/24\"\
     \n    ]\n}"
-  host-agent-config: "{\n    \"flavor\": \"kubernetes-1.32\",\n    \"app-profile\"\
+  host-agent-config: "{\n    \"flavor\": \"kubernetes-1.33\",\n    \"app-profile\"\
     : \"kubernetes\",\n    \"epg-resolve-prioritize\": true,\n    \"opflex-mode\"\
     : null,\n    \"log-level\": \"info\",\n    \"aci-snat-namespace\": \"aci-containers-system\"\
     ,\n    \"aci-vmm-type\": \"Kubernetes\",\n    \"aci-vmm-domain\": \"kube\",\n\
