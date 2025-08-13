@@ -6966,6 +6966,60 @@ flavors:
             prot: tcp
             stateful: "no"
     order: 58
+  RKE2-kubernetes-1.33:
+    desc: Rancher Kubernetes Engine Government kubernetes version 1.33
+    default_version: 6.1
+    config:
+      rke_config:
+        contracts:
+          - name: prometheus-monitoring
+            provided: ["aci-containers-system"]
+            consumed: ["aci-containers-istio"]
+            filter: "access-prometheus"
+        filters:
+          - name: access-prometheus
+            items:
+              - name: http
+                range: [8080, 8080]
+                etherT: ip
+                prot: tcp
+                stateful: "no"
+      kube_config:
+        allow_kube_api_default_epg: True
+        use_host_netns_volume: True
+        allow_pods_external_access: True
+        use_cnideploy_initcontainer: True
+      aci_config:
+        items:
+          - name: metrics-kubelet
+            range: [10250, 10250]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-node
+            range: [9796, 9796]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: monitoring-ingress
+            range: [10254, 10254]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: rancher-ui
+            range: [443, 443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        vmm_domain:
+          type: Kubernetes
+          injected_cluster_type: RKE2
+          injected_cluster_provider: Rancher
+      istio_config:
+        install_istio: False
+    status: null
+    hidden: false
+    order: 83
   RKE2-kubernetes-1.32:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.32
     default_version: 6.1
@@ -7126,7 +7180,7 @@ flavors:
       istio_config:
         install_istio: False
     status: null
-    hidden: false
+    hidden: true
     order: 85
   RKE2-kubernetes-1.29:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.29
