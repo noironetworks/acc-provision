@@ -3040,6 +3040,9 @@ data:
         {% if config.kube_config.taint_not_ready_node %}
         "taint-not-ready-node": {{ config.kube_config.taint_not_ready_node|json }},
         {% endif %}
+        {% if config.kube_config.disable_opflex_resilient_hashing %}
+        "disable-opflex-resilient-hashing": {{ config.kube_config.disable_opflex_resilient_hashing|json }},
+        {% endif %}
         {% if config.sriov_config.enable %}
         {% if config.dpu_config.enable %}
         "dpu-ovsdb-socket": {{config.dpu_ovsdb_socket|json}},

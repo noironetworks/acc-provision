@@ -173,6 +173,7 @@ registry:
   # disable_service_vlan_preprovisioning : True         # default is False, set to True if you want to disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
   # proactive_conf: True                                # default is False, set to True to enable proactive configuration
   # disable_resilient_hashing: True                     # default is False, set to True if you want to disable Resilient Hashing in the L4-L7 Redirect Policy programmed for LoadBalancer services.
+  # disable_opflex_resilient_hashing: True              # default is False, set it as True to disable Opflex Resilient Hashing. By default, session stickiness for ongoing flows is maintained even as the number of backend pods changes; only flows tied to affected pods will be rehashed.
   # filter_opflex_device: False                         # default is True, set to False if you want to disable filtering opflexODev MOs by VMM domain and allow processing of all opflexODev notifications from APIC.
 
 #
