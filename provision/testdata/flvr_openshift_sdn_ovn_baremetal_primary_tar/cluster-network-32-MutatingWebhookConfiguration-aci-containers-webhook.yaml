@@ -34,3 +34,29 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /delete-nad
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-delete-nad.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - k8s.cni.cncf.io
+    apiVersions:
+    - v1
+    operations:
+    - DELETE
+    resources:
+    - network-attachment-definitions
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10

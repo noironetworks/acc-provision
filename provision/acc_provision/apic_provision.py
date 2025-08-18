@@ -79,6 +79,15 @@ def is_chained_mode(config):
             "chained_cni_config"]["primary_interface_chaining"]) else False
 
 
+def is_vmm_lite(config):
+    return True if config.get("vmm_lite_config") and (
+        config["vmm_lite_config"].get("aaep_monitoring_enabled")) else False
+
+
+def is_cno_enabled(config):
+    return is_vmm_lite(config) or is_chained_mode(config)
+
+
 class Apic(object):
 
     TENANT_OBJECTS = ["ap-kubernetes", "BD-kube-node-bd", "BD-kube-pod-bd", "brc-kube-api", "brc-health-check", "brc-dns", "brc-icmp", "flt-kube-api-filter", "flt-dns-filter", "flt-health-check-filter-out", "flt-icmp-filter", "flt-health-check-filter-in"]
@@ -344,7 +353,7 @@ class Apic(object):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
         shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
-        if is_chained_mode(cfg):
+        if is_cno_enabled(cfg):
             if cfg["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
                 pysdom_path = "/api/mo/uni/phys-%s.json" % cfg["user_config"]["aci_config"]["physical_domain"]["domain"]
                 shared_resources.append(pysdom_path)
@@ -404,7 +413,7 @@ class Apic(object):
                                         del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
                                         if 'name' in val['attributes']:
                                             name = val['attributes']['name']
-                                            if is_chained_mode(cfg) and "ap-" in val['attributes']['dn']:
+                                            if is_cno_enabled(cfg) and "ap-" in val['attributes']['dn']:
                                                 continue
                                             if 'annotation' in val['attributes']:
                                                 annotation = val['attributes']['annotation']
@@ -438,7 +447,7 @@ class Apic(object):
                                                         resp = self.delete(del_path)
                                                         self.check_resp(resp)
                                                         dbg("%s: %s" % (del_path, resp.text))
-                                            elif is_chained_mode(cfg) and (name == self.ACI_CHAINED_PREFIX + "nodes"):
+                                            elif is_cno_enabled(cfg) and (name == self.ACI_CHAINED_PREFIX + "nodes"):
                                                 resp = self.delete(del_path)
                                                 self.check_resp(resp)
                                                 dbg("%s: %s" % (del_path, resp.text))
@@ -480,7 +489,7 @@ class Apic(object):
                 if self.check_valid_annotation(cluster_l3out_tenant_path):
                     self.delete(cluster_l3out_tenant_path)
 
-        if is_chained_mode(cfg):
+        if is_cno_enabled(cfg):
             ap_path = "/api/mo/uni/tn-%s/ap-%s.json" % (cluster_tenant, self.ACI_CHAINED_PREFIX + system_id)
             ap_query_path = ap_path + "?query-target=children"
             resp = self.get(ap_query_path)
@@ -699,8 +708,8 @@ class ApicKubeConfig(object):
                     data.append((path, None))
 
         data = []
-        if is_chained_mode(self.config):
-            if not self.config["chained_cni_config"]["skip_node_network_provisioning"]:
+        if is_cno_enabled(self.config):
+            if (is_chained_mode(self.config) and not self.config["chained_cni_config"]["skip_node_network_provisioning"]) or is_vmm_lite(self.config):
                 pool_name = self.config["aci_config"]["physical_domain"]["vlan_pool"]
                 kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
                 phys_name = self.config["aci_config"]["physical_domain"]["domain"]
@@ -872,7 +881,7 @@ class ApicKubeConfig(object):
         elif not (data[key]["attributes"]["name"] == "common") and not (pre_existing_tenant):
             data[key]["attributes"]["annotation"] = ann
 
-        if is_chained_mode(self.config) and key == "fvAp":
+        if is_cno_enabled(self.config) and key == "fvAp":
             tenant_name = self.config["aci_config"].get("tenant", None).get("name", None)
             if self.apic and tenant_name:
                 app_profile = self.ACI_CHAINED_PREFIX + self.config["aci_config"]["system_id"]

@@ -30,7 +30,7 @@ metadata:
 {% endif %}
 {% if config.kube_config.use_acicni_priority_class %}
 {% set flavor_version = config.flavor.split('-') %}
-{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining or config.vmm_lite_config.aaep_monitoring_enabled %}
 apiVersion: scheduling.k8s.io/v1
 {% else %}
 {% set major_version = flavor_version[1].split('.')[0] | int %}
@@ -50,7 +50,7 @@ globalDefault: false
 description: "This priority class is used for ACI-CNI resources"
 ---
 {% endif %}
-{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
 {% if config.kube_config.use_aci_anywhere_crd %}
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -2642,6 +2642,68 @@ spec:
       status: {}
 ---
 {% endif %}
+{% if config.vmm_lite_config.aaep_monitoring_enabled %}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.0
+  name: aaepmonitors.aci.attachmentmonitor
+spec:
+  group: aci.attachmentmonitor
+  names:
+    kind: AaepMonitor
+    listKind: AaepMonitorList
+    plural: aaepmonitors
+    singular: aaepmonitor
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AaepMonitor is the Schema for AttachmentMonitors to monitor AAEPs
+        properties:
+          apiVersion:
+            description: >-
+              'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: >-
+              'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              aaeps:
+                type: array
+                items:
+                  type: string
+                description: List of AAEPs to monitor
+            type: object
+            required:
+            - aaeps
+          status:
+            properties:
+              status:
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+        x-kubernetes-validations:
+        - message: Only one instance with name aaepmonitor allowed
+          rule: self.metadata.name == 'aaepmonitor'
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+{% endif %}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -2653,18 +2715,30 @@ metadata:
 data:
   controller-config: |-
     {
-        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining or config.vmm_lite_config.aaep_monitoring_enabled %}
         "flavor": {{config.flavor|json}},
         "log-level": {{config.logging.controller_log_level|json}},
         "apic-hosts": {{config.aci_config.apic_hosts|json|indent(width=8)}},
         "aep" : {{config.aci_config.aep|json}},
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         "aci-additional-aep": {{config.aci_config.secondary_aep|json}},
         "chained-mode": true,
-        {% if config.kube_config.unknown_mac_unicast_action %}
-        "unknown-mac-unicast-action": {{config.kube_config.unknown_mac_unicast_action|json}},
-        {% endif %}
         {% if config.chained_cni_config.primary_cni_path %}
         "primary-cni-path": {{config.chained_cni_config.primary_cni_path|json}},
+        {% endif %}
+        {% if config.chained_cni_config.use_global_scope_vlan %}
+        "aci-use-global-scope-vlan": true,
+        {% else %}
+        "aci-use-global-scope-vlan": false,
+        {% endif %}
+        {% if config.chained_cni_config.use_system_id_for_secondary_names %}
+        "aci-use-system-id-for-secondary-names": true,
+        {% else %}
+        "aci-use-system-id-for-secondary-names": false,
+        {% endif %}
+        {% endif %}
+        {% if config.kube_config.unknown_mac_unicast_action %}
+        "unknown-mac-unicast-action": {{config.kube_config.unknown_mac_unicast_action|json}},
         {% endif %}
         "aci-phys-dom": {{config.aci_config.physical_domain.domain|json}},
         {% if config.aci_config.apic_refreshtime %}
@@ -2688,15 +2762,12 @@ data:
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
         "aci-vmm-controller": {{config.aci_config.vmm_domain.controller|json}},
         {% endif %}
-        {% if config.chained_cni_config.use_global_scope_vlan %}
-        "aci-use-global-scope-vlan": true,
-        {% else %}
-        "aci-use-global-scope-vlan": false,
+        {% if config.vmm_lite_config.aaep_monitoring_enabled %}
+        "aci-aaep-monitoring-enabled": true,
+        "bridge-name": {{config.vmm_lite_config.bridge_name|json}},
+        {% if config.vmm_lite_config.cno_identifier %}
+        "cno-identifier": {{config.vmm_lite_config.cno_identifier|json}},
         {% endif %}
-        {% if config.chained_cni_config.use_system_id_for_secondary_names %}
-        "aci-use-system-id-for-secondary-names": true,
-        {% else %}
-        "aci-use-system-id-for-secondary-names": false,
         {% endif %}
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.kube_config.hpp_optimization %}
@@ -2877,7 +2948,7 @@ data:
     }
   host-agent-config: |-
     {
-        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining or config.vmm_lite_config.aaep_monitoring_enabled %}
         "flavor": {{config.flavor|json}},
         "app-profile": {{ config.kube_config.default_endpoint_group.app_profile|json }},
         "chained-mode": true,
@@ -3053,7 +3124,7 @@ data:
         {% endif %}
         {% endif %}
     }
-  {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+  {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
   opflex-agent-config: |-
     {
         "log": {
@@ -3109,7 +3180,7 @@ data:
           "pod-subnet": {{ config.net_config.gbp_pod_subnet|json|indent(width=8) }}
     }
    {% endif %}
-{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -3157,8 +3228,8 @@ metadata:
   namespace: {{ config.kube_config.system_namespace }}
   labels:
     aci-containers-config-version: "{{ config.registry.configuration_version }}"
----
 {% if config.kube_config.use_cluster_role %}
+---
 apiVersion: {{ config.kube_config.use_rbac_api }}
 kind: ClusterRole
 metadata:
@@ -3420,6 +3491,22 @@ and aci-containers-operator images for istio.io/istio package
   - watch
   - update
   - patch
+{% endif %}
+{% if config.vmm_lite_config.aaep_monitoring_enabled %}
+- apiGroups:
+  - aci.attachmentmonitor
+  resources:
+  - aaepmonitors
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - k8s.cni.cncf.io
+  resources:
+  - network-attachment-definitions
+  verbs:
+  - '*'
 {% endif %}
 - apiGroups:
   - "aci.hpp"
@@ -3913,7 +4000,7 @@ spec:
           mountPath: /run
         - name: hostrun
           mountPath: /usr/local/run
-        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
         - name: opflex-hostconfig-volume
           mountPath: /usr/local/etc/opflex-agent-ovs/base-conf.d
         {% endif %}
@@ -3956,7 +4043,7 @@ spec:
           periodSeconds: 60
           successThreshold: 1
           timeoutSeconds: 30
-      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
       - name: opflex-agent
         env:
         - name: REBOOT_WITH_OVS
@@ -4049,7 +4136,7 @@ spec:
           mountPath: /usr/local/var
       {% endif %}
       {% if config.kube_config.opflex_mode != "overlay" %}
-      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
       - name: mcast-daemon
         {% if config.registry.use_digest %}
         image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
@@ -4121,7 +4208,7 @@ spec:
           items:
           - key: host-agent-config
             path: host-agent.conf
-      {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
       - name: opflex-hostconfig-volume
         emptyDir:
           medium: Memory
@@ -4140,7 +4227,7 @@ spec:
         hostPath:
           path: /var/lib/dhclient
       {% endif %}
-      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+      {% if config.dpu_config.enable != True and not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
       - name: opflex-config-volume
         configMap:
           name: aci-containers-config
@@ -4172,7 +4259,7 @@ spec:
           - key: lsyncd.json
             path: lsyncd.json
       {% endif %}
-{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+{% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
 {% if config.dpu_config.enable != True %}
 ---
 apiVersion: {{ config.kube_config.use_apps_api }}
@@ -4426,7 +4513,7 @@ spec:
             {% endif %}
         {% endif %}
         env:
-        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining %}
+        {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
         {% if config.flavor != "k8s-overlay" %}
         - name: WATCH_NAMESPACE
           value: "{{ config.kube_config.snat_operator.watch_namespace }}"
@@ -4756,7 +4843,7 @@ spec:
     defaultRequest:
       memory: {{ config.kube_config.aci_containers_memory_request }}
     type: Container
-{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining or config.vmm_lite_config.aaep_monitoring_enabled %}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -4806,6 +4893,7 @@ rules:
   - securitycontextconstraints
   verbs:
   - use
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 - apiGroups:
   - aci.fabricattachment
   resources:
@@ -4816,6 +4904,7 @@ rules:
   - get
   - list
   - watch
+{% endif %}
 - apiGroups:
   - ""
   resources:
@@ -4881,6 +4970,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
+        {% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
         {% if config.chained_cni_config.require_annotation_for_nad_mutation_webhook %}
         - name: REQUIRE_NAD_ANNOTATION
           value: "True"
@@ -4888,6 +4978,13 @@ spec:
         {% if config.chained_cni_config.named_container_for_fabric_bgp_peer_insertion %}
         - name: CONTAINER_FOR_ENVVARS
           value: {{ config.chained_cni_config.named_container_for_fabric_bgp_peer_insertion }}
+        {% endif %}
+        - name: CHAINED_MODE_ENABLED
+          value: "True"
+        {% endif %}
+        {% if config.vmm_lite_config.aaep_monitoring_enabled %}
+        - name: VMM_LITE_ENABLED
+          value: "True"
         {% endif %}
         readinessProbe:
           failureThreshold: 3
@@ -4930,7 +5027,7 @@ metadata:
     app: aci-containers-webhook
   name: aci-containers-webhook
   namespace: aci-containers-system
-  {% if not config.chained_cni_config.local_cert_manager_enabled %}
+  {% if not config.chained_cni_config.local_cert_manager_enabled or config.vmm_lite_config.aaep_monitoring_enabled %}
   annotations:
     service.alpha.openshift.io/serving-cert-secret-name:  aci-containers-webhook
   {% endif %}
@@ -4950,7 +5047,7 @@ metadata:
   labels:
     app: aci-containers-webhook
   name: aci-containers-webhook
-  {% if not config.chained_cni_config.local_cert_manager_enabled %}
+  {% if not config.chained_cni_config.local_cert_manager_enabled or config.vmm_lite_config.aaep_monitoring_enabled %}
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"
   {% endif %}
@@ -4977,6 +5074,32 @@ webhooks:
     operations:
     - CREATE
     - UPDATE
+    resources:
+    - network-attachment-definitions
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: aci-containers-webhook
+      namespace: aci-containers-system
+      path: /delete-nad
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: aci-containers-webhook-delete-nad.netop-cni.cisco.com
+  namespaceSelector: {}
+  objectSelector: {}
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - k8s.cni.cncf.io
+    apiVersions:
+    - v1
+    operations:
+    - DELETE
     resources:
     - network-attachment-definitions
     scope: '*'
@@ -5012,6 +5135,7 @@ webhooks:
   sideEffects: None
   timeoutSeconds: 10
 {% endif %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -5075,6 +5199,7 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+{% endif %}
 {% endif %}
 {% if config.chained_cni_config.local_cert_manager_enabled %}
 ---
@@ -5171,6 +5296,7 @@ spec:
   nadVlanMapping:
     {{ chained_mode_input.nadvlan_map|indent(width=4) }}
 {% endif %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining %}
 ---
 apiVersion: aci.fabricattachment/v1
 kind: FabricVlanPool
@@ -5180,4 +5306,5 @@ metadata:
 spec:
   vlans:
   {{ chained_mode_input.fabric_vlan_pool|indent(width=2) }}
+{% endif %}
 {% endif %}
