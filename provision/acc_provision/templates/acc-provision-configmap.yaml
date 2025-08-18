@@ -220,6 +220,9 @@ data:
                 {% if config.chained_cni_config.use_system_id_for_secondary_names %}
                 "use_system_id_for_secondary_names": {{config.chained_cni_config.use_system_id_for_secondary_names|json}}
                 {% endif%}
+                {% if config.chained_cni_config.vmm_lite_enabled %}
+                "vmm_lite_enabled": {{config.chained_cni_config.vmm_lite_enabled|json}}
+                {% endif%}
             },
             {% endif %}
             {% if config.user_config.net_config %}

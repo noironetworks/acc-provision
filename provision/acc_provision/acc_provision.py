@@ -475,6 +475,7 @@ def config_default():
             "enable_container_l3_peering_model": False,
             "include_network_attachment_definition_crd": False,
             "use_system_id_for_secondary_names": False,
+            "vmm_lite_enabled": False,
         }
     }
     return default_config
