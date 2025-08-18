@@ -475,7 +475,12 @@ def config_default():
             "enable_container_l3_peering_model": False,
             "include_network_attachment_definition_crd": False,
             "use_system_id_for_secondary_names": False,
-        }
+        },
+        "vmm_lite_config": {
+            "aaep_monitoring_enabled": False,
+            "bridge_name": "bridge-default",
+            "cno_identifier": "cno",
+        },
     }
     return default_config
 
@@ -495,7 +500,7 @@ def config_user(flavor, config_file):
                 data = file.read()
         user_input = re.sub('password:.*', '', data)
         config["user_input"] = user_input
-        if not is_chained_mode(config):
+        if not is_cno_enabled(config):
             if not isinstance(config["net_config"]["pod_subnet"], list):
                 config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
             if not isinstance(config["net_config"]["extern_dynamic"], list):
@@ -588,7 +593,7 @@ def normalize_vlans(secondary_vlans):
     return normalized_vlans
 
 
-def config_adjust_chained_mode(args, config, no_random):
+def config_adjust_for_cno(args, config, no_random):
     system_id = config["aci_config"]["system_id"]
     infra_vlan = config["net_config"]["infra_vlan"]
     token = str(uuid.uuid4())
@@ -605,7 +610,8 @@ def config_adjust_chained_mode(args, config, no_random):
     else:
         physical_domain = system_id + "-physdom"
 
-    secondary_vlans = config["chained_cni_config"]["secondary_vlans"]
+    if is_chained_mode(config):
+        secondary_vlans = config["chained_cni_config"]["secondary_vlans"]
 
     app_profile = Apic.ACI_CHAINED_PREFIX + system_id
     default_endpoint_group = Apic.ACI_CHAINED_PREFIX + "default"
@@ -663,17 +669,22 @@ def config_adjust_chained_mode(args, config, no_random):
                 },
             },
         },
-        "chained_cni_config": {
-            "secondary_vlans": secondary_vlans,
-        },
+        "chained_cni_config": {},
         "registry": {
             "configuration_version": token,
         }
     }
 
-    if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+    if is_chained_mode(config):
+        adj_config["chained_cni_config"]["secondary_vlans"] = secondary_vlans
+        if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+            node_subnet = config["net_config"]["node_subnet"][0]
+            adj_config["net_config"]["node_subnet"] = node_subnet
+
+    if is_vmm_lite(config):
         node_subnet = config["net_config"]["node_subnet"][0]
-        config["net_config"]["node_subnet"] = node_subnet
+        # Chained mode don't need this in case of skip_node_network_provisioning
+        adj_config["net_config"]["node_subnet"] = node_subnet
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         adj_config["aci_config"]["apic_refreshtime"] = config["aci_config"]["apic_refreshtime"]
@@ -1324,7 +1335,7 @@ def config_validate(flavor_opts, config):
             "net_config/pod_subnet": (get(("net_config", "pod_subnet")), required),
             "net_config/node_subnet": (get(("net_config", "node_subnet")), required),
         }
-    elif is_chained_mode(config):
+    elif is_cno_enabled(config):
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
@@ -1340,7 +1351,7 @@ def config_validate(flavor_opts, config):
             "kube_config/image_pull_policy": (get(("kube_config", "image_pull_policy")),
                                               is_valid_image_pull_policy),
         }
-        if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+        if (is_chained_mode(config) and not config["chained_cni_config"]["skip_node_network_provisioning"]) or is_vmm_lite(config):
             # Network Config
             checks["net_config/node_subnet"] = (
                 get(("net_config", "node_subnet")), required)
@@ -1352,6 +1363,9 @@ def config_validate(flavor_opts, config):
                 get(("aci_config", "vmm_domain", "domain")), required)
             checks["aci_config/vmm_domain/type"] = (
                 get(("aci_config", "vmm_domain", "type")), required)
+        if is_vmm_lite(config):
+            checks["vmm_lite_config/bridge_name"] = (
+                get(("vmm_lite_config", "bridge_name")), required)
     elif not isOverlay(config["flavor"]):
         checks = {
             # ACI config
@@ -1391,24 +1405,38 @@ def config_validate(flavor_opts, config):
         }
     if isOverlay(config["flavor"]):
         extra_checks = {}
-    elif is_chained_mode(config):
+    elif is_cno_enabled(config):
         extra_checks = {
-            "aci_config/secondary_aep": (get(("aci_config", "secondary_aep")), required),
+            # "aci_config/secondary_aep": (get(("aci_config", "secondary_aep")), required),
             # Network Config
             "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
                                          is_valid_mtu),
             "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
                                                   is_valid_headroom),
         }
-        if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+        if is_chained_mode(config):
+            extra_checks["aci_config/secondary_aep"] = (get(("aci_config", "secondary_aep")), required)
+            if not config["chained_cni_config"]["skip_node_network_provisioning"]:
+                extra_checks["aci_config/aep"] = (
+                    get(("aci_config", "aep")), required)
+            if config["chained_cni_config"].get("vlans_file"):
+                extra_checks["chained_cni_config/vlans_file"] = (
+                    get(("chained_cni_config", "vlans_file")), is_valid_file)
+            else:
+                extra_checks["chained_cni_config/secondary_vlans"] = (
+                    get(("chained_cni_config", "secondary_vlans")), required)
+        if is_vmm_lite(config):
+            # extra_checks = {
+            #     # Network Config
+            #     "net_config/interface_mtu": (get(("net_config", "interface_mtu")),
+            #                                  is_valid_mtu),
+            #     "net_config/interface_mtu_headroom": (get(("net_config", "interface_mtu_headroom")),
+            #                                           is_valid_headroom),
+            # }
+            # Chained mode don't have this mandetory in case of skip_node_network_provisioning
+            # For now, VMM lite needs this.
             extra_checks["aci_config/aep"] = (
                 get(("aci_config", "aep")), required)
-        if config["chained_cni_config"].get("vlans_file"):
-            extra_checks["chained_cni_config/vlans_file"] = (
-                get(("chained_cni_config", "vlans_file")), is_valid_file)
-        else:
-            extra_checks["chained_cni_config/secondary_vlans"] = (
-                get(("chained_cni_config", "secondary_vlans")), required)
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -1490,7 +1518,7 @@ def config_validate(flavor_opts, config):
             get(("aci_config", "vmm_domain", "nested_inside", "type")),
             required)
 
-    if not is_chained_mode(config) and get(("aci_config", "vmm_domain", "encap_type")) == "vlan":
+    if not is_cno_enabled(config) and get(("aci_config", "vmm_domain", "encap_type")) == "vlan":
         checks["aci_config/vmm_domain/vlan_range/start"] = \
             (get(("aci_config", "vmm_domain", "vlan_range", "start")),
              required)
@@ -1506,7 +1534,7 @@ def config_validate(flavor_opts, config):
             (get(("aci_config", "vmm_domain", "nested_inside", "name")),
              required)
 
-    if not is_chained_mode(config) and not is_agent_based_installer(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
+    if not is_cno_enabled(config) and not is_agent_based_installer(config) and get(("aci_config", "vmm_domain", "nested_inside", "duplicate_file_router_default_svc")):
         checks["aci_config/vmm_domain/nested_inside/installer_provisioned_lb_ip"] = \
             (get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")),
              required)
@@ -1541,21 +1569,22 @@ def is_agent_based_installer(config):
     return True if config.get("agent_based_installer") and config["agent_based_installer"]["enable"] else False
 
 
-def chained_config_validate_preexisting(config, prov_apic):
+def cno_config_validate_preexisting(config, prov_apic):
     try:
         if prov_apic is not None:
             apic = get_apic(config)
             if apic is None:
                 return False
 
-            secondary_aep_name = config["aci_config"]["secondary_aep"]
-            secondary_aep = apic.get_aep(secondary_aep_name)
-            if secondary_aep is None:
-                err("Secondary AEP %s not defined in the APIC. Please create secondary AEP and try again." % secondary_aep_name)
-                return False
+            if is_chained_mode(config):
+                secondary_aep_name = config["aci_config"]["secondary_aep"]
+                secondary_aep = apic.get_aep(secondary_aep_name)
+                if secondary_aep is None:
+                    err("Secondary AEP %s not defined in the APIC. Please create secondary AEP and try again." % secondary_aep_name)
+                    return False
 
-            if config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"]:
-                return True
+                if config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"] and not is_vmm_lite(config):
+                    return True
 
             aep_name = config["aci_config"]["aep"]
             aep = apic.get_aep(aep_name)
@@ -1606,7 +1635,7 @@ def config_validate_preexisting(config, prov_apic):
         if isOverlay(config["flavor"]):
             return True
 
-        if prov_apic is not None and not is_chained_mode(config):
+        if prov_apic is not None and not is_cno_enabled(config):
             apic = get_apic(config)
             if apic is None:
                 return False
@@ -1839,6 +1868,8 @@ def generate_operator_tar(tar_path, cont_docs, config):
     # Function to construct filenames for each yaml
     def gen_file_list(docs, counter, filenames):
         for doc in docs:
+            if not doc:
+                continue
             filename = "cluster-network-" + str(counter).zfill(2) + "-" + doc['kind'] + "-" + doc['metadata']['name'] + ".yaml"
             filenames.append(os.path.basename(filename))
             with open(filename, 'w') as outfile:
@@ -2515,6 +2546,15 @@ def is_chained_mode(config):
             "chained_cni_config"].get("primary_interface_chaining")) else False
 
 
+def is_vmm_lite(config):
+    return True if config.get("vmm_lite_config") and (
+        config["vmm_lite_config"].get("aaep_monitoring_enabled")) else False
+
+
+def is_cno_enabled(config):
+    return is_vmm_lite(config) or is_chained_mode(config)
+
+
 def generate_calico_deployment_files(config, network_operator_output):
     config['net_config']['node_subnet'] = config['net_config']['node_subnet'][0]
     config['net_config']['pod_subnet'] = config['net_config']['pod_subnet'][0]
@@ -2642,12 +2682,13 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
             cmap_temp = ''.join(oper_cmap_template.stream(config=config))
 
-            op_template = get_jinja_template('aci-operators.yaml')
-            output_from_parsed_template = op_template.render(config=config)
+            if not is_vmm_lite(config):
+                op_template = get_jinja_template('aci-operators.yaml')
+                output_from_parsed_template = op_template.render(config=config)
 
-            # Generate acioperator CRD from template and add it to top
-            op_crd_template = get_jinja_template('aci-operators-crd.yaml')
-            op_crd_output = op_crd_template.render(config=config)
+                # Generate acioperator CRD from template and add it to top
+                op_crd_template = get_jinja_template('aci-operators-crd.yaml')
+                op_crd_output = op_crd_template.render(config=config)
 
             acc_provision_crd_template = get_jinja_template('acc-provision-crd.yaml')
             acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
@@ -2655,7 +2696,9 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
 
             if not is_cilium_chaining_enabled(config):
-                new_parsed_yaml = [op_crd_output] + parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:] + [output_from_parsed_template]
+                new_parsed_yaml = parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:]
+                if not is_vmm_lite(config):
+                    new_parsed_yaml = [op_crd_output] + new_parsed_yaml + [output_from_parsed_template]
                 new_deployment_file = '---'.join(new_parsed_yaml)
             else:
                 cilium_template = get_jinja_template('cilium.yaml')
@@ -2686,13 +2729,14 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                 deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
                 generate_operator_tar(tar_path, deployment_docs, config)
 
-            op_cr_template = get_jinja_template('aci-operators-cr.yaml')
-            if operator_cr_output and operator_cr_output != "/dev/null":
-                if operator_cr_output == "-":
-                    operator_cr_output = "/dev/null"
-                else:
-                    info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
-            op_cr_template.stream(config=config).dump(operator_cr_output)
+            if not is_vmm_lite(config):
+                op_cr_template = get_jinja_template('aci-operators-cr.yaml')
+                if operator_cr_output and operator_cr_output != "/dev/null":
+                    if operator_cr_output == "-":
+                        operator_cr_output = "/dev/null"
+                    else:
+                        info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
+                op_cr_template.stream(config=config).dump(operator_cr_output)
 
         info("Writing kubernetes infrastructure YAML to %s" % outname)
         if config["flavor"] != "k8s-overlay":
@@ -3023,7 +3067,7 @@ def get_subnet_list(config):
         return subnet_info
 
     net_config = config["net_config"]
-    if not is_chained_mode(config):
+    if not is_cno_enabled(config):
         process_subnet_value(net_config.get("pod_subnet", []), subnet_info)
         process_subnet_value(net_config.get("extern_dynamic", []), subnet_info)
         process_subnet_value(net_config.get("extern_static", []), subnet_info)
@@ -3197,9 +3241,18 @@ def provision(args, apic_file, no_random):
     config['user_config'] = copy.deepcopy(user_config)
     deep_merge(config, user_config)
 
+    # if is_chained_mode(config) and is_vmm_lite(config):
+    #     err("VMM lite is not supported along with chained mode")
+    #     return False
+
     if is_chained_mode(config):
         if flavor != 'openshift-sdn-ovn-baremetal':
             err("Chained mode is not supported with flavor " + flavor)
+            return False
+
+    if is_vmm_lite(config):
+        if flavor != 'openshift-sdn-ovn-baremetal':
+            err("VMM lite is not supported with flavor " + flavor)
             return False
 
     if flavor in FLAVORS:
@@ -3242,6 +3295,13 @@ def provision(args, apic_file, no_random):
             warn(("encap_type option is not used in %s flavor with chained mode" % config["flavor"]))
         if get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")):
             warn(("nested_inside option is not used in %s flavor with chained mode" % config["flavor"]))
+    if is_vmm_lite(config):
+        if get(("aci_config", "vmm_domain", "mcast_range", "start")):
+            warn(("mcast_range option is not used in %s flavor with VMM lite" % config["flavor"]))
+        if get(("aci_config", "vmm_domain", "encap_type")):
+            warn(("encap_type option is not used in %s flavor with VMM lite" % config["flavor"]))
+        if get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")):
+            warn(("nested_inside option is not used in %s flavor with VMM lite" % config["flavor"]))
 
     deep_merge(config, config_default())
 
@@ -3251,10 +3311,11 @@ def provision(args, apic_file, no_random):
         if flavor == "openshift-sdn-ovn-baremetal":
             config["chained_cni_config"][
                 "primary_cni_path"] = "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
+    if is_cno_enabled(config):
         if not user_config.get("aci_config", {}).get("vmm_domain"):
             config["aci_config"]["vmm_domain"] = None
 
-    if (args.disable_multus == 'false' or is_chained_mode(config)):
+    if (args.disable_multus == 'false' or is_cno_enabled(config)):
         config['multus']['disable'] = False
 
     if config["registry"]["version"] in VERSIONS:
@@ -3285,7 +3346,7 @@ def provision(args, apic_file, no_random):
         print("%s") % ex
 
     # Verify if overlapping subnet present in config input file
-    if not is_chained_mode(config) and not check_overlapping_subnets(config):
+    if not is_cno_enabled(config) and not check_overlapping_subnets(config):
         err("overlapping subnets found in configuration input file")
         return False
 
@@ -3296,19 +3357,20 @@ def provision(args, apic_file, no_random):
             return False
 
     # Adjust config based on convention/apic data
-    if is_chained_mode(config):
-        adj_config = config_adjust_chained_mode(args, config, no_random)
-        all_secondary_vlans, normalized_vlans = prepare_secondary_vlans(
-            args, config)
-        all_secondary_vlans.sort()
-        config["chained_cni_config"]["secondary_vlans"] = all_secondary_vlans
+    if is_cno_enabled(config):
+        adj_config = config_adjust_for_cno(args, config, no_random)
+        if is_chained_mode(config):
+            all_secondary_vlans, normalized_vlans = prepare_secondary_vlans(
+                args, config)
+            all_secondary_vlans.sort()
+            config["chained_cni_config"]["secondary_vlans"] = all_secondary_vlans
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
 
     if is_calico_flavor(config["flavor"]) and not calico_config_validate_preexisting(config, prov_apic):
         return False
-    elif is_chained_mode(config) and not chained_config_validate_preexisting(config, prov_apic):
+    elif is_cno_enabled(config) and not cno_config_validate_preexisting(config, prov_apic):
         return False
     else:
         # Advisory checks, including apic checks, ignore failures

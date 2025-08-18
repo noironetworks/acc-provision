@@ -1303,6 +1303,18 @@ def test_override_include_network_attachment_definition_crd():
 
 
 @in_testdir
+def test_override_vmm_lite_enabled():
+    run_provision(
+        "override_vmm_lite_enabled.inp.yaml",
+        "override_vmm_lite_enabled.kube.yaml",
+        None,
+        None,
+        "override_vmm_lite_enabled.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+
+@in_testdir
 def test_override_use_system_id_for_secondary_names():
     run_provision(
         "override_use_system_id_for_secondary_names.inp.yaml",
@@ -2474,6 +2486,7 @@ def convert_aci_op_cm_to_base64(kube_yaml_file, kind="ConfigMap", name="aci-oper
     converted_yaml = []
     for k_yaml in kube_yaml_file:
         converted_yaml.append(copy.deepcopy(k_yaml))
+
         for _, v in k_yaml.items():
             if v == kind and k_yaml['metadata']['name'] == name:
                 aci_op_cm_yaml = copy.deepcopy(k_yaml)
