@@ -1044,6 +1044,7 @@ This section explains features / configuration options available in acc provisio
 - [Dual-Stack Support for K8s/OCP with ACI CNI](dual-stack.md)
 - [Multipod VM Migration](multipod-vm-migration.md)
 - [Pre-existing Tenant](pre-existing-tenant.md)
+- [Resilient Hashing Enhancements for k8s Services](resilient-hashing-enhancements.md)
 - [Add External Subnets To Rdconfig](add-external-subnets-to-rdconfig.md)
 - [Add User Subnets To Rdconfig](add-user-subnets-to-rdconfig.md)
 - [Automatic ingress contract assignment for service type LoadBalancer](ingress-contract-assignment-for-lb-service.md)
