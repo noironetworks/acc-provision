@@ -1,13 +1,13 @@
 # Multipod VM Migration
 
 # Table of Contents
-
 - [1. Overview](#1-overview)
 - [2. Motivation](#2-motivation)
 - [3. Mechanism](#3-mechanism)
 - [4. Configurations](#4-configurations)
 - [5. Example](#5-example)
 - [6. Assumptions](#6-assumptions)
+  - [6.1 Workarounds with other DHCP clients](#61-workarounds-with-other-dhcp-clients)
 - [7. Troubleshooting](#7-troubleshooting)
 - [8. Known Issues](#8-known-issues)
 
@@ -111,8 +111,39 @@ The following assumptions have been made about the nodes of the cluster and are 
 * The operating system of the nodes of the cluster is either of the below:
     * Ubuntu
     * RedHat
-* If the nodes are RedHat, dhclient is installed on the nodes and the config file is in the path `/var/lib/dhclient`.
-* If nodes are Ubuntu, dhclient is installed on the nodes and the config file is in the path `/var/lib/dhcp`.
+* If the nodes are RedHat, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhclient`.
+* If nodes are Ubuntu, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhcp`.
+
+### 6.1 Workarounds with other DHCP clients
+
+When the default DHCP client on your node is not dhclient, i.e. when the IP address on infra VLAN subinterface is managed by systemd-networkd on Ubuntu or Network Manager on RHEL, the lease file would not be present in the expected location. In this case, the following steps need to be performed on the node before migration.
+
+1. Add the following line to /etc/dhcp/dhclient.conf
+
+      send dhcp-client-identifier = hardware;
+
+2. Do dhclient <infra-interface-name>
+    eg:
+    ```sh
+        dhclient ens160.4090
+    ```
+
+3. Verify lease file got created in /var/lib/dhclient if RHEL or /var/lib/dhcp if Ubuntu.
+
+    ```sh
+    cat /var/lib/dhcp/dhclient.leases
+        lease {
+        interface "ens160.4090";
+        fixed-address 11.0.160.64;
+        option subnet-mask 255.255.0.0;
+        option dhcp-lease-time 604800;
+        option dhcp-message-type 5;
+        option dhcp-server-identifier 10.0.0.1;
+        renew 0 2025/09/07 10:03:50;
+        rebind 3 2025/09/10 13:39:35;
+        expire 4 2025/09/11 10:39:35;
+        }
+    ```
 
 ## 7. Troubleshooting
 
