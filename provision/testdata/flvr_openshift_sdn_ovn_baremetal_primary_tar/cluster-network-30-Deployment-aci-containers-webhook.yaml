@@ -32,6 +32,8 @@ spec:
           value: 'True'
         - name: CONTAINER_FOR_ENVVARS
           value: fabric-peer
+        - name: CHAINED_MODE_ENABLED
+          value: 'True'
         image: noiro/aci-containers-webhook:6.1.2.1.81c2369
         imagePullPolicy: Always
         name: aci-containers-webhook
