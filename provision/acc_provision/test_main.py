@@ -1373,6 +1373,16 @@ def test_override_vmm_lite_enabled():
         overrides={"flavor": "openshift-sdn-ovn-baremetal"}
     )
 
+@in_testdir
+def test_override_vmm_lite_chained_mode_enabled():
+    run_provision(
+        "override_vmm_lite_chained_mode_enabled.inp.yaml",
+        "override_vmm_lite_chained_mode_enabled.kube.yaml",
+        None,
+        None,
+        "override_vmm_lite_chained_mode_enabled.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
 
 @in_testdir
 def test_override_use_system_id_for_secondary_names():
