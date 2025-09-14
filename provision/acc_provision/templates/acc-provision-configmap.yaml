@@ -34,7 +34,7 @@ data:
                 {% if config.user_config.aci_config.secondary_aep %}
                 "secondary_aep": {{config.aci_config.secondary_aep|json}},
                 {% endif %}
-                {% if (config.user_config.chained_cni_config) and (config.user_config.aci_config.physical_domain) %}
+                {% if (config.user_config.chained_cni_config or config.user_config.vmm_lite_config) and (config.user_config.aci_config.physical_domain) %}
                 "physical_domain": {
                     "domain": {{config.aci_config.physical_domain.domain|json}},
                     "vlan_pool": {{config.aci_config.physical_domain.vlan_pool|json}}
@@ -101,7 +101,7 @@ data:
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
                 }
-                {% elif not config.user_config.chained_cni_config %}
+                {% elif (not config.user_config.chained_cni_config) and (not config.user_config.vmm_lite_config) %}
                 "l3out": {
                     "name": {{config.aci_config.l3out.name|json}},
                     "external_networks": {{ config.aci_config.l3out.external_networks|json|indent(width=20) }}
@@ -220,6 +220,22 @@ data:
                 {% if config.chained_cni_config.use_system_id_for_secondary_names %}
                 "use_system_id_for_secondary_names": {{config.chained_cni_config.use_system_id_for_secondary_names|json}}
                 {% endif%}
+                {% if config.chained_cni_config.vmm_lite_enabled %}
+                "vmm_lite_enabled": {{config.chained_cni_config.vmm_lite_enabled|json}}
+                {% endif%}
+            },
+            {% endif %}
+            {% if config.user_config.vmm_lite_config %}
+            "vmm_lite_config": {
+                {% if config.user_config.vmm_lite_config.aaep_monitoring_enabled %}
+                "aaep_monitoring_enabled": {{config.vmm_lite_config.aaep_monitoring_enabled|json}}
+                {% endif %}
+                {% if config.user_config.vmm_lite_config.bridge_name %}
+                "bridge_name": {{config.vmm_lite_config.bridge_name|json}}
+                {% endif %}
+                {% if config.user_config.vmm_lite_config.cno_identifier %}
+                "cno_identifier": {{config.vmm_lite_config.cno_identifier|json}}
+                {% endif %}
             },
             {% endif %}
             {% if config.user_config.net_config %}

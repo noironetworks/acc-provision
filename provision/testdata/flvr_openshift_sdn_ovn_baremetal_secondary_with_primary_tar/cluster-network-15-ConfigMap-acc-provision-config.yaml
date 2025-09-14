@@ -23,7 +23,8 @@ data:
     \           \"primary_cni_path\": \"/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf\"\
     \n            \"require_annotation_for_nad_mutation_webhook\": true\n        },\n\
     \        \"net_config\": {\n            \"kubeapi_vlan\": 4001,\n            \"\
-    node_subnet\": \"10.1.0.1/16\",\n        }\n    }\n }"
+    node_subnet\": [\n                \"10.1.0.1/16\"\n            ],\n        }\n\
+    \    }\n }"
 kind: ConfigMap
 metadata:
   labels:

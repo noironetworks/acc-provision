@@ -107,21 +107,8 @@ registry:
 #multus:
   # disable: False       # default is True
 
-chained_cni_config:                                                  # Contains chained mode specific configurations
-  secondary_interface_chaining: True                                 # default is False
-  vlans_file: "chained_mode.csv"                                     # Absolute/relative path of CSV file.
-  # primary_interface_chaining: True                                 # default is False
-  # primary_cni_path: "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf" # Path value of primary CNI to use
-  # secondary_vlans:              # VLANs for additional networks
-  # - 402
-  # - 403-406
-  # - 410, 425
-  # skip_node_network_provisioning: True                             # default is False
-  # use_global_scope_vlan: True                                      # default is False
-  # local_cert_manager_enabled: True                                 # default is False
-  # require_annotation_for_nad_mutation_webhook: False               # default is True
-  # enable_ovs_cni_support: True                                     # default is False
-  # named_container_for_fabric_bgp_peer_insertion: fabric-peer       # default is fabric-peer
-  # enable_container_l3_peering_model: True                          # default is False
-  # include_network_attachment_definition_crd: True                  # default is False
-  # use_system_id_for_secondary_names: True                          # default is False
+vmm_lite_config:                                                     # Contains VMM lite specific configurations
+  aaep_monitoring_enabled: True                                      # default is False
+  bridge_name: "br-nad"                                              # Name of linux bridge from worker nodes, needs to be created with same name on all worker nodes
+  cno_identifier: "cno-id1"                                          # Prefix for EPG annotation to identify CNO, default is "cno" 
+
