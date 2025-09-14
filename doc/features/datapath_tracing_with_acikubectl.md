@@ -8,6 +8,7 @@
 - [acikubectl trace_pod_to_pod](#acikubectl-trace_pod_to_pod)
 - [acikubectl trace_pod_to_svc](#acikubectl-trace_pod_to_svc)
 - [acikubectl trace_pod_to_ext](#acikubectl-trace_pod_to_ext)
+- [acikubectl trace_arp_pod_to_pod](#acikubectl-trace_arp_pod_to_pod)
 - [Tracing Packet Drops](#tracing-packet-drops)
   - [Network Policy: Blocking Traffic](#network-policy-blocking-traffic)
     - [NetworkPolicy – Deny Ingress](#networkpolicy--deny-ingress)
@@ -45,16 +46,17 @@ Usage:
   acikubectl [command]
 
 Available Commands:
-  completion       Generate the autocompletion script for the specified shell
-  debug            Commands to help diagnose problems with ACI containers
-  get              Get a value
-  help             Help about any command
-  policy           output the gbp_inspect policies into a file for all the host-agent pods
-  set              Set a value
-  trace_pod_to_ext Trace ip packet's flow in ovs from pod to outside cluster communication
-  trace_pod_to_pod Trace ip packet's flow in ovs for pod to pod communication
-  trace_pod_to_svc Trace ip packet's flow in ovs from pod to service communication
-  version          Print the client and server versions for the current context acikubectl version
+  completion           Generate the autocompletion script for the specified shell
+  debug                Commands to help diagnose problems with ACI containers
+  get                  Get a value
+  help                 Help about any command
+  policy               output the gbp_inspect policies into a file for all the host-agent pods
+  set                  Set a value
+  trace_arp_pod_to_pod Trace arp packet's flow in ovs from pod to pod communication
+  trace_pod_to_ext     Trace ip packet's flow in ovs from pod to outside cluster communication
+  trace_pod_to_pod     Trace ip packet's flow in ovs for pod to pod communication
+  trace_pod_to_svc     Trace ip packet's flow in ovs from pod to service communication
+  version              Print the client and server versions for the current context acikubectl
 
 Flags:
       --context string      Kubernetes context to use for CLI requests.
@@ -64,7 +66,7 @@ Flags:
 Use "acikubectl [command] --help" for more information about a command.
 ```
 
-**Note:** The `trace_pod_to_ext`, `trace_pod_to_pod`, and `trace_pod_to_svc` are the commands for tracing IP packet flows.
+**Note:** The `trace_arp_pod_to_pod`, `trace_pod_to_ext`, `trace_pod_to_pod`, and `trace_pod_to_svc` are the commands for tracing IP packet flows.
 
 
 # acikubectl trace_pod_to_pod
@@ -84,7 +86,7 @@ Flags:
 
 Args:
 src_ns: Source Namespace
-dest_ns: Destination Namespace 
+dest_ns: Destination Namespace
 src_pod: Source Pod
 dest_pod: Destination Pod
 ```
@@ -197,19 +199,86 @@ Global Flags:
 ```
 
 ```
-oc get pods -o wide
-NAME    READY   STATUS    RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
-pod-a   1/1     Running   0          55m   10.2.3.74    ocp412-worker1   <none>           <none>
-pod-b   1/1     Running   0          55m   10.2.0.232   ocp412-worker2   <none>           <none>
+oc get pods -n mk -o wide
+NAME    READY   STATUS    RESTARTS   AGE   IP             NODE                           NOMINATED NODE   READINESS GATES
+pod-a   2/2     Running   0          42s   15.128.0.216   openupi-2s9bm-worker-0-wkxhw   <none>           <none>
+pod-b   2/2     Running   0          42s   15.128.1.25    openupi-2s9bm-worker-0-978c2   <none>           <none>
+pod-c   2/2     Running   0          42s   15.128.0.217   openupi-2s9bm-worker-0-wkxhw   <none>           <none>
 ```
 ```
-acikubectl trace_pod_to_ext default:pod-a 192.168.152.1 --tcp --tcp_dst=80 --verbose
+acikubectl trace_pod_to_ext mk:pod-a 192.168.152.1 --tcp --tcp_dst=80 --verbose
 ```
 
 ![img_16.png](images/acikubectl-trace/img_16.png)
 ![img_17.png](images/acikubectl-trace/img_17.png)
 ![img_18.png](images/acikubectl-trace/img_18.png)
 ![img_19.png](images/acikubectl-trace/img_19.png)
+![img_33.png](images/acikubectl-trace/img_33.png)
+![img_34.png](images/acikubectl-trace/img_34.png)
+![img_35.png](images/acikubectl-trace/img_35.png)
+
+# acikubectl trace_arp_pod_to_pod
+Trace arp packet's flow in ovs for pod to pod communication
+
+```
+Usage:
+  acikubectl trace_arp_pod_to_pod [src_ns:src_pod] [dest_ns:dest_pod]
+
+Examples:
+acikubectl trace_arp_pod_to_pod src_ns:src_pod dest_ns:dest_pod
+
+Flags:
+  -h, --help          help for trace_pod_to_pod
+  -v, --verbose       Enable verbose output
+
+Args:
+src_ns: Source Namespace
+dest_ns: Destination Namespace
+src_pod: Source Pod
+dest_pod: Destination Pod
+```
+
+- Tracking ARP request/reply between source and destination.
+
+   ```acikubectl trace_arp_pod_to_pod mk:pod-a mk:pod-b –verbose```
+
+- Use verbose flag for ovs-flows output.
+
+## Example
+
+```
+$ oc get po -n mk -owide
+NAME    READY   STATUS    RESTARTS   AGE   IP             NODE                           NOMINATED NODE   READINESS GATES
+pod-a   2/2     Running   0          56m   15.128.0.216   openupi-2s9bm-worker-0-wkxhw   <none>           <none>
+pod-b   2/2     Running   0          56m   15.128.1.25    openupi-2s9bm-worker-0-978c2   <none>           <none>
+pod-c   2/2     Running   0          56m   15.128.0.217   openupi-2s9bm-worker-0-wkxhw   <none>           <none>
+```
+
+```
+acikubectl trace_arp_pod_to_pod mk:pod-a  mk:pod-b --verbose
+```
+
+![img_40.png](images/acikubectl-trace/img_40.png)
+![img_41.png](images/acikubectl-trace/img_41.png)
+![img_42.png](images/acikubectl-trace/img_42.png)
+![img_43.png](images/acikubectl-trace/img_43.png)
+![img_44.png](images/acikubectl-trace/img_44.png)
+![img_45.png](images/acikubectl-trace/img_45.png)
+![img_46.png](images/acikubectl-trace/img_46.png)
+![img_47.png](images/acikubectl-trace/img_47.png)
+![img_48.png](images/acikubectl-trace/img_48.png)
+![img_49.png](images/acikubectl-trace/img_49.png)
+![img_50.png](images/acikubectl-trace/img_50.png)
+![img_51.png](images/acikubectl-trace/img_51.png)
+![img_52.png](images/acikubectl-trace/img_52.png)
+![img_53.png](images/acikubectl-trace/img_53.png)
+![img_54.png](images/acikubectl-trace/img_54.png)
+![img_55.png](images/acikubectl-trace/img_55.png)
+![img_56.png](images/acikubectl-trace/img_56.png)
+![img_57.png](images/acikubectl-trace/img_57.png)
+![img_58.png](images/acikubectl-trace/img_58.png)
+![img_59.png](images/acikubectl-trace/img_59.png)
+![img_60.png](images/acikubectl-trace/img_60.png)
 
 
 # Tracing Packet Drops
