@@ -3833,6 +3833,7 @@ volumes:
 priority: 100
 ---
 {% endif %}
+{% if config.chained_cni_config.secondary_interface_chaining or config.chained_cni_config.primary_interface_chaining or not config.vmm_lite_config.aaep_monitoring_enabled %}
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: DaemonSet
 metadata:
@@ -4259,6 +4260,7 @@ spec:
           - key: lsyncd.json
             path: lsyncd.json
       {% endif %}
+{% endif %}
 {% if not config.chained_cni_config.secondary_interface_chaining and not config.chained_cni_config.primary_interface_chaining and not config.vmm_lite_config.aaep_monitoring_enabled %}
 {% if config.dpu_config.enable != True %}
 ---
@@ -4382,7 +4384,9 @@ spec:
           path: /var/lib/docker
 {% endif %}
 {% endif %}
+{% if not config.vmm_lite_config.aaep_monitoring_enabled %}
 ---
+{% endif %}
 apiVersion: {{ config.kube_config.use_apps_api }}
 kind: Deployment
 metadata:
