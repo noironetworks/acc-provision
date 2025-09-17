@@ -9,8 +9,9 @@
 - [5. Test OpFlex Drop Log](#5-test-opflex-drop-log)
 - [6. Disable packet event](#6-disable-packet-event)
 - [7. Test disable event](#7-test-disable-event)
-- [8. Cleanup](#8-cleanup)
-- [9. Reference](#9-reference)
+- [8. Redirect droplogs to user defined file](#8-redirect-droplogs-to-user-defined-file)
+- [9. Cleanup](#8-cleanup)
+- [10. Reference](#9-reference)
 
 
 ## 1. About OpFlex Drop Log
@@ -185,7 +186,17 @@ command terminated with exit code 1
 This time we can see packet drop log in opflex-agent but will not see packet drop event logging under `oc describe pod web`
 
 
-## 8. Cleanup
+## 8. Redirect droplogs to user defined file
+
+By default, droplogs are written to the opflex-agent container logs within the aci-containers-host pod. This can cause the logs to grow quickly, leading to frequent rotations and potential loss of important opflex-agent log entries. To prevent this, the logs can be redirected to a separate file by adding the following configuration in the input file:
+```yaml
+drop_log_config:
+    opflex_redirect_drop_logs: <filename>
+```
+The file is created with the provided filename in `/usr/local/var/log/' directory of the opflex-agent container in the containers-host pod.
+
+
+## 9. Cleanup
 
 ```sh
 kubectl delete pod web
@@ -193,7 +204,7 @@ kubectl delete service web
 kubectl delete networkpolicy web-deny-all
 ```
 
-## 9. Reference
+## 10. Reference
 
 1. [Enabling the OpFlex Drop Log Feature](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/use-case/enabling-the-opflex-drop-log-feature.html#Cisco_Reference.dita_f9b8d10f-3db3-4d7b-a2ef-68343d406748)
 2. [DENY all traffic to an application](https://github.com/ahmetb/kubernetes-network-policy-recipes/blob/master/01-deny-all-traffic-to-an-application.md)
