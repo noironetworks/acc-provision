@@ -33,7 +33,7 @@ aci_config:
   aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
   vrf:                          # This VRF used to create all kubernetes EPs
     name: mykube-vrf
-    tenant: common              # This can be system-id or common
+    tenant: common              # This can be system-id or pre-existing-tenant
   l3out:
     name: mykube_l3out          # Used to provision external IPs
     external_networks:
