@@ -163,7 +163,7 @@ class Apic(object):
         return resp
     
     def is_system_id_matching(self, system_id, resource_name):
-        contains_match_pattern = rf".*-\b{system_id}\b-.*"
+        contains_match_pattern = rf".*-\b{system_id}\d*-.*"
         ends_with_pattern = rf".*-\b{system_id}\b$"
         if(re.match(contains_match_pattern, resource_name) or re.match(ends_with_pattern, resource_name)):
             return True

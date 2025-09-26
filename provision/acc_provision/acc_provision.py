@@ -3228,6 +3228,7 @@ def provision(args, apic_file, no_random):
     if 'aci_config' in user_config and 'use_legacy_kube_naming_convention' in user_config['aci_config'] and 'tenant' in user_config['aci_config']:
         err("Not allowed to set tenant and use_legacy_kube_naming_convention fields at the same time")
         return False
+    system_id = user_config["aci_config"]["system_id"]
 
     if flavor == "cloud" and 'use_legacy_kube_naming_convention' in user_config['aci_config']:
         err("use_legacy_kube_naming_convention not allowed in cloud flavor")
@@ -3259,6 +3260,9 @@ def provision(args, apic_file, no_random):
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
         if "config" in FLAVORS[flavor]:
+            if "items" in FLAVORS[flavor]["config"].get("aci_config", ""):
+                for item in FLAVORS[flavor]["config"]["aci_config"]["items"]:
+                    item['name'] = f"{Apic.ACI_PREFIX}{system_id}-{item['name']}"
             deep_merge(config, FLAVORS[flavor]["config"])
         if "default_version" in FLAVORS[flavor]:
             deep_merge(config, {
