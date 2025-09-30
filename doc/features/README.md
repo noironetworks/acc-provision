@@ -1045,6 +1045,7 @@ This section explains features / configuration options available in acc provisio
 - [Multipod VM Migration](multipod-vm-migration.md)
 - [Pre-existing Tenant](pre-existing-tenant.md)
 - [Add External Subnets To Rdconfig](add-external-subnets-to-rdconfig.md)
+- [Add User Subnets To Rdconfig](add-user-subnets-to-rdconfig.md)
 - [Automatic ingress contract assignment for service type LoadBalancer](ingress-contract-assignment-for-lb-service.md)
 - [Exclude cluster nodes from snat redirect](node-snat-redirect-exclude.md)
 - [VMWare vSphere DVS ELAG](vsphere-dvs-elag.md)
