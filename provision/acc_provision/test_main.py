@@ -135,6 +135,91 @@ def test_unprovision_custom_epg():
 
 
 @in_testdir
+def test_unprovision_multi_cluster_in_shared_tenant():
+    """
+    Tests that deleting one OCP cluster from a shared, pre-existing
+    tenant deletes the resources prefixed with
+    aci-containers-{system_id}-.
+    Ensures other cluster resources are not affected.
+    """
+    with open("test_unprovision_multi_cluster_data.json") as data_file:
+        data = json.loads(data_file.read())
+
+    # Start the mock APIC with a state representing two existing clusters
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    # Sanity check: ensure the test expects specific delete operations
+    assert len(fake_apic.fake_deletes) != 0
+    # Sanity check: ensure the test starts with no unexpected deletes
+    assert len(fake_apic.fake_extra_deletes) == 0
+
+    # Manually build args to run `--delete` for the FIRST cluster only
+    args = get_args(
+        config="test_unprovision_multi_cluster_cluster1.inp.yaml",
+        flavor="openshift-4.19-esx",
+        delete=True,
+        apic=True,
+        password="test"
+    )
+    acc_provision.main(args, no_random=True)
+
+    apic.shutdown()
+    apic.server_close()
+
+    # --- Final Assertions ---
+    # 1. Verify all expected deletes for cluster 1 were executed.
+    assert len(fake_apic.fake_deletes) == 0, "Not all expected resources for cluster 1 were deleted."
+
+    # 2. CRITICAL: Verify that NO unexpected deletes for cluster 2 were attempted.
+    assert len(fake_apic.fake_extra_deletes) == 0, "An unexpected resource (likely from cluster 2) was deleted."
+
+
+@in_testdir
+def test_unprovision_shared_tenant_for_old_acc_provision():
+    """
+    Tests un-provisioning a cluster where shared resources (like contracts)
+    were created by a older acc-provision version and lack a prefix.
+
+    This simulates the old '-a' behavior. It expects that the un-provision
+    script deletes all cluster-specific resources but correctly leaves the
+    unprefixed shared contracts and filters untouched.
+    """
+    # Load the test data that simulates a legacy setup
+    with open("test_unprovision_shared_tenant_for_old_acc_provision.json") as data_file:
+        data = json.loads(data_file.read())
+
+    # Start the mock APIC with the expected GETs and DELETES
+    # Note: The "deletes" list in the JSON intentionally omits the contract
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    # Sanity check: ensure the test expects specific delete operations
+    assert len(fake_apic.fake_deletes) != 0
+    # Sanity check: ensure the test starts with no unexpected deletes
+    assert len(fake_apic.fake_extra_deletes) == 0
+
+    # Manually build args to run `--delete` for the cluster
+    args = get_args(
+        config="test_unprovision_multi_cluster_cluster1.inp.yaml",
+        flavor="openshift-4.19-esx",
+        delete=True,
+        apic=True,
+        password="test"
+    )
+    acc_provision.main(args, no_random=True)
+
+    apic.shutdown()
+    apic.server_close()
+
+    # --- Final Assertions ---
+    # 1. Verify all expected, cluster-specific deletes were executed.
+    assert len(fake_apic.fake_deletes) == 0, "Not all expected cluster-specific resources were deleted."
+
+    # 2. CRITICAL: Verify that NO unexpected deletes were attempted.
+    #    This implicitly confirms the unprefixed contract was not deleted.
+    assert len(fake_apic.fake_extra_deletes) == 0, "An unexpected resource was deleted. The script may have incorrectly targeted the shared contract."
+
+
+@in_testdir
 def test_base_case_simple():
     run_provision(
         "base_case.inp.yaml",
