@@ -7,15 +7,8 @@
 - [4. Configurations](#4-configurations)
 - [5. Example](#5-example)
 - [6. Assumptions](#6-assumptions)
+  - [6.1 Workarounds with other DHCP clients](#61-workarounds-with-other-dhcp-clients)
 - [7. Troubleshooting](#7-troubleshooting)
-  - [1. Check if configuration is applied properly](#1-check-if-configuration-is-applied-properly)
-  - [2. Verify volumes are correctly configured](#2-verify-volumes-are-correctly-configured)
-  - [3. Verify that the lease is correct](#3-verify-that-the-lease-is-correct)
-    - [3.1. Workarounds for failure scenarios](#31-workarounds-for-failure-scenarios)
-  - [4. Verify that the VLAN IP was updated](#4-verify-that-the-vlan-ip-was-updated)
-  - [5. Verify that the anycast IPs were updated](#5-verify-that-the-anycast-ips-were-updated)
-  - [6. Verify node annotation was updated](#6-verify-node-annotation-was-updated)
-  - [7. Check host agent and controller logs](#7-check-host-agent-and-controller-logs)
 - [8. Known Issues](#8-known-issues)
 
 ## 1. Overview
@@ -41,8 +34,6 @@ If aci_multipod is set, each Kubernetes node on the cluster will have an annotat
 opflex.cisco.com/aci-pod: pod-<id>-<subnet>
 ```
 where id is the id of the pod in which the node is present and subnet is the subnet of the pod.
-
-On hostagent startup, a check is done to verify if there exists a dhclient dhcp lease for the node infra VLAN subinterface. If hostagent cannot find a dhcp lease, it will trigger a dhcp renew in an attempt to populate one.
 
 When a VM is migrated from pod-1 to pod-2, the opflexOdev (It represents details of opflex device connected to leaf. Details include hostName, opflex connection status, interface etc.) of the node gets disconnected. After waiting for `opflex_device_reconnect_wait_timeout` amount of time, controller will update the annotation on that node to none
 
@@ -123,6 +114,37 @@ The following assumptions have been made about the nodes of the cluster and are 
 * If the nodes are RedHat, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhclient`.
 * If nodes are Ubuntu, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhcp`.
 
+### 6.1 Workarounds with other DHCP clients
+
+When the default DHCP client on your node is not dhclient, i.e. when the IP address on infra VLAN subinterface is managed by systemd-networkd on Ubuntu or Network Manager on RHEL, the lease file would not be present in the expected location. In this case, the following steps need to be performed on the node before migration.
+
+1. Add the following line to /etc/dhcp/dhclient.conf
+
+      send dhcp-client-identifier = hardware;
+
+2. Do dhclient <infra-interface-name>
+    eg:
+    ```sh
+        dhclient ens160.4090
+    ```
+
+3. Verify lease file got created in /var/lib/dhclient if RHEL or /var/lib/dhcp if Ubuntu.
+
+    ```sh
+    cat /var/lib/dhcp/dhclient.leases
+        lease {
+        interface "ens160.4090";
+        fixed-address 11.0.160.64;
+        option subnet-mask 255.255.0.0;
+        option dhcp-lease-time 604800;
+        option dhcp-message-type 5;
+        option dhcp-server-identifier 10.0.0.1;
+        renew 0 2025/09/07 10:03:50;
+        rebind 3 2025/09/10 13:39:35;
+        expire 4 2025/09/11 10:39:35;
+        }
+    ```
+
 ## 7. Troubleshooting
 
 ### 1. Check if configuration is applied properly
@@ -183,79 +205,7 @@ volumeMounts:
      …
 ```
 
-### 3. Verify that the lease is correct
-
-When the default DHCP client on your node is not dhclient, i.e. when the IP address on infra VLAN subinterface is managed by systemd-networkd on Ubuntu or Network Manager on RHEL, a valid lease file may not be present in the expected location.
-
-For the IP address from the old pod to be released correctly, two conditions must be met:
-
-   1. A valid dhclient lease for the interface must exist.
-   2. The most recent lease entry in the file must correspond to the IP address that needs to be released.
-
-The lease file is located on the node at one of the following paths:
-
-    RHEL: /var/lib/dhclient
-    Ubuntu: /var/lib/dhcp
-
-(Note: This path is mounted as /usr/local/var/lib/dhclient inside the hostagent container.)
-
-Sample lease entry:
-
-    ```sh
-    cat /var/lib/dhcp/dhclient.leases
-        lease {
-        interface "ens192.4093";
-        fixed-address 11.0.160.64; # should be the current IP address of the interface
-        option subnet-mask 255.255.0.0;
-        option dhcp-lease-time 604800;
-        option dhcp-message-type 5;
-        option dhcp-server-identifier 10.0.0.1;
-        renew 0 2025/09/07 10:03:50; # ensure this is the latest lease for the interface
-        rebind 3 2025/09/10 13:39:35;
-        expire 4 2025/09/11 10:39:35;
-        }
-    ```
-
-When aci_multipod is enabled, the hostagent does a check on startup to verify if there exists a dhclient dhcp lease for the node infra VLAN subinterface. The following host agent logs indicate that it found an existing dhclient lease for the infra-vlan subinterface.
-
-```
-time="2025-09-22T08:12:26Z" level=info msg="Checking dhclient lease for interface ens192.4093"
-time="2025-09-22T08:12:26Z" level=info msg="Lease found for interface ens192.4093"
-```
-If not, the hostagent will attempt to renew the lease. The following host agent logs indicate a successful renew.
-
-```
-time="2025-09-22T10:29:14Z" level=info msg="Checking dhclient lease for interface ens192.4093"
-time="2025-09-22T10:29:14Z" level=info msg="Renewing dhclient lease for interface ens192.4093"
-time="2025-09-22T10:29:14Z" level=info msg="Executing command:/usr/sbin/dhclient ens192.4093 -1 --timeout 30 -cf /usr/local/etc/dhclient.conf"
-time="2025-09-22T10:29:16Z" level=info msg="Lease populated for interface ens192.4093"
-```
-
-#### 3.1. Workarounds for failure scenarios
-
-- If hostagent was unable to find a lease for the interface and the renew attempt fails:  "Lease populated for interface ens192.4093" log would be absent and the error would be logged. We would need to work around this by manually populating the lease. 
-
-  We can do this through a renew of the interface after SSHing to the node using the following steps:
-    1. Add the following line to the dhclient conf file ( usually `/etc/dhcp/dhclient.conf` )
-    ```sh
-        send dhcp-client-identifier = hardware;
-    ```
-    2. Do dhclient \<infra-interface-name>
-    ```sh
-       dhclient -v ens192.4093  # -v for verbose o/p
-    ```
-    and verify lease file got created at the expected location as mentioned at the start of section 3.
-
-- If "Lease found for interface ens192.4093" log is present, yet the IP did not renew correctly after migration (as described in step 4 below), it might mean that though a lease was found for the interface, it was not valid. In this case, we need to manually ensure that the lease is valid. To get a valid lease, we may attempt the steps mentioned above and do a renew.
-  
-  Once the lease is present, we can manually do a release and renew of the interface:
-    ```sh
-       dhclient -v -r <infra-interface-name>
-       dhclient -v <infra-interface-name>
-    ```
-
-
-### 4. Verify that the VLAN IP was updated
+### 3. Verify that the VLAN IP was updated
 
 If a VM is migrated from pod1 (subnet 10.1.0.0/16) to pod2 (subnet 10.0.0.0/16), the VLAN interface should have an ip from pod2 subnet.
 
@@ -268,20 +218,14 @@ ens192.4093@ens192: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9000 qdisc noqueue sta
        valid_lft forever preferred_lft forever
 ```
 
-If the vlan interface doesn't have any ip or having wrong ip (due to some error during dhcp release or renew) we can work around it by manually trying dhcp release and renew of vlan interface on the node after SSHing to the node and using the following steps:
+If the vlan interface doesn't have any ip or having wrong ip (due to some error during dhcp release or renew) we can work around it by manually trying dhcp release and renew of vlan interface on the node after SSHing to the node, using:
 
-  1. Add the following line to /etc/dhcp/dhclient.conf
+```sh
+dhclient –r <interface name>
+dhclient <interface name>
+```
 
-        send dhcp-client-identifier = hardware;
-
-  2. Do dhclient \<infra-interface-name>
-     
-     ```sh
-     dhclient -v -r <interface name> # -v for more verbose o/p
-     dhclient -v <interface name>
-     ```
-
-### 5. Verify that the anycast IPs were updated
+### 4. Verify that the anycast IPs were updated
 
 /usr/local/etc/opflex-agent-ovs/base-conf.d/01-base.conf file in hostagent pod should have the updated peer ip (ip from new pod subnet).
 
@@ -313,7 +257,7 @@ If the vlan interface doesn't have any ip or having wrong ip (due to some error
 }
 ```
 
-### 6. Verify node annotation was updated
+### 5. Verify node annotation was updated
 
 Check opflex.cisco.com/aci-pod annotation in node yaml. It should contain the pod and its subnet to which the node VM is connected.
 
@@ -323,7 +267,7 @@ Example:
 opflex.cisco.com/aci-pod: pod-1-10.0.0.0/16
 ```
 
-### 7. Check host agent and controller logs
+### 6. Check host agent and controller logs
 
 * Check if any errors or warnings are present in the host agent or controller containers.
 
