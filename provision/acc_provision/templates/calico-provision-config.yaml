@@ -6,7 +6,7 @@ aci_config:
     - 10.30.120.100             # List of APIC hosts to connect for APIC API
   vrf:                          # VRF used to create all kubernetes EPs
     name: mykube-vrf
-    tenant: common              # This can be system-id or common
+    tenant: common              # This can be system-id or pre-existing-tenant
 
   cluster_l3out:
     name: calico_l3out          # This is the l3out created by acc-provision
