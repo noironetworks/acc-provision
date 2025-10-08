@@ -4,6 +4,7 @@ import json
 import sys
 import re
 import requests
+from requests.exceptions import SSLError, ConnectionError
 import urllib3
 import ipaddress
 import time
@@ -203,7 +204,14 @@ class Apic(object):
             self.password,
         )
         path = "/api/aaaLogin.json"
-        req = requests.post(self.url(path), data=data, verify=False)
+        try:
+            req = requests.post(self.url(path), data=data, verify=self.verify)
+        except SSLError:
+            err(f"APIC TLS certificate verification failed. Ensure '{self.verify}' is the correct certificate for the APIC at {self.addr}.")
+            sys.exit(1)
+        except ConnectionError:
+            err(f"Failed to connect to APIC at '{self.addr}'.")
+            sys.exit(1)
         if req.status_code == 200:
             resp = json.loads(req.text)
             dbg("Login resp: {}".format(req.text))
