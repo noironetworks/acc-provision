@@ -8,7 +8,7 @@
 
 ## Overview
 
-Resilient Hashing for Kubernetes Services addresses challenges in maintaining uninterrupted client sessions in multi-backend deployments. This feature is enabled only when the sessionAffinity field of a Service is set to ClientIP. The main improvements include:
+Resilient Hashing for Kubernetes Services addresses challenges in maintaining uninterrupted client sessions in multi-backend deployments. This feature is supported only for East-West Kubernetes ClusterIP services with sessionAffinity set to ClientIP. The main improvements include:
 
 1. Resilient Sessions:
 Previously, ongoing client connections were disrupted whenever the number of backend pods changed, even if the pod serving the session remained active. Resilient hashing ensures that client sessions continue uninterrupted during scale-up or scale-down events.
