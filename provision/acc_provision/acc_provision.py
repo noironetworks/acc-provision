@@ -330,6 +330,7 @@ def config_default():
             "apic_subscription_delay": None,
             "apic_refreshticker_adjust": None,
             "opflex_device_delete_timeout": None,
+            "apic_tls_cert": None,
         },
         "net_config": {
             "node_subnet": None,
@@ -1294,6 +1295,14 @@ def is_valid_file(path):
     return True
 
 
+def is_valid_filepath(path):
+    if path is None:
+        return True
+    if not os.path.isfile(path):
+        raise Exception("File path invalid: %s" % path)
+    return True
+
+
 def validate_system_id_if_openshift(system_id, config):
     if "openshift" in config["flavor"].lower() and not config["provision"]["upgrade_cluster"]:
         if not system_id.isalnum() or not system_id.islower():
@@ -1384,6 +1393,7 @@ def config_validate(flavor_opts, config):
             "aci_config/vrf/name": (get(("aci_config", "vrf", "name")), required),
             "aci_config/vrf/tenant": (get(("aci_config", "vrf", "tenant")),
                                       required),
+            "aci_config/apic_tls_cert": (get(("aci_config", "apic_tls_cert")), is_valid_filepath),
             # Istio config
             "istio_config/install_profile": (get(("istio_config", "install_profile")),
                                              is_valid_istio_install_profile),
@@ -2815,11 +2825,13 @@ def get_apic(config):
     debug = config["provision"]["debug_apic"]
     ssl = config["aci_config"].get("ssl", True)
 
+    verify_tls = config["aci_config"].get("apic_tls_cert", False)
+
     if config["aci_config"]["apic_proxy"]:
         apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug, ssl=ssl)
+        timeout=timeout, debug=debug, ssl=ssl, verify=verify_tls)
     if apic.cookies is None:
         return None
     return apic
@@ -3409,6 +3421,13 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    # read apic_tls_cert if provided
+    apic_tls_cert_path = config["aci_config"].get("apic_tls_cert")
+    if apic_tls_cert_path:
+        info("  Loading APIC TLS certificate from: \"%s\"" % apic_tls_cert_path)
+        with open(apic_tls_cert_path, "rb") as certp:
+            config["aci_config"]["apic_tls_cert_data"] = certp.read()
 
     if is_calico_flavor(config["flavor"]):
         print("Using flavor: ", config["flavor"])
