@@ -330,6 +330,7 @@ def config_default():
             "apic_subscription_delay": None,
             "apic_refreshticker_adjust": None,
             "opflex_device_delete_timeout": None,
+            "apic_tls_cert": None,
         },
         "net_config": {
             "node_subnet": None,
@@ -1293,6 +1294,12 @@ def is_valid_file(path):
     if not check_vlans_available_in_file(path):
         return False
     return True
+
+
+def is_valid_filepath(path):
+    if path is None or os.path.isfile(path):
+        return True
+    raise Exception("File path invalid: %s" % path)
 
 
 def validate_system_id_if_openshift(system_id, config):
@@ -2816,11 +2823,13 @@ def get_apic(config):
     debug = config["provision"]["debug_apic"]
     ssl = config["aci_config"].get("ssl", True)
 
+    verify_tls = config["aci_config"].get("apic_tls_cert") or False
+
     if config["aci_config"]["apic_proxy"]:
         apic_host = config["aci_config"]["apic_proxy"]
     apic = Apic(
         apic_host, apic_username, apic_password,
-        timeout=timeout, debug=debug, ssl=ssl)
+        timeout=timeout, debug=debug, ssl=ssl, verify=verify_tls)
     if apic.cookies is None:
         return None
     return apic
@@ -3333,6 +3342,10 @@ def provision(args, apic_file, no_random):
         deep_merge(config,
                    {"registry": VERSIONS[config["registry"]["version"]]})
 
+    # apic_tls_cert path validation done here because get_apic() (called in config_discover())
+    # runs before config_validate(), so validation can't be deferred.
+    is_valid_filepath(config["aci_config"]["apic_tls_cert"])
+
     # Discoverd state (e.g. infra-vlan) overrides the config file data
     if isOverlay(flavor):
         config["net_config"]["infra_vlan"] = None
@@ -3410,6 +3423,13 @@ def provision(args, apic_file, no_random):
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
+
+    # read apic_tls_cert if provided
+    apic_tls_cert_path = config["aci_config"]["apic_tls_cert"]
+    if apic_tls_cert_path:
+        info("  Loading APIC TLS certificate from: \"%s\"" % apic_tls_cert_path)
+        with open(apic_tls_cert_path, "rb") as certp:
+            config["aci_config"]["apic_tls_cert_data"] = certp.read()
 
     if is_calico_flavor(config["flavor"]):
         print("Using flavor: ", config["flavor"])
