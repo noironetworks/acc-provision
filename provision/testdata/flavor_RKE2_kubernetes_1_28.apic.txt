@@ -829,7 +829,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "metrics-kubelet",
+                                    "name": "aci-containers-rke2-metrics-kubelet",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "10250",
@@ -843,7 +843,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "monitoring-node",
+                                    "name": "aci-containers-rke2-monitoring-node",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "9796",
@@ -857,7 +857,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "monitoring-ingress",
+                                    "name": "aci-containers-rke2-monitoring-ingress",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "10254",
@@ -871,7 +871,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "rancher-ui",
+                                    "name": "aci-containers-rke2-rancher-ui",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "443",

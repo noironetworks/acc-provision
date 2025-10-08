@@ -897,7 +897,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "ucp-ui-port",
+                                    "name": "aci-containers-kube-ucp-ui-port",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "443",
@@ -911,7 +911,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "ucp-tls-port",
+                                    "name": "aci-containers-kube-ucp-tls-port",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "12376",
@@ -925,7 +925,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "ucp-kubelet-port",
+                                    "name": "aci-containers-kube-ucp-kubelet-port",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "10250",
@@ -939,7 +939,7 @@ None
                         {
                             "vzEntry": {
                                 "attributes": {
-                                    "name": "ucp-misc-ports",
+                                    "name": "aci-containers-kube-ucp-misc-ports",
                                     "etherT": "ip",
                                     "prot": "tcp",
                                     "dFromPort": "12378",

@@ -1,0 +1,32 @@
+aci_config:
+  system_id: cluster1
+  tenant:
+    name: shared-tenant
+  apic_hosts:
+  - localhost:50001
+  apic_version: "6.1"
+  ssl: False
+  aep: test-aep
+  vrf:
+    name: test-vrf
+    tenant: common
+  l3out:
+    name: test-l3out
+    external_networks:
+    - default
+  vmm_domain:
+    encap_type: vxlan
+    nested_inside:
+      type: vmware
+      name: test-vmm
+      installer_provisioned_lb_ip: "1.1.1.1"
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  pod_subnet: 10.2.0.1/16
+  extern_dynamic: 10.3.0.1/24
+  extern_static: 10.4.0.1/24
+  node_svc_subnet: 10.5.0.1/24
+  kubeapi_vlan: 4001
+  service_vlan: 4003
+  infra_vlan: 4093

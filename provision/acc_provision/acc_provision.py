@@ -3259,7 +3259,17 @@ def provision(args, apic_file, no_random):
         info("Using configuration flavor " + flavor)
         deep_merge(config, {"flavor": flavor})
         if "config" in FLAVORS[flavor]:
-            deep_merge(config, FLAVORS[flavor]["config"])
+            flavor_config = copy.deepcopy(FLAVORS[flavor]["config"])
+            aci_items = flavor_config.get("aci_config", {}).get("items")
+            if aci_items:
+                try:
+                    system_id = user_config["aci_config"]["system_id"]
+                    for item in aci_items:
+                        item['name'] = f"{Apic.ACI_PREFIX}{system_id}-{item['name']}"
+                except KeyError:
+                    err("Flavor '{}' requires a system_id but it was not found.".format(flavor))
+                    return False
+            deep_merge(config, flavor_config)
         if "default_version" in FLAVORS[flavor]:
             deep_merge(config, {
                 "registry": {

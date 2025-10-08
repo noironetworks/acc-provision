@@ -1,0 +1,41 @@
+{
+    "gets": {
+        "/api/mo/uni/tn-shared-tenant.json?query-target=children": {
+            "imdata": [
+                { "vzBrCP": { "attributes": { "dn": "uni/tn-shared-tenant/brc-aci-containers-cluster1-openshift-monitoring", "name": "aci-containers-cluster1-openshift-monitoring", "annotation": "orchestrator:aci-containers-controller" } } },
+                { "vzBrCP": { "attributes": { "dn": "uni/tn-shared-tenant/brc-aci-containers-cluster1-openshift-svc-catalog", "name": "aci-containers-cluster1-openshift-svc-catalog", "annotation": "orchestrator:aci-containers-controller" } } },
+                { "vzBrCP": { "attributes": { "dn": "uni/tn-shared-tenant/brc-aci-containers-cluster2-openshift-monitoring", "name": "aci-containers-cluster2-openshift-monitoring", "annotation": "orchestrator:aci-containers-controller" } } },
+                { "vzBrCP": { "attributes": { "dn": "uni/tn-shared-tenant/brc-aci-containers-cluster2-openshift-svc-catalog", "name": "aci-containers-cluster2-openshift-svc-catalog", "annotation": "orchestrator:aci-containers-controller" } } }
+            ]
+        },
+        "/api/mo/uni/tn-shared-tenant.json": { "imdata": [ { "fvTenant": { "attributes": { "dn": "uni/tn-shared-tenant", "name": "shared-tenant" } } } ] },
+        "/api/node/mo/uni/vmmp-VMware/dom-test-vmm.json?query-target=children&target-subtree-class=infraRsVlanNs": { "imdata": [ { "infraRsVlanNs": { "attributes": { "tDn": "uni/infra/vlanns-[test-pool]-static" } } } ] },
+        "/api/node/class/firmwareCtrlrRunning.json": { "imdata": [ { "firmwareCtrlrRunning": { "attributes": { "version": "6.1(1.1)" } } } ] },
+        "/api/node/mo/uni/infra/attentp-default/provacc/rsfuncToEpg-[uni/tn-infra/ap-access/epg-default].json": { "imdata": [] },
+        "/api/mo/uni/infra/attentp-test-aep.json": { "imdata": [] },
+        "/api/mo/uni/tn-common/ctx-test-vrf.json": { "imdata": [] },
+        "/api/mo/uni/tn-common/out-test-l3out.json": { "imdata": [] },
+        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagInst": { "imdata": [] },
+        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagAnnotation": { "imdata": [] }
+    },
+    "deletes": [
+        "/api/mo/uni/infra/vlanns-[cluster1-pool]-static.json",
+        "/api/mo/uni/vmmp-OpenShift/dom-cluster1.json",
+        "/api/mo/uni/vmmp-VMware/dom-test-vmm/usrcustomaggr-cluster1.json",
+        "/api/mo/uni/infra/attentp-test-aep/rsdomP-[uni/vmmp-OpenShift/dom-cluster1].json",
+        "/api/mo/uni/infra/attentp-test-aep/rsdomP-[uni/phys-cluster1-pdom].json",
+        "/api/mo/uni/infra/attentp-test-aep/gen-default/rsfuncToEpg-[uni/tn-shared-tenant/ap-aci-containers-cluster1/epg-aci-containers-nodes].json",
+        "/api/mo/uni/tn-common/flt-cluster1-allow-all-filter.json",
+        "/api/mo/uni/tn-common/brc-cluster1-l3out-allow-all.json",
+        "/api/node/mo/uni/userext/user-cluster1.json",
+        "/api/node/mo/uni/userext/user-cluster1.json",
+        "/api/node/mo/uni/tn-shared-tenant/brc-aci-containers-cluster1-openshift-monitoring.json",
+        "/api/node/mo/uni/tn-shared-tenant/brc-aci-containers-cluster1-openshift-svc-catalog.json",
+        "/api/node/mo/uni/infra/vlanns-[test-pool]-static/from-[vlan-4001]-to-[vlan-4001].json",
+        "/api/node/mo/uni/tn-shared-tenant/ap-aci-containers-cluster1/epg-aci-containers-nodes.json",
+        "/api/mo/uni/phys-cluster1-pdom.json",
+        "/api/mo/uni/tn-common/out-test-l3out/instP-default/rsprov-cluster1-l3out-allow-all.json",
+        "/api/mo/uni/infra/maddrns-cluster1-mpool.json",
+        "/api/node/mo/comp/prov-OpenShift/ctrlr-[cluster1]-cluster1/injcont/info.json"
+    ]
+}
