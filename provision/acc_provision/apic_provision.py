@@ -4,6 +4,7 @@ import json
 import sys
 import re
 import requests
+from requests.exceptions import SSLError
 import urllib3
 import ipaddress
 import time
@@ -203,7 +204,14 @@ class Apic(object):
             self.password,
         )
         path = "/api/aaaLogin.json"
-        req = requests.post(self.url(path), data=data, verify=False)
+        try:
+            req = requests.post(self.url(path), data=data, verify=self.verify)
+        except SSLError:
+            if not self.verify:
+                custom_err = "TLS certificate verification enabled on APIC, but no certificate was provided in apic_tls_cert parameter."
+            else:
+                custom_err = f"APIC TLS certificate verification failed. Ensure '{self.verify}' is the correct certificate for the APIC at {self.addr}."
+            raise Exception(custom_err)
         if req.status_code == 200:
             resp = json.loads(req.text)
             dbg("Login resp: {}".format(req.text))
