@@ -28,6 +28,8 @@ kube_config: 
     aci_multipod: True 
 ```
 
+> **Note:** For Remote Leaf (RL) & Autonomous Remote Leaf (ARL) deployments, only Rancher (RKE) clusters are supported, and the cluster must be fully contained within a single remote leaf group. The cluster cannot be stretched across multiple remote leaf groups. Therefore, VM migration across different remote leaf groups or to different Pods is not supported and the `aci_multipod` config should not be set.
+
 If aci_multipod is set, each Kubernetes node on the cluster will have an annotation in the node in below format
 
 ```yaml
