@@ -1,0 +1,15 @@
+isGateway: true
+isDefaultGateway: true
+forceAddress: false
+ipMasq: true
+ipMasqBackend: iptables
+mtu: 1500
+hairpinMode: true
+promiscMode: false
+enabledad: false
+macspoofchk: true
+disableContainerInterface: false
+portIsolation: false
+ipam:
+  type: host-local
+  subnet: 10.1.1.0/24
