@@ -37,3 +37,4 @@ vmm_lite_config:
   aaep_monitoring_enabled: true
   bridge_name: bridge-default
   cno_identifier: cno
+  nad_config_file: bridge_nad_config.yaml

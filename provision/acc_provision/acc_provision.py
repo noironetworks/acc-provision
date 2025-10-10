@@ -57,6 +57,42 @@ VERSION_FIELDS = [
     "aci_containers_host_ovscni_version",
 ]
 
+BRIDGE_NAD_OPTIONAL_KEYS = {
+    "bridge": str,
+    "isGateway": bool,
+    "isDefaultGateway": bool,
+    "forceAddress": bool,
+    "ipMasq": bool,
+    "ipMasqBackend": str,
+    "mtu": int,
+    "hairpinMode": bool,
+    "promiscMode": bool,
+    "vlan": int,
+    "preserveDefaultVlan": bool,
+    "vlanTrunk": list,
+    "enabledad": bool,
+    "macspoofchk": bool,
+    "disableContainerInterface": bool,
+    "portIsolation": bool,
+}
+BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
+
+def validate_bridge_nad_optional_keys(nad_config):
+    for key, value in nad_config.items():
+        if key in BRIDGE_NAD_OPTIONAL_KEYS:
+            expected_type = BRIDGE_NAD_OPTIONAL_KEYS[key]
+            if not isinstance(value, expected_type):
+                raise Exception(f"Optional key '{key}' must be of type {expected_type.__name__}")
+            if key == "ipMasqBackend" and value not in BRIDGE_NAD_ALLOWED_IPMASQBACKEND:
+                raise Exception(f"ipMasqBackend must be one of {BRIDGE_NAD_ALLOWED_IPMASQBACKEND}")
+    return True
+
+def read_and_validate_nad_config_file(nad_config_file_path):
+    with open(nad_config_file_path, "r") as f:
+        nad_config = yaml.safe_load(f)
+    validate_bridge_nad_optional_keys(nad_config)
+    return nad_config
+
 
 FLAVORS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/flavors.yaml"
 VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/versions.yaml"
@@ -480,6 +516,7 @@ def config_default():
             "aaep_monitoring_enabled": False,
             "bridge_name": "bridge-default",
             "cno_identifier": "cno",
+            "nad_config_file": None,
         },
     }
     return default_config
@@ -907,7 +944,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 node_svc_subnet,
             ],
             "opflex_mode": opflex_mode,
-            "apic_request_retry_delay": apic_request_retry_delay, 
+            "apic_request_retry_delay": apic_request_retry_delay,
             "enable_apic_request_retry_delay": enable_apic_request_retry_delay,
             "epg_resolve_prioritize": epg_resolve_prioritize,
             "force_ep_undeclares": force_ep_undeclares,
@@ -3377,6 +3414,16 @@ def provision(args, apic_file, no_random):
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
+
+    if is_vmm_lite(config):
+        nad_config_file_path = config.get("vmm_lite_config", {}).get("nad_config_file")
+        if nad_config_file_path:
+            try:
+                nad_config = read_and_validate_nad_config_file(nad_config_file_path)
+                config["vmm_lite_config"]["nad_config"] = nad_config
+            except Exception as e:
+                err(f"Invalid bridge NAD config: {e}")
+                return False
 
     if is_calico_flavor(config["flavor"]) and not calico_config_validate_preexisting(config, prov_apic):
         return False

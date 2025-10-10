@@ -1,0 +1,19 @@
+bridge: mynet0
+isGateway: true
+isDefaultGateway: true
+forceAddress: false
+ipMasq: true
+ipMasqBackend: iptables
+mtu: 1500
+hairpinMode: true
+promiscMode: false
+vlan: 100
+preserveDefaultVlan: true
+vlanTrunk:
+  - 200
+  - 201
+  - 202
+enabledad: false
+macspoofchk: true
+disableContainerInterface: false
+portIsolation: false

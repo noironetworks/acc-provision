@@ -2767,6 +2767,11 @@ data:
         "cno-identifier": {{config.vmm_lite_config.cno_identifier|json}},
         {% endif %}
         {% endif %}
+        {% if config.vmm_lite_config.nad_config %}
+        {% for key, val in config.vmm_lite_config.nad_config.items() %}
+        {{ key|tojson }}: {{ val|tojson }},
+        {% endfor %}
+        {% endif %}
         "aci-policy-tenant": {{config.kube_config.default_endpoint_group.tenant|json}},
         {% if config.kube_config.hpp_optimization %}
         "hpp-optimization": {{ config.kube_config.hpp_optimization|json }},
