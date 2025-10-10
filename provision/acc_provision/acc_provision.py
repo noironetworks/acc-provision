@@ -57,6 +57,96 @@ VERSION_FIELDS = [
     "aci_containers_host_ovscni_version",
 ]
 
+BRIDGE_NAD_CONFIG_KEYS = {
+    "isGateway": bool,
+    "isDefaultGateway": bool,
+    "forceAddress": bool,
+    "ipMasq": bool,
+    "ipMasqBackend": str,
+    "mtu": int,
+    "hairpinMode": bool,
+    "promiscMode": bool,
+    "enabledad": bool,
+    "macspoofchk": bool,
+    "disableContainerInterface": bool,
+    "portIsolation": bool,
+    "ipam": dict,
+}
+BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
+
+def validate_bridge_nad_field_dependencies(bridge_nad_config):
+    errors = []
+    warnings = []
+
+    ipam = bridge_nad_config.get("ipam", {})
+    is_gw = bridge_nad_config.get("isGateway", False)
+    is_def_gw = bridge_nad_config.get("isDefaultGateway", False)
+    ipmasq = bridge_nad_config.get("ipMasq", False)
+    ipmasq_backend = bridge_nad_config.get("ipMasqBackend")
+    force_address = bridge_nad_config.get("forceAddress", False)
+    disable_iface = bridge_nad_config.get("disableContainerInterface", False)
+    enabledad = bridge_nad_config.get("enabledad", False)
+
+    # --- IPAM & Gateway dependencies ---
+    if (is_gw or is_def_gw or ipmasq or force_address) and not ipam:
+        errors.append("Field 'ipam' must be defined (not empty) when using 'isGateway', 'isDefaultGateway', 'ipMasq', or 'forceAddress' options.")
+
+    if ipmasq_backend and not ipmasq:
+        warnings.append("Field 'ipMasqBackend' is ignored unless 'ipMasq' is set to true.")
+
+    if is_def_gw and not is_gw:
+        warnings.append("Field 'isDefaultGateway' implies 'isGateway: true'. This will be set automatically.")
+
+    if force_address and not is_gw:
+        warnings.append("Field 'forceAddress' has no effect unless 'isGateway' is true.")
+
+    # --- Interface behavior ---
+    if disable_iface and ipam:
+        warnings.append("Field 'disableContainerInterface' disables IPAM; assigned IPs will be ignored.")
+    if enabledad and disable_iface:
+        warnings.append("Field 'enabledad' is ignored because 'disableContainerInterface' is set to true.")
+
+    if errors:
+        raise Exception("Bridge NAD config dependency validation failed: " + "; ".join(errors))
+    for w in warnings:
+        print("WARN:", w)
+
+def validate_bridge_nad_config_keys(bridge_nad_config):
+    unexpected_keys = set(bridge_nad_config.keys()) - set(BRIDGE_NAD_CONFIG_KEYS.keys())
+    if unexpected_keys:
+        raise Exception(f"Invalid NAD config: unexpected keys found: {unexpected_keys}. Keys must match exactly: {list(BRIDGE_NAD_CONFIG_KEYS.keys())}")
+    for key, value in bridge_nad_config.items():
+        if key in BRIDGE_NAD_CONFIG_KEYS:
+            expected_type = BRIDGE_NAD_CONFIG_KEYS[key]
+            if not isinstance(value, expected_type):
+                raise Exception(f"Optional key '{key}' must be of type {expected_type.__name__}")
+            if key == "ipMasqBackend" and value not in BRIDGE_NAD_ALLOWED_IPMASQBACKEND:
+                raise Exception(f"ipMasqBackend must be one of {BRIDGE_NAD_ALLOWED_IPMASQBACKEND}")
+
+
+def read_and_validate_bridge_nad_config_file(bridge_nad_config_file):
+     # Check if file exists
+    if not os.path.isfile(bridge_nad_config_file):
+        raise Exception(f"NAD config file '{bridge_nad_config_file}' does not exist.")
+
+    # Check file extension
+    valid_extensions = ('.yaml', '.yml')
+    if not bridge_nad_config_file.endswith(valid_extensions):
+        raise Exception(f"NAD config file '{bridge_nad_config_file}' must have a .yaml or .yml extension.")
+
+    # Check file format
+    try:
+        with open(bridge_nad_config_file, "r") as f:
+            bridge_nad_config = yaml.safe_load(f)
+        if not isinstance(bridge_nad_config, dict):
+            raise Exception("NAD config file must be a YAML mapping (dictionary) at the top level.")
+    except Exception as e:
+        raise Exception(f"NAD config file '{bridge_nad_config_file}' is not a valid YAML file: {e}")
+
+    validate_bridge_nad_config_keys(bridge_nad_config)
+    validate_bridge_nad_field_dependencies(bridge_nad_config)
+    return bridge_nad_config
+
 
 FLAVORS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/flavors.yaml"
 VERSIONS_PATH = os.path.dirname(os.path.realpath(__file__)) + "/versions.yaml"
@@ -481,6 +571,7 @@ def config_default():
             "aaep_monitoring_enabled": False,
             "bridge_name": "bridge-default",
             "cno_identifier": "cno",
+            "bridge_nad_config_file": None,
             "kubeapi_vlan": None,
         },
     }
@@ -3401,6 +3492,16 @@ def provision(args, apic_file, no_random):
     else:
         adj_config = config_adjust(args, config, prov_apic, no_random)
     deep_merge(config, adj_config)
+
+    if is_vmm_lite(config):
+        bridge_nad_config_file = config.get("vmm_lite_config", {}).get("bridge_nad_config_file")
+        if bridge_nad_config_file:
+            try:
+                bridge_nad_config = read_and_validate_bridge_nad_config_file(bridge_nad_config_file)
+                config["vmm_lite_config"]["bridge_nad_config"] = bridge_nad_config
+            except Exception as e:
+                err(f"Invalid bridge NAD config: {e}")
+                return False
 
     if is_calico_flavor(config["flavor"]) and not calico_config_validate_preexisting(config, prov_apic):
         return False

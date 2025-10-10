@@ -236,6 +236,9 @@ data:
                 {% if config.user_config.vmm_lite_config.cno_identifier %}
                 "cno_identifier": {{config.vmm_lite_config.cno_identifier|json}}
                 {% endif %}
+                {% if config.user_config.vmm_lite_config.bridge_nad_config_file %}
+                "bridge_nad_config_file": {{config.vmm_lite_config.bridge_nad_config_file|json}}
+                {% endif %}
                 {% if config.user_config.vmm_lite_config.kubeapi_vlan %}
                 "kubeapi_vlan": {{config.vmm_lite_config.kubeapi_vlan|json}}
                 {% endif %}
