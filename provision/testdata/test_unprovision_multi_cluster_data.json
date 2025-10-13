@@ -16,7 +16,8 @@
         "/api/mo/uni/tn-common/ctx-test-vrf.json": { "imdata": [] },
         "/api/mo/uni/tn-common/out-test-l3out.json": { "imdata": [] },
         "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagInst": { "imdata": [] },
-        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagAnnotation": { "imdata": [] }
+        "/api/node/mo/uni/tn-common.json?query-target=subtree&target-subtree-class=tagAnnotation": { "imdata": [] },
+	"/api/mo/uni/infra/vlanns-[test-pool]-static.json?query-target=children": {"imdata": []}
     },
     "deletes": [
         "/api/mo/uni/infra/vlanns-[cluster1-pool]-static.json",
