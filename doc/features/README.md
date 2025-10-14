@@ -177,8 +177,8 @@ aci_config:
   #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
   #tenant:
     #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
-  apic_hosts:                   # List of APIC hosts to connect for APIC API
-  - 10.1.1.101
+  apic_hosts:                   # List of APIC hosts to connect for APIC API.
+  - 10.1.1.101                  # Default port is 443, to use a non-default HTTPS port, append the port number to the IP address using a colon separator. For example: 10.1.1.101:6443
   vmm_domain:                   # Kubernetes container domain configuration
     encap_type: vxlan           # Encap mode: vxlan or vlan
     mcast_range:                # Every opflex VMM must use a distinct range
