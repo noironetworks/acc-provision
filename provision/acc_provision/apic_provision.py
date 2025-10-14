@@ -748,9 +748,12 @@ class ApicKubeConfig(object):
                 kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
                 phys_name = self.config["aci_config"]["physical_domain"]["domain"]
                 if phys_name != self.config["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
-                    update(data, self.pdom_pool_chained(pool_name, [kubeapi_vlan]))
-                    update(data, self.chained_phys_dom(phys_name, pool_name))
-                update(data, self.chained_mode_associate_aep())
+                    if not is_vmm_lite(self.config) or kubeapi_vlan:
+                        update(data, self.pdom_pool_chained(pool_name, [kubeapi_vlan]))
+                    if not is_vmm_lite(self.config) or pool_name or phys_name:
+                        update(data, self.chained_phys_dom(phys_name, pool_name))
+                if not is_vmm_lite(self.config) or self.config["aci_config"]["aep"]:
+                    update(data, self.chained_mode_associate_aep())
 
             # if self.config["user_config"]["aci_config"].get("vmm_domain") == None:
             #     update(data, self.chained_kube_dom(apic_version))
@@ -3515,7 +3518,8 @@ class ApicKubeConfig(object):
                     ]
                 )
             tenant_obj = data["fvTenant"]["children"]
-            tenant_obj.append(node_bd_obj)
+            if not is_vmm_lite(self.config) or kube_vrf:
+                tenant_obj.append(node_bd_obj)
             for i, child in enumerate(data["fvTenant"]["children"]):
                 if "fvAp" in child.keys() and child["fvAp"]["attributes"]["name"] == app_profile:
                     ap_object = child["fvAp"]["children"]
@@ -3532,24 +3536,27 @@ class ApicKubeConfig(object):
                             for j, ap_child in enumerate(child["fvAp"]["children"]):
                                 if "fvAEPg" in ap_child.keys() and ap_child["fvAEPg"]["attributes"]["name"] == node_epg_name:
                                     epg_object = ap_child["fvAEPg"]["children"]
-                        epg_object.append(kubeapi_dom_obj)
+                        if not is_vmm_lite(self.config) or kubeapi_vlan:
+                            epg_object.append(kubeapi_dom_obj)
 
                 if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
                     bd_object = child["fvBD"]["children"]
-                    for node_subnet in node_subnets:
-                        node_subnet_obj = collections.OrderedDict(
-                            [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
-                        )
-                        bd_object.append(
-                            collections.OrderedDict(
-                                [
-                                    (
-                                        "fvSubnet",
-                                        node_subnet_obj
-                                    )
-                                ]
+                    node_subnets = self.config.get("net_config", {}).get("node_subnet") or []
+                    if not is_vmm_lite(self.config) or node_subnets:
+                        for node_subnet in node_subnets:
+                            node_subnet_obj = collections.OrderedDict(
+                                [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
                             )
-                        )
+                            bd_object.append(
+                                collections.OrderedDict(
+                                    [
+                                        (
+                                            "fvSubnet",
+                                            node_subnet_obj
+                                        )
+                                    ]
+                                )
+                            )
                     if kube_l3out:
                         l3out_object = collections.OrderedDict(
                             [

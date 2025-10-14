@@ -607,15 +607,19 @@ def config_adjust_for_cno(args, config, no_random):
     else:
         tenant = system_id
 
+    physical_domain = ""
     if config["aci_config"].get("physical_domain"):
         physical_domain = config["aci_config"]["physical_domain"]["domain"]
     else:
-        physical_domain = system_id + "-physdom"
+        if not is_vmm_lite(config) or system_id:
+            physical_domain = system_id + "-physdom"
 
     if is_chained_mode(config):
         secondary_vlans = config["chained_cni_config"]["secondary_vlans"]
 
-    app_profile = Apic.ACI_CHAINED_PREFIX + system_id
+    app_profile = ""
+    if not is_vmm_lite(config) or system_id:
+        app_profile = Apic.ACI_CHAINED_PREFIX + system_id
     default_endpoint_group = Apic.ACI_CHAINED_PREFIX + "default"
     namespace_endpoint_group = Apic.ACI_CHAINED_PREFIX + "system"
     config["aci_config"]["nodes_epg"] = Apic.ACI_CHAINED_PREFIX + "nodes"
@@ -634,7 +638,7 @@ def config_adjust_for_cno(args, config, no_random):
             "cluster_tenant": tenant,
             "physical_domain": {
                 "domain": physical_domain,
-                "vlan_pool": system_id + "-pool",
+                "vlan_pool": f"{system_id}-pool" if system_id else None,
             },
             "vrf": {
                 "dn": aci_vrf_dn,
@@ -684,9 +688,11 @@ def config_adjust_for_cno(args, config, no_random):
             adj_config["net_config"]["node_subnet"] = node_subnet
 
     if is_vmm_lite(config):
-        node_subnet = config["net_config"]["node_subnet"][0]
-        # Chained mode don't need this in case of skip_node_network_provisioning
-        adj_config["net_config"]["node_subnet"] = node_subnet
+        node_subnet_list = config.get("net_config", {}).get("node_subnet")
+        if node_subnet_list and isinstance(node_subnet_list, list) and len(node_subnet_list) > 0:
+            node_subnet = node_subnet_list[0]
+            # Chained mode don't need this in case of skip_node_network_provisioning
+            adj_config["net_config"]["node_subnet"] = node_subnet
 
     if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
         adj_config["aci_config"]["apic_refreshtime"] = config["aci_config"]["apic_refreshtime"]
@@ -1347,8 +1353,7 @@ def config_validate(flavor_opts, config):
         checks = {
             # ACI config
             "aci_config/system_id": (get(("aci_config", "system_id")),
-                                     lambda x: required(x) and isname(x, 32) and
-                                     validate_system_id_if_openshift(x, config)),
+                                     lambda x: True if is_vmm_lite(config) else (required(x) and isname(x, 32) and validate_system_id_if_openshift(x, config))),
             "aci_config/apic_refreshtime": (get(("aci_config", "apic_refreshtime")),
                                             is_valid_refreshtime),
             "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
@@ -1362,9 +1367,10 @@ def config_validate(flavor_opts, config):
         if (is_chained_mode(config) and not config["chained_cni_config"]["skip_node_network_provisioning"]) or is_vmm_lite(config):
             # Network Config
             checks["net_config/node_subnet"] = (
-                get(("net_config", "node_subnet")), required)
-            checks["aci_config/vrf/name"] = (get(("aci_config", "vrf", "name")), required)
-            checks["aci_config/vrf/tenant"] = (get(("aci_config", "vrf", "tenant")), required)
+                get(("net_config", "node_subnet")), required if not is_vmm_lite(config) else (lambda x: True))
+            checks["aci_config/vrf/name"] = (get(("aci_config", "vrf", "name")), required if not is_vmm_lite(config) else (lambda x: True))
+            checks["aci_config/vrf/tenant"] = (get(("aci_config", "vrf", "tenant")), required if not is_vmm_lite(config) else (lambda x: True))
+
         if config["user_config"]["aci_config"].get("vmm_domain", False):
             # ACI Config
             checks["aci_config/vmm_domain/domain"] = (
@@ -1444,7 +1450,7 @@ def config_validate(flavor_opts, config):
             # Chained mode don't have this mandetory in case of skip_node_network_provisioning
             # For now, VMM lite needs this.
             extra_checks["aci_config/aep"] = (
-                get(("aci_config", "aep")), required)
+                get(("aci_config", "aep")), required if not is_vmm_lite(config) else (lambda x: True))
     elif is_calico_flavor(config["flavor"]):
         extra_checks = {
             "aci_config/cluster_l3out/aep": (get(("aci_config", "cluster_l3out", "aep")), required),
@@ -1513,7 +1519,7 @@ def config_validate(flavor_opts, config):
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False and not is_calico_flavor(config["flavor"]):
         checks["aci_config/system_id"] = \
-            (get(("aci_config", "system_id")), required)
+            (get(("aci_config", "system_id")), required if not is_vmm_lite(config) else (lambda x: True))
 
     # Versions
     if not is_calico_flavor(config["flavor"]):
@@ -1595,10 +1601,11 @@ def cno_config_validate_preexisting(config, prov_apic):
                     return True
 
             aep_name = config["aci_config"]["aep"]
-            aep = apic.get_aep(aep_name)
-            if aep is None:
-                err("AEP %s not defined in the APIC. Please create AEP and try again." % aep_name)
-                return False
+            if not is_vmm_lite(config):
+                aep = apic.get_aep(aep_name)
+                if aep is None:
+                    err("AEP %s not defined in the APIC. Please create AEP and try again." % aep_name)
+                    return False
 
             if config["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
                 phydom_name = config["user_config"]["aci_config"]["physical_domain"]["domain"]
@@ -1621,10 +1628,11 @@ def cno_config_validate_preexisting(config, prov_apic):
             vrf_dn = config["aci_config"]["vrf"]["dn"]
             l3out_name = config["aci_config"]["l3out"]["name"]
             vrf = apic.get_vrf(vrf_dn)
-            if vrf is None:
-                err("VRF %s/%s not defined in the APIC.Please create VRF and try again." %
-                    (vrf_tenant, vrf_name))
-                return False
+            if not is_vmm_lite(config):
+                if vrf is None:
+                    err("VRF %s/%s not defined in the APIC.Please create VRF and try again." %
+                        (vrf_tenant, vrf_name))
+                    return False
 
             l3out = apic.get_l3out(vrf_tenant, l3out_name)
             if l3out:
@@ -2722,7 +2730,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             with open(operator_output, "w") as fh:
                 fh.write(new_deployment_file)
         else:
-            op_template.stream(config=config).dump(operator_output)
+            if not is_vmm_lite(config):
+                op_template.stream(config=config).dump(operator_output)
 
         if config["flavor"] != "k8s-overlay":
             # The next few files are to generate tar file with each
@@ -2807,7 +2816,8 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                     apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant,
                                      l3out_name=l3out_name, cluster_l3out_vrf_details=cluster_l3out_vrf_details)
                 else:
-                    apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant)
+                    if not is_vmm_lite(config) or vrf_tenant:
+                        apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant)
             ret = False if apic.errors > 0 else True
     return ret
 
@@ -3470,8 +3480,9 @@ def provision(args, apic_file, no_random):
 
     if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
         config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
-    ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
-    return ret
+    if not is_vmm_lite(config) or config["aci_config"]["system_id"]:
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
 
 
 def main(args=None, apic_file=None, no_random=False):
