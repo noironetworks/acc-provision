@@ -88,6 +88,28 @@ def is_cno_enabled(config):
     return is_vmm_lite(config) or is_chained_mode(config)
 
 
+def is_vlan_in_pool(apic, pool_dn, vlan_id):
+    if apic is None or not pool_dn:
+        return False
+    resp = apic.get("/api/mo/%s.json?query-target=children" % pool_dn)
+    if not resp:
+        return False
+    try:
+        respj = resp.json()
+    except Exception:
+        return False
+    if "imdata" not in respj:
+        return False
+    for obj in respj["imdata"]:
+        if "fvnsEncapBlk" in obj:
+            blk = obj["fvnsEncapBlk"]["attributes"]
+            if "from" in blk and "to" in blk:
+                start = int(blk["from"].replace("vlan-", ""))
+                end = int(blk["to"].replace("vlan-", ""))
+                if start <= vlan_id <= end and start != end:
+                    return True
+    return False
+
 class Apic(object):
 
     TENANT_OBJECTS = ["ap-kubernetes", "BD-kube-node-bd", "BD-kube-pod-bd", "brc-kube-api", "brc-health-check", "brc-dns", "brc-icmp", "flt-kube-api-filter", "flt-dns-filter", "flt-health-check-filter-out", "flt-icmp-filter", "flt-health-check-filter-in"]
@@ -338,6 +360,8 @@ class Apic(object):
 
         for path, config in data:
             try:
+                if not path:
+                    continue
                 if path in ignore_list:
                     continue
                 if config is not None:
@@ -394,6 +418,8 @@ class Apic(object):
                             dbg("%s: %s" % (del_path, resp.text))
             else:
                 for path, config in data:
+                    if not path:
+                        continue
                     if path.split("/")[-1].startswith("instP-"):
                         continue
                     if path not in shared_resources:
@@ -1568,6 +1594,15 @@ class ApicKubeConfig(object):
         vpath = ""
         if 'vlan_pool' in self.config['aci_config']['vmm_domain']['nested_inside']:
             vpath = self.config['aci_config']['vmm_domain']['nested_inside']['vlan_pool']
+
+        # Check for overlap before creating
+        if is_vlan_in_pool(self.apic, vpath, int(kubeapi_vlan)):
+            prov_apic = self.config["provision"]["prov_apic"]
+            if prov_apic:
+                warn(f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block creation.")
+            else:
+                warn(f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block deletion.")
+            return "", None
 
         path = "/api/node/mo/%s/from-[vlan-%s]-to-[vlan-%s].json" % (vpath, kubeapi_vlan, kubeapi_vlan)
         data = collections.OrderedDict(
