@@ -256,10 +256,10 @@ registry:
   # use_digest: true   # option to pull images using digest, override if needed, default is false.
 
 #kube_config:
-  # aci_multipod: True #override if multipod setup, default is False
+  # aci_multipod: True #override if inter-pod migration is to be done on the setup, default is False
   # opflex_device_reconnect_wait_timeout: 10  # Timeout in seconds to wait for reconnect when opflexOdev is diconnected for a node
                                               # before triggering a dhcp release and renew of vlan interface
-  # aci_multipod_ubuntu: True #override if multipod setup with ubuntu nodes, default is False (Used only for rke)
+  # aci_multipod_ubuntu: True #override if inter-pod migration is to be done on a setup with Ubuntu nodes, default is False (Used only for rke)
   # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
   # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
   # hpp_optimization: True #override if needed, default is False
