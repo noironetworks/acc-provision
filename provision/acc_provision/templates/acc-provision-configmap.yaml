@@ -236,6 +236,9 @@ data:
                 {% if config.user_config.vmm_lite_config.cno_identifier %}
                 "cno_identifier": {{config.vmm_lite_config.cno_identifier|json}}
                 {% endif %}
+                {% if config.user_config.vmm_lite_config.kubeapi_vlan %}
+                "kubeapi_vlan": {{config.vmm_lite_config.kubeapi_vlan|json}}
+                {% endif %}
             },
             {% endif %}
             {% if config.user_config.net_config %}
@@ -244,7 +247,7 @@ data:
                 "infra_vlan": {{config.net_config.infra_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.service_vlan %}
-                "service_vlan": {{config.net_config.service_vlan|json}}, 
+                "service_vlan": {{config.net_config.service_vlan|json}},
                 {% endif %}
                 {% if config.user_config.net_config.kubeapi_vlan %}
                 "kubeapi_vlan": {{config.net_config.kubeapi_vlan|json}},

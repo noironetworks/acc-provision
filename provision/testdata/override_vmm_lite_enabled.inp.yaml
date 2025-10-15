@@ -29,3 +29,4 @@ vmm_lite_config:
   aaep_monitoring_enabled: true
   bridge_name: bridge-default
   cno_identifier: cno
+  kubeapi_vlan: 4001

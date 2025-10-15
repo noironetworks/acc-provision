@@ -1521,7 +1521,7 @@ data:
             },
             "net_config": {
                 "infra_vlan": 4093,
-                "service_vlan": 4003, 
+                "service_vlan": 4003,
                 "extern_dynamic": ["10.3.0.1/24"],
                 "node_svc_subnet": "10.5.0.1/24",
                 "node_subnet": [
