@@ -34,3 +34,4 @@ acc-provision -a -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p
 ```
 
 When `elag_name` is configured in acc provision input, now we are adding enhaced LAG policy to the Custom Trunk Port Group and also for vmm-vmware domain attachment under aci-containers-node EPG. This setting is set per port-group and consistently set for both Port-Groups.
+Its recommended to set Load Balancing Mode for ELAG VSwitch Policy to `Source and Destination IP Address and TCP/UDP Port` in APIC.
