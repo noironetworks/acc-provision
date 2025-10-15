@@ -480,6 +480,7 @@ def config_default():
             "aaep_monitoring_enabled": False,
             "bridge_name": "bridge-default",
             "cno_identifier": "cno",
+            "kubeapi_vlan": None,
         },
     }
     return default_config
@@ -907,7 +908,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 node_svc_subnet,
             ],
             "opflex_mode": opflex_mode,
-            "apic_request_retry_delay": apic_request_retry_delay, 
+            "apic_request_retry_delay": apic_request_retry_delay,
             "enable_apic_request_retry_delay": enable_apic_request_retry_delay,
             "epg_resolve_prioritize": epg_resolve_prioritize,
             "force_ep_undeclares": force_ep_undeclares,

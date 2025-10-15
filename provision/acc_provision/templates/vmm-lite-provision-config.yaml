@@ -110,5 +110,5 @@ registry:
 vmm_lite_config:                                                     # Contains VMM lite specific configurations
   aaep_monitoring_enabled: True                                      # default is False
   bridge_name: "br-nad"                                              # Name of linux bridge from worker nodes, needs to be created with same name on all worker nodes
-  cno_identifier: "cno-id1"                                          # Prefix for EPG annotation to identify CNO, default is "cno" 
-
+  cno_identifier: "cno-id1"                                          # Prefix for EPG annotation to identify CNO, default is "cno"
+  kubeapi_vlan: 4001                                                 # The VLAN used by the physdom for nodes (Kubernetes only)
