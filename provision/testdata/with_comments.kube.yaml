@@ -1512,7 +1512,7 @@ data:
             },
             "net_config": {
                 "infra_vlan": 4093,
-                "service_vlan": 4003, 
+                "service_vlan": 4003,
                 "kubeapi_vlan": 4001,
                 "extern_static": ["10.4.0.1/24"],
                 "extern_dynamic": ["10.3.0.1/24"],
