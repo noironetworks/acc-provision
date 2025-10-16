@@ -2752,6 +2752,9 @@ data:
         {% endif %}
         "apic-username": {{config.aci_config.sync_login.username|json}},
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        {% if config.aci_config.apic_tls_cert %}
+        "apic-cert-path": "/usr/local/etc/apic-ca-cert/root_ca.pem",
+        {% endif %}
         {% if config.aci_config.tenant.name %}
         "aci-prefix": {{config.aci_config.tenant.name|json}},
         {% else %}
@@ -2825,6 +2828,9 @@ data:
         {% endif %}
         "apic-username": {{config.aci_config.sync_login.username|json}},
         "apic-private-key-path": "/usr/local/etc/aci-cert/user.key",
+        {% if config.aci_config.apic_tls_cert %}
+        "apic-cert-path": "/usr/local/etc/apic-ca-cert/root_ca.pem",
+        {% endif %}
         "aci-prefix": {{config.aci_config.system_id|json}},
         "aci-vmm-type": {{config.aci_config.vmm_domain.type|json}},
         "aci-vmm-domain": {{config.aci_config.vmm_domain.domain|json}},
@@ -3214,6 +3220,18 @@ metadata:
 data:
   user.key: {{config.aci_config.sync_login.key_data|base64enc}}
   user.crt: {{config.aci_config.sync_login.cert_data|base64enc}}
+{% endif %}
+{% if config.aci_config.apic_tls_cert %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: apic-ca-cert
+  namespace: {{ config.kube_config.system_namespace }}
+  labels:
+    aci-containers-config-version: "{{ config.registry.configuration_version }}"
+data:
+  root_ca.pem: {{config.aci_config.apic_tls_cert_data|base64enc}}
 {% endif %}
 ---
 apiVersion: v1
@@ -4550,6 +4568,11 @@ spec:
         - name: aci-user-cert-volume
           mountPath: /usr/local/etc/aci-cert/
         {% endif %}
+        {% if config.aci_config.apic_tls_cert %}
+        - name: apic-ca-cert-volume
+          mountPath: /usr/local/etc/apic-ca-cert/
+          readOnly: true
+        {% endif %}
         livenessProbe:
           failureThreshold: 10
           httpGet:
@@ -4565,6 +4588,11 @@ spec:
       - name: aci-user-cert-volume
         secret:
           secretName: aci-user-cert
+      {% endif %}
+      {% if config.aci_config.apic_tls_cert %}
+      - name: apic-ca-cert-volume
+        secret:
+          secretName: apic-ca-cert
       {% endif %}
       - name: controller-config-volume
         configMap:
