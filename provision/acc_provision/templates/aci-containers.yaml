@@ -2771,6 +2771,11 @@ data:
         {% if config.vmm_lite_config.cno_identifier %}
         "cno-identifier": {{config.vmm_lite_config.cno_identifier|json}},
         {% endif %}
+        {% if config.vmm_lite_config.bridge_nad_config %}
+        {% for key, val in config.vmm_lite_config.bridge_nad_config.items() %}
+        {{ key|tojson }}: {{ val|tojson }},
+        {% endfor %}
+        {% endif %}
         {% if config.vmm_lite_config.kubeapi_vlan %}
         "kubeapi-vlan": {{config.vmm_lite_config.kubeapi_vlan|json}},
         {% endif %}
