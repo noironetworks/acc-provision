@@ -216,11 +216,11 @@ None
 }
 /api/mo/uni/tn-common/out-l3out/instP-default/rsprov-kube-l3out-allow-all.json
 None
-/api/node/mo/uni/userext/user-kube.json
+/api/node/mo/uni/userext/user-mykube.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "kube",
+            "name": "mykube",
             "accountStatus": "active",
             "pwd": "NotRandom!",
             "annotation": "orchestrator:aci-containers-controller"
@@ -248,18 +248,18 @@ None
         ]
     }
 }
-/api/node/mo/uni/userext/user-kube.json
+/api/node/mo/uni/userext/user-mykube.json
 {
     "aaaUser": {
         "attributes": {
-            "name": "kube",
+            "name": "mykube",
             "annotation": "orchestrator:aci-containers-controller"
         },
         "children": [
             {
                 "aaaUserCert": {
                     "attributes": {
-                        "name": "kube.crt",
+                        "name": "mykube.crt",
                         "data": "dummy\n",
                         "annotation": "orchestrator:aci-containers-controller"
                     }
