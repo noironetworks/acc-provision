@@ -31,5 +31,6 @@ INFO: RKE-1.6.3:	Rancher Kubernetes Engine min version 1.6.3
 INFO: RKE-1.5.14:	Rancher Kubernetes Engine min version 1.5.14
 INFO: calico-3.26.3:	calico-3.26.3
 INFO: openshift-sdn-ovn-baremetal:	Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
+INFO: openshift-vmm-lite-baremetal:	VMM lite for Red Hat OpenShift Container Platform 4.18 on Baremetal
 INFO: k8s-aci-cilium:	Chained CNI for Kubernertes [Experimental]
 INFO: openshift-4.14-aci-cilium-esx:	Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX [Experimental]

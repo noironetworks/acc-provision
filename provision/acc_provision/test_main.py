@@ -1455,7 +1455,7 @@ def test_override_vmm_lite_enabled():
         None,
         None,
         "override_vmm_lite_enabled.apic.txt",
-        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+        overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
 
 @in_testdir
@@ -1466,7 +1466,7 @@ def test_override_vmm_lite_minimal_config_enabled():
         None,
         None,
         "override_vmm_lite_minimal_config_enabled.apic.txt",
-        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+        overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
 
 @in_testdir
@@ -1477,7 +1477,7 @@ def test_override_vmm_lite_chained_mode_enabled():
         None,
         None,
         "override_vmm_lite_chained_mode_enabled.apic.txt",
-        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+        overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
 
 @in_testdir
