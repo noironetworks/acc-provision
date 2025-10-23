@@ -3598,6 +3598,8 @@ def provision(args, apic_file, no_random):
     if not is_vmm_lite(config) or config["aci_config"]["system_id"]:
         ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
         return ret
+    else:
+        return True
 
 
 def main(args=None, apic_file=None, no_random=False):
