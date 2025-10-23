@@ -9756,6 +9756,23 @@ flavors:
     status: null
     hidden: false
     order: 127
+  openshift-vmm-lite-baremetal:
+    desc: VMM lite for Red Hat OpenShift Container Platform 4.18 on Baremetal
+    default_version: 6.1
+    config:
+      kube_config:
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        generate_installer_files: False
+        generate_cnet_file: True
+      aci_config:
+        kube_default_provide_kube_api: True
+    status: null
+    hidden: false
+    order: 128
   k8s-aci-cilium:
     desc: Chained CNI for Kubernertes
     default_version: 6.1
@@ -9767,7 +9784,7 @@ flavors:
         disable: False
     hidden: False
     status: Experimental
-    order: 128
+    order: 129
   openshift-4.14-aci-cilium-esx:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX
     default_version: 6.1
@@ -9884,4 +9901,4 @@ flavors:
         disable: True
     status: Experimental
     hidden: false
-    order: 129
+    order: 130
