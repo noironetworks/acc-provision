@@ -573,6 +573,9 @@ def config_default():
             "cno_identifier": "cno",
             "bridge_nad_config_file": None,
             "kubeapi_vlan": None,
+            "apic_username": None,
+            "apic_certfile": None,
+            "apic_keyfile": None,
         },
     }
     return default_config
@@ -724,6 +727,7 @@ def config_adjust_for_cno(args, config, no_random):
     if args.version_token:
         token = args.version_token
 
+    username = config["vmm_lite_config"]["apic_username"] if is_vmm_lite(config) else system_id
     adj_config = {
         "aci_config": {
             "cluster_tenant": tenant,
@@ -735,7 +739,7 @@ def config_adjust_for_cno(args, config, no_random):
                 "dn": aci_vrf_dn,
             },
             "sync_login": {
-                "username": system_id,
+                "username": username,
                 "password": generate_password(no_random),
                 "certfile": "user-%s.crt" % system_id,
                 "keyfile": "user-%s.key" % system_id,
@@ -1471,6 +1475,12 @@ def config_validate(flavor_opts, config):
         if is_vmm_lite(config):
             checks["vmm_lite_config/bridge_name"] = (
                 get(("vmm_lite_config", "bridge_name")), required)
+            checks["vmm_lite_config/apic_username"] = (
+                get(("vmm_lite_config", "apic_username")), required)
+            checks["vmm_lite_config/apic_certfile"] = (
+                get(("vmm_lite_config", "apic_certfile")), required)
+            checks["vmm_lite_config/apic_keyfile"] = (
+                get(("vmm_lite_config", "apic_keyfile")), required)
     elif not isOverlay(config["flavor"]):
         checks = {
             # ACI config
@@ -3517,6 +3527,10 @@ def provision(args, apic_file, no_random):
     username = config["aci_config"]["sync_login"]["username"]
     certfile = config["aci_config"]["sync_login"]["certfile"]
     keyfile = config["aci_config"]["sync_login"]["keyfile"]
+    if is_vmm_lite(config):
+        username = config["vmm_lite_config"]["apic_username"]
+        certfile = config["vmm_lite_config"]["apic_certfile"]
+        keyfile = config["vmm_lite_config"]["apic_keyfile"]
     key_data, cert_data = None, None
     reused = True
     if generate_cert_data:
