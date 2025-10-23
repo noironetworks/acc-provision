@@ -1459,6 +1459,17 @@ def test_override_vmm_lite_enabled():
     )
 
 @in_testdir
+def test_override_vmm_lite_minimal_config_enabled():
+    run_provision(
+        "override_vmm_lite_minimal_config_enabled.inp.yaml",
+        "override_vmm_lite_minimal_config_enabled.kube.yaml",
+        None,
+        None,
+        "override_vmm_lite_minimal_config_enabled.apic.txt",
+        overrides={"flavor": "openshift-sdn-ovn-baremetal"}
+    )
+
+@in_testdir
 def test_override_vmm_lite_chained_mode_enabled():
     run_provision(
         "override_vmm_lite_chained_mode_enabled.inp.yaml",
