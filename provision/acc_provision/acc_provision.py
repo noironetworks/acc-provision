@@ -3441,7 +3441,7 @@ def provision(args, apic_file, no_random):
     if is_chained_mode(config):
         # TODO: Currently setting primary_cni_path for chained mode with openshift-sdn-ovn-baremetal flavor.
         # For other flavors needs to be derived from flavor.
-        if flavor in "openshift-sdn-ovn-baremetal":
+        if flavor == "openshift-sdn-ovn-baremetal":
             config["chained_cni_config"][
                 "primary_cni_path"] = "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
     if is_cno_enabled(config):
