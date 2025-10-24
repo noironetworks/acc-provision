@@ -26,7 +26,7 @@
                                 "attributes": {
                                     "tDn": "uni/tn-kube/ap-netop-kube/epg-netop-nodes",
                                     "encap": "vlan-4001",
-                                    "mode": "untagged",
+                                    "mode": "regular",
                                     "annotation": "orchestrator:aci-containers-controller"
                                 }
                             }
