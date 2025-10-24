@@ -1860,6 +1860,8 @@ def generate_sample(filep, flavor):
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
     elif flavor == "openshift-sdn-ovn-baremetal":
         data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
+    elif flavor == "openshift-vmm-lite-baremetal":
+        data = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
@@ -3367,12 +3369,12 @@ def provision(args, apic_file, no_random):
     #     return False
 
     if is_chained_mode(config):
-        if flavor != 'openshift-sdn-ovn-baremetal':
+        if flavor not in ['openshift-sdn-ovn-baremetal', 'openshift-vmm-lite-baremetal']:
             err("Chained mode is not supported with flavor " + flavor)
             return False
 
     if is_vmm_lite(config):
-        if flavor != 'openshift-sdn-ovn-baremetal':
+        if flavor != 'openshift-vmm-lite-baremetal':
             err("VMM lite is not supported with flavor " + flavor)
             return False
 
@@ -3439,7 +3441,7 @@ def provision(args, apic_file, no_random):
     if is_chained_mode(config):
         # TODO: Currently setting primary_cni_path for chained mode with openshift-sdn-ovn-baremetal flavor.
         # For other flavors needs to be derived from flavor.
-        if flavor == "openshift-sdn-ovn-baremetal":
+        if flavor in "openshift-sdn-ovn-baremetal":
             config["chained_cni_config"][
                 "primary_cni_path"] = "/mnt/cni-conf/cni/net.d/10-ovn-kubernetes.conf"
     if is_cno_enabled(config):
