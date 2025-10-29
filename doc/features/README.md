@@ -171,6 +171,7 @@ ACI CNI in nested mode is only supported with VMM-integrated VMware (with dVS).
 #
 aci_config:
   system_id: mykube             # Every opflex cluster must have a distinct ID
+  #apic_tls_cert: <cert-file-path> # Path for APIC CA certificate, if verification is enabled on APIC. Default value is None, and verification will be skipped for APIC API calls.
   #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
   #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
   #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
@@ -1077,6 +1078,7 @@ This section explains features / configuration options available in acc provisio
     - [ACI day-zero provision using APIC Out Of Band management IP](apic-oobm-ip.md)
     - [APIC refresh time and refresh ticker](apic-refresh-time-ticker.md)
     - [Enable retries for APIC requests on failure](apic-request-retries.md)
+    - [APIC TLS certificate validation](apic-cert-validation.md)
 - [PBR tracking for non snat, service monitor interval](pbr-tacking-non-snat-and-service-monitor-interval.md)
 - [SNAT Service Graph Contract Scope](snat-operator-contract-scope.md)
 - [User defined Service Graph](user-defined-service-graph.md)
