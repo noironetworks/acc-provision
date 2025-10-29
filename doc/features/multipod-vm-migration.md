@@ -332,7 +332,13 @@ opflex.cisco.com/aci-pod: pod-1-10.0.0.0/16
     time="2023-09-25T09:53:01Z" level=info msg="Processing fabric path for node when connected device state is found" fabricPath="topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc]" mac="00:50:56:97:12:A8" node=rke-w2 obj="{\"opflexODev\":{\"attributes\":{\"annotation\":\"\",\"childAction\":\"\",\"compHvDn\":\"comp/prov-Kubernetes/ctrlr-[rke1]-rke1/hv-rke-w2\",\"ctrlrName\":\"rke1\",\"devId\":\"167829585\",\"devOperIssues\":\"\",\"devType\":\"k8s\",\"dn\":\"topology/pod-1/node-101/sys/br-[eth1/12]/odev-167829585\",\"domName\":\"rke1\",\"encap\":\"unknown\",\"epStatsBulkAckStatus\":\"processed\",\"extMngdBy\":\"\",\"fabricPathDn\":\"topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc]\",\"features\":\"0\",\"handle\":\"0\",\"hbPeriod\":\"0\",\"hbStatus\":\"valid-dvs\",\"hostName\":\"rke-w2\",\"id\":\"167829585\",\"ip\":\"10.0.224.81\",\"ipAddr\":\"\",\"isSecondary\":\"false\",\"lNodeDn\":\"comp/prov-Kubernetes/ctrlr-[rke1]-rke1/sw-InsiemeLSOid\",\"lastHandshakeTime\":\"1970-01-01T00:00:00.000+00:00\",\"lastNumHB\":\"0\",\"lcOwn\":\"local\",\"mac\":\"00:50:56:97:12:A8\",\"maxMissHb\":\"0\",\"modTs\":\"2023-09-25T09:44:43.839+00:00\",\"monPolDn\":\"uni/fabric/monfab-default\",\"name\":\"\",\"nameAlias\":\"\",\"numHB\":\"0\",\"operSt\":\"online\",\"pcIfId\":\"369098769\",\"portId\":\"0\",\"state\":\"connected\",\"status\":\"\",\"tType\":\"unknown\",\"transitionStatus\":\"attached\",\"uid\":\"0\",\"updateTs\":\"0\",\"userdom\":\"all\",\"uuid\":\"rke-w2\",\"version\":\"\",\"vmmCtrlrPKey\":\"uni/vmmp-Kubernetes/dom-rke1/ctrlr-rke1\"}}}"
     ```
 
+### 7. Check if the multicast route exists:
 
+A static route for the multicast subnet 224.0.0.0/4 should exist.  
+To verify, run: 
+`ip route show | grep 224`
+
+If the route is missing, configure a static route for the multicast subnet through the uplink interface (Infra VLAN) used for VXLAN traffic.
 
 ## 8. Known Issues
 
