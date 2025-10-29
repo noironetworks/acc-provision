@@ -7,7 +7,7 @@
 - [4. Configurations](#4-configurations)
 - [5. Example](#5-example)
 - [6. Assumptions](#6-assumptions)
-  - [6.1 Workarounds with other DHCP clients](#61-workarounds-with-other-dhcp-clients)
+  - [6.1 Only one service is managing DHCP](#61-Only-one-service-is-managing-DHCP)
 - [7. Troubleshooting](#7-troubleshooting)
 - [8. Known Issues](#8-known-issues)
 
@@ -27,6 +27,8 @@ If the setup is a multipod ACI setup, the following configuration should be set 
 kube_config: 
     aci_multipod: True 
 ```
+
+> **Note:** For Remote Leaf (RL) & Autonomous Remote Leaf (ARL) deployments, only Rancher (RKE) clusters are supported, and the cluster must be fully contained within a single remote leaf group. The cluster cannot be stretched across multiple remote leaf groups. Therefore, VM migration across different remote leaf groups or to different Pods is not supported and the `aci_multipod` config should not be set.
 
 If aci_multipod is set, each Kubernetes node on the cluster will have an annotation in the node in below format
 
@@ -114,35 +116,65 @@ The following assumptions have been made about the nodes of the cluster and are 
 * If the nodes are RedHat, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhclient`.
 * If nodes are Ubuntu, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhcp`.
 
-### 6.1 Workarounds with other DHCP clients
+### 6.1 Only one service is managing DHCP
 
-When the default DHCP client on your node is not dhclient, i.e. when the IP address on infra VLAN subinterface is managed by systemd-networkd on Ubuntu or Network Manager on RHEL, the lease file would not be present in the expected location. In this case, the following steps need to be performed on the node before migration.
+Multipod migration support necessitates dhclient to be managing the infra VLAN interface for proper IP address renewal upon VM migration. However, the default DHCP management services on various operating systems can interfere with this requirement. Specifically, NetworkManager typically manages network configurations on RHEL (Red Hat Enterprise Linux) nodes, while systemd-networkd often handles this role on Ubuntu nodes.
 
-1. Add the following line to /etc/dhcp/dhclient.conf
+A critical issue arises when these default system services operate in parallel with dhclient to manage DHCP for VLAN subinterfaces. This concurrent management creates conflicts that undermine the reliability of IP address assignment and network stability.
 
-      send dhcp-client-identifier = hardware;
+#### Manual Reconfiguration for dhclient Exclusivity
 
-2. Do dhclient <infra-interface-name>
-    eg:
-    ```sh
-        dhclient ens160.4090
+To mitigate DHCP conflicts we need to ensure dhclient is the sole manager of the VLAN subinterface's IP address. For this we have to disable dhcp management for the interface from other clients. Based on your installation, the following operating system-specific reconfigurations, followed by a manual DHCP renewal with dhclient may be performed to achieve this.
+
+**Operating System-Specific Configuration**
+
+* **Ubuntu**
+
+1. Navigate to the Netplan configuration directory:
+    ```bash
+    cd /etc/netplan
+    ```
+2. Edit the Netplan YAML file for the VLAN interface:
+    ```yaml
+    ens160.3301:
+      id: 3301
+      link: ens160
+      dhcp4: no   # Disable automatic DHCP to prevent conflicts
+      routes:
+        - to: 224.0.0.0/4
+          scope: link
+    ```
+3. Apply the Netplan changes:
+    ```bash
+    sudo netplan apply
     ```
 
-3. Verify lease file got created in /var/lib/dhclient if RHEL or /var/lib/dhcp if Ubuntu.
+* **RHEL**
 
-    ```sh
-    cat /var/lib/dhcp/dhclient.leases
-        lease {
-        interface "ens160.4090";
-        fixed-address 11.0.160.64;
-        option subnet-mask 255.255.0.0;
-        option dhcp-lease-time 604800;
-        option dhcp-message-type 5;
-        option dhcp-server-identifier 10.0.0.1;
-        renew 0 2025/09/07 10:03:50;
-        rebind 3 2025/09/10 13:39:35;
-        expire 4 2025/09/11 10:39:35;
-        }
+1. List existing connections to identify the VLAN interface:
+    ```bash
+    nmcli con show
+    ```
+2. Set the VLAN connection to manual IPv4 to prevent DHCP conflicts:
+    ```bash
+    sudo nmcli con mod "cloud-init ens192.4093" ipv4.method manual
+    ```
+3. Restart the VLAN connection:
+    ```bash
+    sudo nmcli con down "cloud-init ens192.4093"
+    sudo nmcli con up "cloud-init ens192.4093"
+    ```
+
+#### Manual DHCP Renewal with dhclient
+
+1. Add the following line to /etc/dhcp/dhclient.conf
+    ```text
+    send dhcp-client-identifier = hardware;
+    ```
+
+2. Request DHCP manually:
+    ```bash
+    sudo dhclient ens192.4093
     ```
 
 ## 7. Troubleshooting
@@ -300,7 +332,13 @@ opflex.cisco.com/aci-pod: pod-1-10.0.0.0/16
     time="2023-09-25T09:53:01Z" level=info msg="Processing fabric path for node when connected device state is found" fabricPath="topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc]" mac="00:50:56:97:12:A8" node=rke-w2 obj="{\"opflexODev\":{\"attributes\":{\"annotation\":\"\",\"childAction\":\"\",\"compHvDn\":\"comp/prov-Kubernetes/ctrlr-[rke1]-rke1/hv-rke-w2\",\"ctrlrName\":\"rke1\",\"devId\":\"167829585\",\"devOperIssues\":\"\",\"devType\":\"k8s\",\"dn\":\"topology/pod-1/node-101/sys/br-[eth1/12]/odev-167829585\",\"domName\":\"rke1\",\"encap\":\"unknown\",\"epStatsBulkAckStatus\":\"processed\",\"extMngdBy\":\"\",\"fabricPathDn\":\"topology/pod-1/protpaths-101-102/pathep-[esx-2-HX_vC-vpc]\",\"features\":\"0\",\"handle\":\"0\",\"hbPeriod\":\"0\",\"hbStatus\":\"valid-dvs\",\"hostName\":\"rke-w2\",\"id\":\"167829585\",\"ip\":\"10.0.224.81\",\"ipAddr\":\"\",\"isSecondary\":\"false\",\"lNodeDn\":\"comp/prov-Kubernetes/ctrlr-[rke1]-rke1/sw-InsiemeLSOid\",\"lastHandshakeTime\":\"1970-01-01T00:00:00.000+00:00\",\"lastNumHB\":\"0\",\"lcOwn\":\"local\",\"mac\":\"00:50:56:97:12:A8\",\"maxMissHb\":\"0\",\"modTs\":\"2023-09-25T09:44:43.839+00:00\",\"monPolDn\":\"uni/fabric/monfab-default\",\"name\":\"\",\"nameAlias\":\"\",\"numHB\":\"0\",\"operSt\":\"online\",\"pcIfId\":\"369098769\",\"portId\":\"0\",\"state\":\"connected\",\"status\":\"\",\"tType\":\"unknown\",\"transitionStatus\":\"attached\",\"uid\":\"0\",\"updateTs\":\"0\",\"userdom\":\"all\",\"uuid\":\"rke-w2\",\"version\":\"\",\"vmmCtrlrPKey\":\"uni/vmmp-Kubernetes/dom-rke1/ctrlr-rke1\"}}}"
     ```
 
+### 7. Check if the multicast route exists:
 
+A static route for the multicast subnet 224.0.0.0/4 should exist.  
+To verify, run: 
+`ip route show | grep 224`
+
+If the route is missing, configure a static route for the multicast subnet through the uplink interface (Infra VLAN) used for VXLAN traffic.
 
 ## 8. Known Issues
 
