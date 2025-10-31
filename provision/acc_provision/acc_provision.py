@@ -74,7 +74,7 @@ BRIDGE_NAD_CONFIG_KEYS = {
 }
 BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
 
-def validate_bridge_nad_field_dependencies(bridge_nad_config):
+def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
     errors = []
     warnings = []
 
@@ -90,6 +90,9 @@ def validate_bridge_nad_field_dependencies(bridge_nad_config):
     # --- IPAM & Gateway dependencies ---
     if (is_gw or is_def_gw or ipmasq or force_address) and not ipam:
         errors.append("Field 'ipam' must be defined (not empty) when using 'isGateway', 'isDefaultGateway', 'ipMasq', or 'forceAddress' options.")
+
+    if (is_gw or is_def_gw) and len(bridge_name) > 10:
+        errors.append("Field 'bridge_name' in acc-provision input file must be 10 characters or less when using 'isGateway' or 'isDefaultGateway' options.")
 
     if ipmasq_backend and not ipmasq:
         warnings.append("Field 'ipMasqBackend' is ignored unless 'ipMasq' is set to true.")
@@ -124,7 +127,7 @@ def validate_bridge_nad_config_keys(bridge_nad_config):
                 raise Exception(f"ipMasqBackend must be one of {BRIDGE_NAD_ALLOWED_IPMASQBACKEND}")
 
 
-def read_and_validate_bridge_nad_config_file(bridge_nad_config_file):
+def read_and_validate_bridge_nad_config_file(bridge_name, bridge_nad_config_file):
      # Check if file exists
     if not os.path.isfile(bridge_nad_config_file):
         raise Exception(f"NAD config file '{bridge_nad_config_file}' does not exist.")
@@ -144,7 +147,7 @@ def read_and_validate_bridge_nad_config_file(bridge_nad_config_file):
         raise Exception(f"NAD config file '{bridge_nad_config_file}' is not a valid YAML file: {e}")
 
     validate_bridge_nad_config_keys(bridge_nad_config)
-    validate_bridge_nad_field_dependencies(bridge_nad_config)
+    validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config)
     return bridge_nad_config
 
 
@@ -3507,9 +3510,10 @@ def provision(args, apic_file, no_random):
 
     if is_vmm_lite(config):
         bridge_nad_config_file = config.get("vmm_lite_config", {}).get("bridge_nad_config_file")
+        bridge_name = config.get("vmm_lite_config", {}).get("bridge_name")
         if bridge_nad_config_file:
             try:
-                bridge_nad_config = read_and_validate_bridge_nad_config_file(bridge_nad_config_file)
+                bridge_nad_config = read_and_validate_bridge_nad_config_file(bridge_name, bridge_nad_config_file)
                 config["vmm_lite_config"]["bridge_nad_config"] = bridge_nad_config
             except Exception as e:
                 err(f"Invalid bridge NAD config: {e}")
