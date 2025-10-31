@@ -35,7 +35,7 @@ chained_cni_config:
 
 vmm_lite_config:
   aaep_monitoring_enabled: true
-  bridge_name: bridge-default
+  bridge_name: bridge1
   cno_identifier: cno
   bridge_nad_config_file: bridge_nad_config.yaml
   kubeapi_vlan: 4001
