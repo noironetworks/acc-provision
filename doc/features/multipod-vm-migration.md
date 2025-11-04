@@ -7,7 +7,6 @@
 - [4. Configurations](#4-configurations)
 - [5. Example](#5-example)
 - [6. Assumptions](#6-assumptions)
-  - [6.1 Only one service is managing DHCP](#61-Only-one-service-is-managing-DHCP)
 - [7. Troubleshooting](#7-troubleshooting)
 - [8. Known Issues](#8-known-issues)
 - [9. Workarounds with other DHCP clients (ACI-CNI \<= 6.1.1.4)](#9-workarounds-with-other-dhcp-clients-aci-cni--6114)
@@ -117,67 +116,6 @@ The following assumptions have been made about the nodes of the cluster and are 
 * If the nodes are RedHat, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhclient`.
 * If nodes are Ubuntu, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhcp`.
 * The DHCP client on your host that is managing the infra vlan interface is configured to use the interface's hardware (MAC) address as its DHCP Client Identifier (Option 61)., i.e. the Client Identifier is generated using the network interface's hardware type and MAC address. For an Ethernet interface, this results in an identifier with the format `01:\<mac-address\>`.
-
-### 6.1 Only one service is managing DHCP
-
-Multipod migration support necessitates dhclient to be managing the infra VLAN interface for proper IP address renewal upon VM migration. However, the default DHCP management services on various operating systems can interfere with this requirement. Specifically, NetworkManager typically manages network configurations on RHEL (Red Hat Enterprise Linux) nodes, while systemd-networkd often handles this role on Ubuntu nodes.
-
-A critical issue arises when these default system services operate in parallel with dhclient to manage DHCP for VLAN subinterfaces. This concurrent management creates conflicts that undermine the reliability of IP address assignment and network stability.
-
-#### Manual Reconfiguration for dhclient Exclusivity
-
-To mitigate DHCP conflicts we need to ensure dhclient is the sole manager of the VLAN subinterface's IP address. For this we have to disable dhcp management for the interface from other clients. Based on your installation, the following operating system-specific reconfigurations, followed by a manual DHCP renewal with dhclient may be performed to achieve this.
-
-**Operating System-Specific Configuration**
-
-* **Ubuntu**
-
-1. Navigate to the Netplan configuration directory:
-    ```bash
-    cd /etc/netplan
-    ```
-2. Edit the Netplan YAML file for the VLAN interface:
-    ```yaml
-    ens160.3301:
-      id: 3301
-      link: ens160
-      dhcp4: no   # Disable automatic DHCP to prevent conflicts
-      routes:
-        - to: 224.0.0.0/4
-          scope: link
-    ```
-3. Apply the Netplan changes:
-    ```bash
-    sudo netplan apply
-    ```
-
-* **RHEL**
-
-1. List existing connections to identify the VLAN interface:
-    ```bash
-    nmcli con show
-    ```
-2. Set the VLAN connection to manual IPv4 to prevent DHCP conflicts:
-    ```bash
-    sudo nmcli con mod "cloud-init ens192.4093" ipv4.method manual
-    ```
-3. Restart the VLAN connection:
-    ```bash
-    sudo nmcli con down "cloud-init ens192.4093"
-    sudo nmcli con up "cloud-init ens192.4093"
-    ```
-
-#### Manual DHCP Renewal with dhclient
-
-1. Add the following line to /etc/dhcp/dhclient.conf
-    ```text
-    send dhcp-client-identifier = hardware;
-    ```
-
-2. Request DHCP manually:
-    ```bash
-    sudo dhclient ens192.4093
-    ```
 
 ## 7. Troubleshooting
 
