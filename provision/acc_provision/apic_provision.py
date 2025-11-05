@@ -184,7 +184,7 @@ class Apic(object):
 
         err("Max retries reached for POST request to %s. Giving up." % path)
         return resp
-    
+
     def is_system_id_matching(self, system_id, resource_name):
         contains_match_pattern = rf".*-\b{system_id}\b-.*"
         ends_with_pattern = rf".*-\b{system_id}\b$"
