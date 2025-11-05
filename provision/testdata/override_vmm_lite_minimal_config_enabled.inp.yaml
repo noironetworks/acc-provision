@@ -9,5 +9,4 @@ vmm_lite_config:
   bridge_nad_config_file: bridge_nad_config.yaml
   kubeapi_vlan: 4001
   apic_username: "mykube"
-  apic_certfile: user-mykube.crt
-  apic_keyfile: user-mykube.key
+
