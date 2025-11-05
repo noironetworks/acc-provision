@@ -24,5 +24,4 @@ vmm_lite_config:                                                     # Contains 
   bridge_nad_config_file: "bridge_nad_config.yaml"                   # Path to bridge NAD config file (must be a YAML file with a top-level mapping/dictionary), needs to be created with proper config with optional fields
   kubeapi_vlan: 4001                                                 # The VLAN used by the physdom for nodes (Kubernetes only)
   apic_username: "admin"                                             # APIC username
-  apic_certfile: "/certs/apic-cert.pem"                              # Path to APIC client certificate file
-  apic_keyfile: "/certs/apic-key.pem"                                # Path to APIC client key file
+
