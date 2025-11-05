@@ -242,6 +242,9 @@ data:
                 {% if config.user_config.vmm_lite_config.kubeapi_vlan %}
                 "kubeapi_vlan": {{config.vmm_lite_config.kubeapi_vlan|json}}
                 {% endif %}
+                {% if config.user_config.vmm_lite_config.apic_username %}
+                "apic_username": {{config.vmm_lite_config.apic_username|json}}
+                {% endif %}
             },
             {% endif %}
             {% if config.user_config.net_config %}

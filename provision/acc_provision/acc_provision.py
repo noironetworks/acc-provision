@@ -34,6 +34,11 @@ if __package__ is None or __package__ == '':
 else:
     from .apic_provision import Apic, ApicKubeConfig
 
+# Try importing Mapping for python 3.10, if it fails default to the older version
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
 # This black magic forces pyyaml to load YAML strings as unicode rather
 # than byte strings in Python 2, thus ensuring that the type of strings
@@ -577,8 +582,6 @@ def config_default():
             "bridge_nad_config_file": None,
             "kubeapi_vlan": None,
             "apic_username": None,
-            "apic_certfile": None,
-            "apic_keyfile": None,
         },
     }
     return default_config
@@ -744,8 +747,8 @@ def config_adjust_for_cno(args, config, no_random):
             "sync_login": {
                 "username": username,
                 "password": generate_password(no_random),
-                "certfile": "user-%s.crt" % system_id,
-                "keyfile": "user-%s.key" % system_id,
+                "certfile": "user-%s.crt" % username,
+                "keyfile": "user-%s.key" % username,
                 "cert_reused": False,
             },
             "node_bd_dn": node_bd_dn,
@@ -1480,10 +1483,7 @@ def config_validate(flavor_opts, config):
                 get(("vmm_lite_config", "bridge_name")), required)
             checks["vmm_lite_config/apic_username"] = (
                 get(("vmm_lite_config", "apic_username")), required)
-            checks["vmm_lite_config/apic_certfile"] = (
-                get(("vmm_lite_config", "apic_certfile")), required)
-            checks["vmm_lite_config/apic_keyfile"] = (
-                get(("vmm_lite_config", "apic_keyfile")), required)
+
     elif not isOverlay(config["flavor"]):
         checks = {
             # ACI config
@@ -2879,6 +2879,52 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
     return config
 
 
+def generate_kube_user_and_certs(config, prov_apic):
+
+    def assert_attributes_is_first_key(data):
+            """Check that attributes is the first key in the JSON."""
+            if isinstance(data, Mapping) and "attributes" in data:
+                assert next(iter(data.keys())) == "attributes"
+                for item in data.items():
+                    assert_attributes_is_first_key(item)
+            elif isinstance(data, (list, tuple)):
+                for item in data:
+                    assert_attributes_is_first_key(item)
+
+    def update(data, x):
+        if x:
+            assert_attributes_is_first_key(x)
+            data.append((x[0], json.dumps(
+                x[1],
+                indent=4,
+                separators=(",", ": "))))
+            for path in x[2:]:
+                data.append((path, None))
+
+    ret = True
+    if prov_apic is not None:
+        apic = None
+        apic = get_apic(config)
+        if apic is None:
+            err("Failed to connect to APIC - cannot generate user and certificates")
+            return False
+        configurator = ApicKubeConfig(config, apic)
+        apic_config = []
+        update(apic_config, configurator.kube_user())
+        update(apic_config, configurator.kube_cert())
+
+        sync_login = config["aci_config"]["sync_login"]["username"]
+        if config["provision"].get("max_retries"):
+            retries = config["provision"]["max_retries"]
+        else:
+            retries = 5
+
+        apic.provision(apic_config, sync_login, retries)
+        ret = False if apic.errors > 0 else True
+    return ret
+
+
+
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
     apic = None
     if prov_apic is not None:
@@ -3535,8 +3581,6 @@ def provision(args, apic_file, no_random):
     keyfile = config["aci_config"]["sync_login"]["keyfile"]
     if is_vmm_lite(config):
         username = config["vmm_lite_config"]["apic_username"]
-        certfile = config["vmm_lite_config"]["apic_certfile"]
-        keyfile = config["vmm_lite_config"]["apic_keyfile"]
     key_data, cert_data = None, None
     reused = True
     if generate_cert_data:
@@ -3601,11 +3645,12 @@ def provision(args, apic_file, no_random):
 
     if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
         config["chained_cni_config"]["secondary_vlans"] = normalized_vlans
-    if not is_vmm_lite(config) or config["aci_config"]["system_id"]:
-        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+    if is_vmm_lite(config) and not config["aci_config"]["system_id"]:
+        ret = generate_kube_user_and_certs(config, prov_apic)
         return ret
     else:
-        return True
+        ret = generate_apic_config(flavor_opts, config, prov_apic, apic_file)
+        return ret
 
 
 def main(args=None, apic_file=None, no_random=False):
