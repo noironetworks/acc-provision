@@ -80,6 +80,84 @@ BRIDGE_NAD_CONFIG_KEYS = {
 BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
 
 def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
+
+    def validate_ipam(ipam):
+        errors = []
+        if not isinstance(ipam, dict):
+            errors.append("Field 'ipam' must be a dictionary")
+            return errors
+
+        # Check if type is present
+        ipam_type = ipam.get("type")
+        if not ipam_type:
+            errors.append("Field 'ipam.type' is required")
+            return errors
+
+        # Validate IPAM type
+        valid_types = {"dhcp", "host-local", "static", "whereabouts"}
+        if ipam_type not in valid_types:
+            errors.append(f"Field 'ipam.type' must be one of {valid_types}, got '{ipam_type}'")
+            return errors
+
+        # Type-specific validations
+        if ipam_type == "host-local":
+            ranges_field = ipam.get("ranges")
+            subnet_field = ipam.get("subnet")  # Legacy format
+
+            # Check if either ranges or legacy subnet is present
+            if not ranges_field and not subnet_field:
+                errors.append("Field 'ipam.ranges' (new format) or 'ipam.subnet' (legacy format) is required when using 'host-local' type")
+                return errors
+
+            # If both are present, prefer ranges (new format)
+            if ranges_field and subnet_field:
+                errors.append("Cannot use both 'ipam.ranges' (new format) and 'ipam.subnet' (legacy format) at the same time")
+                return errors
+
+            # Validate new format (ranges array)
+            if ranges_field:
+                if not isinstance(ranges_field, list) or len(ranges_field) == 0:
+                    errors.append("Field 'ipam.ranges' must be a non-empty array when using 'host-local' type")
+                else:
+                    # Validate each range set in the ranges array
+                    for i, range_set in enumerate(ranges_field):
+                        if not isinstance(range_set, list) or len(range_set) == 0:
+                            errors.append(f"Field 'ipam.ranges[{i}]' must be a non-empty array")
+                            continue
+                        for j, range_obj in enumerate(range_set):
+                            if not isinstance(range_obj, dict):
+                                errors.append(f"Field 'ipam.ranges[{i}][{j}]' must be an object")
+                                continue
+                            subnet = range_obj.get("subnet")
+                            if not subnet:
+                                errors.append(f"Field 'ipam.ranges[{i}][{j}].subnet' is required")
+                            else:
+                                # Validate subnet format (IPv4 or IPv6)
+                                try:
+                                    ipaddress.ip_network(subnet, strict=False)
+                                except ValueError:
+                                    errors.append(f"Field 'ipam.ranges[{i}][{j}].subnet' is not a valid IPv4/IPv6 subnet: {subnet}")
+
+            # Validate legacy format (top-level subnet)
+            if subnet_field:
+                try:
+                    ipaddress.ip_network(subnet_field, strict=False)
+                except ValueError:
+                    errors.append(f"Field 'ipam.subnet' is not a valid IPv4/IPv6 subnet: {subnet_field}")
+
+        elif ipam_type == "whereabouts":
+            range_field = ipam.get("range")
+            if not range_field:
+                errors.append("Field 'ipam.range' is required when using 'whereabouts' type")
+            else:
+                # Validate range format (should be a CIDR)
+                try:
+                    ipaddress.ip_network(range_field, strict=False)
+                except ValueError:
+                    errors.append(f"Field 'ipam.range' is not a valid IPv4/IPv6 network range: {range_field}")
+
+        return errors
+
     errors = []
     warnings = []
 
@@ -91,6 +169,7 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
     force_address = bridge_nad_config.get("forceAddress", False)
     disable_iface = bridge_nad_config.get("disableContainerInterface", False)
     enabledad = bridge_nad_config.get("enabledad", False)
+    mtu = bridge_nad_config.get("mtu", None)
 
     # --- IPAM & Gateway dependencies ---
     if (is_gw or is_def_gw or ipmasq or force_address) and not ipam:
@@ -99,20 +178,33 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
     if (is_gw or is_def_gw) and len(bridge_name) > 10:
         errors.append("Field 'bridge_name' in acc-provision input file must be 10 characters or less when using 'isGateway' or 'isDefaultGateway' options.")
 
+    if mtu is not None and (mtu < 576 or mtu > 9216):
+        errors.append("Field 'mtu' must be between 576 and 9216 if specified.")
+
+    if ipam:
+        ipam_errors = validate_ipam(ipam)
+        errors.extend(ipam_errors)
+
     if ipmasq_backend and not ipmasq:
-        warnings.append("Field 'ipMasqBackend' is ignored unless 'ipMasq' is set to true.")
+        errors.append(f"Field 'ipMasqBackend' is set to '{ipmasq_backend}' but 'ipMasq' is set to '{ipmasq}'. "
+                    f"The 'ipMasqBackend' field is ignored unless 'ipMasq' is set to true.")
 
     if is_def_gw and not is_gw:
-        warnings.append("Field 'isDefaultGateway' implies 'isGateway: true'. This will be set automatically.")
+        errors.append(f"Field 'isDefaultGateway' is set to '{is_def_gw}' but 'isGateway' is set to '{is_gw}'. "
+                    f"When 'isDefaultGateway' is true, 'isGateway' must also be set to true because the default gateway functionality requires gateway capabilities.")
 
     if force_address and not is_gw:
-        warnings.append("Field 'forceAddress' has no effect unless 'isGateway' is true.")
+        errors.append(f"Field 'forceAddress' is set to '{force_address}' but 'isGateway' is set to '{is_gw}'. "
+                    f"The 'forceAddress' option requires 'isGateway' to be true because it controls gateway IP assignment behavior.")
 
     # --- Interface behavior ---
     if disable_iface and ipam:
-        warnings.append("Field 'disableContainerInterface' disables IPAM; assigned IPs will be ignored.")
+        errors.append(f"Field 'disableContainerInterface' is set to '{disable_iface}' but 'ipam' is configured. "
+                    f"When container interface is disabled, IPAM configuration will be ignored because no IPs can be assigned to the disabled interface.")
+
     if enabledad and disable_iface:
-        warnings.append("Field 'enabledad' is ignored because 'disableContainerInterface' is set to true.")
+        errors.append(f"Field 'enabledad' is set to '{enabledad}' but 'disableContainerInterface' is set to '{disable_iface}'. "
+                    f"The 'enabledad' option is ignored when the container interface is disabled because duplicate address detection requires an active interface.")
 
     if errors:
         raise Exception("Bridge NAD config dependency validation failed: " + "; ".join(errors))
