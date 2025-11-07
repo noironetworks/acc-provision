@@ -80,6 +80,32 @@ BRIDGE_NAD_CONFIG_KEYS = {
 BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
 
 def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
+    DHCP_IPAM_CONFIG_KEYS = ["daemonSocketPath", "request", "skipDefault", "option", "provide", "value", "fromArg"]
+    STATIC_IPAM_CONFIG_KEYS = ["addresses", "address", "gateway", "routes", "dns"]
+    WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end", "exclude"]
+    HOST_LOCAL_IPAM_CONFIG_KEYS = ["ranges", "subnet", "rangeStart", "rangeEnd", "gateway", "routes", "resolvConf", "dataDir"]
+
+    def validate_ipam_type_specific_keys(ipam_type, ipam_config):
+        """Validate IPAM type-specific keys only (no type checking)."""
+        errors = []
+
+        if ipam_type == "dhcp":
+            allowed_keys = DHCP_IPAM_CONFIG_KEYS
+        elif ipam_type == "static":
+            allowed_keys = STATIC_IPAM_CONFIG_KEYS
+        elif ipam_type == "whereabouts":
+            allowed_keys = WHEREABOUTS_IPAM_CONFIG_KEYS
+        elif ipam_type == "host-local":
+            allowed_keys = HOST_LOCAL_IPAM_CONFIG_KEYS
+        else:
+            return errors
+        # Check for unexpected keys (excluding 'type' which is common to all)
+        ipam_keys = set(ipam_config.keys()) - {"type"}
+        unexpected_keys = ipam_keys - set(allowed_keys)
+        if unexpected_keys:
+            errors.append(f"Unexpected keys for 'ipam.type={ipam_type}': {unexpected_keys}. "
+                        f"Allowed keys: {allowed_keys}")
+        return errors
 
     def validate_ipam(ipam):
         errors = []
@@ -98,6 +124,10 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
         if ipam_type not in valid_types:
             errors.append(f"Field 'ipam.type' must be one of {valid_types}, got '{ipam_type}'")
             return errors
+
+        # Validate type-specific keys
+        type_specific_errors = validate_ipam_type_specific_keys(ipam_type, ipam)
+        errors.extend(type_specific_errors)
 
         # Type-specific validations
         if ipam_type == "host-local":
