@@ -1950,13 +1950,16 @@ def calico_config_validate_preexisting(config, prov_apic):
     return True
 
 
-def generate_sample(filep, flavor):
+def generate_sample(filep, flavor, generate_sample_bridge_nad=False):
     if flavor == "calico-3.26.3":
         data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
     elif flavor == "openshift-sdn-ovn-baremetal":
         data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
     elif flavor == "openshift-vmm-lite-baremetal":
-        data = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
+        if generate_sample_bridge_nad:
+            data = pkgutil.get_data('acc_provision', 'templates/vmm-lite-bridge-nad-config.yaml')
+        else:
+            data = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
@@ -3182,6 +3185,9 @@ def parse_args(show_help):
     parser.add_argument(
         '--old-nad-vlan-map-input', default=None, metavar='file',
         help='Old NAD VLAN map input file used for last provisioning')
+    parser.add_argument(
+        '--sample-bridge-nad-config', action='store_true', default=False,
+        help='print a sample bridge nad configuration file')
     # If the input has no arguments, show help output and exit
     if show_help:
         parser.print_help(sys.stderr)
@@ -3446,6 +3452,10 @@ def provision(args, apic_file, no_random):
     # Print sample, if needed
     if args.sample:
         generate_sample(sys.stdout, args.flavor)
+        return True
+
+    if args.sample_bridge_nad_config:
+        generate_sample(sys.stdout, args.flavor, args.sample_bridge_nad_config)
         return True
 
     # command line config
