@@ -699,7 +699,7 @@ def config_default():
         },
         "vmm_lite_config": {
             "aaep_monitoring_enabled": False,
-            "bridge_name": "bridge-default",
+            "bridge_name": None,
             "cno_identifier": "cno",
             "bridge_nad_config_file": None,
             "kubeapi_vlan": None,
