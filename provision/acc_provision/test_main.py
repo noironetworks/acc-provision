@@ -2645,7 +2645,8 @@ def get_args(**overrides):
         "test_run": True,
         "compare_kube_yaml_aci_op_cm_in_plain_text": True,
         "skip_app_profile_check": False,
-        "old_nad_vlan_map_input": None
+        "old_nad_vlan_map_input": None,
+        "sample_bridge_nad_config": False
     }
     argc = collections.namedtuple('argc', list(arg.keys()))
     args = argc(**arg)

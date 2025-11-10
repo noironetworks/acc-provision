@@ -1,0 +1,19 @@
+# Sample Configuration for VMM-Lite Bridge Network Attachment Definition (NAD)
+#
+# isGateway: false                          # (boolean, optional): assign an IP address to the bridge. Defaults to false.
+# isDefaultGateway: false                   # (boolean, optional): Sets isGateway to true and makes the assigned IP the default route. Defaults to false
+# forceAddress: false                       # (boolean, optional): Indicates if a new IP address should be set if the previous value has been changed. Defaults to false
+# ipMasq: false                             # (boolean, optional): set up IP Masquerade on the host for traffic originating from this network and destined outside of it. Defaults to false.
+# ipMasqBackend: iptables                   # (string, optional): IP masquerading implementation to use when ipMasq is true. Can be “iptables” or “nftables”. Defaults to “iptables”, unless only “nftables” is available.
+# mtu: 1500                                 # (integer, optional): explicitly set MTU to the specified value. Defaults is 1500
+# hairpinMode: false                        # (boolean, optional): set hairpin mode for interfaces on the bridge. Defaults to false.
+# promiscMode: false                        # (boolean, optional): set promiscuous mode on the bridge. Defaults to false.
+# enabledad: false                          # (boolean, optional): enables duplicate address detection for the container side veth. Defaults to false.
+# macspoofchk: false                        # (boolean, optional): Enables mac spoof check, limiting the traffic originating from the container to the mac address of the interface. Defaults to false.
+# disableContainerInterface: false          # (boolean, optional): Set the container interface (veth peer inside the container netns) state down. When enabled, IPAM cannot be used.
+# portIsolation: false                      # (boolean, optional): Set isolation on the host interface (veth peer in root netns). When enabled containers can communicate only with the host, or through the gateway. Defaults to false.
+# ipam:                                     # (dictionary, optional): IPAM configuration to be used for this network.
+#   type: host-local
+#   subnet: 10.1.1.0/24
+
+
