@@ -1986,7 +1986,9 @@ def generate_sample(filep, flavor):
     elif flavor == "openshift-sdn-ovn-baremetal":
         data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
     elif flavor == "openshift-vmm-lite-baremetal":
-        data = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
+        data1 = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
+        data2 = pkgutil.get_data('acc_provision', 'templates/bridge-cni-config.yaml')
+        data = data1 + b"\n---\n" + data2
     else:
         data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
     try:
