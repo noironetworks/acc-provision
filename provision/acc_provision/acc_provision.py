@@ -85,6 +85,40 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
     WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end", "exclude"]
     HOST_LOCAL_IPAM_CONFIG_KEYS = ["ranges", "subnet", "rangeStart", "rangeEnd", "gateway", "routes", "resolvConf", "dataDir"]
 
+    def validate_subnet(subnet_field, field_path):
+        errors = []
+        try:
+            net = ipaddress.ip_network(subnet_field, strict=True)
+        except ValueError:
+            errors.append(f"Field '{field_path}' is not a valid IPv4/IPv6 subnet: {subnet_field}")
+            return errors
+
+        # IPv4 validation: reject /31, /32 (no usable host)
+        if net.version == 4 and net.prefixlen >= 31:
+            errors.append(f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
+
+        # IPv6 validation: reject /127, /128 (no usable host)
+        elif net.version == 6 and net.prefixlen >= 127:
+            errors.append(f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
+
+        # Exclusion of Reserved/Special Use IP Ranges
+        reserved_ipv4_ranges = [
+            (ipaddress.ip_network('127.0.0.0/8'), "Loopback"),
+            (ipaddress.ip_network('169.254.0.0/16'), "Link-local"),
+            (ipaddress.ip_network('224.0.0.0/4'), "Multicast"),
+            (ipaddress.ip_network('0.0.0.0/8'), "This Network (RFC 1700)"),
+        ]
+        reserved_ipv6_ranges = [
+            (ipaddress.ip_network('::1/128'), "Loopback"),
+            (ipaddress.ip_network('fe80::/10'), "Link-local"),
+            (ipaddress.ip_network('ff00::/8'), "Multicast"),
+        ]
+
+        for reserved_net_obj, description in (reserved_ipv4_ranges if net.version == 4 else reserved_ipv6_ranges):
+            if net.overlaps(reserved_net_obj):
+                errors.append(f"Field '{field_path}' {subnet_field} overlaps with a reserved/special-use IP range ({description}): {reserved_net_obj}")
+        return errors
+
     def validate_ipam_type_specific_keys(ipam_type, ipam_config):
         """Validate IPAM type-specific keys only (no type checking)."""
         errors = []
@@ -163,17 +197,13 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
                                 errors.append(f"Field 'ipam.ranges[{i}][{j}].subnet' is required")
                             else:
                                 # Validate subnet format (IPv4 or IPv6)
-                                try:
-                                    ipaddress.ip_network(subnet, strict=False)
-                                except ValueError:
-                                    errors.append(f"Field 'ipam.ranges[{i}][{j}].subnet' is not a valid IPv4/IPv6 subnet: {subnet}")
+                                subnet_errors = validate_subnet(subnet, f"ipam.ranges[{i}][{j}].subnet")
+                                errors.extend(subnet_errors)
 
             # Validate legacy format (top-level subnet)
             if subnet_field:
-                try:
-                    ipaddress.ip_network(subnet_field, strict=False)
-                except ValueError:
-                    errors.append(f"Field 'ipam.subnet' is not a valid IPv4/IPv6 subnet: {subnet_field}")
+                subnet_errors = validate_subnet(subnet_field, "ipam.subnet")
+                errors.extend(subnet_errors)
 
         elif ipam_type == "whereabouts":
             range_field = ipam.get("range")
@@ -181,10 +211,8 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
                 errors.append("Field 'ipam.range' is required when using 'whereabouts' type")
             else:
                 # Validate range format (should be a CIDR)
-                try:
-                    ipaddress.ip_network(range_field, strict=False)
-                except ValueError:
-                    errors.append(f"Field 'ipam.range' is not a valid IPv4/IPv6 network range: {range_field}")
+                subnet_errors = validate_subnet(range_field, "ipam.range")
+                errors.extend(subnet_errors)
 
         return errors
 
