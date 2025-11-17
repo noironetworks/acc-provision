@@ -82,7 +82,7 @@ BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
 def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
     DHCP_IPAM_CONFIG_KEYS = ["daemonSocketPath", "request", "skipDefault", "option", "provide", "value", "fromArg"]
     STATIC_IPAM_CONFIG_KEYS = ["addresses", "address", "gateway", "routes", "dns"]
-    WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end", "exclude"]
+    WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end", "exclude", "gateway", "network_name", "enable_overlapping_ranges", "node_slice_size"]
     HOST_LOCAL_IPAM_CONFIG_KEYS = ["ranges", "subnet", "rangeStart", "rangeEnd", "gateway", "routes", "resolvConf", "dataDir"]
 
     def validate_subnet(subnet_field, field_path):
