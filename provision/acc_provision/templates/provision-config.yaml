@@ -176,6 +176,8 @@ registry:
   # disable_resilient_hashing: True                     # default is False, set to True if you want to disable Resilient Hashing in the L4-L7 Redirect Policy programmed for LoadBalancer services.
   # disable_opflex_resilient_hashing: True              # default is False, set it as True to disable Opflex Resilient Hashing. By default, session stickiness for ongoing flows is maintained even as the number of backend pods changes; only flows tied to affected pods will be rehashed.
   # filter_opflex_device: False                         # default is True, set to False if you want to disable filtering opflexODev MOs by VMM domain and allow processing of all opflexODev notifications from APIC.
+  # leaf_reboot_check_interval: 300                     # Interval in seconds to periodically check for leaf reboots or additions. A detected change triggers a WebSocket reconnect to the APIC, ensuring that event notifications from the leaf resume.
+                                                        # The default value is 900.
 
 #
 # Configuration for ACI CNI Operator
