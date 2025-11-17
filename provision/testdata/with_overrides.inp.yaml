@@ -123,6 +123,7 @@ kube_config:
   disable_resilient_hashing: True
   disable_opflex_resilient_hashing: True
   filter_opflex_device: False
+  leaf_reboot_check_interval: 300
 
 registry:
   image_prefix: noiro
