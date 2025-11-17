@@ -2958,6 +2958,9 @@ data:
         {% if config.kube_config.enable_endpointslice %}
         "enable_endpointslice": true
         {% endif %}
+        {% if config.kube_config.leaf_reboot_check_interval %}
+        "leaf-reboot-check-interval": {{ config.kube_config.leaf_reboot_check_interval|json }}
+        {% endif %}
         {% endif %}
     }
   host-agent-config: |-
