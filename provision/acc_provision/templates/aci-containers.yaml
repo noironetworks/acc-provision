@@ -5132,7 +5132,7 @@ webhooks:
       namespace: aci-containers-system
       path: /delete-nad
       port: 443
-  failurePolicy: Fail
+  failurePolicy: Ignore
   matchPolicy: Equivalent
   name: aci-containers-webhook-delete-nad.netop-cni.cisco.com
   namespaceSelector: {}
