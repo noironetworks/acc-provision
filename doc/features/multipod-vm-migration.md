@@ -9,6 +9,7 @@
 - [6. Assumptions](#6-assumptions)
 - [7. Troubleshooting](#7-troubleshooting)
 - [8. Known Issues](#8-known-issues)
+- [9. Workarounds with other DHCP clients (ACI-CNI \<= 6.1.1.4)](#9-workarounds-with-other-dhcp-clients-aci-cni--6114)
 
 ## 1. Overview
 
@@ -114,8 +115,11 @@ The following assumptions have been made about the nodes of the cluster and are 
     * RedHat
 * If the nodes are RedHat, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhclient`.
 * If nodes are Ubuntu, dhclient is installed on the nodes and the lease file is in the path `/var/lib/dhcp`.
+* The DHCP client on your host that is managing the infra vlan interface is configured to use the interface's hardware (MAC) address as its DHCP Client Identifier (Option 61)., i.e. the Client Identifier is generated using the network interface's hardware type and MAC address. For an Ethernet interface, this results in an identifier with the format `01:\<mac-address\>`.
 
 ## 7. Troubleshooting
+
+Refer this troubleshooting guide if, after an inter pod migration, issues are seen and traffic is not working.
 
 ### 1. Check if configuration is applied properly
 
@@ -188,30 +192,91 @@ ens192.4093@ens192: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9000 qdisc noqueue sta
        valid_lft forever preferred_lft forever
 ```
 
-If the vlan interface doesn't have any ip or having wrong ip (due to some error during dhcp release or renew) we can work around it by manually trying dhcp release and renew of vlan interface on the node after SSHing to the node, using:
+If the vlan interface doesn't have any ip or having wrong ip (due to some error during dhcp release or renew) we can work around it by manually trying dhcp release and renew of vlan interface on the node after SSHing to it:
 
-Add the following line to /etc/dhcp/dhclient.conf
+#### 1. Add the following configuration to /etc/dhcp/dhclient.conf
 ```text
 send dhcp-client-identifier = hardware;
 ```
 
-Release the current DHCP lease
+#### 2. Locate the dhclient lease file on the node at one of the following paths and ensure it's contents are valid:
+
+    RHEL: /var/lib/dhclient
+    Ubuntu: /var/lib/dhcp
+
+(Note: This path is mounted as /usr/local/var/lib/dhclient inside the hostagent container.)
+
+Sample lease entry:
+
+  ```sh
+  cat /var/lib/dhcp/dhclient.leases
+      lease {
+      interface "ens192.4093";
+      fixed-address 11.0.160.64;              # should be the current IP address of the interface
+      option subnet-mask 255.255.0.0;
+      option dhcp-lease-time 604800;
+      option dhcp-message-type 5;
+      option dhcp-server-identifier 10.0.0.1;
+      renew 0 2025/09/07 10:03:50;            # ensure this is the latest lease for the interface
+      rebind 3 2025/09/10 13:39:35;
+      expire 4 2025/09/11 10:39:35;
+      }
+  ```
+
+If lease file is absent or information ( ip in fixed-address field, etc.) is incorrect or out of date, it can be updated as follows.
+
+Do dhclient \<infra-interface-name>
+
+  ```sh
+     dhclient -v ens192.4093  # -v for verbose o/p
+  ```
+and verify lease file got created at the expected location.
+
+#### 3. Release the current DHCP lease using dhclient
 ```sh
 sudo dhclient -r <interface-name>
 ```
-#### **For RHEL-based systems:**
+
+#### 4. Trigger a DHCP request by bouncing the interface.
+
+Sample commands:
+##### **For RHEL-based systems:**
 ```sh
 # Bring the interface down and up using NetworkManager
 sudo nmcli con down <interface-name>
 sudo nmcli con up <interface-name>
 ```
 
-#### **For Ubuntu systems:**
+##### **For Ubuntu systems:**
 ```sh
 # Bring the interface down and up manually
 sudo ip link set <interface-name> down
 sudo ip link set <interface-name> up
 ```
+
+> Note: These commands might differ depending on your network manager.
+
+
+### 3.1 Duplicate IPs
+
+Because of issue described in [Known Issues](#8-known-issues) #2 below, if the node ends up with duplicate IPs or inconsistent configuration:
+
+#### 1. Clear the IPs using:
+
+```sh
+sudo ip -4 addr flush dev <interface-name>
+```
+
+#### 2. Kill any stale dhclient processes that might be running on the interface
+
+```sh
+dhclient -x -v <interface-name>
+```
+
+#### 3. Trigger a DHCP request as mentioned in step 4 above
+
+If the IP received happens to be from wrong subnet, follow steps in section 3 to get IP from correct subnet.
+
 
 ### 4. Verify that the anycast IPs were updated
 
@@ -301,3 +366,43 @@ If the route is missing, configure a static route for the multicast subnet throu
 1. When a VM is migrated from pod-1 to pod-2, even after doing dhcp release and renew in the VLAN interface, the interface is getting ip from old pod subnet. As a workaround, a configurable parameter `dhcp_renew_max_retry_count` is provided in acc_provision_input file where user can provide the number of times dhcp release and renew should be tried.
 
 2. When dhcp renew on the VLAN interface is done immediately after dhcp release, then dhcp server tries to assign an ip that is already assigned to the VLAN interface of a different node and client sends decline. As a workaround, a configurable parameter `dhcp_delay` is provided in acc_provision_input file, where user can configure the delay between dhcp release and dhcp renew.
+
+## 9. Workarounds with other DHCP clients (ACI-CNI <= 6.1.1.4)
+
+The following workaround is necessary only if ACI-CNI version is 6.1.1.4 or below 
+
+When the default DHCP client on your node is not dhclient, i.e. when the IP address on infra VLAN subinterface is managed by systemd-networkd on Ubuntu or Network Manager on RHEL, the lease file would not be present in the expected location. In this case, the following steps need to be performed on the node before migration.
+
+1. Add the following line to /etc/dhcp/dhclient.conf
+
+      send dhcp-client-identifier = hardware;
+
+2. Do dhclient <infra-interface-name>
+    eg:
+    ```sh
+        dhclient ens160.4090
+    ```
+
+3. Verify lease file got created in /var/lib/dhclient if RHEL or /var/lib/dhcp if Ubuntu.
+
+    ```sh
+    cat /var/lib/dhcp/dhclient.leases
+        lease {
+        interface "ens160.4090";
+        fixed-address 11.0.160.64;
+        option subnet-mask 255.255.0.0;
+        option dhcp-lease-time 604800;
+        option dhcp-message-type 5;
+        option dhcp-server-identifier 10.0.0.1;
+        renew 0 2025/09/07 10:03:50;
+        rebind 3 2025/09/10 13:39:35;
+        expire 4 2025/09/11 10:39:35;
+        }
+    ``` 
+> **Note**: Known issue with **NetworkManager**:
+> 
+> Default route of the interface set by dhclient, may not match what is expected by NetworkManager and on some occasions result in NetworkManager misbehaving and the interface losing IP. To workaround this, edit NetworkManager configuration to remove the route metric:
+> 
+> `nmcli connection modify "Vlan ens192.4090" ipv4.route-metric ""`
+> 
+>  and apply the configuration
