@@ -1,44 +1,45 @@
 # Cisco Network Fabric and Kubernetes Integration
 
+- [Cisco Network Fabric and Kubernetes Integration](#cisco-network-fabric-and-kubernetes-integration)
 - [Overview](#overview)
 - [Hardware Requirements](#hardware-requirements)
 - [Kubernetes Compatibility Matrix](#kubernetes-compatibility-matrix)
 - [Workflow for Kubernetes Integration](#workflow-for-kubernetes-integration)
-   * [Planning for Kubernetes Integration](#planning-for-kubernetes-integration)
-   * [Prerequisites for Integrating Kubernetes with Cisco ACI](#prerequisites-for-integrating-kubernetes-with-cisco-aci)
-   * [Provisioning Cisco ACI to Work with Kubernetes](#provisioning-cisco-aci-to-work-with-kubernetes)
-   * [Preparing the Kubernetes Nodes](#preparing-the-kubernetes-nodes)
-   * [Installing Kubernetes and Cisco ACI Containers](#installing-kubernetes-and-cisco-aci-containers)
-   * [Verifying the Kubernetes Integration](#verifying-the-kubernetes-integration)
+  - [Planning for Kubernetes Integration](#planning-for-kubernetes-integration)
+  - [Prerequisites for Integrating Kubernetes with Cisco ACI](#prerequisites-for-integrating-kubernetes-with-cisco-aci)
+  - [Provisioning Cisco ACI to Work with Kubernetes](#provisioning-cisco-aci-to-work-with-kubernetes)
+  - [Preparing the Kubernetes Nodes](#preparing-the-kubernetes-nodes)
+  - [Installing Kubernetes and Cisco ACI Containers](#installing-kubernetes-and-cisco-aci-containers)
+  - [Verifying the Kubernetes Integration](#verifying-the-kubernetes-integration)
 - [Unprovisioning Kubernetes from the ACI Fabric](#unprovisioning-kubernetes-from-the-aci-fabric)
 - [Uninstalling the CNI Plug-In](#uninstalling-the-cni-plug-in)
 - [Upgrade the CNI Plug-in](#upgrade-the-cni-plug-in)
 - [Using Policy](#using-policy)
-   * [Network Policy and EPGs](#network-policy-and-epgs)
-   * [Mapping to Cisco APIC](#mapping-to-cisco-apic)
-   * [Creating and Mapping an EPG](#creating-and-mapping-an-epg)
-   * [The acikubectl Command](#the-acikubectl-command)
-   * [Load Balancing External Services](#load-balancing-external-services)
-      + [Load Balancing External Services Across Multiple L3Out](#load-balancing-external-services-across-multiple-l3out)
+  - [Network Policy and EPGs](#network-policy-and-epgs)
+  - [Mapping to Cisco APIC](#mapping-to-cisco-apic)
+  - [Creating and Mapping an EPG](#creating-and-mapping-an-epg)
+  - [The acikubectl Command](#the-acikubectl-command)
+  - [Load Balancing External Services](#load-balancing-external-services)
+    - [Load Balancing External Services Across Multiple L3Out](#load-balancing-external-services-across-multiple-l3out)
 - [Draining a Node](#draining-a-node)
 - [Service Subnet Advertisement](#service-subnet-advertisement)
-   * [Configuring Service Subnet Advertisement](#configuring-service-subnet-advertisement)
-   * [Verifying Service Subnet Advertisement](#verifying-service-subnet-advertisement)
+  - [Configuring Service Subnet Advertisement](#configuring-service-subnet-advertisement)
+  - [Verifying Service Subnet Advertisement](#verifying-service-subnet-advertisement)
 - [Service Account Hardening](#service-account-hardening)
-   * [Checking the Current Administrative Privileges](#checking-the-current-administrative-privileges)
-   * [Modifying Administrative Account Permissions](#modifying-administrative-account-permissions)
+  - [Checking the Current Administrative Privileges](#checking-the-current-administrative-privileges)
+  - [Modifying Administrative Account Permissions](#modifying-administrative-account-permissions)
 - [Feature and Configuration Details](#feature-and-configuration-details)
 - [Troubleshooting Kubernetes Integration](#troubleshooting-kubernetes-integration)
-   * [Troubleshooting Checklist](#troubleshooting-checklist)
-   * [Troubleshooting Specific Problems](#troubleshooting-specific-problems)
-      + [Collecting and Exporting Logs](#collecting-and-exporting-logs)
-      + [Troubleshooting External Connectivity](#troubleshooting-external-connectivity)
-      + [Troubleshooting POD EPG Communication](#troubleshooting-pod-epg-communication)
-      + [Troubleshooting Endpoint Discovery](#troubleshooting-endpoint-discovery)
-      + [Troubleshooting Pod Health Check](#troubleshooting-pod-health-check)
-      + [Troubleshooting aci-containers-host](#troubleshooting-aci-containers-host)
-      + [Datapath tracing with acikubectl](#datapath_tracing_with_acikubectl)
-      + [Proactive Configuration with acikubectl](#proactive-configuration-with-acikubectl)
+  - [Troubleshooting Checklist](#troubleshooting-checklist)
+  - [Troubleshooting Specific Problems](#troubleshooting-specific-problems)
+    - [Collecting and Exporting Logs](#collecting-and-exporting-logs)
+    - [Troubleshooting External Connectivity](#troubleshooting-external-connectivity)
+    - [Troubleshooting POD EPG Communication](#troubleshooting-pod-epg-communication)
+    - [Troubleshooting Endpoint Discovery](#troubleshooting-endpoint-discovery)
+    - [Troubleshooting Pod Health Check](#troubleshooting-pod-health-check)
+    - [Troubleshooting aci-containers-host](#troubleshooting-aci-containers-host)
+    - [Datapath tracing with acikubectl](#datapath-tracing-with-acikubectl)
+    - [Proactive Configuration with acikubectl](#proactive-configuration-with-acikubectl)
 - [Building ARM Images for ACI CNI](#building-arm-images-for-aci-cni)
 
 
@@ -165,20 +166,19 @@ ACI CNI in nested mode is only supported with VMM-integrated VMware (with dVS).
     The command generates a configuration file that looks like the following example:
 
 ```yaml
-
 #
 # Configuration for ACI Fabric
 #
 aci_config:
   system_id: mykube             # Every opflex cluster must have a distinct ID
-  #apic_tls_cert: <cert-file-path> # Path for APIC CA certificate, if verification is enabled on APIC. Default value is None, and verification will be skipped for APIC API calls.
-  #apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
-  #apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
-  #apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
-  #opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
-  #tenant:
-    #name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
-  apic_hosts:                   # List of APIC hosts to connect for APIC API.
+  # apic_tls_cert: <cert-file-path> # Path for APIC CA certificate, if verification is enabled on APIC. Default value is None, and verification will be skipped for APIC API calls.
+  # apic-refreshtime: 1200       # Subscrption refresh-interval in seconds; Max=43200
+  # apic_refreshticker_adjust: 150 # How early (seconds) the subscriptions to be refreshed than actual subscription refresh-timeout. Min=1, Max=65535
+  # apic_subscription_delay: 100 # Delay after each subscription query in milliseconds; Min=1, Max=65535
+  # opflex_device_delete_timeout: 1800   # Timeout in seconds to delete old opflex devices; Min=1, Max=65535
+  # tenant:
+    # name: pre_existing_tenant  # Add pre_existing_tenant name if it's manually created on the APIC
+  apic_hosts:                   # List of APIC hosts to connect for APIC API
   - 10.1.1.101                  # Default port is 443, to use a non-default HTTPS port, append the port number to the IP address using a colon separator. For example: 10.1.1.101:6443
   vmm_domain:                   # Kubernetes container domain configuration
     encap_type: vxlan           # Encap mode: vxlan or vlan
@@ -186,7 +186,7 @@ aci_config:
       start: 225.20.1.1
       end: 225.20.255.255
     nested_inside:              # Include if nested inside a VMM;
-                                #   supported for Kubernetes
+    #                           # supported for Kubernetes
     # elag_name: fab-elag       # elag name on APIC, this is required for ESXi vDS >= 6.6.0
     # type: vmware              # Specify the VMM vendor (supported: vmware)
     # name: myvmware            # Specify the name of the VMM domain
@@ -202,14 +202,14 @@ aci_config:
   aep: kube-cluster             # The AEP for ports/VPCs used by this cluster
   vrf:                          # This VRF used to create all kubernetes EPs
     name: mykube-vrf
-    tenant: common              # This can be system-id or common
+    tenant: common              # This can be system-id or pre-existing-tenant
   l3out:
     name: mykube_l3out          # Used to provision external IPs
     external_networks:
     - mykube_extepg             # Used for external contracts
-  #custom_epgs:                 # List of additional endpoint-group names
-  #  - custom_group1            # to configure for use with annotations
-  #  - custom_group2
+  # custom_epgs:                 # List of additional endpoint-group names
+  #   - custom_group1            # to configure for use with annotations
+  #   - custom_group2
 
 
 #
@@ -218,32 +218,32 @@ aci_config:
 net_config:
   node_subnet: 10.1.0.1/16      # Subnet to use for nodes
   pod_subnet:
-  - 10.2.0.1/24       # Subnet to use for Kubernetes Pods
-  - 10.2.1.1/24       # Subnet to use for Kubernetes Pods
+  - 10.2.0.1/24                 # Subnet to use for Kubernetes Pods
+  - 10.2.1.1/24                 # Subnet to use for Kubernetes Pods
   extern_dynamic: 10.3.0.1/24   # Subnet to use for dynamic external IPs
   extern_static: 10.4.0.1/24    # Subnet to use for static external IPs
   node_svc_subnet: 10.5.0.1/24  # Subnet to use for service graph
   kubeapi_vlan: 4001            # The VLAN used by the physdom for nodes
-                                #   (Kubernetes only)
+  #                             # (Kubernetes only)
   service_vlan: 4003            # The VLAN used by LoadBalancer services
   infra_vlan: 4093              # The VLAN used by ACI infra
-  #interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
-  #interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
-                                # Must be >= 50
-                                # Default value si set to 100
-  #service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
-                                # default is 5, set to 0 to disable, max: 65535
-  #pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
-                                # be effective with non-snat services
-  #disable_wait_for_network: true  # Default is false, set to true if the ACI
-                                   # CNI should not wait for datapath to be
-                                   # ready before returning success for pod
-                                   # interface creation
- #duration_wait_for_network: 210  # Duration in seconds that ACI should wait
-                                  # for datapath to be ready.
-                                  # Default is 210 seconds.
-                                  # Only enabled if disable_wait_for_network
-                                  # is set to false.
+  # interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
+  # interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
+  #                             # Must be >= 50
+  #                             # Default value si set to 100
+  # service_monitor_interval: 5  # IPSLA interval probe time for PBR tracking
+  #                             # default is 5, set to 0 to disable, max: 65535
+  # pbr_tracking_non_snat: true  # Default is false, set to true for IPSLA to
+  #                             # be effective with non-snat services
+  # disable_wait_for_network: true  # Default is false, set to true if the ACI
+  #                                 # CNI should not wait for datapath to be
+  #                                 # ready before returning success for pod
+  #                                 # interface creation
+  # duration_wait_for_network: 210  # Duration in seconds that ACI should wait
+  #                                 # for datapath to be ready.
+  #                                 # Default is 210 seconds.
+  #                                 # Only enabled if disable_wait_for_network
+  #                                 # is set to false.
 
 #
 # Configuration for container registry
@@ -256,48 +256,66 @@ registry:
   # dpu_control_server: ip:port # e.g: 192.168.20.1:5000
   # use_digest: true   # option to pull images using digest, override if needed, default is false.
 
-#kube_config:
-  # aci_multipod: True #override if inter-pod migration is to be done on the setup, default is False
+# kube_config:
+  # enable_apic_request_retry_delay: False # Set to False to disable retrying sending requests to APIC.
+  #                                        # The default value is True.
+  # apic_request_retry_delay: 10 # Timeout in minutes to wait in between retries before sending request to APIC.
+  #                              # The default value is 2.
+  # epg_resolve_prioritize: False # Set to False to disable delaying the writing of EP files until the associated EPG is resolved.
+  #                               # The default value is True.
+  # force_ep_undeclares: False # Set to False to disable sending an undeclare before the endpoint declare request to opflex-proxy.
+  #                            # The default value is True.
+  # aci_multipod: True # override if inter-pod migration is to be done on the setup, default is False
   # opflex_device_reconnect_wait_timeout: 10  # Timeout in seconds to wait for reconnect when opflexOdev is diconnected for a node
-                                              # before triggering a dhcp release and renew of vlan interface
-  # aci_multipod_ubuntu: True #override if inter-pod migration is to be done on a setup with Ubuntu nodes, default is False (Used only for rke)
-  # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
-  # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
-  # hpp_optimization: True #override if needed, default is False
+  #                                           # before triggering a dhcp release and renew of vlan interface
+  # aci_multipod_ubuntu: True # override if inter-pod migration is to be done on a setup with Ubuntu nodes, default is False (Used only for rke)
+  # dhcp_renew_max_retry_count: 10  # max number of times dhcp renew should be executed before giving up
+  # dhcp_delay: 10  # delay between dhcp release and dhcp renew in seconds
+  # hpp_optimization: True # override if needed, default is False
   # disable_hpp_rendering: False              # set to true to disable HPP rendering which disables k8s network policies functionality, default is false
-  # no_wait_for_service_ep_readiness: True    #override if needed, default is False
+  # no_wait_for_service_ep_readiness: True    # override if needed, default is False
   # service_graph_endpoint_add_delay:
-        # delay: 30                     #Delay in seconds
-        # services:                     #List of services for which delay should be added
-        # - name: "service-name1"
-        #   namespace: "service-ns1"
-        # - name: "service-name2"
-        #   namespace: "service-ns2"
-        #   delay: 60                   # per service delay that overrides common delay
-  # add_external_subnets_to_rdconfig: True               #override if needed, default is False
+      # delay: 30                     # Delay in seconds
+      # services:                     # List of services for which delay should be added
+      # - name: "service-name1"
+      #   namespace: "service-ns1"
+      # - name: "service-name2"
+      #   namespace: "service-ns2"
+      #   delay: 60                   # per service delay that overrides common delay
+  # add_external_subnets_to_rdconfig: True               # override if needed, default is False
   # ovs_memory_request: "512Mi"         # override if needed, default is "128Mi"
   # ovs_memory_limit: "20Gi"            # override if needed, default is "1Gi"
-  # aci_containers_memory_request: "512Mi", # kind: LimitRange, memory request, override if needed, default is "128Mi"
-  # aci_containers_memory_limit": "20Gi",    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
+  # aci_containers_memory_request: "512Mi" # kind: LimitRange, memory request, override if needed, default is "128Mi"
+  # aci_containers_memory_limit: "20Gi"    # kind: LimitRange, memory limit, override if needed, default is "3Gi"
   # reboot_opflex_with_ovs: "false"     # override if needed, default is "true"
   # snat_operator:
-        # disable_periodic_snat_global_info_sync: True
-        # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
+      # disable_periodic_snat_global_info_sync: True
+      # sleep_time_snat_global_info_sync: 60 # Sleep time in seconds for snat_global_info_sync, default is 60; Min=1, Max=300
   # node_snat_redirect_exclude:
-  #     - group: router
-  #       labels:
-  #       - worker
-  #       - router
-  #       - infra
-  #     - group: infra
-  #       labels:
-  #       - infra
-  #       - router
-  #opflex_mode: ""                      #override if needed, supported modes are "physical", "dpu" and "overlay"
-  #opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
-  # opflex_agent_opflex_asyncjson_enabled": "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
+  #   - group: router
+  #     labels:
+  #     - worker
+  #     - router
+  #     - infra
+  #   - group: infra
+  #     labels:
+  #     - infra
+  #     - router
+  # opflex_mode: ""                      # override if needed, supported modes are "physical", "dpu" and "overlay"
+  # opflex_agent_prometheus: "true" # Set to "true" if enabling opflex-agent prometheus metrics, default is "false"
+  # opflex_agent_opflex_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent opflex asyncjson, default is "false"
   # opflex_agent_ovs_asyncjson_enabled: "false" # set to "true" for enabling opflex-agent ovs asyncjson, default is "false"
   # opflex_agent_policy_retry_delay_timer: 60   # set opflex agent policy retry delay time, value in seconds, default=10, min=1
+  # opflex_startup_enabled: True                # To allow the opflex agent to start with policy state that was persisted prior to the
+  #                                             # agent restart. Default value is False
+  # opflex_startup_policy_duration: 80          # How long to use the policy file  during startup after agent connects to the leaf
+  #                                             # default value is 60
+  # opflex_startup_resolve_aft_conn: True       # Wait till opflex connects to leaf before using the local policy
+  #                                             # default value is False
+  # opflex_switch_sync_delay: 10                # How long to wait from PlatformConfig resolution to start the switch sync
+  #                                             # default value is 5
+  # opflex_switch_sync_dynamic: 5               # Subsequent switch sync delay
+  #                                             # default value is 10
   # use_system_node_priority_class: True        # override if needed, default is False
   # aci_containers_controller_memory_request: "256Mi"   # override if needed, default is aci_containers_memory_request
   # aci_containers_controller_memory_limit: "5Gi"       # override if needed, default is aci_containers_memory_limit
@@ -318,47 +336,65 @@ registry:
   # add_external_contract_to_default_epg: True          # override if needed, default is False
   # apic_connection_retry_limit: 5                      # number of times the controller tries to communicate with APIC before switching to next APIC if unsuccessful, default is 5
   # taint_not_ready_node: True                          # default is False, set to True if you want to make the node in not ready state unschedulable till the host agent initalization is complete.
+  # enable_hpp_direct: True                             # default is False, set to True to enable HPP distribution via Kubernetes control plane for faster convergence and reduce load on fabric
+  # unknown_mac_unicast_action: "flood"                 # override if needed, default is "proxy"
+  # opflex_agent_reset_wait_delay: 10                   # override if needed, default is 5
+  # disable_service_vlan_preprovisioning: True          # default is False, set to True if you want to disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
+  # proactive_conf: True                                # default is False, set to True to enable proactive configuration
+  # disable_resilient_hashing: True                     # default is False, set to True if you want to disable Resilient Hashing in the L4-L7 Redirect Policy programmed for LoadBalancer services.
+  # disable_opflex_resilient_hashing: True              # default is False, set it as True to disable Opflex Resilient Hashing. By default, session stickiness for ongoing flows is maintained even as the number of backend pods changes; only flows tied to affected pods will be rehashed.
+  # filter_opflex_device: False                         # default is True, set to False if you want to disable filtering opflexODev MOs by VMM domain and allow processing of all opflexODev notifications from APIC.
+  # leaf_reboot_check_interval: 300                     # Interval in seconds to periodically check for leaf reboots or additions. A detected change triggers a WebSocket reconnect to the APIC, ensuring that event notifications from the leaf resume.
+  #                                                     # The default value is 900.
 
 #
 # Configuration for ACI CNI Operator
 #
 # operator_managed_config:
-    #enable_updates: True # Default is False
+  # enable_updates: True # Default is False
 
-#drop_log_config:
-  # enable: False         # default is True
-  # disable_events: True  # default is False
+# drop_log_config:
+  # enable: False                      # default is True
+  # disable_events: True               # default is False
+  # opflex_redirect_drop_logs: syslog  # to log packet drops to the file or syslog, specify filname to log to file.
 
-#multus:
+# multus:
   # disable: False       # default is True
 
-#sriov_config:
+# sriov_config:
   # enable: True     # default is False
   # device_info:
     # isRdma: True   # default is false
     # devices: ""    # default is "1014","101e"
 
-#dpu_config:
-    # enable: True          # default is false
-    # ip: ""                # default is "192.168.200.2"
-    # user: ""              # default is "opflex"
-    # ovsdb_socket_port: "" # default is "6640"
-    # masterNodeIp: ""
+# dpu_config:
+  # enable: True          # default is false
+  # ip: ""                # default is "192.168.200.2"
+  # user: ""              # default is "opflex"
+  # ovsdb_socket_port: "" # default is "6640"
+  # masterNodeIp: ""
 
-#nodepodif_config:
+# cilium_chaining:
+  # enable: True     # default is False
+
+# nodepodif_config:
   # enable: True     # default is False, set to True to enable ERSPAN feature
 
 # Configuration for RKE2 cluster
 
-#rke2_config:
-  # logging_namespace: "cattle-logging" #override if needed, default is "cattle-logging"
-  # monitoring_namespace: "cattle-prometheus" #override if needed, default is "cattle-prometheus"
+# rke2_config:
+  # logging_namespace: "cattle-logging" # override if needed, default is "cattle-logging"
+  # monitoring_namespace: "cattle-prometheus" # override if needed, default is "cattle-prometheus"
 
-#logging:
-  #controller_log_level: debug      # default log level is info
-  #hostagent_log_level: debug       # default log level is info
-  #opflexagent_log_level: debug     # default log level is info
-  #operator_log_level: debug        # default log level is info
+# provision:
+  # max_retries: 10     # Maximum number of retries done for POST request to APIC before giving up
+  #                     # Default is 5
+
+# logging:
+  # controller_log_level: debug      # default log level is info
+  # hostagent_log_level: debug       # default log level is info
+  # opflexagent_log_level: debug     # default log level is info
+  # operator_log_level: debug        # default log level is info
 ```
 
 > [!Note]
