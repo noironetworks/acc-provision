@@ -263,6 +263,9 @@ registry:
   # aci_multipod_ubuntu: True #override if inter-pod migration is to be done on a setup with Ubuntu nodes, default is False (Used only for rke)
   # dhcp_renew_max_retry_count: 10  #max number of times dhcp renew should be executed before giving up
   # dhcp_delay: 10  #delay between dhcp release and dhcp renew in seconds
+  # platform_config_delete_event_age: 60  # Aging time for the platform config delete event in seconds, default is 120 seconds.
+                                          # This helps to detect intra-pod migration
+                                          # when controller fails to receive opflexOdev create notification from APIC.
   # hpp_optimization: True #override if needed, default is False
   # disable_hpp_rendering: False              # set to true to disable HPP rendering which disables k8s network policies functionality, default is false
   # no_wait_for_service_ep_readiness: True    #override if needed, default is False

@@ -3041,6 +3041,9 @@ data:
         {% if config.kube_config.dhcp_delay %}
         "dhcp-delay": {{ config.kube_config.dhcp_delay|json}},
         {% endif %}
+        {% if config.kube_config.platform_config_delete_event_age %}
+        "platform-config-delete-event-age": {{ config.kube_config.platform_config_delete_event_age|json}},
+        {% endif %}
         {% if config.kube_config.epg_resolve_prioritize %}
         "epg-resolve-prioritize": {{config.kube_config.epg_resolve_prioritize|json}},
         {% endif %}
@@ -3146,7 +3149,13 @@ data:
             "level": {{config.logging.opflexagent_log_level|json}}
         },
         "opflex": {
-            "notif" : { "enabled" : "false" },
+            "notif" : {
+              {% if config.kube_config.aci_multipod %}
+                "enabled": {{config.kube_config.aci_multipod|json}}
+              {% else %}
+                "enabled": false
+              {% endif %}
+            },
             "startup": {
                     "enabled": {{ config.kube_config.opflex_startup_enabled|json }},
                     "policy-file": {{ config.kube_config.opflex_startup_policy_file|json }},
