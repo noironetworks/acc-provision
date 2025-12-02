@@ -111,9 +111,11 @@ def is_vlan_in_pool(apic, pool_dn, vlan_id):
                     return True
     return False
 
+
 class Apic(object):
 
-    TENANT_OBJECTS = ["ap-kubernetes", "BD-kube-node-bd", "BD-kube-pod-bd", "brc-kube-api", "brc-health-check", "brc-dns", "brc-icmp", "flt-kube-api-filter", "flt-dns-filter", "flt-health-check-filter-out", "flt-icmp-filter", "flt-health-check-filter-in"]
+    TENANT_OBJECTS = ["ap-kubernetes", "BD-kube-node-bd", "BD-kube-pod-bd", "brc-kube-api", "brc-health-check", "brc-dns", "brc-icmp",
+                      "flt-kube-api-filter", "flt-dns-filter", "flt-health-check-filter-out", "flt-icmp-filter", "flt-health-check-filter-in"]
     ACI_PREFIX = aci_prefix
     ACI_CHAINED_PREFIX = aci_chained_prefix
 
@@ -151,7 +153,8 @@ class Apic(object):
         return "http://%s%s" % (self.addr, path)
 
     def get(self, path, data=None, params=None):
-        args = dict(data=data, cookies=self.cookies, verify=self.verify, params=params)
+        args = dict(data=data, cookies=self.cookies,
+                    verify=self.verify, params=params)
         args.update(timeout=self.timeout)
         dbg("getting path: {} {}".format(path, json.dumps(args)))
         resp = requests.get(self.url(path), **args)
@@ -178,7 +181,8 @@ class Apic(object):
                 break
 
             delay = 2 ** retries
-            dbg("Retrying in %d time..(Attempt %d of %d)" % (delay, retries + 1, max_retries))
+            dbg("Retrying in %d time..(Attempt %d of %d)" %
+                (delay, retries + 1, max_retries))
             time.sleep(delay)
             retries += 1
 
@@ -188,7 +192,7 @@ class Apic(object):
     def is_system_id_matching(self, system_id, resource_name):
         contains_match_pattern = rf".*-\b{system_id}\b-.*"
         ends_with_pattern = rf".*-\b{system_id}\b$"
-        if(re.match(contains_match_pattern, resource_name) or re.match(ends_with_pattern, resource_name)):
+        if (re.match(contains_match_pattern, resource_name) or re.match(ends_with_pattern, resource_name)):
             return True
         return False
 
@@ -219,7 +223,8 @@ class Apic(object):
             self.cookies = collections.OrderedDict([("APIC-Cookie", token)])
         else:
             print("Login failed - {}".format(req.text))
-            print("Addr: {} u: {} p: {}".format(self.addr, self.username, self.password))
+            print("Addr: {} u: {} p: {}".format(
+                self.addr, self.username, self.password))
         return req
 
     def check_resp(self, resp):
@@ -295,7 +300,8 @@ class Apic(object):
         return self.get_path(path)
 
     def get_vmmdom_vlanpool_tDn(self, vmmdom):
-        path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children&target-subtree-class=infraRsVlanNs" % (vmmdom)
+        path = "/api/node/mo/uni/vmmp-VMware/dom-%s.json?query-target=children&target-subtree-class=infraRsVlanNs" % (
+            vmmdom)
         return self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
 
     def get_phys_dom(self, domain):
@@ -307,17 +313,20 @@ class Apic(object):
         return self.get_path(path)["infraRsVlanNs"]["attributes"]["tDn"]
 
     def check_l3out_vrf(self, tenant, name, vrf_name, vrf_dn):
-        path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (tenant, name)
+        path = "/api/mo/uni/tn-%s/out-%s/rsectx.json?query-target=self" % (
+            tenant, name)
         res = False
         try:
             tDn = self.get_path(path)["l3extRsEctx"]["attributes"]["tDn"]
             res = (tDn == vrf_dn)
         except Exception as e:
-            err("Error in getting configured l3out vrf for %s/%s: %s" % (tenant, name, str(e)))
+            err("Error in getting configured l3out vrf for %s/%s: %s" %
+                (tenant, name, str(e)))
         return res
 
     def check_ext_l3out_epg(self, tenant, ext_l3out_name):
-        path = "/api/mo/uni/tn-%s/out-%s.json?query-target=children&target-subtree-class=l3extInstP" % (tenant, ext_l3out_name)
+        path = "/api/mo/uni/tn-%s/out-%s.json?query-target=children&target-subtree-class=l3extInstP" % (
+            tenant, ext_l3out_name)
         return self.get_path(path)
 
     def get_user(self, name):
@@ -329,33 +338,40 @@ class Apic(object):
         return self.get_path(path)
 
     def get_ext_l3out_lnodep(self, tenant, l3out_name):
-        path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=children&target-subtree-class=l3extLNodeP" % (tenant, l3out_name)
+        path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=children&target-subtree-class=l3extLNodeP" % (
+            tenant, l3out_name)
         return self.get_path(path)["l3extLNodeP"]["attributes"]["name"]
 
     def get_configured_node_dns(self, tenant, l3out, node_prof):
-        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (tenant, l3out, node_prof)
+        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (
+            tenant, l3out, node_prof)
         configured_node_dns = []
         node_ids = self.get_path(path, multi=True)
         if node_ids is None:
             return configured_node_dns
         if type(node_ids) is list:
             for node_id in node_ids:
-                configured_node_dns.append(node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
+                configured_node_dns.append(
+                    node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
         else:
-            configured_node_dns.append(node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
+            configured_node_dns.append(
+                node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"])
         return configured_node_dns
 
     def get_extl3out_configured_nodes_router_id(self, tenant, l3out, node_prof):
-        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (tenant, l3out, node_prof)
+        path = "/api/node/mo/uni/tn-%s/out-%s/lnodep-%s.json?query-target=children&target-subtree-class=l3extRsNodeL3OutAtt" % (
+            tenant, l3out, node_prof)
         nodeid_dict = {}
         node_ids = self.get_path(path, multi=True)
         if node_ids is None:
             return nodeid_dict
         if type(node_ids) is list:
             for node_id in node_ids:
-                nodeid_dict[node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_id["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
+                nodeid_dict[node_id["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]
+                            ] = node_id["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
         else:
-            nodeid_dict[node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]] = node_ids["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
+            nodeid_dict[node_ids["l3extRsNodeL3OutAtt"]["attributes"]["tDn"]
+                        ] = node_ids["l3extRsNodeL3OutAtt"]["attributes"]["rtrId"]
         return nodeid_dict
 
     def provision(self, data, sync_login, retries):
@@ -373,7 +389,8 @@ class Apic(object):
                 if path in ignore_list:
                     continue
                 if config is not None:
-                    resp = self.post_with_exponential_backoff(path, config, retries)
+                    resp = self.post_with_exponential_backoff(
+                        path, config, retries)
                     self.check_resp(resp)
                     dbg("%s: %s" % (path, resp.text))
             except Exception as e:
@@ -383,7 +400,8 @@ class Apic(object):
 
     def unprovision(self, data, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, cfg, pre_existing_tenant=False, l3out_name=None, cluster_l3out_vrf_details=None):
         cluster_tenant_path = "/api/mo/uni/tn-%s.json" % cluster_tenant
-        shared_resources = ["/api/mo/uni/infra.json", "/api/mo/uni/tn-common.json", cluster_tenant_path]
+        shared_resources = ["/api/mo/uni/infra.json",
+                            "/api/mo/uni/tn-common.json", cluster_tenant_path]
 
         if is_cno_enabled(cfg):
             if cfg["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
@@ -395,19 +413,23 @@ class Apic(object):
 
         try:
             if "calico" in cfg['flavor']:
-                cluster_l3out_path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=self" % (cluster_l3out_tenant, l3out_name)
+                cluster_l3out_path = "/api/node/mo/uni/tn-%s/out-%s.json?query-target=self" % (
+                    cluster_l3out_tenant, l3out_name)
                 resp = self.delete(cluster_l3out_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (cluster_l3out_path, resp.text))
-                l3_dom_path = "/api/node/mo/uni/l3dom-%s.json?query-target=self" % (l3out_name + "-L3-dom")
+                l3_dom_path = "/api/node/mo/uni/l3dom-%s.json?query-target=self" % (
+                    l3out_name + "-L3-dom")
                 resp = self.delete(l3_dom_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (l3_dom_path, resp.text))
-                phys_dom_path = "/api/node/mo/uni/phys-%s.json?query-target=self" % (l3out_name + "-phys-dom")
+                phys_dom_path = "/api/node/mo/uni/phys-%s.json?query-target=self" % (
+                    l3out_name + "-phys-dom")
                 resp = self.delete(phys_dom_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (phys_dom_path, resp.text))
-                vlan_pool_path = "/api/mo/uni/infra/vlanns-[%s]-static.json?query-target=self" % (l3out_name + "-pool")
+                vlan_pool_path = "/api/mo/uni/infra/vlanns-[%s]-static.json?query-target=self" % (
+                    l3out_name + "-pool")
                 resp = self.delete(vlan_pool_path)
                 self.check_resp(resp)
                 dbg("%s: %s" % (vlan_pool_path, resp.text))
@@ -420,7 +442,8 @@ class Apic(object):
                 for resp in respj:
                     for val in resp.values():
                         if l3out_name in val['attributes']['dn']:
-                            del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                            del_path = "/api/node/mo/" + \
+                                val['attributes']['dn'] + ".json"
                             resp = self.delete(del_path)
                             self.check_resp(resp)
                             dbg("%s: %s" % (del_path, resp.text))
@@ -444,50 +467,64 @@ class Apic(object):
                             for resp in respj:
                                 for val in resp.values():
                                     if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
-                                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                                        del_path = "/api/node/mo/" + \
+                                            val['attributes']['dn'] + ".json"
                                         if 'name' in val['attributes']:
                                             name = val['attributes']['name']
                                             if is_cno_enabled(cfg) and "ap-" in val['attributes']['dn']:
                                                 continue
                                             if 'annotation' in val['attributes']:
                                                 annotation = val['attributes']['annotation']
-                                                class_name = list(resp.keys())[0]
+                                                class_name = list(
+                                                    resp.keys())[0]
                                                 if annotation == aciContainersOwnerAnnotation and self.is_system_id_matching(system_id, name):
                                                     if class_name == "fvAp":
                                                         ap_path = "/api/mo/%s.json?query-target=children" % val['attributes']['dn']
-                                                        resp = self.get(ap_path)
+                                                        resp = self.get(
+                                                            ap_path)
                                                         self.check_resp(resp)
-                                                        resp_json = json.loads(resp.text)
+                                                        resp_json = json.loads(
+                                                            resp.text)
                                                         resp_json = resp_json["imdata"]
                                                         delete_ap = True
                                                         for resp in resp_json:
                                                             for val in resp.values():
-                                                                 if 'annotation' in val['attributes']:
-                                                                     annotation = val['attributes']['annotation']
-                                                                     if annotation != aciContainersOwnerAnnotation:
-                                                                       delete_ap = False
-                                                                     else:
+                                                                if 'annotation' in val['attributes']:
+                                                                    annotation = val['attributes']['annotation']
+                                                                    if annotation != aciContainersOwnerAnnotation:
+                                                                        delete_ap = False
+                                                                    else:
                                                                         epg_path = "/api/mo/%s.json" % val['attributes']['dn']
-                                                                        resp = self.delete(epg_path)
-                                                                        self.check_resp(resp)
-                                                                 else:
-                                                                     delete_ap = False
+                                                                        resp = self.delete(
+                                                                            epg_path)
+                                                                        self.check_resp(
+                                                                            resp)
+                                                                else:
+                                                                    delete_ap = False
                                                         if (delete_ap) and (not old_naming):
-                                                            dbg("Deleting resource: %s" % name)
-                                                            resp = self.delete(del_path)
-                                                            self.check_resp(resp)
+                                                            dbg("Deleting resource: %s" %
+                                                                name)
+                                                            resp = self.delete(
+                                                                del_path)
+                                                            self.check_resp(
+                                                                resp)
                                                     elif (not old_naming):
-                                                        dbg("Deleting resource: %s" % name)
-                                                        resp = self.delete(del_path)
+                                                        dbg("Deleting resource: %s" %
+                                                            name)
+                                                        resp = self.delete(
+                                                            del_path)
                                                         self.check_resp(resp)
-                                                        dbg("%s: %s" % (del_path, resp.text))
+                                                        dbg("%s: %s" %
+                                                            (del_path, resp.text))
                                             elif is_cno_enabled(cfg) and (name == self.ACI_CHAINED_PREFIX + "nodes"):
                                                 resp = self.delete(del_path)
                                                 self.check_resp(resp)
-                                                dbg("%s: %s" % (del_path, resp.text))
+                                                dbg("%s: %s" %
+                                                    (del_path, resp.text))
             if old_naming:
                 for object in self.TENANT_OBJECTS:
-                    del_path = "/api/node/mo/uni/tn-%s/%s.json" % (cluster_tenant, object)
+                    del_path = "/api/node/mo/uni/tn-%s/%s.json" % (
+                        cluster_tenant, object)
                     resp = self.delete(del_path)
                     self.check_resp(resp)
                     dbg("%s: %s" % (del_path, resp.text))
@@ -502,19 +539,22 @@ class Apic(object):
             # Delete cluster_l3out vrf
             if cluster_l3out_vrf_details["create_vrf"]:
                 vrf_name = cluster_l3out_vrf_details["name"]
-                cluster_l3out_vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json" % (tenant_name, vrf_name)
+                cluster_l3out_vrf_path = "/api/mo/uni/tn-%s/ctx-%s.json" % (
+                    tenant_name, vrf_name)
                 if self.check_valid_vrf_annotation(cluster_l3out_vrf_path):
                     self.delete(cluster_l3out_vrf_path)
 
                 # Delete global scope contract
-                global_contract_path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+                global_contract_path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (
+                    vrf_tenant, system_id)
                 self.delete(global_contract_path)
 
                 # Delete external l3out epg provided global scope contract
                 for l3out_instp in cfg["aci_config"]["l3out"]["external_networks"]:
                     l3out = cfg["aci_config"]["l3out"]["name"]
                     l3out_rsprov_name = "%s-l3out-allow-all" % system_id
-                    rsprov = "/api/mo/uni/tn-%s/out-%s/instP-%s/rsprov-%s.json" % (vrf_tenant, l3out, l3out_instp, l3out_rsprov_name)
+                    rsprov = "/api/mo/uni/tn-%s/out-%s/instP-%s/rsprov-%s.json" % (
+                        vrf_tenant, l3out, l3out_instp, l3out_rsprov_name)
                     self.delete(rsprov)
 
             # Delete cluster_l3out tenant
@@ -524,7 +564,8 @@ class Apic(object):
                     self.delete(cluster_l3out_tenant_path)
 
         if is_cno_enabled(cfg):
-            ap_path = "/api/mo/uni/tn-%s/ap-%s.json" % (cluster_tenant, self.ACI_CHAINED_PREFIX + system_id)
+            ap_path = "/api/mo/uni/tn-%s/ap-%s.json" % (
+                cluster_tenant, self.ACI_CHAINED_PREFIX + system_id)
             ap_query_path = ap_path + "?query-target=children"
             resp = self.get(ap_query_path)
             self.check_resp(resp)
@@ -533,7 +574,8 @@ class Apic(object):
             for resp in respj:
                 for val in resp.values():
                     if 'rsTenantMonPol' not in val['attributes']['dn'] and 'svcCont' not in val['attributes']['dn']:
-                        del_path = "/api/node/mo/" + val['attributes']['dn'] + ".json"
+                        del_path = "/api/node/mo/" + \
+                            val['attributes']['dn'] + ".json"
                         if 'name' in val['attributes']:
                             name = val['attributes']['name']
                             if self.check_valid_annotation(del_path, 'fvAEPg'):
@@ -572,7 +614,8 @@ class Apic(object):
             data = self.get_path(path)
             versionStr = data['firmwareCtrlrRunning']['attributes']['version']
             version = self.process_apic_version_string(versionStr)
-            dbg("APIC version obtained: %s, processed version: %s" % (versionStr, version))
+            dbg("APIC version obtained: %s, processed version: %s" %
+                (versionStr, version))
         except Exception as e:
             dbg("Unable to get APIC version object %s: %s" % (path, str(e)))
         return version
@@ -749,9 +792,11 @@ class ApicKubeConfig(object):
                 phys_name = self.config["aci_config"]["physical_domain"]["domain"]
                 if phys_name != self.config["user_config"]["aci_config"].get("physical_domain", {}).get("domain", False):
                     if not is_vmm_lite(self.config) or kubeapi_vlan:
-                        update(data, self.pdom_pool_chained(pool_name, [kubeapi_vlan]))
+                        update(data, self.pdom_pool_chained(
+                            pool_name, [kubeapi_vlan]))
                     if not is_vmm_lite(self.config) or pool_name or phys_name:
-                        update(data, self.chained_phys_dom(phys_name, pool_name))
+                        update(data, self.chained_phys_dom(
+                            phys_name, pool_name))
                 if not is_vmm_lite(self.config) or self.config["aci_config"]["aep"]:
                     update(data, self.chained_mode_associate_aep())
 
@@ -782,7 +827,8 @@ class ApicKubeConfig(object):
                 update(data, self.cluster_info())
 
             update(data, self.l3out_tn())
-            update(data, getattr(self, self.tenant_generator)(self.config['flavor']))
+            update(data, getattr(self, self.tenant_generator)
+                   (self.config['flavor']))
             update(data, self.add_apivlan_for_second_portgroup())
             update(data, self.nested_dom_second_portgroup())
             update(data, self.phys_dom(phys_name, pool_name))
@@ -791,19 +837,24 @@ class ApicKubeConfig(object):
             cluster_l3out_vrf_details = self.get_cluster_l3out_vrf_details()
             cluster_l3out_tn = cluster_l3out_vrf_details["tenant"]
             cluster_l3out_vrf = cluster_l3out_vrf_details["name"]
-            print("INFO: cluster_l3out is under tenant: %s, vrf: %s " % (cluster_l3out_tn, cluster_l3out_vrf))
+            print("INFO: cluster_l3out is under tenant: %s, vrf: %s " %
+                  (cluster_l3out_tn, cluster_l3out_vrf))
             if cluster_l3out_vrf_details["create_tenant"]:
                 if self.apic and not self.apic.get_tenant(cluster_l3out_tn):
-                    update(data, self.cluster_l3out_tenant(cluster_l3out_vrf_details))
+                    update(data, self.cluster_l3out_tenant(
+                        cluster_l3out_vrf_details))
                 else:
                     # TODO: temp UT fix, use mock
-                    update(data, self.cluster_l3out_tenant(cluster_l3out_vrf_details))
+                    update(data, self.cluster_l3out_tenant(
+                        cluster_l3out_vrf_details))
             if cluster_l3out_vrf_details["create_vrf"]:
                 if self.apic and not self.apic.get_tenant_vrf(cluster_l3out_tn, cluster_l3out_vrf):
-                    update(data, self.cluster_l3out_vrf(cluster_l3out_vrf_details))
+                    update(data, self.cluster_l3out_vrf(
+                        cluster_l3out_vrf_details))
                 else:
                     # TODO: temp UT fix, use mock
-                    update(data, self.cluster_l3out_vrf(cluster_l3out_vrf_details))
+                    update(data, self.cluster_l3out_vrf(
+                        cluster_l3out_vrf_details))
             update(data, self.create_cluster_l3out(cluster_l3out_vrf_details))
             update(data, self.l3_dom_calico())
             update(data, self.pdom_pool_calico())
@@ -814,9 +865,12 @@ class ApicKubeConfig(object):
             node_map = {}
             tenant = cluster_l3out_vrf_details["tenant"]
             if self.apic is not None:
-                ext_l3out_lnodep = self.apic.get_ext_l3out_lnodep(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"])
-                node_ids = self.apic.get_configured_node_dns(tenant, self.config["aci_config"]["cluster_l3out"]["name"], self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"])
-                node_map = self.apic.get_extl3out_configured_nodes_router_id(self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"], ext_l3out_lnodep)
+                ext_l3out_lnodep = self.apic.get_ext_l3out_lnodep(
+                    self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"])
+                node_ids = self.apic.get_configured_node_dns(
+                    tenant, self.config["aci_config"]["cluster_l3out"]["name"], self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"])
+                node_map = self.apic.get_extl3out_configured_nodes_router_id(
+                    self.config["aci_config"]["vrf"]["tenant"], self.config["aci_config"]["l3out"]["name"], ext_l3out_lnodep)
 
             else:
                 # For "calico" flavor based UT
@@ -825,20 +879,24 @@ class ApicKubeConfig(object):
             for rack in self.config["topology"]["rack"]:
                 for leaf in rack["leaf"]:
                     if "local_ip" in leaf and "id" in leaf:
-                        update(data, self.calico_floating_svi(rack["aci_pod_id"], leaf["id"], leaf["local_ip"], tenant))
+                        update(data, self.calico_floating_svi(
+                            rack["aci_pod_id"], leaf["id"], leaf["local_ip"], tenant))
                         if len(node_map) == 0 and ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
-                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"], tenant))
+                            update(data, self.add_configured_nodes(
+                                rack["aci_pod_id"], leaf["id"], tenant))
             # If the node already has a router_id in external l3out, then use the same router_id
             if len(node_map) != 0:
                 for node_dn, router_id in node_map.items():
-                    update(data, self.add_configured_nodes_with_routerid(rack["aci_pod_id"], node_dn, router_id, tenant))
+                    update(data, self.add_configured_nodes_with_routerid(
+                        rack["aci_pod_id"], node_dn, router_id, tenant))
                     if node_dn not in node_ids:
                         node_ids.append(node_dn)
                 # Finally add all other nodes which arent added.
                 for rack in self.config["topology"]["rack"]:
                     for leaf in rack["leaf"]:
                         if ("topology/pod-%s/node-%s" % (rack["aci_pod_id"], leaf["id"])) not in node_ids:
-                            update(data, self.add_configured_nodes(rack["aci_pod_id"], leaf["id"], tenant))
+                            update(data, self.add_configured_nodes(
+                                rack["aci_pod_id"], leaf["id"], tenant))
 
             update(data, self.l3out_filter())
 
@@ -919,9 +977,11 @@ class ApicKubeConfig(object):
             data[key]["attributes"]["annotation"] = ann
 
         if is_cno_enabled(self.config) and key == "fvAp":
-            tenant_name = self.config["aci_config"].get("tenant", None).get("name", None)
+            tenant_name = self.config["aci_config"].get(
+                "tenant", None).get("name", None)
             if self.apic and tenant_name:
-                app_profile = self.ACI_CHAINED_PREFIX + self.config["aci_config"]["system_id"]
+                app_profile = self.ACI_CHAINED_PREFIX + \
+                    self.config["aci_config"]["system_id"]
                 if self.apic.get_ap(tenant_name, app_profile):
                     data[key]["attributes"]["annotation"] = ""
 
@@ -935,11 +995,14 @@ class ApicKubeConfig(object):
         accProvisionInput = yaml.safe_dump(input_yaml, sort_keys=False)
         key_data = cert_data = ''
         if self.config["aci_config"]["sync_login"]["key_data"]:
-            key_data = self.config["aci_config"]["sync_login"]["key_data"].decode('ascii')
+            key_data = self.config["aci_config"]["sync_login"]["key_data"].decode(
+                'ascii')
         if self.config["aci_config"]["sync_login"]["cert_data"]:
-            cert_data = self.config["aci_config"]["sync_login"]["cert_data"].decode('ascii')
+            cert_data = self.config["aci_config"]["sync_login"]["cert_data"].decode(
+                'ascii')
 
-        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont/info.json" % (vmm_type, vmm_name, vmm_name)
+        path = "/api/node/mo/comp/prov-%s/ctrlr-[%s]-%s/injcont/info.json" % (
+            vmm_type, vmm_name, vmm_name)
         data = collections.OrderedDict(
             [
                 (
@@ -1136,8 +1199,10 @@ class ApicKubeConfig(object):
                                             collections.OrderedDict(
                                                 [
                                                     ("allocMode", "static"),
-                                                    ("from", "vlan-%s" % kubeapi_vlan),
-                                                    ("to", "vlan-%s" % kubeapi_vlan),
+                                                    ("from", "vlan-%s" %
+                                                     kubeapi_vlan),
+                                                    ("to", "vlan-%s" %
+                                                     kubeapi_vlan),
                                                 ]
                                             ),
                                         )
@@ -1168,7 +1233,8 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", vpool_name), ("allocMode", "dynamic")]
+                                    [("name", vpool_name),
+                                     ("allocMode", "dynamic")]
                                 ),
                             ),
                             (
@@ -1237,7 +1303,8 @@ class ApicKubeConfig(object):
                                 collections.OrderedDict(
                                     [
                                         ("name", mpool_name),
-                                        ("dn", "uni/infra/maddrns-%s" % mpool_name),
+                                        ("dn", "uni/infra/maddrns-%s" %
+                                         mpool_name),
                                     ]
                                 ),
                             ),
@@ -1258,7 +1325,8 @@ class ApicKubeConfig(object):
                                                                         "from",
                                                                         mcast_start,
                                                                     ),
-                                                                    ("to", mcast_end),
+                                                                    ("to",
+                                                                     mcast_end),
                                                                 ]
                                                             ),
                                                         )
@@ -1476,9 +1544,11 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("name", vmm_name),
+                                                                    ("name",
+                                                                     vmm_name),
                                                                     ("mode", mode),
-                                                                    ("scope", scope),
+                                                                    ("scope",
+                                                                     scope),
                                                                     (
                                                                         "hostOrIp",
                                                                         kube_controller,
@@ -1584,7 +1654,8 @@ class ApicKubeConfig(object):
         nvmm_portgroup = self.config["aci_config"]["vmm_domain"]["nested_inside"]["portgroup"]
         if nvmm_portgroup is None:
             nvmm_portgroup = system_id
-        path, data = self.build_nested_dom_data(nvmm_portgroup, True, True, True)
+        path, data = self.build_nested_dom_data(
+            nvmm_portgroup, True, True, True)
         return path, data
 
     def add_apivlan_for_second_portgroup(self):
@@ -1610,12 +1681,15 @@ class ApicKubeConfig(object):
         if is_vlan_in_pool(self.apic, vpath, int(kubeapi_vlan)):
             prov_apic = self.config["provision"]["prov_apic"]
             if prov_apic:
-                warn(f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block creation.")
+                warn(
+                    f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block creation.")
             else:
-                warn(f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block deletion.")
+                warn(
+                    f"VLAN {kubeapi_vlan} already present in pool vlan-range {vpath}, skipping block deletion.")
             return "", None
 
-        path = "/api/node/mo/%s/from-[vlan-%s]-to-[vlan-%s].json" % (vpath, kubeapi_vlan, kubeapi_vlan)
+        path = "/api/node/mo/%s/from-[vlan-%s]-to-[vlan-%s].json" % (
+            vpath, kubeapi_vlan, kubeapi_vlan)
         data = collections.OrderedDict(
             [
                 (
@@ -1626,11 +1700,13 @@ class ApicKubeConfig(object):
                                 "attributes",
                                 collections.OrderedDict(
                                     [
-                                        ("dn", "%s/from-[vlan-%s]-to-[vlan-%s]" % (vpath, kubeapi_vlan, kubeapi_vlan)),
+                                        ("dn", "%s/from-[vlan-%s]-to-[vlan-%s]" %
+                                         (vpath, kubeapi_vlan, kubeapi_vlan)),
                                         ("allocMode", "static"),
                                         ("from", "vlan-%s" % kubeapi_vlan),
                                         ("to", "vlan-%s" % kubeapi_vlan),
-                                        ("rn", "from-[vlan-%s]-to-[vlan-%s]" % (kubeapi_vlan, kubeapi_vlan))
+                                        ("rn", "from-[vlan-%s]-to-[vlan-%s]" %
+                                         (kubeapi_vlan, kubeapi_vlan))
                                     ]
                                 ),
                             ),
@@ -1695,7 +1771,8 @@ class ApicKubeConfig(object):
 
         nvmm_elag_name = self.config["aci_config"]["vmm_domain"]["nested_inside"]["elag_name"]
         if nvmm_elag_name:
-            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (nvmm_name, nvmm_elag_name)
+            nvmm_elag_dn = "uni/vmmp-VMware/dom-%s/vswitchpolcont/enlacplagp-%s" % (
+                nvmm_name, nvmm_elag_name)
             data["fvRsDomAtt"]["children"].append(
                 collections.OrderedDict(
                     [
@@ -1726,8 +1803,10 @@ class ApicKubeConfig(object):
                                                                     collections.OrderedDict(
                                                                         [
                                                                             ("annotation", ""),
-                                                                            ("tDn", nvmm_elag_dn),
-                                                                            ("userdom", ":all:")
+                                                                            ("tDn",
+                                                                             nvmm_elag_dn),
+                                                                            ("userdom",
+                                                                             ":all:")
                                                                         ]
                                                                     )
                                                                 )
@@ -1799,7 +1878,8 @@ class ApicKubeConfig(object):
                                         "attributes",
                                         collections.OrderedDict(
                                             [
-                                                ("from", "vlan-%d" % infra_vlan),
+                                                ("from", "vlan-%d" %
+                                                 infra_vlan),
                                                 ("to", "vlan-%d" % infra_vlan),
                                             ]
                                         ),
@@ -1824,8 +1904,10 @@ class ApicKubeConfig(object):
                                         "attributes",
                                         collections.OrderedDict(
                                             [
-                                                ("from", "vlan-%d" % service_vlan),
-                                                ("to", "vlan-%d" % service_vlan),
+                                                ("from", "vlan-%d" %
+                                                 service_vlan),
+                                                ("to", "vlan-%d" %
+                                                 service_vlan),
                                             ]
                                         ),
                                     )
@@ -1849,8 +1931,10 @@ class ApicKubeConfig(object):
                                         "attributes",
                                         collections.OrderedDict(
                                             [
-                                                ("from", "vlan-%d" % kubeapi_vlan),
-                                                ("to", "vlan-%d" % kubeapi_vlan),
+                                                ("from", "vlan-%d" %
+                                                 kubeapi_vlan),
+                                                ("to", "vlan-%d" %
+                                                 kubeapi_vlan),
                                             ]
                                         ),
                                     )
@@ -1878,7 +1962,8 @@ class ApicKubeConfig(object):
                                                     "from",
                                                     "vlan-%d" % vlan_range["start"],
                                                 ),
-                                                ("to", "vlan-%d" % vlan_range["end"]),
+                                                ("to", "vlan-%d" %
+                                                 vlan_range["end"]),
                                             ]
                                         ),
                                     )
@@ -1982,7 +2067,8 @@ class ApicKubeConfig(object):
                                     [
                                         (
                                             "attributes",
-                                            collections.OrderedDict([("name", "default")]),
+                                            collections.OrderedDict(
+                                                [("name", "default")]),
                                         ),
                                         (
                                             "children",
@@ -2041,7 +2127,8 @@ class ApicKubeConfig(object):
                                     [
                                         (
                                             "attributes",
-                                            collections.OrderedDict([("name", "default")]),
+                                            collections.OrderedDict(
+                                                [("name", "default")]),
                                         ),
                                         (
                                             "children",
@@ -2104,7 +2191,8 @@ class ApicKubeConfig(object):
         else:
             rsfun = (
                 base + "/gen-default/rsfuncToEpg-"
-                "[uni/tn-%s/ap-%s/epg-%snodes].json" % (tn_name, aci_system_id, self.ACI_CHAINED_PREFIX)
+                "[uni/tn-%s/ap-%s/epg-%snodes].json" % (
+                    tn_name, aci_system_id, self.ACI_CHAINED_PREFIX)
             )
         self.annotateApicObjects(data)
         return path, data, rsphy, rsfun
@@ -2279,7 +2367,8 @@ class ApicKubeConfig(object):
                                     [
                                         (
                                             "attributes",
-                                            collections.OrderedDict([("name", "default")]),
+                                            collections.OrderedDict(
+                                                [("name", "default")]),
                                         ),
                                         (
                                             "children",
@@ -2338,7 +2427,8 @@ class ApicKubeConfig(object):
                                     [
                                         (
                                             "attributes",
-                                            collections.OrderedDict([("name", "default")]),
+                                            collections.OrderedDict(
+                                                [("name", "default")]),
                                         ),
                                         (
                                             "children",
@@ -2391,7 +2481,8 @@ class ApicKubeConfig(object):
                 )
 
         base = "/api/mo/uni/infra/attentp-%s" % aep_name
-        rsvmm = base + "/rsdomP-[uni/vmmp-%s/dom-%s].json" % (vmm_type, vmm_name)
+        rsvmm = base + \
+            "/rsdomP-[uni/vmmp-%s/dom-%s].json" % (vmm_type, vmm_name)
         rsphy = base + "/rsdomP-[uni/phys-%s].json" % phys_name
 
         if self.associate_aep_to_nested_inside_domain:
@@ -2422,7 +2513,8 @@ class ApicKubeConfig(object):
                     ]
                 )
             )
-            rsnvmm = base + "/rsdomP-[uni/vmmp-%s/dom-%s].json" % (nvmm_type, nvmm_name)
+            rsnvmm = base + \
+                "/rsdomP-[uni/vmmp-%s/dom-%s].json" % (nvmm_type, nvmm_name)
             self.annotateApicObjects(data)
             return path, data, rsvmm, rsnvmm, rsphy
         else:
@@ -2434,7 +2526,8 @@ class ApicKubeConfig(object):
             else:
                 rsfun = (
                     base + "/gen-default/rsfuncToEpg-"
-                    "[uni/tn-%s/ap-%s/epg-%snodes].json" % (tn_name, aci_system_id, aci_prefix)
+                    "[uni/tn-%s/ap-%s/epg-%snodes].json" % (
+                        tn_name, aci_system_id, aci_prefix)
                 )
             self.annotateApicObjects(data)
             return path, data, rsvmm, rsphy, rsfun
@@ -2672,8 +2765,10 @@ class ApicKubeConfig(object):
             ]
         )
 
-        flt = "/api/mo/uni/tn-%s/flt-%s-allow-all-filter.json" % (vrf_tenant, system_id)
-        brc = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+        flt = "/api/mo/uni/tn-%s/flt-%s-allow-all-filter.json" % (
+            vrf_tenant, system_id)
+        brc = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (
+            vrf_tenant, system_id)
         self.annotateApicObjects(data)
         return path, data, flt, brc
 
@@ -2681,7 +2776,8 @@ class ApicKubeConfig(object):
         system_id = self.config["aci_config"]["system_id"]
         vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
 
-        path = "/api/mo/uni/tn-%s/flt-%s-allow-all-filter.json" % (vrf_tenant, system_id)
+        path = "/api/mo/uni/tn-%s/flt-%s-allow-all-filter.json" % (
+            vrf_tenant, system_id)
         data = collections.OrderedDict(
             [
                 (
@@ -2740,7 +2836,8 @@ class ApicKubeConfig(object):
         tenant = self.config["aci_config"]["cluster_l3out"]["vrf"]["tenant"]
         vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
 
-        path = "/api/mo/uni/tn-%s/cif-%s-l3out-allow-all-export.json" % (tenant, system_id)
+        path = "/api/mo/uni/tn-%s/cif-%s-l3out-allow-all-export.json" % (
+            tenant, system_id)
         data = collections.OrderedDict(
             [
                 (
@@ -2803,7 +2900,8 @@ class ApicKubeConfig(object):
         system_id = self.config["aci_config"]["system_id"]
         vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
 
-        path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+        path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (
+            vrf_tenant, system_id)
         data = collections.OrderedDict(
             [
                 (
@@ -2901,7 +2999,8 @@ class ApicKubeConfig(object):
         system_id = self.config["aci_config"]["system_id"]
         vrf_tenant = self.config["aci_config"]["vrf"]["tenant"]
 
-        path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (vrf_tenant, system_id)
+        path = "/api/mo/uni/tn-%s/brc-%s-l3out-allow-all.json" % (
+            vrf_tenant, system_id)
         data = collections.OrderedDict(
             [
                 (
@@ -3128,7 +3227,8 @@ class ApicKubeConfig(object):
                     "aaaUser",
                     collections.OrderedDict(
                         [
-                            ("attributes", collections.OrderedDict([("name", name)])),
+                            ("attributes", collections.OrderedDict(
+                                [("name", name)])),
                             (
                                 "children",
                                 [
@@ -3223,7 +3323,8 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", ap_name), ("dn", "uni/tn-common/ap-%s" % ap_name)]
+                                    [("name", ap_name),
+                                     ("dn", "uni/tn-common/ap-%s" % ap_name)]
                                 ),
                             ),
                             (
@@ -3246,7 +3347,8 @@ class ApicKubeConfig(object):
         phys_name = self.config["aci_config"]["physical_domain"]["domain"]
         kubeapi_vlan = self.config["net_config"]["kubeapi_vlan"]
         kube_vrf = self.config["aci_config"]["vrf"]["name"]
-        kube_l3out = self.config["aci_config"].get("l3out", None).get("name", None)
+        kube_l3out = self.config["aci_config"].get(
+            "l3out", None).get("name", None)
         node_subnets = self.config["net_config"].get("node_subnet", [])
         if not isinstance(node_subnets, list):
             node_subnets = [node_subnets]
@@ -3267,7 +3369,8 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name)]
+                                    [("name", tn_name),
+                                     ("dn", "uni/tn-%s" % tn_name)]
                                 ),
                             ),
                             (
@@ -3509,7 +3612,8 @@ class ApicKubeConfig(object):
                                     (
                                         "attributes",
                                         collections.OrderedDict(
-                                            [("name", dhcp_relay_label), ("owner", "infra")]
+                                            [("name", dhcp_relay_label),
+                                             ("owner", "infra")]
                                         ),
                                     )
                                 ]
@@ -3541,11 +3645,13 @@ class ApicKubeConfig(object):
 
                 if "fvBD" in child.keys() and child["fvBD"]["attributes"]["name"] == node_bd_name:
                     bd_object = child["fvBD"]["children"]
-                    node_subnets = self.config.get("net_config", {}).get("node_subnet") or []
+                    node_subnets = self.config.get(
+                        "net_config", {}).get("node_subnet") or []
                     if not is_vmm_lite(self.config) or node_subnets:
                         for node_subnet in node_subnets:
                             node_subnet_obj = collections.OrderedDict(
-                                [("attributes", collections.OrderedDict([("ip", node_subnet)]))]
+                                [("attributes", collections.OrderedDict(
+                                    [("ip", node_subnet)]))]
                             )
                             bd_object.append(
                                 collections.OrderedDict(
@@ -3684,7 +3790,8 @@ class ApicKubeConfig(object):
                             [
                                 (
                                     "attributes",
-                                    collections.OrderedDict([("tnVzBrCPName", "%sdns" % contract_prefix)]),
+                                    collections.OrderedDict(
+                                        [("tnVzBrCPName", "%sdns" % contract_prefix)]),
                                 )
                             ]
                         ),
@@ -3700,7 +3807,8 @@ class ApicKubeConfig(object):
                                 (
                                     "attributes",
                                     collections.OrderedDict(
-                                        [("tnVzBrCPName", "%shealth-check" % contract_prefix)]
+                                        [("tnVzBrCPName", "%shealth-check" %
+                                          contract_prefix)]
                                     ),
                                 )
                             ]
@@ -3716,7 +3824,8 @@ class ApicKubeConfig(object):
                             [
                                 (
                                     "attributes",
-                                    collections.OrderedDict([("tnVzBrCPName", "%sicmp" % contract_prefix)]),
+                                    collections.OrderedDict(
+                                        [("tnVzBrCPName", "%sicmp" % contract_prefix)]),
                                 )
                             ]
                         ),
@@ -3731,7 +3840,8 @@ class ApicKubeConfig(object):
                             [
                                 (
                                     "attributes",
-                                    collections.OrderedDict([("tnVzBrCPName", "%sistio" % contract_prefix)]),
+                                    collections.OrderedDict(
+                                        [("tnVzBrCPName", "%sistio" % contract_prefix)]),
                                 )
                             ]
                         ),
@@ -3768,7 +3878,8 @@ class ApicKubeConfig(object):
                                     (
                                         "attributes",
                                         collections.OrderedDict(
-                                            [("tnVzBrCPName", "%sapi" % api_contract_prefix)]
+                                            [("tnVzBrCPName", "%sapi" %
+                                              api_contract_prefix)]
                                         ),
                                     )
                                 ]
@@ -3811,7 +3922,8 @@ class ApicKubeConfig(object):
                                     (
                                         "attributes",
                                         collections.OrderedDict(
-                                            [("tnNdPfxPolName", "%snd-ra-policy" % v6_sub_prefix)]
+                                            [("tnNdPfxPolName",
+                                              "%snd-ra-policy" % v6_sub_prefix)]
                                         ),
                                     )
                                 ]
@@ -3835,7 +3947,8 @@ class ApicKubeConfig(object):
                             (
                                 "attributes",
                                 collections.OrderedDict(
-                                    [("name", tn_name), ("dn", "uni/tn-%s" % tn_name)]
+                                    [("name", tn_name),
+                                     ("dn", "uni/tn-%s" % tn_name)]
                                 ),
                             ),
                             (
@@ -4478,7 +4591,8 @@ class ApicKubeConfig(object):
                                                                     ),
                                                                     (
                                                                         "arpFlood",
-                                                                        yesno(True),
+                                                                        yesno(
+                                                                            True),
                                                                     ),
                                                                 ]
                                                             ),
@@ -4834,7 +4948,8 @@ class ApicKubeConfig(object):
                                                         (
                                                             "attributes",
                                                             collections.OrderedDict(
-                                                                [("name", "%sdns-filter" % filter_prefix)]
+                                                                [("name", "%sdns-filter" %
+                                                                  filter_prefix)]
                                                             ),
                                                         ),
                                                         (
@@ -5316,7 +5431,8 @@ class ApicKubeConfig(object):
                                                         (
                                                             "attributes",
                                                             collections.OrderedDict(
-                                                                [("name", "%sapi" % api_contract_prefix)]
+                                                                [("name", "%sapi" %
+                                                                  api_contract_prefix)]
                                                             ),
                                                         ),
                                                         (
@@ -5559,7 +5675,8 @@ class ApicKubeConfig(object):
                                                         (
                                                             "attributes",
                                                             collections.OrderedDict(
-                                                                [("name", "%sdns" % contract_prefix)]
+                                                                [("name", "%sdns" %
+                                                                  contract_prefix)]
                                                             ),
                                                         ),
                                                         (
@@ -5638,7 +5755,8 @@ class ApicKubeConfig(object):
                                                         (
                                                             "attributes",
                                                             collections.OrderedDict(
-                                                                [("name", "%sicmp" % contract_prefix)]
+                                                                [("name", "%sicmp" %
+                                                                  contract_prefix)]
                                                             ),
                                                         ),
                                                         (
@@ -5717,7 +5835,8 @@ class ApicKubeConfig(object):
                                                         (
                                                             "attributes",
                                                             collections.OrderedDict(
-                                                                [("name", "%sistio" % contract_prefix)]
+                                                                [("name", "%sistio" %
+                                                                  contract_prefix)]
                                                             ),
                                                         ),
                                                         (
@@ -5905,7 +6024,8 @@ class ApicKubeConfig(object):
                                             [
                                                 ("ctrl", "on-link,router-address"),
                                                 ("lifetime", "2592000"),
-                                                ("name", "%snd-ra-policy" % v6_sub_prefix),
+                                                ("name", "%snd-ra-policy" %
+                                                 v6_sub_prefix),
                                                 ("prefLifetime", "604800"),
                                             ]
                                         ),
@@ -5931,7 +6051,8 @@ class ApicKubeConfig(object):
                                 (
                                     "attributes",
                                     collections.OrderedDict(
-                                        [("name", dhcp_relay_label), ("owner", "infra")]
+                                        [("name", dhcp_relay_label),
+                                         ("owner", "infra")]
                                     ),
                                 )
                             ]
@@ -5971,22 +6092,28 @@ class ApicKubeConfig(object):
                 openshift_flavor_specific_handling(data, items, system_id, old_naming, self.ACI_PREFIX, default_provide_api,
                                                    kube_api_entries, api_filter_prefix, dns_entries, filter_prefix)
                 if flavor.startswith("openshift") and self.is_ocp_version_4_8_and_above(flavor):
-                    add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix)
+                    add_l3out_allow_all_for_istio_epg(
+                        data, system_id, epg_prefix)
             elif flavor == "docker-ucp-3.0":
-                dockerucp_flavor_specific_handling(data, items, api_filter_prefix)
+                dockerucp_flavor_specific_handling(
+                    data, items, api_filter_prefix)
             elif flavor.startswith("RKE"):
-                rke_flavor_specific_handling(aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
+                rke_flavor_specific_handling(
+                    aci_prefix, data, items, api_filter_prefix, self.config["rke_config"])
             elif flavor == "k8s-aci-cilium":
-                k8s_cilium_aci_specific_handling(self.ACI_PREFIX, old_naming, data, items)
+                k8s_cilium_aci_specific_handling(
+                    self.ACI_PREFIX, old_naming, data, items)
 
         # Adding prometheus opflex-agent contract for all flavors
-        add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filter_prefix)
+        add_prometheus_opflex_agent_contract(
+            data, epg_prefix, contract_prefix, filter_prefix)
 
         if self.config.get("cilium_chaining"):
             if self.config["cilium_chaining"].get("enable"):
                 if self.config["cilium_chaining"]["enable"]:
                     # Adding hubble-peer contract for all flavors
-                    add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix)
+                    add_hubble_4244_allow(
+                        data, epg_prefix, contract_prefix, filter_prefix)
 
         self.annotateApicObjects(data, pre_existing_tenant)
         return path, data
@@ -6013,13 +6140,15 @@ class ApicKubeConfig(object):
             children.append(
                 aci_obj("fvRsDomAtt", [('encap', "vlan-%s" % e), ('tDn', "uni/phys-%s" % d)]))
         for (t, n) in vmm_domains:
-            children.append(aci_obj("fvRsDomAtt", [('tDn', "uni/vmmp-%s/dom-%s" % (t, n))]))
+            children.append(
+                aci_obj("fvRsDomAtt", [('tDn', "uni/vmmp-%s/dom-%s" % (t, n))]))
         return aci_obj("fvAEPg", [('name', name), ('_children', children)])
 
     def bd(self, name, vrf_name, subnets=[], l3outs=[]):
         children = []
         for sn in subnets:
-            children.append(aci_obj("fvSubnet", [('ip', sn), ('scope', "public")]))
+            children.append(
+                aci_obj("fvSubnet", [('ip', sn), ('scope', "public")]))
         if vrf_name:
             children.append(aci_obj("fvRsCtx", [('tnFvCtxName', vrf_name)]))
         for l in l3outs:
@@ -6037,7 +6166,8 @@ class ApicKubeConfig(object):
         for s in subjects:
             filts = []
             for f in s.get("filters", []):
-                filts.append(aci_obj("vzRsSubjFiltAtt", [('tnVzFilterName', f)]))
+                filts.append(aci_obj("vzRsSubjFiltAtt",
+                             [('tnVzFilterName', f)]))
             subj = aci_obj(
                 "vzSubj",
                 [('name', s["name"]),
@@ -6262,7 +6392,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnFvCtxName", vrf_name),
+                                                                    ("tnFvCtxName",
+                                                                     vrf_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6282,7 +6413,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tDn", "uni/l3dom-%s" % l3_dom_name),
+                                                                    ("tDn", "uni/l3dom-%s" %
+                                                                     l3_dom_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6301,7 +6433,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("name", lnodep),
+                                                                    ("name",
+                                                                     lnodep),
                                                                 ]
                                                             ),
                                                         ),
@@ -6426,7 +6559,8 @@ class ApicKubeConfig(object):
         lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         node_dn = "topology/pod-%s/node-%s" % (pod_id, node_id)
         router_id = "1.1.4." + str(node_id)
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, l3out_name, lnodep, node_dn)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (
+            l3out_tn, l3out_name, lnodep, node_dn)
         data = collections.OrderedDict(
             [
                 (
@@ -6454,7 +6588,8 @@ class ApicKubeConfig(object):
     def add_configured_nodes_with_routerid(self, pod_id, node_dn, router_id, l3out_tn):
         cluster_l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         lnodep = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (l3out_tn, cluster_l3out_name, lnodep, node_dn)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/rsnodeL3OutAtt-[%s].json" % (
+            l3out_tn, cluster_l3out_name, lnodep, node_dn)
         data = collections.OrderedDict(
             [
                 (
@@ -6515,7 +6650,8 @@ class ApicKubeConfig(object):
             password = None
         logical_node_profile = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
         int_prof = self.config["aci_config"]["cluster_l3out"]["svi"]["int_prof_name"]
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s].json" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s].json" % (
+            l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)
         data = collections.OrderedDict(
             [
                 (
@@ -6526,7 +6662,8 @@ class ApicKubeConfig(object):
                                 "attributes",
                                 collections.OrderedDict(
                                     [
-                                        ("dn", "uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s]" % (l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)),
+                                        ("dn", "uni/tn-%s/out-%s/lnodep-%s/lifp-%s/vlifp-[%s]-[vlan-%s]" % (
+                                            l3out_tn, l3out_name, logical_node_profile, int_prof, node_dn, vlan_id)),
                                         ("addr", primary_addr),
                                         ("encap", "vlan-%s" % vlan_id),
                                         ("nodeDn", node_dn),
@@ -6551,11 +6688,16 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tDn", "uni/phys-%s" % physical_domain_name),
-                                                                    ("floatingAddr", floating_ip),
-                                                                    ("forgedTransmit", "Disabled"),
-                                                                    ("promMode", "Disabled"),
-                                                                    ("macChange", "Disabled")
+                                                                    ("tDn", "uni/phys-%s" %
+                                                                     physical_domain_name),
+                                                                    ("floatingAddr",
+                                                                     floating_ip),
+                                                                    ("forgedTransmit",
+                                                                     "Disabled"),
+                                                                    ("promMode",
+                                                                     "Disabled"),
+                                                                    ("macChange",
+                                                                     "Disabled")
                                                                 ]
                                                             ),
                                                         ),
@@ -6575,7 +6717,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("addr", secondary_ip)
+                                                                    ("addr",
+                                                                     secondary_ip)
                                                                 ]
                                                             ),
                                                         ),
@@ -6595,7 +6738,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("addr", node_subnet),
+                                                                    ("addr",
+                                                                     node_subnet),
                                                                     ("ctrl", "as-override,dis-peer-as-check")
                                                                 ]
                                                             ),
@@ -6613,7 +6757,8 @@ class ApicKubeConfig(object):
                                                                                         "attributes",
                                                                                         collections.OrderedDict(
                                                                                             [
-                                                                                                ("asn", str(remote_asn)),
+                                                                                                ("asn", str(
+                                                                                                    remote_asn)),
                                                                                             ]
                                                                                         ),
                                                                                     ),
@@ -6700,7 +6845,8 @@ class ApicKubeConfig(object):
         external_svc_subnet = self.config["net_config"]["extern_dynamic"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
         l3out_rsprov_name = "%s-l3out-allow-all-export" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
         data = collections.OrderedDict(
             [
@@ -6730,7 +6876,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzCPIfName", l3out_rsprov_name),
+                                                                    ("tnVzCPIfName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6751,8 +6898,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", external_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -6773,14 +6922,16 @@ class ApicKubeConfig(object):
 
     def ext_epg_svc_global_scope_contract(self):
         system_id = self.config["aci_config"]["system_id"]
-        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get("tenant")
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get(
+            "tenant")
         if not l3out_tn:
             l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         external_svc_subnet = self.config["net_config"]["extern_dynamic"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
         l3out_rsprov_name = "%s-l3out-allow-all" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
         data = collections.OrderedDict(
             [
@@ -6810,7 +6961,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                    ("tnVzBrCPName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6831,8 +6983,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", external_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -6858,7 +7012,8 @@ class ApicKubeConfig(object):
         external_svc_subnet = self.config["net_config"]["extern_dynamic"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network_svc"]
         l3out_rsprov_name = "%s-l3out-allow-all" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         data = collections.OrderedDict(
             [
                 (
@@ -6887,7 +7042,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                    ("tnVzBrCPName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6908,7 +7064,8 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", external_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
                                                                     ("scope", "export-rtctrl,import-rtctrl,import-security"),
                                                                 ]
                                                             ),
@@ -6937,7 +7094,8 @@ class ApicKubeConfig(object):
         cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network"]
         l3out_rsprov_name = "%s-l3out-allow-all-export" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
         data = collections.OrderedDict(
             [
@@ -6967,7 +7125,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzCPIfName", l3out_rsprov_name),
+                                                                    ("tnVzCPIfName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -6987,9 +7146,12 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("ip",
+                                                                     pod_subnet),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7010,8 +7172,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", node_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7032,8 +7196,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", cluster_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7055,7 +7221,8 @@ class ApicKubeConfig(object):
     def ext_epg_int_global_scope_contract(self):
         system_id = self.config["aci_config"]["system_id"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get("tenant")
+        l3out_tn = self.config["aci_config"]["cluster_l3out"]["vrf"].get(
+            "tenant")
         if not l3out_tn:
             l3out_tn = self.config["aci_config"]["vrf"]["tenant"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
@@ -7063,7 +7230,8 @@ class ApicKubeConfig(object):
         cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network"]
         l3out_rsprov_name = "%s-l3out-allow-all" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         scope = "export-rtctrl,import-rtctrl,import-security,shared-security,shared-rtctrl"
         data = collections.OrderedDict(
             [
@@ -7093,7 +7261,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                    ("tnVzBrCPName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -7113,9 +7282,12 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("ip",
+                                                                     pod_subnet),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7136,8 +7308,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", node_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7158,8 +7332,10 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", cluster_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
-                                                                    ("scope", scope),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
+                                                                    ("scope",
+                                                                     scope),
                                                                 ]
                                                             ),
                                                         ),
@@ -7188,7 +7364,8 @@ class ApicKubeConfig(object):
         cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
         ext_epg = self.config["aci_config"]["cluster_l3out"]["svi"]["external_network"]
         l3out_rsprov_name = "%s-l3out-allow-all" % system_id
-        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (l3out_tn, l3out_name, ext_epg)
+        path = "/api/mo/uni/tn-%s/out-%s/instP-%s.json" % (
+            l3out_tn, l3out_name, ext_epg)
         data = collections.OrderedDict(
             [
                 (
@@ -7217,7 +7394,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnVzBrCPName", l3out_rsprov_name),
+                                                                    ("tnVzBrCPName",
+                                                                     l3out_rsprov_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -7237,8 +7415,10 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("ip",
+                                                                     pod_subnet),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
                                                                     ("scope", "export-rtctrl,import-rtctrl,import-security"),
                                                                 ]
                                                             ),
@@ -7281,7 +7461,8 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", cluster_svc_subnet),
-                                                                    ("aggregate", "shared-rtctrl"),
+                                                                    ("aggregate",
+                                                                     "shared-rtctrl"),
                                                                     ("scope", "export-rtctrl,import-rtctrl,import-security"),
                                                                 ]
                                                             ),
@@ -7331,7 +7512,8 @@ class ApicKubeConfig(object):
     def bgp_timers(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
-        path = "/api/mo/uni/tn-%s/bgpCtxP-%s-Timers.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/bgpCtxP-%s-Timers.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7363,7 +7545,8 @@ class ApicKubeConfig(object):
     def bgp_relax_as_policy(self):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
-        path = "/api/mo/uni/tn-%s/bestpath-%s-Relax-AS.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/bestpath-%s-Relax-AS.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7392,7 +7575,8 @@ class ApicKubeConfig(object):
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         logical_node_profile = self.config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"]
-        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (l3out_tn, l3out_name, logical_node_profile)
+        path = "/api/mo/uni/tn-%s/out-%s/lnodep-%s/protp.json" % (
+            l3out_tn, l3out_name, logical_node_profile)
         data = collections.OrderedDict(
             [
                 (
@@ -7420,7 +7604,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnBgpCtxPolName", "%s-Timers" % l3out_name),
+                                                                    ("tnBgpCtxPolName",
+                                                                     "%s-Timers" % l3out_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -7439,7 +7624,8 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("tnBgpBestPathCtrlPolName", "%s-Relax-AS" % l3out_name),
+                                                                    ("tnBgpBestPathCtrlPolName",
+                                                                     "%s-Relax-AS" % l3out_name),
                                                                 ]
                                                             ),
                                                         ),
@@ -7493,7 +7679,8 @@ class ApicKubeConfig(object):
         l3out_tn = cluster_l3out_vrf_details["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         l3out_vrf = cluster_l3out_vrf_details["name"]
-        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv4-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
+        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv4-ucast.json" % (
+            l3out_tn, l3out_vrf, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7523,7 +7710,8 @@ class ApicKubeConfig(object):
         l3out_tn = cluster_l3out_vrf_details["tenant"]
         l3out_vrf = cluster_l3out_vrf_details["name"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv6-ucast.json" % (l3out_tn, l3out_vrf, l3out_name)
+        path = "/api/mo/uni/tn-%s/ctx-%s/rsctxToBgpCtxAfPol-[%s]-ipv6-ucast.json" % (
+            l3out_tn, l3out_vrf, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7551,7 +7739,8 @@ class ApicKubeConfig(object):
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
         pod_subnet = self.config["net_config"]["pod_subnet"]
-        path = "/api/mo/uni/tn-%s/subj-%s-export-match.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/subj-%s-export-match.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7580,8 +7769,10 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet),
-                                                                    ("aggregate", "yes"),
+                                                                    ("ip",
+                                                                     pod_subnet),
+                                                                    ("aggregate",
+                                                                     "yes"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7603,7 +7794,8 @@ class ApicKubeConfig(object):
     def attach_rule_to_default_export_pol(self):
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        path = "/api/mo/uni/tn-%s/out-%s/prof-default-export.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/out-%s/prof-default-export.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7632,9 +7824,11 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("name", "export_pod_subnet"),
+                                                                    ("name",
+                                                                     "export_pod_subnet"),
                                                                     ("order", "0"),
-                                                                    ("action", "permit"),
+                                                                    ("action",
+                                                                     "permit"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7685,7 +7879,8 @@ class ApicKubeConfig(object):
         node_subnet = self.config["net_config"]["node_subnet"]
         cluster_svc_subnet = self.config["net_config"]["cluster_svc_subnet"]
         external_svc_subnet = self.config["net_config"]["extern_dynamic"]
-        path = "/api/mo/uni/tn-%s/subj-%s-import-match.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/subj-%s-import-match.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7714,8 +7909,10 @@ class ApicKubeConfig(object):
                                                             "attributes",
                                                             collections.OrderedDict(
                                                                 [
-                                                                    ("ip", pod_subnet),
-                                                                    ("aggregate", "yes"),
+                                                                    ("ip",
+                                                                     pod_subnet),
+                                                                    ("aggregate",
+                                                                     "yes"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7736,7 +7933,8 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", node_subnet),
-                                                                    ("aggregate", "yes"),
+                                                                    ("aggregate",
+                                                                     "yes"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7757,7 +7955,8 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", cluster_svc_subnet),
-                                                                    ("aggregate", "yes"),
+                                                                    ("aggregate",
+                                                                     "yes"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7778,7 +7977,8 @@ class ApicKubeConfig(object):
                                                             collections.OrderedDict(
                                                                 [
                                                                     ("ip", external_svc_subnet),
-                                                                    ("aggregate", "yes"),
+                                                                    ("aggregate",
+                                                                     "yes"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7802,7 +8002,8 @@ class ApicKubeConfig(object):
     def attach_rule_to_default_import_pol(self):
         l3out_tn = self.get_cluster_l3out_vrf_details()["tenant"]
         l3out_name = self.config["aci_config"]["cluster_l3out"]["name"]
-        path = "/api/mo/uni/tn-%s/out-%s/prof-default-import.json" % (l3out_tn, l3out_name)
+        path = "/api/mo/uni/tn-%s/out-%s/prof-default-import.json" % (
+            l3out_tn, l3out_name)
         data = collections.OrderedDict(
             [
                 (
@@ -7833,7 +8034,8 @@ class ApicKubeConfig(object):
                                                                 [
                                                                     ("name", "import_cluster_subnets"),
                                                                     ("order", "0"),
-                                                                    ("action", "permit"),
+                                                                    ("action",
+                                                                     "permit"),
                                                                 ]
                                                             ),
                                                         ),
@@ -7934,7 +8136,8 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
     for epg in ["%sdefault" % epg_prefix, "%ssystem" % epg_prefix]:
         for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
             if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
-                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                    consumer_contract)
                 break
 
     provider_contract = collections.OrderedDict(
@@ -7962,7 +8165,8 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
     for epg in ["%snodes" % epg_prefix]:
         for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
             if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
-                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provider_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                    provider_contract)
                 break
 
     filters = collections.OrderedDict(
@@ -8049,7 +8253,8 @@ def add_prometheus_opflex_agent_contract(data, epg_prefix, contract_prefix, filt
                         (
                             "attributes",
                             collections.OrderedDict(
-                                [("name", "%sprometheus-opflex-agent" % contract_prefix)]
+                                [("name", "%sprometheus-opflex-agent" %
+                                  contract_prefix)]
                             ),
                         ),
                         (
@@ -8148,7 +8353,8 @@ def add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix):
     for epg in ["%ssystem" % epg_prefix]:
         for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
             if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
-                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                    consumer_contract)
                 break
 
     provider_contract = collections.OrderedDict(
@@ -8176,7 +8382,8 @@ def add_hubble_4244_allow(data, epg_prefix, contract_prefix, filter_prefix):
     for epg in ["%snodes" % epg_prefix]:
         for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
             if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
-                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provider_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                    provider_contract)
                 break
 
     filters = collections.OrderedDict(
@@ -8362,7 +8569,8 @@ def add_l3out_allow_all_for_istio_epg(data, system_id, epg_prefix):
     for epg in ["%sistio" % epg_prefix]:
         for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
             if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == epg:
-                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consumer_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                    consumer_contract)
                 break
 
 
@@ -8401,10 +8609,12 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
             )
         ]
     )
-    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_kube_api_contract_os)
+    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+        provide_kube_api_contract_os)
 
     if default_provide_api:
-        data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_kube_api_contract_os)
+        data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+            provide_kube_api_contract_os)
 
     # special case for dns contract
     consume_dns_contract_os = collections.OrderedDict(
@@ -8429,8 +8639,10 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
             )
         ]
     )
-    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_dns_contract_os)
-    data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_dns_contract_os)
+    data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+        consume_dns_contract_os)
+    data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+        consume_dns_contract_os)
 
     # add new contract
     for item in items:
@@ -8483,34 +8695,46 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
         if old_naming:
             # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
             if 'kube-default' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if 'kube-system' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if 'kube-nodes' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    consume_os_contract)
 
             if 'kube-default' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if 'kube-system' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if 'kube-nodes' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    provide_os_contract)
 
         else:
             # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
             if ('%sdefault' % aci_prefix) in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if ('%ssystem' % aci_prefix) in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if ('%snodes' % aci_prefix) in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    consume_os_contract)
 
             if ('%sdefault' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if ('%ssystem' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if ('%snodes' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    provide_os_contract)
 
     # add new contract and subject
     for item in items:
@@ -8541,7 +8765,8 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                                                 [
                                                                     (
                                                                         "name",
-                                                                        item['name'] + "-subj",
+                                                                        item['name'] +
+                                                                        "-subj",
                                                                     ),
                                                                     (
                                                                         "consMatchT",
@@ -8569,7 +8794,8 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                                                                             [
                                                                                                 (
                                                                                                     "tnVzFilterName",
-                                                                                                    item['name'] + "-filter",
+                                                                                                    item['name'] +
+                                                                                                    "-filter",
                                                                                                 )
                                                                                             ]
                                                                                         ),
@@ -8637,7 +8863,8 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                                         [
                                             (
                                                 "name",
-                                                item["name"] + '-' + str(port[0]),
+                                                item["name"] + '-' +
+                                                str(port[0]),
                                             ),
                                             (
                                                 "etherT",
@@ -8730,7 +8957,8 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                         ]
                     )
                     filter_entries.append(apic_entry)
-                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                child['vzFilter']['children'] = child['vzFilter']['children'] + \
+                    filter_entries
                 break
 
     if dns_entries:
@@ -8787,7 +9015,8 @@ def openshift_flavor_specific_handling(data, items, system_id, old_naming, aci_p
                         ]
                     )
                     filter_entries.append(apic_entry)
-                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                child['vzFilter']['children'] = child['vzFilter']['children'] + \
+                    filter_entries
                 break
 
 
@@ -8849,7 +9078,8 @@ def dockerucp_flavor_specific_handling(data, ports, api_filter_prefix):
                         ]
                     )
                     filter_entries.append(extra_port)
-                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                child['vzFilter']['children'] = child['vzFilter']['children'] + \
+                    filter_entries
                 break
 
 
@@ -8911,7 +9141,8 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
                         ]
                     )
                     filter_entries.append(extra_port)
-                child['vzFilter']['children'] = child['vzFilter']['children'] + filter_entries
+                child['vzFilter']['children'] = child['vzFilter']['children'] + \
+                    filter_entries
                 break
 
     if rke_config is not None:
@@ -8972,7 +9203,8 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
                                                                                                 [
                                                                                                     (
                                                                                                         "tnVzFilterName",
-                                                                                                        aci_prefix + ctrct["filter"],
+                                                                                                        aci_prefix +
+                                                                                                        ctrct["filter"],
                                                                                                     )
                                                                                                 ]
                                                                                             ),
@@ -9044,12 +9276,14 @@ def rke_flavor_specific_handling(aci_prefix, data, ports, api_filter_prefix, rke
             for provider in ctrct['provided']:
                 for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
                     if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == provider:
-                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(provide_rke_contract)
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                            provide_rke_contract)
                         break
             for consumer in ctrct['consumed']:
                 for i, child in enumerate(data['fvTenant']['children'][0]['fvAp']['children']):
                     if data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['attributes']['name'] == consumer:
-                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(consume_rke_contract)
+                        data['fvTenant']['children'][0]['fvAp']['children'][i]['fvAEPg']['children'].append(
+                            consume_rke_contract)
                         break
 
         for i, filter in enumerate(rke_config["filters"]):
@@ -9184,35 +9418,47 @@ def k8s_cilium_aci_specific_handling(aci_prefix, old_naming, data, items):
         if old_naming:
             # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
             if 'kube-default' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if 'kube-system' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if 'kube-nodes' in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    consume_os_contract)
 
             if 'kube-default' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if 'kube-system' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if 'kube-nodes' in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    provide_os_contract)
 
         else:
             # 0 = kube-default, 1 = kube-system, 2 = kube-nodes
             if ('%sdefault' % "aci_prefix") in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if ('%ssystem' % aci_prefix) in item['consumed']:
                 print("Here in consume contract")
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    consume_os_contract)
             if ('%snodes' % aci_prefix) in item['consumed']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(consume_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    consume_os_contract)
 
             if ('%sdefault' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][0]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if ('%ssystem' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][1]['fvAEPg']['children'].append(
+                    provide_os_contract)
             if ('%snodes' % aci_prefix) in item['provided']:
-                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(provide_os_contract)
+                data['fvTenant']['children'][0]['fvAp']['children'][2]['fvAEPg']['children'].append(
+                    provide_os_contract)
 
     # add new contract and subject
     for item in items:
@@ -9243,7 +9489,8 @@ def k8s_cilium_aci_specific_handling(aci_prefix, old_naming, data, items):
                                                                 [
                                                                     (
                                                                         "name",
-                                                                        item['name'] + "-subj",
+                                                                        item['name'] +
+                                                                        "-subj",
                                                                     ),
                                                                     (
                                                                         "consMatchT",
@@ -9340,7 +9587,8 @@ def k8s_cilium_aci_specific_handling(aci_prefix, old_naming, data, items):
                                         [
                                             (
                                                 "name",
-                                                item["name"] + '-' + str(port[0]),
+                                                item["name"] + '-' +
+                                                str(port[0]),
                                             ),
                                             (
                                                 "etherT",
