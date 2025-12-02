@@ -107,7 +107,8 @@ class Apic(object):
         return "http://%s%s" % (self.addr, path)
 
     def get(self, path, data=None, params=None):
-        args = dict(data=data, cookies=self.cookies, verify=self.verify, params=params)
+        args = dict(data=data, cookies=self.cookies,
+                    verify=self.verify, params=params)
         args.update(timeout=self.timeout)
         dbg("getting path: {} {}".format(path, json.dumps(args)))
         resp = requests.get(self.url(path), **args)
@@ -148,7 +149,8 @@ class Apic(object):
         else:
             print("Login failed - {}".format(req.text))
             print(
-                "Addr: {} u: {} p: {}".format(self.addr, self.username, self.password)
+                "Addr: {} u: {} p: {}".format(
+                    self.addr, self.username, self.password)
             )
         return req
 
@@ -465,7 +467,8 @@ def main(args=None):
         config["aci_config"]["apic_login"]["username"] = args.username
 
     config["aci_config"]["apic_login"]["password"] = (
-        args.password if args.password else os.environ.get("ACC_PROVISION_PASS")
+        args.password if args.password else os.environ.get(
+            "ACC_PROVISION_PASS")
     )
     config["aci_config"]["apic_login"]["timeout"] = timeout
 
