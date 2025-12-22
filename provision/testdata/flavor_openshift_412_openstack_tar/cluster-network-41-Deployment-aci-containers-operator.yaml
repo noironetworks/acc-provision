@@ -43,7 +43,7 @@ spec:
           value: openshift-4.12-openstack
         - name: OPERATOR_LOGGING_LEVEL
           value: info
-        image: noiro/aci-containers-operator:6.1.1.5.81c2369
+        image: noiro/aci-containers-operator:6.1.1.6.81c2369
         imagePullPolicy: Always
         name: aci-containers-operator
         terminationMessagePath: /dev/termination-log
@@ -73,7 +73,7 @@ spec:
           value: openshift-4.12-openstack
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
-        image: noiro/acc-provision-operator:6.1.1.5.81c2369
+        image: noiro/acc-provision-operator:6.1.1.6.81c2369
         imagePullPolicy: Always
         name: acc-provision-operator
         terminationMessagePath: /dev/termination-log
