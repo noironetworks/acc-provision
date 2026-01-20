@@ -40,7 +40,7 @@ spec:
         - name: SYSTEM_NAMESPACE
           value: kube-system
         - name: ACC_PROVISION_FLAVOR
-          value: kubernetes-1.34
+          value: kubernetes-1.35
         - name: OPERATOR_LOGGING_LEVEL
           value: info
         image: noiro/aci-containers-operator:6.1.1.6.81c2369
@@ -70,7 +70,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: ACC_PROVISION_FLAVOR
-          value: kubernetes-1.34
+          value: kubernetes-1.35
         - name: ACC_PROVISION_INPUT_CR_NAME
           value: accprovisioninput
         image: noiro/acc-provision-operator:6.1.1.6.81c2369
