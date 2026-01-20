@@ -80,16 +80,16 @@ data:
     \   },\n    \"enable-drop-log\": true,\n    \"enable-nodepodif\": false,\n   \
     \ \"enable-ovs-hw-offload\": false\n}"
   opflex-agent-config: "{\n    \"log\": {\n        \"level\": \"info\"\n    },\n \
-    \   \"opflex\": {\n        \"notif\" : { \"enabled\" : \"false\" },\n        \"\
-    startup\": {\n                \"enabled\": false,\n                \"policy-file\"\
-    : \"/usr/local/var/lib/opflex-agent-ovs/startup/pol.json\",\n                \"\
-    policy-duration\": 60,\n                \"resolve-aft-conn\": false\n        },\n\
-    \        \"timers\" : {\n                \"switch-sync-delay\": 5,\n         \
-    \       \"switch-sync-dynamic\": 10\n        },\n        \"asyncjson\": { \"enabled\"\
-    \ : \"false\" },\n        \"force-ep-undeclares\": { \"enabled\": \"true\" }\n\
-    \        ,\"epg-resolve-prioritize\": { \"enabled\": \"true\" }\n    },\n    \"\
-    ovs\": {\n        \"asyncjson\": { \"enabled\" : \"false\" }\n    },\n    \"prometheus\"\
-    : {\n        \"enabled\": \"false\"\n    }\n}"
+    \   \"opflex\": {\n        \"notif\" : {\n            \"enabled\": false\n   \
+    \     },\n        \"startup\": {\n                \"enabled\": false,\n      \
+    \          \"policy-file\": \"/usr/local/var/lib/opflex-agent-ovs/startup/pol.json\"\
+    ,\n                \"policy-duration\": 60,\n                \"resolve-aft-conn\"\
+    : false\n        },\n        \"timers\" : {\n                \"switch-sync-delay\"\
+    : 5,\n                \"switch-sync-dynamic\": 10\n        },\n        \"asyncjson\"\
+    : { \"enabled\" : \"false\" },\n        \"force-ep-undeclares\": { \"enabled\"\
+    : \"true\" }\n        ,\"epg-resolve-prioritize\": { \"enabled\": \"true\" }\n\
+    \    },\n    \"ovs\": {\n        \"asyncjson\": { \"enabled\" : \"false\" }\n\
+    \    },\n    \"prometheus\": {\n        \"enabled\": \"false\"\n    }\n}"
 kind: ConfigMap
 metadata:
   labels:

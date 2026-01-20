@@ -951,7 +951,9 @@ data:
             "level": "debug"
         },
         "opflex": {
-            "notif" : { "enabled" : "false" },
+            "notif" : {
+                "enabled": false
+            },
             "startup": {
                     "enabled": false,
                     "policy-file": "/usr/local/var/lib/opflex-agent-ovs/startup/pol.json",
