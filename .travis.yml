@@ -15,6 +15,7 @@ jobs:
         - pip install ./provision
       script:
         - cd provision
+        - flake8 --builtins="unicode" --ignore E501,E731,E741,E704,W504 acc_provision || travis_terminate 1
         - coverage run --source=. -m pytest acc_provision
         - coveralls
     - stage: push-package
