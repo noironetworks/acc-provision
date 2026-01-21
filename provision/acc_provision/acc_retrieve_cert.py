@@ -21,7 +21,6 @@ def err(msg):
 
 
 def kubectl(kind, name, namespace=None):
-    ret = None
     cmd = ['kubectl', 'get', '-o', 'json']
     cmd.extend([kind, name])
     if namespace:
@@ -30,17 +29,14 @@ def kubectl(kind, name, namespace=None):
         cmd.extend(['--kubeconfig', KUBECONFIG])
     retstr = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     if retstr:
-        ret = json.loads(retstr).get('data')
-    return ret
+        return json.loads(retstr).get('data')
 
 
-def get_secret(name, namespace, *keys):
-    ret = []
+def get_secret(name, namespace, keys):
     data = kubectl('secret', name, namespace)
-    decode = lambda k: data.get(k) and base64.b64decode(data[k].decode("ascii"))
+    decode = lambda k: data.get(k) and base64.b64decode(data[k].encode("ascii"))
     if keys:
-        ret = map(decode, keys)
-    return ret
+        return map(decode, keys)
 
 
 def get_sysid(name, namespace):
@@ -54,12 +50,13 @@ def get_sysid(name, namespace):
 
 
 def retrieve_certs(sysid, name, namespace=None):
-    key, crt = get_secret(name, namespace, 'user.key', 'user.crt')
+    keys = ['user.key', 'user.crt']
+    key, crt = get_secret(name, namespace, keys)
     for k, v in zip(['key', 'crt'], [key, crt]):
         if v:
             fname = 'user-%s.%s' % (sysid, k)
             try:
-                with open(fname, "w") as fd:
+                with open(fname, "wb") as fd:
                     fd.write(v)
             except Exception:
                 err("Could not write: " + fname)
