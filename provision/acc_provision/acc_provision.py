@@ -44,6 +44,8 @@ except ImportError:
 # than byte strings in Python 2, thus ensuring that the type of strings
 # is consistent across versions.  From
 # https://stackoverflow.com/a/2967461/3857947. Revisit for Python 3.
+
+
 def construct_yaml_str(self, node):
     return self.construct_scalar(node)
 
@@ -79,27 +81,35 @@ BRIDGE_NAD_CONFIG_KEYS = {
 }
 BRIDGE_NAD_ALLOWED_IPMASQBACKEND = {"iptables", "nftables"}
 
+
 def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
-    DHCP_IPAM_CONFIG_KEYS = ["daemonSocketPath", "request", "skipDefault", "option", "provide", "value", "fromArg"]
-    STATIC_IPAM_CONFIG_KEYS = ["addresses", "address", "gateway", "routes", "dns"]
-    WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end", "exclude", "gateway", "network_name", "enable_overlapping_ranges", "node_slice_size"]
-    HOST_LOCAL_IPAM_CONFIG_KEYS = ["ranges", "subnet", "rangeStart", "rangeEnd", "gateway", "routes", "resolvConf", "dataDir"]
+    DHCP_IPAM_CONFIG_KEYS = ["daemonSocketPath", "request",
+                             "skipDefault", "option", "provide", "value", "fromArg"]
+    STATIC_IPAM_CONFIG_KEYS = ["addresses",
+                               "address", "gateway", "routes", "dns"]
+    WHEREABOUTS_IPAM_CONFIG_KEYS = ["range", "ipRanges", "range_start", "range_end",
+                                    "exclude", "gateway", "network_name", "enable_overlapping_ranges", "node_slice_size"]
+    HOST_LOCAL_IPAM_CONFIG_KEYS = ["ranges", "subnet", "rangeStart",
+                                   "rangeEnd", "gateway", "routes", "resolvConf", "dataDir"]
 
     def validate_subnet(subnet_field, field_path):
         errors = []
         try:
             net = ipaddress.ip_network(subnet_field, strict=True)
         except ValueError:
-            errors.append(f"Field '{field_path}' is not a valid IPv4/IPv6 subnet: {subnet_field}")
+            errors.append(
+                f"Field '{field_path}' is not a valid IPv4/IPv6 subnet: {subnet_field}")
             return errors
 
         # IPv4 validation: reject /31, /32 (no usable host)
         if net.version == 4 and net.prefixlen >= 31:
-            errors.append(f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
+            errors.append(
+                f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
 
         # IPv6 validation: reject /127, /128 (no usable host)
         elif net.version == 6 and net.prefixlen >= 127:
-            errors.append(f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
+            errors.append(
+                f"Field '{field_path}' {subnet_field} has no usable host IPs (prefix too small)")
 
         # Exclusion of Reserved/Special Use IP Ranges
         reserved_ipv4_ranges = [
@@ -116,7 +126,8 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
 
         for reserved_net_obj, description in (reserved_ipv4_ranges if net.version == 4 else reserved_ipv6_ranges):
             if net.overlaps(reserved_net_obj):
-                errors.append(f"Field '{field_path}' {subnet_field} overlaps with a reserved/special-use IP range ({description}): {reserved_net_obj}")
+                errors.append(
+                    f"Field '{field_path}' {subnet_field} overlaps with a reserved/special-use IP range ({description}): {reserved_net_obj}")
         return errors
 
     def validate_ipam_type_specific_keys(ipam_type, ipam_config):
@@ -138,7 +149,7 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
         unexpected_keys = ipam_keys - set(allowed_keys)
         if unexpected_keys:
             errors.append(f"Unexpected keys for 'ipam.type={ipam_type}': {unexpected_keys}. "
-                        f"Allowed keys: {allowed_keys}")
+                          f"Allowed keys: {allowed_keys}")
         return errors
 
     def validate_ipam(ipam):
@@ -156,11 +167,13 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
         # Validate IPAM type
         valid_types = {"dhcp", "host-local", "static", "whereabouts"}
         if ipam_type not in valid_types:
-            errors.append(f"Field 'ipam.type' must be one of {valid_types}, got '{ipam_type}'")
+            errors.append(
+                f"Field 'ipam.type' must be one of {valid_types}, got '{ipam_type}'")
             return errors
 
         # Validate type-specific keys
-        type_specific_errors = validate_ipam_type_specific_keys(ipam_type, ipam)
+        type_specific_errors = validate_ipam_type_specific_keys(
+            ipam_type, ipam)
         errors.extend(type_specific_errors)
 
         # Type-specific validations
@@ -170,34 +183,41 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
 
             # Check if either ranges or legacy subnet is present
             if not ranges_field and not subnet_field:
-                errors.append("Field 'ipam.ranges' (new format) or 'ipam.subnet' (legacy format) is required when using 'host-local' type")
+                errors.append(
+                    "Field 'ipam.ranges' (new format) or 'ipam.subnet' (legacy format) is required when using 'host-local' type")
                 return errors
 
             # If both are present, prefer ranges (new format)
             if ranges_field and subnet_field:
-                errors.append("Cannot use both 'ipam.ranges' (new format) and 'ipam.subnet' (legacy format) at the same time")
+                errors.append(
+                    "Cannot use both 'ipam.ranges' (new format) and 'ipam.subnet' (legacy format) at the same time")
                 return errors
 
             # Validate new format (ranges array)
             if ranges_field:
                 if not isinstance(ranges_field, list) or len(ranges_field) == 0:
-                    errors.append("Field 'ipam.ranges' must be a non-empty array when using 'host-local' type")
+                    errors.append(
+                        "Field 'ipam.ranges' must be a non-empty array when using 'host-local' type")
                 else:
                     # Validate each range set in the ranges array
                     for i, range_set in enumerate(ranges_field):
                         if not isinstance(range_set, list) or len(range_set) == 0:
-                            errors.append(f"Field 'ipam.ranges[{i}]' must be a non-empty array")
+                            errors.append(
+                                f"Field 'ipam.ranges[{i}]' must be a non-empty array")
                             continue
                         for j, range_obj in enumerate(range_set):
                             if not isinstance(range_obj, dict):
-                                errors.append(f"Field 'ipam.ranges[{i}][{j}]' must be an object")
+                                errors.append(
+                                    f"Field 'ipam.ranges[{i}][{j}]' must be an object")
                                 continue
                             subnet = range_obj.get("subnet")
                             if not subnet:
-                                errors.append(f"Field 'ipam.ranges[{i}][{j}].subnet' is required")
+                                errors.append(
+                                    f"Field 'ipam.ranges[{i}][{j}].subnet' is required")
                             else:
                                 # Validate subnet format (IPv4 or IPv6)
-                                subnet_errors = validate_subnet(subnet, f"ipam.ranges[{i}][{j}].subnet")
+                                subnet_errors = validate_subnet(
+                                    subnet, f"ipam.ranges[{i}][{j}].subnet")
                                 errors.extend(subnet_errors)
 
             # Validate legacy format (top-level subnet)
@@ -208,7 +228,8 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
         elif ipam_type == "whereabouts":
             range_field = ipam.get("range")
             if not range_field:
-                errors.append("Field 'ipam.range' is required when using 'whereabouts' type")
+                errors.append(
+                    "Field 'ipam.range' is required when using 'whereabouts' type")
             else:
                 # Validate range format (should be a CIDR)
                 subnet_errors = validate_subnet(range_field, "ipam.range")
@@ -231,10 +252,12 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
 
     # --- IPAM & Gateway dependencies ---
     if (is_gw or is_def_gw or ipmasq or force_address) and not ipam:
-        errors.append("Field 'ipam' must be defined (not empty) when using 'isGateway', 'isDefaultGateway', 'ipMasq', or 'forceAddress' options.")
+        errors.append(
+            "Field 'ipam' must be defined (not empty) when using 'isGateway', 'isDefaultGateway', 'ipMasq', or 'forceAddress' options.")
 
     if (is_gw or is_def_gw) and len(bridge_name) > 10:
-        errors.append("Field 'bridge_name' in acc-provision input file must be 10 characters or less when using 'isGateway' or 'isDefaultGateway' options.")
+        errors.append(
+            "Field 'bridge_name' in acc-provision input file must be 10 characters or less when using 'isGateway' or 'isDefaultGateway' options.")
 
     if mtu is not None and (mtu < 576 or mtu > 9216):
         errors.append("Field 'mtu' must be between 576 and 9216 if specified.")
@@ -245,61 +268,71 @@ def validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config):
 
     if ipmasq_backend and not ipmasq:
         errors.append(f"Field 'ipMasqBackend' is set to '{ipmasq_backend}' but 'ipMasq' is set to '{ipmasq}'. "
-                    f"The 'ipMasqBackend' field is ignored unless 'ipMasq' is set to true.")
+                      f"The 'ipMasqBackend' field is ignored unless 'ipMasq' is set to true.")
 
     if is_def_gw and not is_gw:
         errors.append(f"Field 'isDefaultGateway' is set to '{is_def_gw}' but 'isGateway' is set to '{is_gw}'. "
-                    f"When 'isDefaultGateway' is true, 'isGateway' must also be set to true because the default gateway functionality requires gateway capabilities.")
+                      f"When 'isDefaultGateway' is true, 'isGateway' must also be set to true because the default gateway functionality requires gateway capabilities.")
 
     if force_address and not is_gw:
         errors.append(f"Field 'forceAddress' is set to '{force_address}' but 'isGateway' is set to '{is_gw}'. "
-                    f"The 'forceAddress' option requires 'isGateway' to be true because it controls gateway IP assignment behavior.")
+                      f"The 'forceAddress' option requires 'isGateway' to be true because it controls gateway IP assignment behavior.")
 
     # --- Interface behavior ---
     if disable_iface and ipam:
         errors.append(f"Field 'disableContainerInterface' is set to '{disable_iface}' but 'ipam' is configured. "
-                    f"When container interface is disabled, IPAM configuration will be ignored because no IPs can be assigned to the disabled interface.")
+                      f"When container interface is disabled, IPAM configuration will be ignored because no IPs can be assigned to the disabled interface.")
 
     if enabledad and disable_iface:
         errors.append(f"Field 'enabledad' is set to '{enabledad}' but 'disableContainerInterface' is set to '{disable_iface}'. "
-                    f"The 'enabledad' option is ignored when the container interface is disabled because duplicate address detection requires an active interface.")
+                      f"The 'enabledad' option is ignored when the container interface is disabled because duplicate address detection requires an active interface.")
 
     if errors:
-        raise Exception("Bridge NAD config dependency validation failed: " + "; ".join(errors))
+        raise Exception(
+            "Bridge NAD config dependency validation failed: " + "; ".join(errors))
     for w in warnings:
         print("WARN:", w)
 
+
 def validate_bridge_nad_config_keys(bridge_nad_config):
-    unexpected_keys = set(bridge_nad_config.keys()) - set(BRIDGE_NAD_CONFIG_KEYS.keys())
+    unexpected_keys = set(bridge_nad_config.keys()) - \
+        set(BRIDGE_NAD_CONFIG_KEYS.keys())
     if unexpected_keys:
-        raise Exception(f"Invalid NAD config: unexpected keys found: {unexpected_keys}. Keys must match exactly: {list(BRIDGE_NAD_CONFIG_KEYS.keys())}")
+        raise Exception(
+            f"Invalid NAD config: unexpected keys found: {unexpected_keys}. Keys must match exactly: {list(BRIDGE_NAD_CONFIG_KEYS.keys())}")
     for key, value in bridge_nad_config.items():
         if key in BRIDGE_NAD_CONFIG_KEYS:
             expected_type = BRIDGE_NAD_CONFIG_KEYS[key]
             if not isinstance(value, expected_type):
-                raise Exception(f"Optional key '{key}' must be of type {expected_type.__name__}")
+                raise Exception(
+                    f"Optional key '{key}' must be of type {expected_type.__name__}")
             if key == "ipMasqBackend" and value not in BRIDGE_NAD_ALLOWED_IPMASQBACKEND:
-                raise Exception(f"ipMasqBackend must be one of {BRIDGE_NAD_ALLOWED_IPMASQBACKEND}")
+                raise Exception(
+                    f"ipMasqBackend must be one of {BRIDGE_NAD_ALLOWED_IPMASQBACKEND}")
 
 
 def read_and_validate_bridge_nad_config_file(bridge_name, bridge_nad_config_file):
-     # Check if file exists
+    # Check if file exists
     if not os.path.isfile(bridge_nad_config_file):
-        raise Exception(f"NAD config file '{bridge_nad_config_file}' does not exist.")
+        raise Exception(
+            f"NAD config file '{bridge_nad_config_file}' does not exist.")
 
     # Check file extension
     valid_extensions = ('.yaml', '.yml')
     if not bridge_nad_config_file.endswith(valid_extensions):
-        raise Exception(f"NAD config file '{bridge_nad_config_file}' must have a .yaml or .yml extension.")
+        raise Exception(
+            f"NAD config file '{bridge_nad_config_file}' must have a .yaml or .yml extension.")
 
     # Check file format
     try:
         with open(bridge_nad_config_file, "r") as f:
             bridge_nad_config = yaml.safe_load(f)
         if not isinstance(bridge_nad_config, dict):
-            raise Exception("NAD config file must be a YAML mapping (dictionary) at the top level.")
+            raise Exception(
+                "NAD config file must be a YAML mapping (dictionary) at the top level.")
     except Exception as e:
-        raise Exception(f"NAD config file '{bridge_nad_config_file}' is not a valid YAML file: {e}")
+        raise Exception(
+            f"NAD config file '{bridge_nad_config_file}' is not a valid YAML file: {e}")
 
     validate_bridge_nad_config_keys(bridge_nad_config)
     validate_bridge_nad_field_dependencies(bridge_name, bridge_nad_config)
@@ -354,7 +387,8 @@ def get_csv_contents(file_path):
             for row in csv_reader:
                 csv_data.append(row)
     except Exception as ex:
-        print("Error while getting CSV %s file contents. Error: %s") % (file_path, ex)
+        print("Error while getting CSV %s file contents. Error: %s") % (
+            file_path, ex)
     return csv_data
 
 
@@ -386,7 +420,8 @@ def prepare_nadvlanmap(file_path):
             item_updated = False
             for resource_details in all_resources[resource_header]:
                 if resource_details['label'] == network:
-                    modified_vlans = resource_details['vlans'] + ',' + resource_item['vlans']
+                    modified_vlans = resource_details['vlans'] + \
+                        ',' + resource_item['vlans']
                     vlans_list = list(set(modified_vlans.split(',')))
                     resource_details.update({'vlans': ','.join(vlans_list)})
                     item_updated = True
@@ -501,6 +536,7 @@ def yaml_indent(s, **kwargs):
 
 class SafeDict(dict):
     'Provide a default value for missing keys'
+
     def __missing__(self, key):
         return None
 
@@ -754,14 +790,18 @@ def config_user(flavor, config_file):
         config["user_input"] = user_input
         if not is_cno_enabled(config):
             if not isinstance(config["net_config"]["pod_subnet"], list):
-                config["net_config"]["pod_subnet"] = [config["net_config"]["pod_subnet"]]
+                config["net_config"]["pod_subnet"] = [
+                    config["net_config"]["pod_subnet"]]
             if not isinstance(config["net_config"]["extern_dynamic"], list):
-                config["net_config"]["extern_dynamic"] = [config["net_config"]["extern_dynamic"]]
+                config["net_config"]["extern_dynamic"] = [
+                    config["net_config"]["extern_dynamic"]]
             if "extern_static" in config["net_config"] and not isinstance(config["net_config"]["extern_static"], list):
-                config["net_config"]["extern_static"] = [config["net_config"]["extern_static"]]
+                config["net_config"]["extern_static"] = [
+                    config["net_config"]["extern_static"]]
         if "net_config" in config.keys() and config["net_config"].get(
                 "node_subnet") and not isinstance(config["net_config"]["node_subnet"], list):
-            config["net_config"]["node_subnet"] = [config["net_config"]["node_subnet"]]
+            config["net_config"]["node_subnet"] = [
+                config["net_config"]["node_subnet"]]
     if config is None:
         config = {}
     return config
@@ -875,7 +915,8 @@ def config_adjust_for_cno(args, config, no_random):
     config["aci_config"]["nodes_epg"] = Apic.ACI_CHAINED_PREFIX + "nodes"
     bd_dn_prefix = "uni/tn-%s/BD-%snodes" % (tenant, Apic.ACI_CHAINED_PREFIX)
 
-    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
+    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]
+                                       ["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix
 
     config["aci_config"]["app_profile"] = app_profile
@@ -883,7 +924,8 @@ def config_adjust_for_cno(args, config, no_random):
     if args.version_token:
         token = args.version_token
 
-    username = config["vmm_lite_config"]["apic_username"] if is_vmm_lite(config) else system_id
+    username = config["vmm_lite_config"]["apic_username"] if is_vmm_lite(
+        config) else system_id
     adj_config = {
         "aci_config": {
             "cluster_tenant": tenant,
@@ -945,16 +987,19 @@ def config_adjust_for_cno(args, config, no_random):
             # Chained mode don't need this in case of skip_node_network_provisioning
             adj_config["net_config"]["node_subnet"] = node_subnet
 
-    if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
+    # APIC Subscription refresh timeout value
+    if config["aci_config"].get("apic_refreshtime"):
         adj_config["aci_config"]["apic_refreshtime"] = config["aci_config"]["apic_refreshtime"]
 
-    if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+    # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+    if config["kube_config"].get("image_pull_policy"):
         adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
 
     if config["net_config"].get("pbr_tracking_non_snat"):
         adj_config["net_config"]["pbr_tracking_non_snat"] = config["net_config"]["pbr_tracking_non_snat"]
 
-    ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
+    ns_value = {"tenant": tenant, "app_profile": app_profile,
+                "group": namespace_endpoint_group}
 
     # To add kube-system namespace to ACI system EPG
     adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
@@ -1043,7 +1088,8 @@ def config_adjust(args, config, prov_apic, no_random):
         default_endpoint_group = Apic.ACI_PREFIX + "default"
         namespace_endpoint_group = Apic.ACI_PREFIX + "system"
         config["aci_config"]["nodes_epg"] = Apic.ACI_PREFIX + "nodes"
-        bd_dn_prefix = "uni/tn-%s/BD-%s%s-" % (tenant, Apic.ACI_PREFIX, system_id)
+        bd_dn_prefix = "uni/tn-%s/BD-%s%s-" % (tenant,
+                                               Apic.ACI_PREFIX, system_id)
         istio_epg = Apic.ACI_PREFIX + "istio"
     else:
         app_profile = "kubernetes"
@@ -1057,15 +1103,21 @@ def config_adjust(args, config, prov_apic, no_random):
         bd_dn_prefix = "uni/tn-%s/BD-kube-" % tenant
         istio_epg = "kube-istio"
 
-    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
+    aci_vrf_dn = "uni/tn-%s/ctx-%s" % (config["aci_config"]
+                                       ["vrf"]["tenant"], config["aci_config"]["vrf"]["name"])
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
 
-    apic_request_retry_delay = config["kube_config"].get("apic_request_retry_delay", 2)
-    enable_apic_request_retry_delay = config["kube_config"].get("enable_apic_request_retry_delay", True)
-    epg_resolve_prioritize = config["kube_config"].get("epg_resolve_prioritize", True)
-    force_ep_undeclares = config["kube_config"].get("force_ep_undeclares", True)
-    filter_opflex_device = config["kube_config"].get("filter_opflex_device", True)
+    apic_request_retry_delay = config["kube_config"].get(
+        "apic_request_retry_delay", 2)
+    enable_apic_request_retry_delay = config["kube_config"].get(
+        "enable_apic_request_retry_delay", True)
+    epg_resolve_prioritize = config["kube_config"].get(
+        "epg_resolve_prioritize", True)
+    force_ep_undeclares = config["kube_config"].get(
+        "force_ep_undeclares", True)
+    filter_opflex_device = config["kube_config"].get(
+        "filter_opflex_device", True)
     config["aci_config"]["app_profile"] = app_profile
     system_namespace = config["kube_config"]["system_namespace"]
     if args.version_token:
@@ -1074,11 +1126,13 @@ def config_adjust(args, config, prov_apic, no_random):
     static_service_ip_pool = []
     if (not is_calico_flavor(config["flavor"])) and (extern_static is not None):
         for subnet in extern_statics:
-            static_service_ip_pool.append({"start": cidr_split(subnet)[0], "end": cidr_split(subnet)[1]})
+            static_service_ip_pool.append(
+                {"start": cidr_split(subnet)[0], "end": cidr_split(subnet)[1]})
 
     node_service_ip_pool = []
     if not is_calico_flavor(config["flavor"]) and node_svc_subnet:
-        node_service_ip_pool = [{"start": cidr_split(node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
+        node_service_ip_pool = [{"start": cidr_split(
+            node_svc_subnet)[0], "end": cidr_split(node_svc_subnet)[1]}]
 
     if is_calico_flavor(config["flavor"]):
         config["aci_config"]["cluster_l3out"]["svi"]["node_profile_name"] = l3out_name + "_node_prof"
@@ -1247,14 +1301,17 @@ def config_adjust(args, config, prov_apic, no_random):
             if "node_network" not in net_config_object:
                 net_config_object["node_network"] = normalize_cidr(node_subnet)
 
-    if config["aci_config"].get("apic_refreshtime"):  # APIC Subscription refresh timeout value
+    # APIC Subscription refresh timeout value
+    if config["aci_config"].get("apic_refreshtime"):
         apic_refreshtime = config["aci_config"]["apic_refreshtime"]
         adj_config["aci_config"]["apic_refreshtime"] = apic_refreshtime
 
-    if config["kube_config"].get("ovs_memory_limit"):  # OVS memory limit to be set in K8S Spec
+    # OVS memory limit to be set in K8S Spec
+    if config["kube_config"].get("ovs_memory_limit"):
         adj_config["kube_config"]["ovs_memory_limit"] = config["kube_config"]["ovs_memory_limit"]
 
-    if config["kube_config"].get("image_pull_policy"):  # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+    # imagePullPolicy to be set for ACI CNI pods in K8S Spec
+    if config["kube_config"].get("image_pull_policy"):
         adj_config["kube_config"]["image_pull_policy"] = config["kube_config"]["image_pull_policy"]
 
     # Commenting code to disable the install_istio flag as the functionality
@@ -1264,7 +1321,8 @@ def config_adjust(args, config, prov_apic, no_random):
     # if config["istio_config"].get("install_istio"):  # Install istio control-plane by default?
     #     adj_config["istio_config"]["install_istio"] = config["istio_config"]["install_istio"]
 
-    if config["istio_config"].get("install_profile"):  # Which istio profile to bring-up
+    # Which istio profile to bring-up
+    if config["istio_config"].get("install_profile"):
         adj_config["istio_config"]["install_profile"] = config["istio_config"]["install_profile"]
 
     if config["net_config"].get("pbr_tracking_non_snat"):
@@ -1273,7 +1331,8 @@ def config_adjust(args, config, prov_apic, no_random):
     if config["net_config"].get("service_monitor_interval"):
         adj_config["net_config"]["service_monitor_interval"] = config["net_config"]["service_monitor_interval"]
 
-    ns_value = {"tenant": tenant, "app_profile": app_profile, "group": namespace_endpoint_group}
+    ns_value = {"tenant": tenant, "app_profile": app_profile,
+                "group": namespace_endpoint_group}
 
     # To add kube-system namespace to ACI system EPG
     adj_config["kube_config"]["namespace_default_endpoint_group"]["kube-system"] = ns_value
@@ -1314,7 +1373,8 @@ def config_adjust(args, config, prov_apic, no_random):
 
         if 'device_info' in config["sriov_config"]:
             if 'devices' in config["sriov_config"]["device_info"]:
-                adj_config["devices"] = str(config["sriov_config"]["device_info"].get("devices"))
+                adj_config["devices"] = str(
+                    config["sriov_config"]["device_info"].get("devices"))
             if config["sriov_config"]["device_info"].get("isRdma"):
                 adj_config["isRdma"] = "true"
 
@@ -1331,9 +1391,11 @@ def config_adjust(args, config, prov_apic, no_random):
                     adj_config["dpuUser"] = "opflex"
 
                 if 'ovsdb_socket_port' in config["dpu_config"] and config["dpu_config"].get("ovsdb_socket_port"):
-                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":" + str(config["dpu_config"]["ovsdb_socket_port"])
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + \
+                        ":" + str(config["dpu_config"]["ovsdb_socket_port"])
                 else:
-                    adj_config["dpu_ovsdb_socket"] = "tcp:" + adj_config["dpuIp"] + ":6640"
+                    adj_config["dpu_ovsdb_socket"] = "tcp:" + \
+                        adj_config["dpuIp"] + ":6640"
             else:
                 err("Opflex_mode is not set to dpu. Cannot generate dpu config")
 
@@ -1456,7 +1518,8 @@ def is_valid_refreshtime(xval):
         # Not a required field.
         return True
     xmin = 0
-    xmax = (12 * 60 * 60)  # 12Hrs is the max suggested subscription refresh time for APIC
+    # 12Hrs is the max suggested subscription refresh time for APIC
+    xmax = (12 * 60 * 60)
     try:
         x = int(xval)
         if xmin <= x <= xmax:
@@ -1562,7 +1625,8 @@ def is_valid_filepath(path):
 def validate_system_id_if_openshift(system_id, config):
     if "openshift" in config["flavor"].lower() and not config["provision"]["upgrade_cluster"]:
         if not system_id.isalnum() or not system_id.islower():
-            raise Exception("Invalid system_id: %s, only lower case alphanumeric characters allowed" % system_id)
+            raise Exception(
+                "Invalid system_id: %s, only lower case alphanumeric characters allowed" % system_id)
     return True
 
 
@@ -1578,17 +1642,20 @@ def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
 
-    required = lambda x: True if x else Raise(Exception("Missing option"))
-    lower_in = lambda y: (
+    def required(x): return True if x else Raise(Exception("Missing option"))
+
+    def lower_in(y): return (
         lambda x: (
             (True if str(x).lower() in y
              else Raise(Exception("Invalid value: %s; "
                                   "Expected one of: {%s}" %
                                   (x, ','.join(y)))))))
-    isname = lambda x, l: (1 < len(x) < l) and \
+
+    def isname(x, l): return (1 < len(x) < l) and \
         x[0].isalpha() and x.replace('_', '').isalnum() \
         if x else Raise(Exception("Invalid name"))
-    get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
+
+    def get(t): return functools.reduce(lambda x, y: x and x.get(y), t, config)
 
     if is_calico_flavor(config["flavor"]):
         checks = {
@@ -1619,8 +1686,10 @@ def config_validate(flavor_opts, config):
             # Network Config
             checks["net_config/node_subnet"] = (
                 get(("net_config", "node_subnet")), required if not is_vmm_lite(config) else (lambda x: True))
-            checks["aci_config/vrf/name"] = (get(("aci_config", "vrf", "name")), required if not is_vmm_lite(config) else (lambda x: True))
-            checks["aci_config/vrf/tenant"] = (get(("aci_config", "vrf", "tenant")), required if not is_vmm_lite(config) else (lambda x: True))
+            checks["aci_config/vrf/name"] = (get(("aci_config", "vrf", "name")),
+                                             required if not is_vmm_lite(config) else (lambda x: True))
+            checks["aci_config/vrf/tenant"] = (get(("aci_config", "vrf", "tenant")),
+                                               required if not is_vmm_lite(config) else (lambda x: True))
 
         if config["user_config"]["aci_config"].get("vmm_domain", False):
             # ACI Config
@@ -1683,7 +1752,8 @@ def config_validate(flavor_opts, config):
                                                   is_valid_headroom),
         }
         if is_chained_mode(config):
-            extra_checks["aci_config/secondary_aep"] = (get(("aci_config", "secondary_aep")), required)
+            extra_checks["aci_config/secondary_aep"] = (
+                get(("aci_config", "secondary_aep")), required)
             if not config["chained_cni_config"]["skip_node_network_provisioning"]:
                 extra_checks["aci_config/aep"] = (
                     get(("aci_config", "aep")), required)
@@ -1717,7 +1787,8 @@ def config_validate(flavor_opts, config):
             "aci_config/cluster_l3out/svi/secondary_ip": (get(("aci_config", "cluster_l3out", "svi", "secondary_ip")),
                                                           required),
             "aci_config/cluster_l3out/bgp/peering/aci_as_number":
-            (get(("aci_config", "cluster_l3out", "bgp", "peering", "aci_as_number")), required),
+            (get(("aci_config", "cluster_l3out", "bgp",
+             "peering", "aci_as_number")), required),
             "net_config/extern_dynamic": (get(("net_config", "extern_dynamic")),
                                           required),
             "net_config/cluster_svc_subnet": (get(("net_config", "cluster_svc_subnet")),
@@ -1773,7 +1844,8 @@ def config_validate(flavor_opts, config):
     # Allow deletion of resources without isname check
     if get(("provision", "prov_apic")) is False and not is_calico_flavor(config["flavor"]):
         checks["aci_config/system_id"] = \
-            (get(("aci_config", "system_id")), required if not is_vmm_lite(config) else (lambda x: True))
+            (get(("aci_config", "system_id")),
+             required if not is_vmm_lite(config) else (lambda x: True))
 
     # Versions
     if not is_calico_flavor(config["flavor"]):
@@ -1848,7 +1920,8 @@ def cno_config_validate_preexisting(config, prov_apic):
                 secondary_aep_name = config["aci_config"]["secondary_aep"]
                 secondary_aep = apic.get_aep(secondary_aep_name)
                 if secondary_aep is None:
-                    err("Secondary AEP %s not defined in the APIC. Please create secondary AEP and try again." % secondary_aep_name)
+                    err("Secondary AEP %s not defined in the APIC. Please create secondary AEP and try again." %
+                        secondary_aep_name)
                     return False
 
                 if config["user_config"]["chained_cni_config"]["skip_node_network_provisioning"] and not is_vmm_lite(config):
@@ -1892,7 +1965,8 @@ def cno_config_validate_preexisting(config, prov_apic):
             if l3out:
                 # get l3out context and check if it's the same as vrf in
                 # input config
-                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+                result = apic.check_l3out_vrf(
+                    vrf_tenant, l3out_name, vrf_name, vrf_dn)
                 if not result:
                     info("L3out and Kubernetes EPGs are configured in different VRFs")
     except Exception as e:
@@ -1930,7 +2004,8 @@ def config_validate_preexisting(config, prov_apic):
             else:
                 # get l3out context and check if it's the same as vrf in
                 # input config
-                result = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+                result = apic.check_l3out_vrf(
+                    vrf_tenant, l3out_name, vrf_name, vrf_dn)
                 if not result:
                     info("L3out and Kubernetes EPGs are configured in different VRFs")
 
@@ -1963,7 +2038,8 @@ def calico_config_validate_preexisting(config, prov_apic):
             for rack in config["topology"]["rack"]:
                 for leaf in rack["leaf"]:
                     if "local_ip" not in leaf:
-                        err("Please provide only anchor leaf nodes in the input file. Non-anchor leaf node provided is %s" % leaf["id"])
+                        err("Please provide only anchor leaf nodes in the input file. Non-anchor leaf node provided is %s" %
+                            leaf["id"])
                         return False
             aep_name = config["aci_config"]["cluster_l3out"]["aep"]
             vrf_tenant = config["aci_config"]["vrf"]["tenant"]
@@ -1987,18 +2063,23 @@ def calico_config_validate_preexisting(config, prov_apic):
                 return False
             vrf = apic.get_vrf(vrf_dn)
             if vrf is None:
-                err("VRF %s/%s not created on the APIC. Please create the vrf and try again" % (vrf_tenant, vrf_name))
+                err("VRF %s/%s not created on the APIC. Please create the vrf and try again" %
+                    (vrf_tenant, vrf_name))
                 return False
             l3out = apic.get_l3out(vrf_tenant, l3out_name)
             if l3out is None:
-                err("External l3Out %s/%s not created on the APIC. Please create the external l3out and try again " % (vrf_tenant, l3out_name))
+                err("External l3Out %s/%s not created on the APIC. Please create the external l3out and try again " %
+                    (vrf_tenant, l3out_name))
                 return False
-            map_l3out_vrf = apic.check_l3out_vrf(vrf_tenant, l3out_name, vrf_name, vrf_dn)
+            map_l3out_vrf = apic.check_l3out_vrf(
+                vrf_tenant, l3out_name, vrf_name, vrf_dn)
             if not map_l3out_vrf:
-                err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" % (vrf_tenant, l3out_name))
+                err("VRF is not mapped to L3out %s/%s on the APIC. Please fix the configuration and try again" %
+                    (vrf_tenant, l3out_name))
                 return False
             else:
-                check_ext_l3out_epg = apic.check_ext_l3out_epg(vrf_tenant, l3out_name)
+                check_ext_l3out_epg = apic.check_ext_l3out_epg(
+                    vrf_tenant, l3out_name)
                 if check_ext_l3out_epg is None:
                     err("External l3out %s/%s does not have an external EPG configured on the APIC. Please fix the configuration and try again" %
                         (vrf_tenant, l3out_name))
@@ -2010,15 +2091,20 @@ def calico_config_validate_preexisting(config, prov_apic):
 
 def generate_sample(filep, flavor):
     if flavor == "calico-3.26.3":
-        data = pkgutil.get_data('acc_provision', 'templates/calico-provision-config.yaml')
+        data = pkgutil.get_data(
+            'acc_provision', 'templates/calico-provision-config.yaml')
     elif flavor == "openshift-sdn-ovn-baremetal":
-        data = pkgutil.get_data('acc_provision', 'templates/chained-mode-provision-config.yaml')
+        data = pkgutil.get_data(
+            'acc_provision', 'templates/chained-mode-provision-config.yaml')
     elif flavor == "openshift-vmm-lite-baremetal":
-        data1 = pkgutil.get_data('acc_provision', 'templates/vmm-lite-provision-config.yaml')
-        data2 = pkgutil.get_data('acc_provision', 'templates/bridge-cni-config.yaml')
+        data1 = pkgutil.get_data(
+            'acc_provision', 'templates/vmm-lite-provision-config.yaml')
+        data2 = pkgutil.get_data(
+            'acc_provision', 'templates/bridge-cni-config.yaml')
         data = data1 + b"\n---\n" + data2
     else:
-        data = pkgutil.get_data('acc_provision', 'templates/provision-config.yaml')
+        data = pkgutil.get_data(
+            'acc_provision', 'templates/provision-config.yaml')
     try:
         filep.write(data)
     except TypeError:
@@ -2144,10 +2230,13 @@ def generate_operator_tar(tar_path, cont_docs, config):
         for doc in docs:
             if not doc:
                 continue
-            filename = "cluster-network-" + str(counter).zfill(2) + "-" + doc['kind'] + "-" + doc['metadata']['name'] + ".yaml"
+            filename = "cluster-network-" + \
+                str(counter).zfill(2) + "-" + \
+                doc['kind'] + "-" + doc['metadata']['name'] + ".yaml"
             filenames.append(os.path.basename(filename))
             with open(filename, 'w') as outfile:
-                yaml.safe_dump(doc, outfile, default_flow_style=False, encoding="utf-8")
+                yaml.safe_dump(
+                    doc, outfile, default_flow_style=False, encoding="utf-8")
             counter += 1
         return counter
 
@@ -2214,7 +2303,8 @@ def generate_rancher_yaml(config, operator_output, operator_tar, operator_cr_out
 
 def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-13.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-13.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2237,7 +2327,8 @@ def generate_rancher_1_3_13_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-17.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-17.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2260,7 +2351,8 @@ def generate_rancher_1_3_17_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_3_18_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-18.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-18.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2283,7 +2375,8 @@ def generate_rancher_1_3_18_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_3_20_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-20.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-20.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2306,7 +2399,8 @@ def generate_rancher_1_3_20_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_4_6_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-6.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-4-6.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2329,7 +2423,8 @@ def generate_rancher_1_4_6_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_3_21_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-21.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-21.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2352,7 +2447,8 @@ def generate_rancher_1_3_21_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_4_9_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-9.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-4-9.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2375,7 +2471,8 @@ def generate_rancher_1_4_9_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_3_24_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-3-24.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-3-24.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2398,7 +2495,8 @@ def generate_rancher_1_3_24_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_4_13_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-13.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-4-13.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2421,7 +2519,8 @@ def generate_rancher_1_4_13_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_5_3_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-3.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-5-3.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2444,7 +2543,8 @@ def generate_rancher_1_5_3_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_4_16_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-16.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-4-16.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2467,7 +2567,8 @@ def generate_rancher_1_4_16_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_5_6_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-6.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-5-6.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2490,7 +2591,8 @@ def generate_rancher_1_5_6_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_4_20_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-4-20.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-4-20.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2513,7 +2615,8 @@ def generate_rancher_1_4_20_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_5_11_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-11.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-5-11.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2536,7 +2639,8 @@ def generate_rancher_1_5_11_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_6_0_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-0.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-0.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2559,7 +2663,8 @@ def generate_rancher_1_6_0_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_5_13_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-13.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-5-13.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2582,7 +2687,8 @@ def generate_rancher_1_5_13_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_6_2_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-2.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-2.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2605,7 +2711,8 @@ def generate_rancher_1_6_2_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_5_14_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-5-14.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-5-14.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2628,7 +2735,8 @@ def generate_rancher_1_5_14_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_6_3_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-3.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-3.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2651,7 +2759,8 @@ def generate_rancher_1_6_3_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_6_6_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-6.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-6.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2674,7 +2783,8 @@ def generate_rancher_1_6_6_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_7_2_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-7-2.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-7-2.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2697,7 +2807,8 @@ def generate_rancher_1_7_2_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_6_5_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-5.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-5.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2720,7 +2831,8 @@ def generate_rancher_1_6_5_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_7_1_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-7-1.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-7-1.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2743,7 +2855,8 @@ def generate_rancher_1_7_1_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_6_10_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-6-10.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-6-10.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2766,7 +2879,8 @@ def generate_rancher_1_6_10_yaml(config, operator_output, operator_tar, operator
 
 def generate_rancher_1_7_7_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-7-7.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-7-7.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2789,7 +2903,8 @@ def generate_rancher_1_7_7_yaml(config, operator_output, operator_tar, operator_
 
 def generate_rancher_1_8_3_yaml(config, operator_output, operator_tar, operator_cr_output):
     if operator_output and operator_output != "/dev/null":
-        template = get_jinja_template('aci-network-provider-cluster-1-8-3.yaml')
+        template = get_jinja_template(
+            'aci-network-provider-cluster-1-8-3.yaml')
         outname = operator_output
         # At this time, we do not use the aci-containers-operator with Rancher.
         # The template to generate ACI CNI components is upstream in RKE code
@@ -2834,11 +2949,13 @@ def generate_calico_deployment_files(config, network_operator_output):
     config['net_config']['pod_subnet'] = config['net_config']['pod_subnet'][0]
     config['net_config']['extern_dynamic'] = config['net_config']['extern_dynamic'][0]
 
-    filenames = ["tigera_operator.yaml", "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
+    filenames = ["tigera_operator.yaml",
+                 "custom_resources_aci_calico.yaml", "custom_resources_calicoctl.yaml"]
     if network_operator_output and network_operator_output != "/dev/null":
         calico_crds_template = get_jinja_template('tigera-operator.yaml')
         calico_crds_output = calico_crds_template.render(config=config)
-        calico_crs_template = get_jinja_template('custom-resources-aci-calico.yaml')
+        calico_crs_template = get_jinja_template(
+            'custom-resources-aci-calico.yaml')
         calico_crs_output = calico_crs_template.render(config=config)
         calicoctl_template = get_jinja_template('calicoctl.yaml')
         calicoctl_output = calicoctl_template.render(config=config)
@@ -2852,22 +2969,29 @@ def generate_calico_deployment_files(config, network_operator_output):
                 configTemp = dict()
                 configTemp["node_name"] = node_name["name"]
                 configTemp["id"] = item["id"]
-                bgp_node = bgp_node + "\n---\n" + calico_node_template.render(config=configTemp)
+                bgp_node = bgp_node + "\n---\n" + \
+                    calico_node_template.render(config=configTemp)
             for leaf in item["leaf"]:
                 if "local_ip" in leaf:
                     configTemp = dict(config)
                     configTemp["local_ip"] = leaf["local_ip"]
-                    configTemp["peer_name"] = leaf["local_ip"].replace(".", "-")
+                    configTemp["peer_name"] = leaf["local_ip"].replace(
+                        ".", "-")
                     configTemp["id"] = item["id"]
-                    bgp_peer = bgp_peer + "\n---\n" + calico_bgp_peer_template.render(config=configTemp)
+                    bgp_peer = bgp_peer + "\n---\n" + \
+                        calico_bgp_peer_template.render(config=configTemp)
 
-        calico_bgp_config_template = get_jinja_template('calico-bgp-config.yaml')
-        calico_bgp_config_output = calico_bgp_config_template.render(config=config)
+        calico_bgp_config_template = get_jinja_template(
+            'calico-bgp-config.yaml')
+        calico_bgp_config_output = calico_bgp_config_template.render(
+            config=config)
 
         tigera_operator_yaml = calico_crds_output
-        custom_resources_aci_calico_yaml = calico_crs_output + "\n---\n" + calicoctl_output + bgp_node
+        custom_resources_aci_calico_yaml = calico_crs_output + \
+            "\n---\n" + calicoctl_output + bgp_node
         custom_resources_calicoctl_yaml = calico_bgp_config_output + bgp_peer
-        acc_provision_yaml = get_jinja_template('acc-provision-configmap.yaml').render(config=config)
+        acc_provision_yaml = get_jinja_template(
+            'acc-provision-configmap.yaml').render(config=config)
         custom_resources_aci_calico_yaml += "\n---\n" + acc_provision_yaml
         with open("custom_resources_aci_calico.yaml", "w") as fh:
             fh.write(custom_resources_aci_calico_yaml)
@@ -2951,9 +3075,11 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 
         # Generate and convert containers deployment to base64 and add
         # as configMap entry to the operator deployment.
-        config["kube_config"]["deployment_base64"] = base64.b64encode(temp.encode('ascii')).decode('ascii')
+        config["kube_config"]["deployment_base64"] = base64.b64encode(
+            temp.encode('ascii')).decode('ascii')
         if config["flavor"] != "k8s-overlay":
-            oper_cmap_template = get_jinja_template('aci-operators-configmap.yaml')
+            oper_cmap_template = get_jinja_template(
+                'aci-operators-configmap.yaml')
             cmap_temp = ''.join(oper_cmap_template.stream(config=config))
 
             if not is_vmm_lite(config):
@@ -2964,15 +3090,21 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                 op_crd_template = get_jinja_template('aci-operators-crd.yaml')
                 op_crd_output = op_crd_template.render(config=config)
 
-            acc_provision_crd_template = get_jinja_template('acc-provision-crd.yaml')
-            acc_provision_crd_temp = ''.join(acc_provision_crd_template.stream(config=config))
-            acc_provision_oper_cmap_template = get_jinja_template('acc-provision-configmap.yaml')
-            acc_provision_oper_cmap_temp = ''.join(acc_provision_oper_cmap_template.stream(config=config))
+            acc_provision_crd_template = get_jinja_template(
+                'acc-provision-crd.yaml')
+            acc_provision_crd_temp = ''.join(
+                acc_provision_crd_template.stream(config=config))
+            acc_provision_oper_cmap_template = get_jinja_template(
+                'acc-provision-configmap.yaml')
+            acc_provision_oper_cmap_temp = ''.join(
+                acc_provision_oper_cmap_template.stream(config=config))
 
             if not is_cilium_chaining_enabled(config):
-                new_parsed_yaml = parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:]
+                new_parsed_yaml = parsed_temp[:cmap_idx] + [acc_provision_crd_temp] + [
+                    cmap_temp] + [acc_provision_oper_cmap_temp] + parsed_temp[cmap_idx:]
                 if not is_vmm_lite(config):
-                    new_parsed_yaml = [op_crd_output] + new_parsed_yaml + [output_from_parsed_template]
+                    new_parsed_yaml = [op_crd_output] + \
+                        new_parsed_yaml + [output_from_parsed_template]
                 new_deployment_file = '---'.join(new_parsed_yaml)
             else:
                 cilium_template = get_jinja_template('cilium.yaml')
@@ -3001,7 +3133,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
             if tar_path == "-":
                 tar_path = "/dev/null"
             else:
-                deployment_docs = yaml.load_all(new_deployment_file, Loader=yaml.SafeLoader)
+                deployment_docs = yaml.load_all(
+                    new_deployment_file, Loader=yaml.SafeLoader)
                 generate_operator_tar(tar_path, deployment_docs, config)
 
             if not is_vmm_lite(config):
@@ -3010,7 +3143,8 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
                     if operator_cr_output == "-":
                         operator_cr_output = "/dev/null"
                     else:
-                        info("Writing kubernetes ACI operator CR to %s" % operator_cr_output)
+                        info("Writing kubernetes ACI operator CR to %s" %
+                             operator_cr_output)
                 op_cr_template.stream(config=config).dump(operator_cr_output)
 
         info("Writing kubernetes infrastructure YAML to %s" % outname)
@@ -3034,14 +3168,14 @@ def generate_kube_yaml(config, operator_output, operator_tar, operator_cr_output
 def generate_kube_user_and_certs(config, prov_apic):
 
     def assert_attributes_is_first_key(data):
-            """Check that attributes is the first key in the JSON."""
-            if isinstance(data, Mapping) and "attributes" in data:
-                assert next(iter(data.keys())) == "attributes"
-                for item in data.items():
-                    assert_attributes_is_first_key(item)
-            elif isinstance(data, (list, tuple)):
-                for item in data:
-                    assert_attributes_is_first_key(item)
+        """Check that attributes is the first key in the JSON."""
+        if isinstance(data, Mapping) and "attributes" in data:
+            assert next(iter(data.keys())) == "attributes"
+            for item in data.items():
+                assert_attributes_is_first_key(item)
+        elif isinstance(data, (list, tuple)):
+            for item in data:
+                assert_attributes_is_first_key(item)
 
     def update(data, x):
         if x:
@@ -3074,7 +3208,6 @@ def generate_kube_user_and_certs(config, prov_apic):
         apic.provision(apic_config, sync_login, retries)
         ret = False if apic.errors > 0 else True
     return ret
-
 
 
 def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
@@ -3121,7 +3254,8 @@ def generate_apic_config(flavor_opts, config, prov_apic, apic_file):
                                      l3out_name=l3out_name, cluster_l3out_vrf_details=cluster_l3out_vrf_details)
                 else:
                     if not is_vmm_lite(config) or vrf_tenant:
-                        apic.unprovision(apic_config, system_id, cluster_l3out_tenant, vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant)
+                        apic.unprovision(apic_config, system_id, cluster_l3out_tenant,
+                                         vrf_tenant, cluster_tenant, old_naming, config, pre_existing_tenant)
             ret = False if apic.errors > 0 else True
     return ret
 
@@ -3335,9 +3469,11 @@ def check_overlapping_subnets(config):
         rtr2, _ = sub2.split("/")
         ip2 = ipaddress.ip_address(rtr2)
         if ip1.version == 4 and ip2.version == 4:
-            net1, net2 = ipaddress.IPv4Network(sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
+            net1, net2 = ipaddress.IPv4Network(
+                sub1, strict=False), ipaddress.IPv4Network(sub2, strict=False)
         elif ip1.version == 6 and ip2.version == 6:
-            net1, net2 = ipaddress.IPv6Network(sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
+            net1, net2 = ipaddress.IPv6Network(
+                sub1, strict=False), ipaddress.IPv6Network(sub2, strict=False)
         else:
             continue
         out = net1.overlaps(net2)
@@ -3456,7 +3592,8 @@ def is_valid_dualstack_config(config):
     if "net_config" not in config:
         return False, ""
 
-    pod_subnet_type, node_subnet_type, extern_static_type, extern_dynamic_type = get_subnet_types(config)
+    pod_subnet_type, node_subnet_type, extern_static_type, extern_dynamic_type = get_subnet_types(
+        config)
 
     if node_subnet_type != "DualStack":
         return False, "Node Subnet " + " ".join(config['net_config']['node_subnet']) + " does not have IPv6"
@@ -3544,7 +3681,8 @@ def provision(args, apic_file, no_random):
         config["aci_config"]["apic_login"]["username"] = args.username
 
     config["aci_config"]["apic_login"]["password"] = \
-        args.password if args.password else os.environ.get('ACC_PROVISION_PASS')
+        args.password if args.password else os.environ.get(
+            'ACC_PROVISION_PASS')
     config["aci_config"]["apic_login"]["timeout"] = timeout
 
     # Create config
@@ -3591,7 +3729,8 @@ def provision(args, apic_file, no_random):
                     for item in aci_items:
                         item['name'] = f"{Apic.ACI_PREFIX}{system_id}-{item['name']}"
                 except KeyError:
-                    err("Flavor '{}' requires a system_id but it was not found.".format(flavor))
+                    err("Flavor '{}' requires a system_id but it was not found.".format(
+                        flavor))
                     return False
             deep_merge(config, flavor_config)
         if "default_version" in FLAVORS[flavor]:
@@ -3621,21 +3760,27 @@ def provision(args, apic_file, no_random):
         err(" Multisubnet feature is not supported in calico.")
         return False
 
-    get = lambda t: functools.reduce(lambda x, y: x and x.get(y), t, config)
+    def get(t): return functools.reduce(lambda x, y: x and x.get(y), t, config)
     if is_chained_mode(config):
         if get(("aci_config", "vmm_domain", "mcast_range", "start")):
-            warn(("mcast_range option is not used in %s flavor with chained mode" % config["flavor"]))
+            warn(("mcast_range option is not used in %s flavor with chained mode" %
+                 config["flavor"]))
         if get(("aci_config", "vmm_domain", "encap_type")):
-            warn(("encap_type option is not used in %s flavor with chained mode" % config["flavor"]))
+            warn(("encap_type option is not used in %s flavor with chained mode" %
+                 config["flavor"]))
         if get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")):
-            warn(("nested_inside option is not used in %s flavor with chained mode" % config["flavor"]))
+            warn(("nested_inside option is not used in %s flavor with chained mode" %
+                 config["flavor"]))
     if is_vmm_lite(config):
         if get(("aci_config", "vmm_domain", "mcast_range", "start")):
-            warn(("mcast_range option is not used in %s flavor with VMM lite" % config["flavor"]))
+            warn(("mcast_range option is not used in %s flavor with VMM lite" %
+                 config["flavor"]))
         if get(("aci_config", "vmm_domain", "encap_type")):
-            warn(("encap_type option is not used in %s flavor with VMM lite" % config["flavor"]))
+            warn(("encap_type option is not used in %s flavor with VMM lite" %
+                 config["flavor"]))
         if get(("aci_config", "vmm_domain", "nested_inside", "installer_provisioned_lb_ip")):
-            warn(("nested_inside option is not used in %s flavor with VMM lite" % config["flavor"]))
+            warn(("nested_inside option is not used in %s flavor with VMM lite" %
+                 config["flavor"]))
 
     deep_merge(config, config_default())
 
@@ -3707,11 +3852,13 @@ def provision(args, apic_file, no_random):
     deep_merge(config, adj_config)
 
     if is_vmm_lite(config):
-        bridge_nad_config_file = config.get("vmm_lite_config", {}).get("bridge_nad_config_file")
+        bridge_nad_config_file = config.get(
+            "vmm_lite_config", {}).get("bridge_nad_config_file")
         bridge_name = config.get("vmm_lite_config", {}).get("bridge_name")
         if bridge_nad_config_file:
             try:
-                bridge_nad_config = read_and_validate_bridge_nad_config_file(bridge_name, bridge_nad_config_file)
+                bridge_nad_config = read_and_validate_bridge_nad_config_file(
+                    bridge_name, bridge_nad_config_file)
                 config["vmm_lite_config"]["bridge_nad_config"] = bridge_nad_config
             except Exception as e:
                 err(f"Invalid bridge NAD config: {e}")
@@ -3746,7 +3893,8 @@ def provision(args, apic_file, no_random):
                 info("Reusing existing certs for calico based kubernetes controller")
             else:
                 info("Reusing existing certs for kubernetes controller")
-        key_data, cert_data, reused = generate_cert(username, certfile, keyfile)
+        key_data, cert_data, reused = generate_cert(
+            username, certfile, keyfile)
     config["aci_config"]["sync_login"]["key_data"] = key_data
     config["aci_config"]["sync_login"]["cert_data"] = cert_data
     config["aci_config"]["sync_login"]["cert_reused"] = reused
@@ -3760,7 +3908,8 @@ def provision(args, apic_file, no_random):
 
     if is_calico_flavor(config["flavor"]):
         print("Using flavor: ", config["flavor"])
-        gen = flavor_opts.get("template_generator", generate_calico_deployment_files)
+        gen = flavor_opts.get("template_generator",
+                              generate_calico_deployment_files)
         if not callable(gen):
             gen = globals()[gen]
         gen(config, output_tar)
@@ -3792,7 +3941,8 @@ def provision(args, apic_file, no_random):
 
     if (config['aci_config']['vmm_domain'] and config['net_config']['second_kubeapi_portgroup'] and prov_apic is not None):
         apic = get_apic(config)
-        nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(config['aci_config']['vmm_domain']['nested_inside']['name'])
+        nested_vswitch_vlanpool = apic.get_vmmdom_vlanpool_tDn(
+            config['aci_config']['vmm_domain']['nested_inside']['name'])
         config['aci_config']['vmm_domain']['nested_inside']['vlan_pool'] = nested_vswitch_vlanpool
 
     if is_chained_mode(config) and config["user_config"]["chained_cni_config"].get("secondary_vlans"):
@@ -3813,7 +3963,8 @@ def main(args=None, apic_file=None, no_random=False):
 
     if args.release:
         try:
-            release_file_path = os.path.dirname(os.path.realpath(__file__)) + '/RELEASE-VERSION'
+            release_file_path = os.path.dirname(
+                os.path.realpath(__file__)) + '/RELEASE-VERSION'
             release = open(release_file_path, "r").read().rstrip()
             print(release, file=sys.stderr)
         except Exception:
@@ -3839,7 +3990,8 @@ def main(args=None, apic_file=None, no_random=False):
         sys.exit(1)
 
     if args.disable_multus is not None and (args.disable_multus != 'true' and args.disable_multus != 'false'):
-        err("Invalid configuration for disable_multus:" + args.disable_multus + " <Valid values: true/false>")
+        err("Invalid configuration for disable_multus:" +
+            args.disable_multus + " <Valid values: true/false>")
         sys.exit(1)
 
     if args.apic_oobm_ip and is_valid_ip(args.apic_oobm_ip) is False:

@@ -44,94 +44,102 @@ def in_testdir(f):
 
 @in_testdir
 def test_unprovision_delete_tenant():
-     with open("test_unprovision_delete_tenant_data.json") as data_file:
-         data = json.loads(data_file.read())
-     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-     def clean_apic():
-         apic.shutdown()
-         apic.server_close()
-         return False
-     assert (len(fake_apic.fake_deletes) != 0)
-     run_provision(
-         "test_unprovision_delete_tenant.inp.yaml",
-         None,
-         None,
-         None,
-         overrides={ "skip_app_profile_check": True, "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-     )
-     apic.shutdown()
-     apic.server_close()
-     # verify all deletes were executed
-     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+    with open("test_unprovision_delete_tenant_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        apic.server_close()
+        return False
+    assert (len(fake_apic.fake_deletes) != 0)
+    run_provision(
+        "test_unprovision_delete_tenant.inp.yaml",
+        None,
+        None,
+        None,
+        overrides={"skip_app_profile_check": True, "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+    apic.server_close()
+    # verify all deletes were executed
+    assert (len(fake_apic.fake_deletes) == 0 and len(
+        fake_apic.fake_extra_deletes) == 0)
 
 
 @in_testdir
 def test_unprovision_custom_ap_without_annotation():
-     with open("test_unprovision_custom_ap_without_annotation_data.json") as data_file:
-         data = json.loads(data_file.read())
-     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-     def clean_apic():
-         apic.shutdown()
-         apic.server_close()
-         return False
-     assert (len(fake_apic.fake_deletes) != 0)
-     run_provision(
-         "test_unprovision_custom_ap_without_annotation.inp.yaml",
-         None,
-         None,
-         None,
-         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-     )
-     apic.shutdown()
-     apic.server_close()
-     # verify all deletes were executed
-     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+    with open("test_unprovision_custom_ap_without_annotation_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        apic.server_close()
+        return False
+    assert (len(fake_apic.fake_deletes) != 0)
+    run_provision(
+        "test_unprovision_custom_ap_without_annotation.inp.yaml",
+        None,
+        None,
+        None,
+        overrides={"apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+    apic.server_close()
+    # verify all deletes were executed
+    assert (len(fake_apic.fake_deletes) == 0 and len(
+        fake_apic.fake_extra_deletes) == 0)
 
 
 @in_testdir
 def test_unprovision_custom_ap_with_annotation():
-     with open("test_unprovision_custom_ap_with_annotation_data.json") as data_file:
-         data = json.loads(data_file.read())
-     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-     def clean_apic():
-         apic.shutdown()
-         apic.server_close()
-         return False
-     assert (len(fake_apic.fake_deletes) != 0)
-     run_provision(
-         "test_unprovision_custom_ap_with_annotation.inp.yaml",
-         None,
-         None,
-         None,
-         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-     )
-     apic.shutdown()
-     apic.server_close()
-     # verify all deletes were executed
-     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+    with open("test_unprovision_custom_ap_with_annotation_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        apic.server_close()
+        return False
+    assert (len(fake_apic.fake_deletes) != 0)
+    run_provision(
+        "test_unprovision_custom_ap_with_annotation.inp.yaml",
+        None,
+        None,
+        None,
+        overrides={"apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+    apic.server_close()
+    # verify all deletes were executed
+    assert (len(fake_apic.fake_deletes) == 0 and len(
+        fake_apic.fake_extra_deletes) == 0)
 
 
 @in_testdir
 def test_unprovision_custom_epg():
-     with open("test_unprovision_custom_epg_data.json") as data_file:
-         data = json.loads(data_file.read())
-     apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
-     def clean_apic():
-         apic.shutdown()
-         apic.server_close()
-         return False
-     assert (len(fake_apic.fake_deletes) != 0)
-     run_provision(
-         "test_unprovision_custom_epg.inp.yaml",
-         None,
-         None,
-         None,
-         overrides={ "apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
-     )
-     apic.shutdown()
-     apic.server_close()
-     # verify all deletes were executed
-     assert( len(fake_apic.fake_deletes) == 0 and len(fake_apic.fake_extra_deletes) == 0 )
+    with open("test_unprovision_custom_epg_data.json") as data_file:
+        data = json.loads(data_file.read())
+    apic = fake_apic.start_fake_apic(50001, data["gets"], data["deletes"])
+
+    def clean_apic():
+        apic.shutdown()
+        apic.server_close()
+        return False
+    assert (len(fake_apic.fake_deletes) != 0)
+    run_provision(
+        "test_unprovision_custom_epg.inp.yaml",
+        None,
+        None,
+        None,
+        overrides={"apic": True, "password": "test", "delete": True}, cleanupFunc=clean_apic
+    )
+    apic.shutdown()
+    apic.server_close()
+    # verify all deletes were executed
+    assert (len(fake_apic.fake_deletes) == 0 and len(
+        fake_apic.fake_extra_deletes) == 0)
 
 
 @in_testdir
@@ -168,10 +176,12 @@ def test_unprovision_multi_cluster_in_shared_tenant():
 
     # --- Final Assertions ---
     # 1. Verify all expected deletes for cluster 1 were executed.
-    assert len(fake_apic.fake_deletes) == 0, "Not all expected resources for cluster 1 were deleted."
+    assert len(
+        fake_apic.fake_deletes) == 0, "Not all expected resources for cluster 1 were deleted."
 
     # 2. CRITICAL: Verify that NO unexpected deletes for cluster 2 were attempted.
-    assert len(fake_apic.fake_extra_deletes) == 0, "An unexpected resource (likely from cluster 2) was deleted."
+    assert len(
+        fake_apic.fake_extra_deletes) == 0, "An unexpected resource (likely from cluster 2) was deleted."
 
 
 @in_testdir
@@ -212,7 +222,8 @@ def test_unprovision_shared_tenant_for_old_acc_provision():
 
     # --- Final Assertions ---
     # 1. Verify all expected, cluster-specific deletes were executed.
-    assert len(fake_apic.fake_deletes) == 0, "Not all expected cluster-specific resources were deleted."
+    assert len(
+        fake_apic.fake_deletes) == 0, "Not all expected cluster-specific resources were deleted."
 
     # 2. CRITICAL: Verify that NO unexpected deletes were attempted.
     #    This implicitly confirms the unprefixed contract was not deleted.
@@ -1458,6 +1469,7 @@ def test_override_vmm_lite_enabled():
         overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
 
+
 @in_testdir
 def test_override_vmm_lite_minimal_config_enabled():
     run_provision(
@@ -1469,6 +1481,7 @@ def test_override_vmm_lite_minimal_config_enabled():
         overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
 
+
 @in_testdir
 def test_override_vmm_lite_chained_mode_enabled():
     run_provision(
@@ -1479,6 +1492,7 @@ def test_override_vmm_lite_chained_mode_enabled():
         "override_vmm_lite_chained_mode_enabled.apic.txt",
         overrides={"flavor": "openshift-vmm-lite-baremetal"}
     )
+
 
 @in_testdir
 def test_override_use_system_id_for_secondary_names():
@@ -2239,7 +2253,8 @@ def test_sample():
             acc_provision.main(args, no_random=True)
         finally:
             sys.stdout = sys.__stdout__
-        assert filecmp.cmp(tmpout.name, "../acc_provision/templates/provision-config.yaml", shallow=False)
+        assert filecmp.cmp(
+            tmpout.name, "../acc_provision/templates/provision-config.yaml", shallow=False)
         run_provision(tmpout.name, "sample.kube.yaml", None)
 
 
@@ -2690,10 +2705,12 @@ def convert_aci_op_cm_to_base64(kube_yaml_file, kind="ConfigMap", name="aci-oper
                         spec = aci_op_cm_yaml['data']['spec']
 
                 if base64_convert == "encode":
-                    base64_encoded_config = base64.b64encode(spec['config'].encode('ascii')).decode("ascii")
+                    base64_encoded_config = base64.b64encode(
+                        spec['config'].encode('ascii')).decode("ascii")
                     spec['config'] = base64_encoded_config
                 elif base64_convert == "decode":
-                    base64_decoded_config = base64.b64decode(spec['config']).decode("ascii")
+                    base64_decoded_config = base64.b64decode(
+                        spec['config']).decode("ascii")
                     spec['config'] = base64_decoded_config
 
                 if kind == "ConfigMap" and name == "aci-operator-config":
@@ -2724,12 +2741,15 @@ def compare_kube_yaml(expectedyaml, output, debug, generated, cleanupFunc):
         name = "acicnioperator"
 
     # 1 Load generated *.kube.yaml
-    prepare_gen_yamls_list = convert_aci_op_cm_to_base64(generated_yaml_file, kind=kind, name=name)
+    prepare_gen_yamls_list = convert_aci_op_cm_to_base64(
+        generated_yaml_file, kind=kind, name=name)
     # 2 Load expected *.kube.yaml, find aci-operator-config configmap and convert it to base64 encode format
-    prepare_exp_yamls_list = convert_aci_op_cm_to_base64(expected_yaml_file, kind=kind, name=name, base64_convert="encode")
+    prepare_exp_yamls_list = convert_aci_op_cm_to_base64(
+        expected_yaml_file, kind=kind, name=name, base64_convert="encode")
     # 3 Load generated *.kube.yaml, find aci-operator-config configmap and convert it to plaintext
     #   and store back to /tmp/generated_kube.yaml to be used in fix-testdata.sh
-    store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(generated_yaml_file, kind=kind, name=name, base64_convert="decode")
+    store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(
+        generated_yaml_file, kind=kind, name=name, base64_convert="decode")
     with open(generated, 'w') as fh:
         yml.dump_all(store_gen_yaml_with_aci_op_cm_as_plain_text, fh)
 
@@ -2781,7 +2801,8 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
                 fname = tmp_dir + "/" + fname
                 gen_fh = open(fname, "r")
                 generated_yaml_file = yml.load_all(gen_fh)
-                prepare_gen_yamls_list = convert_aci_op_cm_to_base64(generated_yaml_file)
+                prepare_gen_yamls_list = convert_aci_op_cm_to_base64(
+                    generated_yaml_file)
                 break
 
         # 2 Load expected *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
@@ -2792,13 +2813,15 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
                 fname = expected + "/" + fname
                 exp_fh = open(fname, "r")
                 expected_yaml_file = yml.load_all(exp_fh)
-                prepare_exp_yamls_list = convert_aci_op_cm_to_base64(expected_yaml_file, base64_convert="encode")
+                prepare_exp_yamls_list = convert_aci_op_cm_to_base64(
+                    expected_yaml_file, base64_convert="encode")
                 break
 
         # 3 Load generated *-ConfigMap-aci-operator-config.yaml, find aci-operator-config configmap
         #   and convert it to plaintext and store back to /tmp/generated_operator.tar.gz to be used in fix-testdata.sh
         new_tmp_tar_dir = "/tmp/new_tmp_tar"
-        tar_output = tarfile.open(mode="r:gz", name=generated, encoding="utf-8")
+        tar_output = tarfile.open(
+            mode="r:gz", name=generated, encoding="utf-8")
         shutil.rmtree(new_tmp_tar_dir, ignore_errors=True)
         os.mkdir(new_tmp_tar_dir)
         tar_output.extractall(path=new_tmp_tar_dir)
@@ -2811,9 +2834,11 @@ def compare_tar_plaintext(expected, output, debug, generated, cleanupFunc):
             if fname.endswith(fname_pattern):
                 gen_fh = open(fname, "r")
                 generated_yaml_file = yml.load_all(gen_fh)
-                store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(generated_yaml_file, base64_convert="decode")
+                store_gen_yaml_with_aci_op_cm_as_plain_text = convert_aci_op_cm_to_base64(
+                    generated_yaml_file, base64_convert="decode")
                 with open(fname, 'w') as fh:
-                    yml.dump_all(store_gen_yaml_with_aci_op_cm_as_plain_text, fh)
+                    yml.dump_all(
+                        store_gen_yaml_with_aci_op_cm_as_plain_text, fh)
                 break
 
         os.remove(generated)
@@ -2847,31 +2872,43 @@ def run_provision(inpfile, expectedkube=None, expectedtar=None,
     # Exec main
     with tempfile.NamedTemporaryFile("w+") as output, tempfile.NamedTemporaryFile("w+") as operator_cr_output, tempfile.NamedTemporaryFile("w+") as apicfile, tempfile.NamedTemporaryFile('w+', suffix='.tar.gz') as out_tar:
 
-        args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name, aci_operator_cr=operator_cr_output.name, **overrides)
+        args = get_args(config=inpfile, output=output.name, output_tar=out_tar.name,
+                        aci_operator_cr=operator_cr_output.name, **overrides)
         acc_provision.main(args, apicfile.name, no_random=True)
 
         copy_file(expectedkube, output, args.debug, "/tmp/generated_kube.yaml")
-        copy_file(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml")
-        copy_file(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt")
-        copy_file(expectedtar, out_tar, args.debug, "/tmp/generated_operator.tar.gz")
+        copy_file(expectedoperatorcr, operator_cr_output,
+                  args.debug, "/tmp/generated_operator_cr.yaml")
+        copy_file(expectedapic, apicfile, args.debug,
+                  "/tmp/generated_apic.txt")
+        copy_file(expectedtar, out_tar, args.debug,
+                  "/tmp/generated_operator.tar.gz")
 
         if args.compare_kube_yaml_aci_op_cm_in_plain_text:
-            result_kube_yaml = compare_kube_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml", cleanupFunc)
-            result_op_cr = compare_kube_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
-            compare_tar_plaintext(expectedtar, out_tar.name, args.debug, "/tmp/generated_operator.tar.gz", cleanupFunc)
+            result_kube_yaml = compare_kube_yaml(
+                expectedkube, output, args.debug, "/tmp/generated_kube.yaml", cleanupFunc)
+            result_op_cr = compare_kube_yaml(
+                expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
+            compare_tar_plaintext(expectedtar, out_tar.name, args.debug,
+                                  "/tmp/generated_operator.tar.gz", cleanupFunc)
             assert result_kube_yaml is True, cleanupFunc()
             assert result_op_cr is True, cleanupFunc()
         else:
-            compare_yaml(expectedkube, output, args.debug, "/tmp/generated_kube.yaml", cleanupFunc)
-            compare_tar(expectedtar, out_tar.name, args.debug, "/tmp/generated_operator.tar.gz", cleanupFunc)
-            compare_yaml(expectedoperatorcr, operator_cr_output, args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
+            compare_yaml(expectedkube, output, args.debug,
+                         "/tmp/generated_kube.yaml", cleanupFunc)
+            compare_tar(expectedtar, out_tar.name, args.debug,
+                        "/tmp/generated_operator.tar.gz", cleanupFunc)
+            compare_yaml(expectedoperatorcr, operator_cr_output,
+                         args.debug, "/tmp/generated_operator_cr.yaml", cleanupFunc)
 
-        compare_yaml(expectedapic, apicfile, args.debug, "/tmp/generated_apic.txt", cleanupFunc)
+        compare_yaml(expectedapic, apicfile, args.debug,
+                     "/tmp/generated_apic.txt", cleanupFunc)
 
 
 @in_testdir
 def test_certificate_generation_kubernetes():
-    create_certificate("base_case.inp.yaml", "user.crt", output='temp.yaml', aci_operator_cr='temp_operator_cr.yaml')
+    create_certificate("base_case.inp.yaml", "user.crt",
+                       output='temp.yaml', aci_operator_cr='temp_operator_cr.yaml')
 
 
 @in_testdir
