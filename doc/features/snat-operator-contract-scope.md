@@ -2,8 +2,7 @@
 
 # Table of contents
 * [Overview](#overview)
-* [Mechanism](#mechanism)  
-* [Examples](#examples)
+* [Mechanism](#mechanism)
     
 
 ## Overview
@@ -24,29 +23,20 @@ kube_config:
   snat_operator:
     contract_scope: tenant
 ```
-
-Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
+Run `acc-provision` tool to generate new aci_deployment.yaml
 ```sh
-acc-provision -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml
+acc-provision --upgrade -c <acc_provision_input_file> -f <flavor> -u <apic_username> -p <apic_password> -o aci_deployment.yaml
 ```
 
-Delete old aci_deployment.yaml and wait till all the pods in the `aci-containers-system` namespace are deleted
+Apply newly generated aci_deployment.yaml and restart controller pod.
 ```sh
-$ oc delete -f aci_deployment.yaml
-$ oc get pods -n aci-containers-system
+$ kubectl apply -f aci_deployment.yaml
+$ kubectl delete po <controller_pod> -n aci-containers-system
 ```
 
-Apply newly generated aci_deployment.yaml and wait till all pods in `aci-containers-system` namespace are running
-```sh
-$ oc apply -f aci_deployment.yaml
-$ oc get pods -n aci-containers-system
-```
-
-Verify conrtact scop set in aci-containers-config config map:
+Verify contract scope set in aci-containers-config config map:
 
 ```sh
-noiro@oshift3-ext-rtr:~$ oc get cm -n aci-containers-system aci-containers-config -oyaml | grep snat-contract-scope
+noiro@rke-rketest135-ext-rtr:~$ kubectl get cm -n aci-containers-system aci-containers-config -oyaml | grep snat-contract-scope
         "snat-contract-scope": "tenant",
 ```
-
-## Examples
