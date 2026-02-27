@@ -18,7 +18,7 @@ import string
 import sys
 import uuid
 
-import pkg_resources
+from importlib.metadata import version as pkg_version, PackageNotFoundError
 import pkgutil
 import tarfile
 import yaml
@@ -3162,8 +3162,8 @@ class CustomFormatter(argparse.HelpFormatter):
 def parse_args(show_help):
     version = 'Unknown'
     try:
-        version = pkg_resources.require("acc_provision")[0].version
-    except pkg_resources.DistributionNotFound:
+        version = pkg_version("acc_provision")
+    except PackageNotFoundError:
         # ignore, expected in case running from source
         pass
 
