@@ -43,11 +43,24 @@ spec:
                   type: string
                 type: array
             type: object
+            x-kubernetes-validations:
+            - message: 'SnatPolicy is invalid: at least one of spec.snatIp, spec.selector.namespace,
+                or spec.selector.labels must be specified
+
+                '
+              rule: '(has(self.snatIp) && self.snatIp.size() > 0) || (has(self.selector)
+                && has(self.selector.namespace) && self.selector.namespace != "")
+                || (has(self.selector) && has(self.selector.labels) && self.selector.labels.size()
+                > 0)
+
+                '
           status:
             additionalProperties:
               type: string
             properties: null
             type: object
+        required:
+        - spec
         type: object
     served: true
     storage: true
