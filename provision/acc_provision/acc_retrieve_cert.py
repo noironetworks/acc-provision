@@ -37,7 +37,8 @@ def kubectl(kind, name, namespace=None):
 def get_secret(name, namespace, *keys):
     ret = []
     data = kubectl('secret', name, namespace)
-    decode = lambda k: data.get(k) and base64.b64decode(data[k].decode("ascii"))
+    def decode(k): return data.get(
+        k) and base64.b64decode(data[k].decode("ascii"))
     if keys:
         ret = map(decode, keys)
     return ret

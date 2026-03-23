@@ -10,13 +10,14 @@ else:
 
 fake_gets = {}
 fake_deletes = []
-fake_extra_deletes=[]
+fake_extra_deletes = []
 login_data = {
     "imdata": [{"aaaLogin": {"attributes": {"token": "testtoken"}}}]
 }
 empty_data = {
     "imdata": []
 }
+
 
 class Serv(BaseHTTPRequestHandler):
     def _set_headers(self):
