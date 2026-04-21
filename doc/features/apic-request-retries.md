@@ -13,8 +13,8 @@ This feature introduces 2 configuration parameters to enable retries for APIC re
 1. `enable_apic_request_retry_delay` to control retry behavior.
   Default: True (enabled). To disable retries, set "enable_apic_request_retry_delay: False" in the acc provision input file.
 
-2. `apic_request_retry_delay` to configure the delay between retry attempts in minutes.
-  Default: 2 (minutes). To change the delay, set "apic_request_retry_delay: <required_value>" in the input file.
+2. `apic_request_retry_delay_base` to configure the base delay for exponential backoff between retry attempts in seconds.
+  Default: 20 (seconds). To change the delay, set "apic_request_retry_delay_base: <required_value>" in the input file.
   This request retry delay is applicable only when `enable_apic_request_retry_delay` is enabled.
 
 
@@ -25,7 +25,7 @@ Add following configuration in the acc provision input file:
 ```yaml
 kube_config:
   enable_apic_request_retry_delay: True
-  apic_request_retry_delay: 5 # Sets the retry delay to 5 minutes
+  apic_request_retry_delay_base: 45 # Sets the retry delay base to 45 seconds
 ```
 
 Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
@@ -60,6 +60,6 @@ data:
         "apic-hosts": [
             "10.30.120.180"
         ],
-        "apic-request-retry-delay": 5,
+        "apic-request-retry-delay-base": 45,
         "enable-apic-request-retry-delay": true
 ```
