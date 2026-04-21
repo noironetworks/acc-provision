@@ -1059,7 +1059,7 @@ def config_adjust(args, config, prov_apic, no_random):
     node_bd_dn = bd_dn_prefix + "node-bd"
     pod_bd_dn = bd_dn_prefix + "pod-bd"
 
-    apic_request_retry_delay = config["kube_config"].get("apic_request_retry_delay", 2)
+    apic_request_retry_delay_base = config["kube_config"].get("apic_request_retry_delay_base", 20)
     enable_apic_request_retry_delay = config["kube_config"].get("enable_apic_request_retry_delay", True)
     epg_resolve_prioritize = config["kube_config"].get("epg_resolve_prioritize", True)
     force_ep_undeclares = config["kube_config"].get("force_ep_undeclares", True)
@@ -1164,7 +1164,7 @@ def config_adjust(args, config, prov_apic, no_random):
                 node_svc_subnet,
             ],
             "opflex_mode": opflex_mode,
-            "apic_request_retry_delay": apic_request_retry_delay,
+            "apic_request_retry_delay_base": apic_request_retry_delay_base,
             "enable_apic_request_retry_delay": enable_apic_request_retry_delay,
             "epg_resolve_prioritize": epg_resolve_prioritize,
             "force_ep_undeclares": force_ep_undeclares,
