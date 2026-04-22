@@ -1,0 +1,69 @@
+aci_config:
+  system_id: rke2
+  use_legacy_kube_naming_convention: False
+  apic_hosts:
+    - 10.30.120.100
+    - 10.30.120.101
+    - 10.30.120.102
+  apic_login:
+    username: admin
+    password: dummy
+  apic_version: "5.1"
+  aep: rke2-aep
+  vrf:
+    name: rke2
+    tenant: common
+  l3out:
+    name: l3out
+    external_networks:
+    - default
+    - test_ext_net
+  sync_login:
+    certfile: user.crt
+    keyfile: user.key
+  vmm_domain:
+    encap_type: vxlan
+    mcast_range:
+        start: 225.2.1.1
+        end: 225.2.255.255
+  opflex_device_reconnect_wait_timeout: 10
+
+net_config:
+  node_subnet: 10.1.0.1/16
+  pod_subnet: 10.2.0.1/16
+  extern_dynamic: 10.3.0.1/24
+  extern_static: 10.4.0.1/24
+  node_svc_subnet: 10.5.0.1/24
+  pod_subnet_chunk_size: 256
+  kubeapi_vlan: 4001
+  service_vlan: 4003
+  infra_vlan: 4093
+
+logging:
+  controller_log_level: info
+  hostagent_log_level: info
+  opflexagent_log_level: info
+
+rke2_config:
+  logging_namespace: "cattle-logging-system"
+  monitoring_namespace: "cattle-monitoring-system"
+
+registry:
+  image_prefix: quay.io/noiro
+
+kube_config:
+  use_system_node_priority_class: true
+  aci_containers_controller_memory_request: "256Mi"
+  aci_containers_controller_memory_limit: "2Gi"
+  aci_containers_host_memory_request: "200Mi"
+  aci_containers_host_memory_limit: "2Gi"
+  mcast_daemon_memory_request: "300Mi"
+  mcast_daemon_memory_limit: "1Gi"
+  opflex_agent_memory_request: "256Mi"
+  opflex_agent_memory_limit: "2Gi"
+  acc_provision_operator_memory_request: "256Mi"
+  acc_provision_operator_memory_limit: "1Gi"
+  aci_containers_operator_memory_request: "256Mi"
+  aci_containers_operator_memory_limit: "3Gi"
+  ovs_memory_request: "256Mi"
+  ovs_memory_limit: "2Gi"
