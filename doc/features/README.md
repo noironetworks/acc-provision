@@ -259,8 +259,8 @@ registry:
 # kube_config:
   # enable_apic_request_retry_delay: False # Set to False to disable retrying sending requests to APIC.
   #                                        # The default value is True.
-  # apic_request_retry_delay: 10 # Timeout in minutes to wait in between retries before sending request to APIC.
-  #                              # The default value is 2.
+  # apic_request_retry_delay_base: 45 # Base timeout in seconds for exponential backoff between APIC request retries.
+  #                              # The default value is 20 seconds.
   # epg_resolve_prioritize: False # Set to False to disable delaying the writing of EP files until the associated EPG is resolved.
   #                               # The default value is True.
   # force_ep_undeclares: False # Set to False to disable sending an undeclare before the endpoint declare request to opflex-proxy.
