@@ -154,6 +154,8 @@ spec:
                         type: string
                       snatPolicyName:
                         type: string
+                      serviceKey:
+                        type: string
                     required:
                     - macAddress
                     - portRanges
