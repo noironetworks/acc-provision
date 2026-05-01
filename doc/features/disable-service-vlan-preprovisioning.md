@@ -7,9 +7,11 @@
 
 
 ## Overview
+Previously, service VLAN provisioning was performed only on hosts that contained cluster nodes. As a result, when multiple VM migrations occurred in parallel across different clusters connected to the same APIC, the APIC could become overloaded. This caused delays in provisioning the service VLAN on destination hosts that did not previously have cluster nodes.
 
-The Disable Service Vlan Preprovisioning parameter would disable proactive vlan programming on all OpenStack compute hosts when using the OpenShift-on-OpenStack deployment model
+To address this issue, service VLAN pre-provisioning has been introduced. Service VLAN pre-provisioning is now enabled by default. This ensures that service VLANs are available on all hosts in advance, avoiding delays during VM migrations.
 
+If required, this feature can be disabled by setting disable_service_vlan_preprovisioning in the input file.
 
 ## Mechanism
 
@@ -77,3 +79,11 @@ data:
     ...
 ```
 
+When Service VLAN Pre-provisioning is enabled (default), L4-L7 devices will display interfaces for all associated OpenStack/ESXi hosts as shown below:
+
+![Esxi Hosts](images/disable-service-vlan-preprovisioning/esx-hosts.png)
+
+
+![Openstack Hosts](images/disable-service-vlan-preprovisioning/openstack-hosts.png)
+
+If the feature is disabled, only the interfaces of hosts that contain cluster nodes will be listed.
