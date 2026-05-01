@@ -6,7 +6,6 @@
 * [Mechanism](#mechanism)  
 * [Example](#example)
 * [Troubleshooting](#troubleshooting)
-* [Known Issues](#known-issues)
     
 
 ## Overview
@@ -228,6 +227,96 @@ As soon as the CRs are updated hostagent updates the netpol file previously crea
 
 ![Local HPP MO Tree](images/hpp-distribution-optimization/1.png)
 
+Below is the format of the netpol file created by hostagent:
+
+```json
+[
+  {
+    "subject": "GbpLocalSecGroup",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/",
+    "properties": [
+      …
+    ],
+    "children": [
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/"
+    ]
+  },
+  {
+    "subject": "GbpLocalSecGroupSubject",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/",
+    "properties": [
+      …
+    ],
+    "children": [
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/"
+    ],
+    …
+  },
+  {
+    "subject": "GbpLocalSecGroupRule",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/",
+    "properties": [
+      …
+    ],
+    "children": [
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToClassifierRSrc/GbpeLocalL24Classifier/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4",
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToActionRSrc/GbpLocalAllowDenyAction/allow/",
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToRemoteAddressRSrc/GbpLocalSubnets/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/"
+    ],
+    …
+  },
+  {
+    "subject": "GbpLocalSecGroupRuleToClassifierRSrc",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToClassifierRSrc/GbpeLocalL24Classifier/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4",
+    "properties": [
+      …
+    ],
+    …
+  },
+  {
+    "subject": "GbpLocalSecGroupRuleToActionRSrc",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToActionRSrc/GbpLocalAllowDenyAction/allow/",
+    "properties": [
+      …
+    ],
+    …
+  },
+  {
+    "subject": "GbpLocalSecGroupRuleToRemoteAddressRSrc",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSecGroup/akhila2_np_028f36d954650a5fde7ea6addc3a6295/GbpLocalSecGroupSubject/networkpolicy-ingress/GbpLocalSecGroupRule/0-ipv4/GbpLocalSecGroupRuleToRemoteAddressRSrc/GbpLocalSubnets/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/",
+    "properties": [
+      …
+    ],
+    …
+  },
+  {
+    "subject": "GbpeLocalL24Classifier",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpeLocalL24Classifier/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/",
+    "properties": [
+      …
+    ]
+  },
+  {
+    "subject": "GbpLocalSubnets",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSubnets/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/",
+    "properties": [
+      …
+    ],
+    "children": [
+      "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSubnets/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/GbpLocalSubnet/10.2.0.182/"
+    ]
+  },
+  {
+    "subject": "GbpLocalSubnet",
+    "uri": "/PolicyUniverse/PolicySpace/akhila2/GbpLocalSubnets/akhila2_np_028f36d954650a5fde7ea6addc3a6295%7cnetworkpolicy-ingress%7c0-ipv4/GbpLocalSubnet/10.2.0.182/",
+    "properties": [
+      …
+    ],
+    …
+  }
+]
+```
+
 The network policy functionality should work as expected once the netpol file is updated.
 
 As in the hpp optimization here also for multiple networkpolicies that has same spec, only one HPP CR will be created. To get the count/list of networkpolicies that are linked to the HPP object, execute the following command from the node where the controller pod is launched:
@@ -287,6 +376,3 @@ $ curl http://127.0.0.1:8091/hpp
   - The /var/lib/opflex-agent-ovs/netpols/ directory should be empty.
   - aci-containers-config configmap should not have the values mentioned earlier.
   - Verify HPP objects from APIC.
-
-## Known Issues
-- After the feature is disabled the old hostprotPols and hostprotRemoteIpContainers CRs will remain, this should not cause any issue with the functionality as only the CRs will be present not the netpol files. Once the feature is enabled again, the stale CRs will be cleaned as per the current network policy and namespaces present in the system.
