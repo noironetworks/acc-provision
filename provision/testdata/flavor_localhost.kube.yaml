@@ -858,7 +858,7 @@ data:
         "log-level": "debug",
         "apic-hosts": [],
         "aep" : null,
-        "apic-request-retry-delay": 2,
+        "apic-request-retry-delay-base": 20,
         "enable-apic-request-retry-delay": true,
         "filter-opflex-device": true,
         "aci-vrf-tenant": "kube",
