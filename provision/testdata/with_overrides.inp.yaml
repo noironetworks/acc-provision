@@ -124,6 +124,7 @@ kube_config:
   disable_opflex_resilient_hashing: True
   filter_opflex_device: False
   leaf_reboot_check_interval: 300
+  disable_apic_rate_limit: true
 
 registry:
   image_prefix: noiro
