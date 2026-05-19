@@ -261,6 +261,7 @@ registry:
   #                                        # The default value is True.
   # apic_request_retry_delay_base: 45 # Base timeout in seconds for exponential backoff between APIC request retries.
   #                              # The default value is 20 seconds.
+  # disable_apic_rate_limit: True    # The default value is False. Set to True to disable client side rate limiting of requests sent to APIC.
   # epg_resolve_prioritize: False # Set to False to disable delaying the writing of EP files until the associated EPG is resolved.
   #                               # The default value is True.
   # force_ep_undeclares: False # Set to False to disable sending an undeclare before the endpoint declare request to opflex-proxy.
