@@ -19,7 +19,7 @@ import os
 import os.path
 import yaml
 import time
-from distutils.version import StrictVersion
+from packaging.version import Version
 
 debug_http = False
 
@@ -416,7 +416,7 @@ def set_service_bd_routing_disable(
         if apic is None:
             raise Exception("Failed to connect to APIC")
         for apic_version in apic.apic_versions:
-            if StrictVersion(apic_version) >= StrictVersion("6.0.4"):
+            if Version(apic_version) >= Version("6.0.4"):
                 dbg(
                     "APIC IP: {}, APIC Version: {}. Version is 6.0(4a) or higher".format(
                         config["aci_config"]["apic_hosts"][apic_id],
