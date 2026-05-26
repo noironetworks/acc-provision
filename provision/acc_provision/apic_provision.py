@@ -8,7 +8,7 @@ from requests.exceptions import SSLError
 import urllib3
 import ipaddress
 import time
-from distutils.version import StrictVersion
+from packaging.version import Version
 
 import yaml
 
@@ -761,7 +761,7 @@ class ApicKubeConfig(object):
 
     def is_newer_version(self, new, old):
         # Expects string arg like "5.2.0"
-        return (StrictVersion(new) >= StrictVersion(old))
+        return (Version(new) >= Version(old))
 
     def get_config(self, apic_version):
         def assert_attributes_is_first_key(data):
