@@ -1542,6 +1542,25 @@ def is_valid_apic_refreshticker_adjust(xval):
     raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_positive_int(xval):
+    if xval is None:
+        # Not a required field.
+        return True
+    # Reject booleans explicitly.
+    if isinstance(xval, bool):
+        raise (Exception("Must be a positive integer"))
+    # Accept actual ints, or strings that are purely base-10 digits.
+    if isinstance(xval, int):
+        ival = xval
+    elif isinstance(xval, str) and re.fullmatch(r"[0-9]+", xval.strip()):
+        ival = int(xval)
+    else:
+        raise (Exception("Must be a positive integer"))
+    if ival > 0:
+        return True
+    raise (Exception("Must be a positive integer"))
+
+
 def is_valid_max_nodes_svc_graph(xval):
     if xval is None:
         return True
@@ -1888,6 +1907,18 @@ def config_validate(flavor_opts, config):
             "aci_config/apic_login/password":
             (get(("aci_config", "apic_login", "password")), required),
         })
+
+    # Drop log rotation knobs (applies to all flavors when redirecting
+    # drop logs to a file).
+    checks.update({
+        "drop_log_config/droplog_max_size_mb":
+        (get(("drop_log_config", "droplog_max_size_mb")), is_valid_positive_int),
+        "drop_log_config/droplog_rotate_count":
+        (get(("drop_log_config", "droplog_rotate_count")), is_valid_positive_int),
+        "drop_log_config/droplog_rotate_interval":
+        (get(("drop_log_config", "droplog_rotate_interval")),
+         is_valid_positive_int),
+    })
 
     checks = deep_merge(checks, extra_checks)
     ret = True
