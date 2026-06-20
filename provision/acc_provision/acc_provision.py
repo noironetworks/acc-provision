@@ -613,6 +613,8 @@ def config_default():
             "preexisting_kube_bd": None,
             "apic_subscription_delay": None,
             "apic_refreshticker_adjust": None,
+            "apic_lldp_refreshtime": None,
+            "apic_lldp_refreshticker_adjust": None,
             "opflex_device_delete_timeout": None,
             "apic_tls_cert": None,
         },
@@ -1542,6 +1544,36 @@ def is_valid_apic_refreshticker_adjust(xval):
     raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
 
 
+def is_valid_apic_lldp_refreshtime(xval):
+    if xval is None:
+        # Will be defaulted to 120 seconds
+        return True
+    xmin = 0
+    xmax = 600  # Max 10 minutes for LLDP subscription refresh
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
+def is_valid_apic_lldp_refreshticker_adjust(xval):
+    if xval is None:
+        # Will be defaulted to 20 seconds
+        return True
+    xmin = 1
+    xmax = 300
+    try:
+        x = int(xval)
+        if xmin <= x <= xmax:
+            return True
+    except ValueError:
+        pass
+    raise (Exception("Must be integer between %d and %d" % (xmin, xmax)))
+
+
 def is_valid_max_nodes_svc_graph(xval):
     if xval is None:
         return True
@@ -1677,6 +1709,10 @@ def config_validate(flavor_opts, config):
                                             is_valid_refreshtime),
             "aci_config/apic_refreshticker_adjust": (get(("aci_config", "apic_refreshticker_adjust")),
                                                      is_valid_apic_refreshticker_adjust),
+            "aci_config/apic_lldp_refreshtime": (get(("aci_config", "apic_lldp_refreshtime")),
+                                                  is_valid_apic_lldp_refreshtime),
+            "aci_config/apic_lldp_refreshticker_adjust": (get(("aci_config", "apic_lldp_refreshticker_adjust")),
+                                                           is_valid_apic_lldp_refreshticker_adjust),
             "aci_config/apic_subscription_delay": (get(("aci_config", "apic_subscription_delay")),
                                                    is_valid_apic_sub_delay),
             "aci_config/apic_host": (get(("aci_config", "apic_hosts")), required),
