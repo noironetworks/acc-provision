@@ -25,10 +25,8 @@ registry:
   cnideploy_version: <version>                  # can be image version or sha256 digest
   opflex_agent_version: <version>               # can be image version or sha256 digest
   openvswitch_version: <version>                # can be image version or sha256 digest
-  acc_provision_operator_version: <version>     # can be image version or sha256 digest
   aci_containers_operator_version: <version>    # can be image version or sha256 digest
 ```
-
 
 Run `acc-provision` tool on updated acc provision input file to generate new `aci_deployment.yaml`
 ```sh
@@ -93,7 +91,6 @@ $ oc get pods -n aci-containers-system
         cnideploy_version: 6.0.3.2.81c2369.z
         opflex_agent_version: 6.0.3.2.81c2369.z
         openvswitch_version: 6.0.3.2.81c2369.z
-        acc_provision_operator_version: 6.0.3.2.81c2369.z
         aci_containers_operator_version: 6.0.3.2.81c2369.z
     ```
 
@@ -132,7 +129,6 @@ $ oc get pods -n aci-containers-system
         opflex_agent_version: de65620afddc12441bc57e8b8b22f4ec6a5d2bb3e441784210cb83a5943fcd9f
         openvswitch_version: fcbbcbed3ffcafdcb471b96b69fe7163e9136882d1d5d1bb52c27dca4676a9c0
         aci_containers_operator_version: 4e0e8264d77e324481be4b33cae5b80980cc9282f39f6ed3d4e64f034098108d
-        acc_provision_operator_version: 4ec93f84fc99533b1e53f35b712b6dfc5c29494da5b03abc6d2bf66add5e5e2f
     ```
 
     This will pull image with sha256 digest like below

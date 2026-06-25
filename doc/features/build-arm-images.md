@@ -13,7 +13,6 @@ This guide walks you through cross-compiling the ACI-CNI plugin for ARM64 archit
     - [Compile ACI Containers Binaries](#compile-aci-containers-binaries)
     - [Build ARM-specific Openvswitch](#build-arm-specific-openvswitch)
     - [Build ARM-specific ACI-CNI Container Images](#build-arm-specific-aci-cni-container-images)
-    - [Build ARM-specific `acc-provision-operator` Container Image](#build-arm-specific-acc-provision-operator-container-image)
     - [Verify all Container Images](#verify-all-container-images)
 
 
@@ -196,25 +195,12 @@ docker buildx build --no-cache --platform linux/arm64 --target without-ovscni -t
 docker buildx build --no-cache --platform linux/arm64 -t ${IMAGE_BUILD_REGISTRY}/aci-containers-operator:${IMAGE_BUILD_TAG} --file=docker/travis/Dockerfile-operator .
 ```
 
-### Build ARM-specific `acc-provision-operator` Container Image:
-
-1. **Clone the acc-provision-operator repository**
-```
-git clone https://github.com/noironetworks/acc-provision-operator.git
-cd acc-provision-operator
-```
-2. **Build the acc-provision-operator container**
-```
- docker buildx  build --platform linux/arm64 -t noiro/acc-provision-operator:v01 --file=Dockerfile .
-```
-
 ### Verify all Container Images:
 
 Run the following command to check the images:
 ```
 docker images
 REPOSITORY                               TAG                       IMAGE ID       CREATED         SIZE
-my_registry/acc-provision-operator       v0.1-test                 c18ee7b6504a   2 hours ago     1.38GB
 my_registry/aci-containers-operator      v0.1-test                 2bcabc38a7fd   7 hours ago     589MB
 my_registry/aci-containers-controller    v0.1-test                 aa8defe53b15   7 hours ago     638MB
 my_registry/aci-containers-host          v0.1-test                 1a23ghi55aee   7 hours ago     727MB
