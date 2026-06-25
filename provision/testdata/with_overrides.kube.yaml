@@ -3000,27 +3000,6 @@ spec:
           value: "kubernetes-1.36"
         - name: OPERATOR_LOGGING_LEVEL
           value: debug
-      - env:
-        - name: ANSIBLE_GATHERING
-          value: explicit
-        - name: WATCH_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: ACC_PROVISION_FLAVOR
-          value: "kubernetes-1.36"
-        - name: ACC_PROVISION_INPUT_CR_NAME
-          value: "accprovisioninput"
-        image: noiro/acc-provision-operator@sha256:AciCniOperatorTag
-        imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            memory: "5Gi"
-          requests:
-            memory: "256Mi"
-        name: acc-provision-operator
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
