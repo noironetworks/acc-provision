@@ -195,6 +195,16 @@ drop_log_config:
 ```
 The file is created with the provided filename in `/usr/local/var/log/' directory of the opflex-agent container in the containers-host pod.
 
+When droplogs are redirected to a file, the opflex-agent container runs a background `logrotate` loop to keep the file from growing unbounded. The rotation behaviour can be tuned with the following optional settings (all only take effect when `opflex_redirect_drop_logs` points to a file):
+```yaml
+drop_log_config:
+    opflex_redirect_drop_logs: <filename>
+    droplog_max_size_mb: 50        # rotate once the file reaches this size in MB (default 50)
+    droplog_rotate_count: 5        # number of rotated backups to keep (default 5)
+    droplog_rotate_interval: 7200  # interval in seconds between rotation checks (default 7200 = 2h)
+```
+These map to the `OPFLEXAGENT_DROPLOG_MAXSIZE`, `OPFLEXAGENT_DROPLOG_ROTATE` and `OPFLEXAGENT_DROPLOG_ROTATE_INTERVAL` environment variables on the opflex-agent container. If a setting is omitted, the opflex-agent default is used.
+
 
 ## 9. Cleanup
 

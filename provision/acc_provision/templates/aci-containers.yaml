@@ -4098,6 +4098,18 @@ spec:
         {% elif config.drop_log_config.opflex_redirect_drop_logs %}
         - name: OPFLEXAGENT_DROPLOG_FILE
           value: "{{ config.drop_log_config.opflex_redirect_drop_logs }}"
+        {% if config.drop_log_config.droplog_max_size_mb %}
+        - name: OPFLEXAGENT_DROPLOG_MAXSIZE
+          value: "{{ config.drop_log_config.droplog_max_size_mb }}"
+        {% endif %}
+        {% if config.drop_log_config.droplog_rotate_count %}
+        - name: OPFLEXAGENT_DROPLOG_ROTATE
+          value: "{{ config.drop_log_config.droplog_rotate_count }}"
+        {% endif %}
+        {% if config.drop_log_config.droplog_rotate_interval %}
+        - name: OPFLEXAGENT_DROPLOG_ROTATE_INTERVAL
+          value: "{{ config.drop_log_config.droplog_rotate_interval }}"
+        {% endif %}
         {% endif %}
         {% if config.registry.use_digest %}
         image: {{ config.registry.image_prefix }}/opflex@sha256:{{ config.registry.opflex_agent_version }}
