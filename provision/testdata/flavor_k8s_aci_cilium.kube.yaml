@@ -2748,22 +2748,6 @@ spec:
           value: "k8s-aci-cilium"
         - name: OPERATOR_LOGGING_LEVEL
           value: "info"
-      - env:
-        - name: ANSIBLE_GATHERING
-          value: explicit
-        - name: WATCH_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: ACC_PROVISION_FLAVOR
-          value: "k8s-aci-cilium"
-        - name: ACC_PROVISION_INPUT_CR_NAME
-          value: "accprovisioninput"
-        image: noiro/acc-provision-operator:6.1.2.1.81c2369
-        imagePullPolicy: Always
-        name: acc-provision-operator
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always

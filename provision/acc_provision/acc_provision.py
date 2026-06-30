@@ -3952,7 +3952,6 @@ def provision(args, apic_file, no_random):
 
     if config["registry"]["aci_cni_operator_version"] is not None:
         config["registry"]["aci_containers_operator_version"] = config["registry"]["aci_cni_operator_version"]
-        config["registry"]["acc_provision_operator_version"] = config["registry"]["aci_cni_operator_version"]
 
     # generate output files; and program apic if needed
     gen = flavor_opts.get("template_generator", generate_kube_yaml)
