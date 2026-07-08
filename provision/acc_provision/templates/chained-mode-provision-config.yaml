@@ -89,8 +89,6 @@ registry:
   # aci_containers_host_memory_limit: "5Gi"             # override if needed, default is aci_containers_memory_limit
   # mcast_daemon_memory_request: "256Mi"                # override if needed, default is aci_containers_memory_request
   # mcast_daemon_memory_limit: "5Gi"                    # override if needed, default is aci_containers_memory_limit
-  # acc_provision_operator_memory_request: "256Mi"      # override if needed, default is aci_containers_memory_request
-  # acc_provision_operator_memory_limit: "5Gi"          # override if needed, default is aci_containers_memory_limit
   # aci_containers_operator_memory_request: "256Mi"     # override if needed, default is aci_containers_memory_request
   # aci_containers_operator_memory_limit: "5Gi"         # override if needed, default is aci_containers_memory_limit
 
