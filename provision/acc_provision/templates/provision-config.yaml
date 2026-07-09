@@ -188,6 +188,9 @@ registry:
   # enable: False                      # default is True
   # disable_events: True               # default is False
   # opflex_redirect_drop_logs: syslog  # to log packet drops to the file or syslog, specify filname to log to file.
+  # droplog_max_size_mb: 50            # max drop-log file size (MB) before rotation; default 50. Only applies when redirecting to a file.
+  # droplog_rotate_count: 5            # number of rotated drop-log backups to keep; default 5. Only applies when redirecting to a file.
+  # droplog_rotate_interval: 7200      # interval in seconds between rotation checks; default 7200 (2h).
 
 # multus:
   # disable: False       # default is True
