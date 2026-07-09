@@ -29,27 +29,11 @@ spec:
             type: object
           spec:
             properties:
-              hostprotRemoteIp:
+              hostprotRemoteIps:
                 items:
-                  properties:
-                    addr:
-                      type: string
-                    hppEpLabel:
-                      items:
-                        properties:
-                          key:
-                            type: string
-                          value:
-                            type: string
-                        type: object
-                      type: array
-                  type: object
+                  type: string
                 type: array
-              name:
-                type: string
             type: object
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}
