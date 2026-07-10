@@ -47,39 +47,9 @@ spec:
                           fromPort:
                             description: FromPort
                             type: string
-                          hostprotFilterContainer:
+                          hostprotRemoteIps:
                             items:
-                              properties:
-                                hostprotFilter:
-                                  items:
-                                    properties:
-                                      key:
-                                        type: string
-                                      operator:
-                                        type: string
-                                      values:
-                                        items:
-                                          type: string
-                                        type: array
-                                    type: object
-                                  type: array
-                              type: object
-                            type: array
-                          hostprotRemoteIp:
-                            items:
-                              properties:
-                                addr:
-                                  type: string
-                                hppEpLabel:
-                                  items:
-                                    properties:
-                                      key:
-                                        type: string
-                                      value:
-                                        type: string
-                                    type: object
-                                  type: array
-                              type: object
+                              type: string
                             type: array
                           hostprotServiceRemoteIps:
                             items:
@@ -91,9 +61,7 @@ spec:
                             description: Protocol
                             type: string
                           rsRemoteIpContainer:
-                            items:
-                              type: string
-                            type: array
+                            type: string
                           toPort:
                             description: ToPort
                             type: string
@@ -113,5 +81,3 @@ spec:
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}

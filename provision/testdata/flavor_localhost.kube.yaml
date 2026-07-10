@@ -695,8 +695,6 @@ spec:
   - name: v1
     served: true
     storage: true
-    subresources:
-      status: {}
     schema:
       openAPIV3Schema:
         type: object
@@ -736,25 +734,11 @@ spec:
                             type: string
                             description: Protocol
                           rsRemoteIpContainer:
+                            type: string
+                          hostprotRemoteIps:
                             type: array
                             items:
                               type: string
-                          hostprotRemoteIp:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                addr:
-                                  type: string
-                                hppEpLabel:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      key:
-                                        type: string
-                                      value:
-                                        type: string
                           toPort:
                             type: string
                             description: ToPort
@@ -774,24 +758,6 @@ spec:
                             type: array
                             items:
                               type: string
-                          hostprotFilterContainer:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                hostprotFilter:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      key:
-                                        type: string
-                                      operator:
-                                        type: string
-                                      values:
-                                        type: array
-                                        items:
-                                          type: string
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -809,8 +775,6 @@ spec:
   - name: v1
     served: true
     storage: true
-    subresources:
-      status: {}
     schema:
       openAPIV3Schema:
         type: object
@@ -826,24 +790,10 @@ spec:
           spec:
             type: object
             properties:
-              name:
-                type: string
-              hostprotRemoteIp:
+              hostprotRemoteIps:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    addr:
-                      type: string
-                    hppEpLabel:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          key:
-                            type: string
-                          value:
-                            type: string
+                  type: string
 ---
 apiVersion: v1
 kind: ConfigMap
