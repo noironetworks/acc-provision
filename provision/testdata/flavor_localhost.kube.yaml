@@ -273,7 +273,7 @@ spec:
             x-kubernetes-validations:
             - rule: >
                 (has(self.snatIp) && self.snatIp.size() > 0) ||
-                (has(self.selector) && has(self.selector.namespace) && self.selector.namespace != "") ||
+                (has(self.selector) && has(self.selector.__namespace__) && self.selector.__namespace__ != "") ||
                 (has(self.selector) && has(self.selector.labels) && self.selector.labels.size() > 0)
               message: >
                 SnatPolicy is invalid: at least one of spec.snatIp,
