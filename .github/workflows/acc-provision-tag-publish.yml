@@ -84,56 +84,6 @@ jobs:
           go-version: '1.26.3'
           cache: true
 
-      - name: Validate test CICD status credential
-        if: env.PUBLISH_TEST_CICD_STATUS == 'true'
-        shell: bash
-        env:
-          TEST_CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
-        run: |
-          set -Eeuo pipefail
-          [[ -n "${TEST_CICD_STATUS_TOKEN}" ]] || {
-            echo "::error::Missing repository secret GITHUBACTIONS_TAGGER"
-            exit 1
-          }
-
-          preflight_root="$(mktemp -d "${RUNNER_TEMP}/test-cicd-status-preflight.XXXXXXXX")"
-          cleanup_preflight() {
-            rm -rf -- "${preflight_root}"
-          }
-          trap cleanup_preflight EXIT
-
-          askpass_script="${preflight_root}/git-askpass.sh"
-          cat > "${askpass_script}" <<'ASKPASS'
-          #!/usr/bin/env bash
-          case "$1" in
-            *Username*) printf '%s\n' 'x-access-token' ;;
-            *Password*) printf '%s\n' "${TEST_CICD_STATUS_TOKEN:?}" ;;
-            *) exit 1 ;;
-          esac
-          ASKPASS
-          chmod 700 "${askpass_script}"
-          export GIT_ASKPASS="${askpass_script}"
-          export GIT_TERMINAL_PROMPT=0
-
-          status_repo="${preflight_root}/test-cicd-status"
-          git -c credential.helper= clone --quiet --depth=1 --single-branch \
-            --branch github-actions-image-build \
-            https://github.com/noironetworks/test-cicd-status.git "${status_repo}"
-
-          expected_sentinel=$'repository=noironetworks/test-cicd-status\nbranch=github-actions-image-build\nrelease=6.1.1.7'
-          actual_sentinel="$(<"${status_repo}/docs/release_artifacts/.github-actions-test-target")"
-          [[ "${actual_sentinel}" == "${expected_sentinel}" ]] || {
-            echo "::error::The remote test status branch is missing the expected safety marker"
-            exit 1
-          }
-
-          git -C "${status_repo}" config user.name github-actions-status-preflight
-          git -C "${status_repo}" config user.email github-actions-status@users.noreply.github.com
-          git -C "${status_repo}" commit --quiet --allow-empty -m "Status credential preflight"
-          git -C "${status_repo}" -c credential.helper= push --quiet --dry-run \
-            origin HEAD:refs/heads/github-actions-image-build
-          echo "Test CICD status credential and branch preflight succeeded without changing the repository."
-
       - name: Validate CICD status settings
         shell: bash
         run: |
@@ -147,12 +97,12 @@ jobs:
             exit 1
           }
 
-      - name: Record disabled test CICD status publication
+      - name: Record disabled CICD status preview publication
         if: env.PUBLISH_TEST_CICD_STATUS != 'true'
         shell: bash
         run: |
           set -Eeuo pipefail
-          echo "PUBLISH_TEST_CICD_STATUS=false; test CICD status publication is disabled and package publication will continue."
+          echo "PUBLISH_TEST_CICD_STATUS=false; CICD status preview publication is disabled and package publication will continue."
 
       - name: Install tooling dependencies
         shell: bash
@@ -287,7 +237,7 @@ jobs:
           set -Eeuo pipefail
           "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
 
-      - name: Publish result to test CICD status
+      - name: Publish result to CICD status preview
         if: env.PUBLISH_TEST_CICD_STATUS == 'true'
         shell: bash
         env:
@@ -297,9 +247,9 @@ jobs:
           bash "${CICD_DIR}/travis/publish-github-actions-test-acc-provision-status.sh"
           {
             echo
-            echo "### Test CICD status"
+            echo "### CICD status preview"
             echo
-            echo "Published the verified acc-provision result to [6.1.1.7.z](https://noironetworks.github.io/test-cicd-status/release.html?release=6.1.1.7.z)."
+            echo "Published the verified acc-provision result to [6.1.1.7.z](https://noironetworks.github.io/cicd-status/release.html?release=6.1.1.7.z)."
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload workflow artifacts
