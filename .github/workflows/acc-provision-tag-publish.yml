@@ -3,7 +3,7 @@ name: ACC Provision feature publish
 on:
   push:
     tags:
-      - "6.1.1.7-gha-test"
+      - "[0-9]+.[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: read
@@ -15,17 +15,15 @@ concurrency:
 jobs:
   build-and-publish:
     name: Build and publish acc-provision package
-    if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && github.ref == 'refs/tags/6.1.1.7-gha-test'
+    if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     env:
-      FEATURE_BRANCH: github-actions-acc-provision-tag-publish
-      SAFE_TAG: 6.1.1.7-gha-test
-      RELEASE_TAG: 6.1.1.7
-      UPSTREAM_ID: 81c2369
-      CICD_BRANCH: github-actions-image-build
+      SOURCE_BRANCH: ${{ vars.SOURCE_BRANCH || 'mmr-6.1.1' }}
+      UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
+      CICD_BRANCH: ${{ vars.CICD_BRANCH || 'mmr-6.1.1' }}
       CI_ARTIFACT_DIR: ci-artifacts
-      SKIP_CICD_STATUS: "true"
+      SKIP_CICD_STATUS: ${{ vars.SKIP_CICD_STATUS || 'true' }}
       PUBLISH_TEST_CICD_STATUS: ${{ vars.PUBLISH_TEST_CICD_STATUS || 'false' }}
 
     steps:
@@ -35,6 +33,26 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Derive release identifiers from tag
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          # Trigger tag is the plain release tag (e.g. 6.1.1.7); UPSTREAM_ID comes from the repo variable.
+          tag="${GITHUB_REF_NAME}"
+          [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Trigger tag ${tag} is not a release tag of form N.N.N.N (e.g. 6.1.1.7)"
+            exit 1
+          }
+          [[ -n "${UPSTREAM_ID}" ]] || {
+            echo "::error::UPSTREAM_ID is empty; set the UPSTREAM_ID Actions variable on this repository (e.g. 81c2369)"
+            exit 1
+          }
+          {
+            echo "RELEASE_TAG=${tag}"
+            echo "SAFE_TAG=${tag}"
+          } >> "${GITHUB_ENV}"
 
       - name: Validate safe tag source
         shell: bash
@@ -58,20 +76,38 @@ jobs:
           }
 
           git fetch --no-tags origin \
-            "+refs/heads/${FEATURE_BRANCH}:refs/remotes/origin/${FEATURE_BRANCH}"
+            "+refs/heads/${SOURCE_BRANCH}:refs/remotes/origin/${SOURCE_BRANCH}"
           tagged_commit="$(git rev-parse "refs/tags/${SAFE_TAG}^{commit}")"
           checked_out_commit="$(git rev-parse HEAD)"
-          feature_commit="$(git rev-parse "refs/remotes/origin/${FEATURE_BRANCH}")"
+          source_commit="$(git rev-parse "refs/remotes/origin/${SOURCE_BRANCH}")"
           [[ "${tagged_commit}" == "${checked_out_commit}" ]] || {
             echo "::error::Tag ${SAFE_TAG} moved after this run was queued; refusing superseded run"
             exit 1
           }
-          [[ "${tagged_commit}" == "${feature_commit}" ]] || {
-            echo "::error::Tag ${SAFE_TAG} resolves to ${tagged_commit}, not current ${FEATURE_BRANCH} head ${feature_commit}"
+          [[ "${tagged_commit}" == "${source_commit}" ]] || {
+            echo "::error::Tag ${SAFE_TAG} resolves to ${tagged_commit}, not current ${SOURCE_BRANCH} head ${source_commit}"
             exit 1
           }
 
           echo "ACC_PROVISION_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
+
+      - name: Determine PyPI target from tag message
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          # Final releases carry "release to pypi.org"; .z/dev releases carry "release to test.pypi.org".
+          msg="$(git tag -l --format='%(contents)' "${SAFE_TAG}")"
+          if grep -qi "release to pypi.org" <<<"${msg}"; then
+            echo "PYPI_TARGET=pypi" >> "${GITHUB_ENV}"
+            echo "Final release detected: publishing to pypi.org."
+          elif grep -qi "release to test.pypi.org" <<<"${msg}"; then
+            echo "PYPI_TARGET=testpypi" >> "${GITHUB_ENV}"
+            echo ".z/dev release detected: publishing to test.pypi.org."
+          else
+            echo "::error::Tag ${SAFE_TAG} message must contain 'release to pypi.org' (final) or 'release to test.pypi.org' (.z stream)"
+            exit 1
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -132,14 +168,8 @@ jobs:
 
       - name: Export compatibility environment
         shell: bash
-        env:
-          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
-          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
         run: |
           set -Eeuo pipefail
-
-          [[ -n "${TEST_PYPI_USER}" ]] || { echo "::error::Missing TEST_PYPI_USER"; exit 1; }
-          [[ -n "${TEST_PYPI_PASS}" ]] || { echo "::error::Missing TEST_PYPI_PASS"; exit 1; }
 
           {
             echo "TRAVIS_TAG=${SAFE_TAG}"
@@ -155,11 +185,10 @@ jobs:
             echo "TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/acc-provision"
             echo "UPSTREAM_ID=${UPSTREAM_ID}"
             echo "SKIP_CICD_STATUS=${SKIP_CICD_STATUS}"
-            echo "TEST_PYPI_USER=${TEST_PYPI_USER}"
-            echo "TEST_PYPI_PASS=${TEST_PYPI_PASS}"
           } >> "${GITHUB_ENV}"
 
-      - name: Validate TestPyPI credentials format
+      - name: Validate and export TestPyPI credentials
+        if: env.PYPI_TARGET == 'testpypi'
         shell: bash
         env:
           TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
@@ -179,7 +208,50 @@ jobs:
             exit 1
           }
 
+          {
+            echo "TEST_PYPI_USER=${TEST_PYPI_USER}"
+            echo "TEST_PYPI_PASS=${TEST_PYPI_PASS}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Validate PyPI credentials and verify signed tag
+        if: env.PYPI_TARGET == 'pypi'
+        shell: bash
+        env:
+          PYPI_USER: ${{ secrets.PYPI_USER }}
+          PYPI_PASS: ${{ secrets.PYPI_PASS }}
+        run: |
+          set -Eeuo pipefail
+
+          [[ -n "${PYPI_USER}" ]] || { echo "::error::Missing PYPI_USER"; exit 1; }
+          [[ -n "${PYPI_PASS}" ]] || { echo "::error::Missing PYPI_PASS"; exit 1; }
+          [[ "${PYPI_USER}" == "__token__" ]] || {
+            echo "::error::PYPI_USER must be __token__ for this workflow"
+            exit 1
+          }
+          [[ "${PYPI_PASS}" == pypi-* ]] || {
+            echo "::error::PYPI_PASS must be a PyPI API token (starts with pypi-)"
+            exit 1
+          }
+
+          # Final releases must be signed by the release key B6878A5BBF81C515428FA14E4CA0BB04A10CDFE1.
+          fpr="B6878A5BBF81C515428FA14E4CA0BB04A10CDFE1"
+          gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "${fpr}"
+          gpg --list-keys "${fpr}" >/dev/null 2>&1 || {
+            echo "::error::Release signing key ${fpr} could not be imported"
+            exit 1
+          }
+          git verify-tag "${SAFE_TAG}" 2>&1 | grep -qi "${fpr}" || {
+            echo "::error::Tag ${SAFE_TAG} is not signed by the release key ${fpr}"
+            exit 1
+          }
+
+          {
+            echo "PYPI_USER=${PYPI_USER}"
+            echo "PYPI_PASS=${PYPI_PASS}"
+          } >> "${GITHUB_ENV}"
+
       - name: Probe TestPyPI authentication
+        if: env.PYPI_TARGET == 'testpypi'
         shell: bash
         env:
           TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
@@ -233,24 +305,11 @@ jobs:
 
       - name: Publish package via CICD script
         shell: bash
+        env:
+          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
         run: |
           set -Eeuo pipefail
           "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
-
-      - name: Publish result to CICD status preview
-        if: env.PUBLISH_TEST_CICD_STATUS == 'true'
-        shell: bash
-        env:
-          TEST_CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
-        run: |
-          set -Eeuo pipefail
-          bash "${CICD_DIR}/travis/publish-github-actions-test-acc-provision-status.sh"
-          {
-            echo
-            echo "### CICD status preview"
-            echo
-            echo "Published the verified acc-provision result to [6.1.1.7.z](https://noironetworks.github.io/cicd-status/release.html?release=6.1.1.7.z)."
-          } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload workflow artifacts
         if: always()
