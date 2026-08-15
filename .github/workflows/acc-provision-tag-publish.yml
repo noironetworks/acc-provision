@@ -311,6 +311,21 @@ jobs:
           set -Eeuo pipefail
           "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
 
+      - name: Publish result to CICD status preview
+        if: env.PUBLISH_TEST_CICD_STATUS == 'true'
+        shell: bash
+        env:
+          TEST_CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
+        run: |
+          set -Eeuo pipefail
+          bash "${CICD_DIR}/travis/publish-github-actions-test-acc-provision-status.sh"
+          {
+            echo
+            echo "### CICD status preview"
+            echo
+            echo "Published the verified acc-provision result to [6.1.1.7.z](https://noironetworks.github.io/cicd-status/release.html?release=6.1.1.7.z)."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
       - name: Upload workflow artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
