@@ -1,5 +1,7 @@
 name: ACC Provision disposable production PyPI smoke
 
+# WARNING: Pushing the exact tag below has no approval gate. After the build
+# succeeds, this workflow immediately performs an irreversible real PyPI upload.
 on:
   push:
     tags:
@@ -19,7 +21,7 @@ env:
   SOURCE_BRANCH: codex/pypi-smoke-20260819
   EXPECTED_UPSTREAM_ID: 81c2369
   UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
-  CICD_COMMIT: afd6a1a3c9d0a5794b183f68e6c04f438a662456
+  CICD_COMMIT: 2630870b2033a91c913cf0c9c04af8fa9c313284
   ACI_CONTAINERS_TAG_OBJECT: 6bad1f5ac5cd7c576c4b85b37fce583b14dc201f
   ACI_CONTAINERS_COMMIT: 854152b59d6ce589c86175bfc2b9aef49f1fc1ac
   # Legacy CICD compatibility uses the logical release, not the smoke event tag.
@@ -72,7 +74,7 @@ jobs:
           git fetch --force --no-tags origin \
             "+refs/tags/${GHA_TRIGGER_TAG}:refs/tags/${GHA_TRIGGER_TAG}"
           [[ "$(git cat-file -t "refs/tags/${GHA_TRIGGER_TAG}")" == "tag" ]] || {
-            echo "::error::${GHA_TRIGGER_TAG} must be an annotated, signed tag"
+            echo "::error::${GHA_TRIGGER_TAG} must be an annotated tag"
             exit 1
           }
 
@@ -193,7 +195,7 @@ jobs:
           echo "artifact_sha256=${artifact_sha256}" >> "${GITHUB_OUTPUT}"
           popd
 
-      - name: Upload the exact package for the protected job
+      - name: Upload the exact package for the publish job
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.package.outputs.artifact_name }}
@@ -202,11 +204,11 @@ jobs:
           retention-days: 14
           compression-level: 0
 
-      - name: Record approval inputs
+      - name: Record upload inputs
         shell: bash
         run: |
           {
-            echo "### Awaiting disposable production PyPI approval"
+            echo "### Disposable production PyPI upload inputs"
             echo
             echo "- Package: noironetworks-acc-provision-release-smoke==${RELEASE_TAG}"
             echo "- SHA-256: ${{ steps.package.outputs.artifact_sha256 }}"
@@ -219,19 +221,18 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     timeout-minutes: 120
-    environment:
-      name: pypi-smoke
-      url: https://pypi.org/project/noironetworks-acc-provision-release-smoke/6.1.1.7/
+    # There is intentionally no environment approval for this one-time smoke.
+    # This job starts automatically after build and uploads to real PyPI.
 
     steps:
-      - name: Check out the approved tagged source
+      - name: Check out the smoke-tagged source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Revalidate exact tag and source after approval
+      - name: Revalidate exact tag and source before upload
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -274,7 +275,7 @@ jobs:
           [[ "$(git -C "${cicd_dir}" rev-parse HEAD)" == "${CICD_COMMIT}" ]]
           echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
 
-      - name: Download the approved source distribution
+      - name: Download the verified source distribution
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ needs.build.outputs.artifact_name }}
@@ -298,8 +299,6 @@ jobs:
         env:
           PYPI_USER: ${{ secrets.PYPI_USER }}
           PYPI_PASS: ${{ secrets.PYPI_PASS }}
-          PYPI_SIGNING_PUBLIC_KEY: ${{ secrets.PYPI_SMOKE_SIGNING_PUBLIC_KEY }}
-          PYPI_SMOKE_SIGNING_FINGERPRINT: ${{ vars.PYPI_SMOKE_SIGNING_FINGERPRINT }}
           TEST_CICD_STATUS_TOKEN: ${{ secrets.TEST_CICD_STATUS_TOKEN }}
           EXPECTED_ARTIFACT_SHA256: ${{ needs.build.outputs.artifact_sha256 }}
         run: |
