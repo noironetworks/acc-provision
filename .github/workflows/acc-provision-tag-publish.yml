@@ -21,14 +21,7 @@ env:
   ACI_CONTAINERS_COMMIT: 854152b59d6ce589c86175bfc2b9aef49f1fc1ac
   CI_ARTIFACT_DIR: ci-artifacts
   TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
-  TRAVIS_BUILD_ID: ${{ github.run_id }}
-  TRAVIS_JOB_ID: ${{ github.run_id }}
-  TRAVIS_JOB_NUMBER: ${{ github.run_number }}
-  TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   TRAVIS_REPO_SLUG: ${{ github.repository }}
-  TRAVIS_BUILD_USER: noiro-tagger
-  TRAVIS_GO_VERSION: 1.26.3
-  TRAVIS_GO_IMPORT_PATH: github.com/noironetworks/acc-provision
 
 jobs:
   build_or_testpypi:
@@ -252,6 +245,8 @@ jobs:
           TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
           TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
           SKIP_CICD_STATUS: 'true'
+          # Compatibility selector used only by the legacy TestPyPI branch.
+          TRAVIS_BUILD_USER: noiro-tagger
         run: |
           set -Eeuo pipefail
           "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"

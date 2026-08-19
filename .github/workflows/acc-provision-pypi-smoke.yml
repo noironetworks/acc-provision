@@ -25,14 +25,7 @@ env:
   # Legacy CICD compatibility uses the logical release, not the smoke event tag.
   TRAVIS_TAG: 6.1.1.7
   TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
-  TRAVIS_BUILD_ID: ${{ github.run_id }}
-  TRAVIS_JOB_ID: ${{ github.run_id }}
-  TRAVIS_JOB_NUMBER: ${{ github.run_number }}
-  TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   TRAVIS_REPO_SLUG: ${{ github.repository }}
-  TRAVIS_BUILD_USER: noiro-tagger
-  TRAVIS_GO_VERSION: 1.26.3
-  TRAVIS_GO_IMPORT_PATH: github.com/noironetworks/acc-provision
 
 jobs:
   build:
