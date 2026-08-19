@@ -19,7 +19,8 @@ jobs:
         - coverage run --source=. -m pytest acc_provision
         - coveralls
     - stage: push-package
-      if: tag IS present
+      # GitHub Actions is the sole publisher for the smoke and final release tags.
+      if: tag IS present AND tag != "081926-test-01" AND tag != "6.1.1.7"
       go: 1.22.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:

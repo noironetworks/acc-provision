@@ -1,25 +1,29 @@
-name: ACC Provision feature publish
+name: ACC Provision disposable production PyPI smoke
 
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+.[0-9]+"
+      - "081926-test-01"
 
 permissions:
   contents: read
 
 concurrency:
-  group: acc-provision-feature-tag-${{ github.ref }}
+  group: acc-provision-pypi-smoke-${{ github.ref }}
   cancel-in-progress: false
 
 env:
-  SOURCE_BRANCH: mmr-6.1.1
+  ACC_PROVISION_PUBLISH_PROFILE: smoke
+  GHA_TRIGGER_TAG: 081926-test-01
+  RELEASE_TAG: 6.1.1.7
+  SOURCE_BRANCH: codex/pypi-smoke-20260819
   EXPECTED_UPSTREAM_ID: 81c2369
   UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
   CICD_COMMIT: a966d9a9baf8b10755155ea5f6606965f549b1da
   ACI_CONTAINERS_TAG_OBJECT: 6bad1f5ac5cd7c576c4b85b37fce583b14dc201f
   ACI_CONTAINERS_COMMIT: 854152b59d6ce589c86175bfc2b9aef49f1fc1ac
-  CI_ARTIFACT_DIR: ci-artifacts
+  # Legacy CICD compatibility uses the logical release, not the smoke event tag.
+  TRAVIS_TAG: 6.1.1.7
   TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
   TRAVIS_BUILD_ID: ${{ github.run_id }}
   TRAVIS_JOB_ID: ${{ github.run_id }}
@@ -31,42 +35,37 @@ env:
   TRAVIS_GO_IMPORT_PATH: github.com/noironetworks/acc-provision
 
 jobs:
-  build_or_testpypi:
-    name: Build package or publish legacy TestPyPI preview
+  build:
+    name: Build immutable disposable package
     if: >-
       github.event_name == 'push' &&
       github.event.deleted == false &&
       github.repository == 'noironetworks/acc-provision' &&
-      startsWith(github.ref, 'refs/tags/')
+      github.ref == 'refs/tags/081926-test-01'
     runs-on: ubuntu-22.04
     timeout-minutes: 100
     outputs:
       artifact_name: ${{ steps.package.outputs.artifact_name }}
       artifact_sha256: ${{ steps.package.outputs.artifact_sha256 }}
-      pypi_target: ${{ steps.route.outputs.pypi_target }}
       source_commit: ${{ steps.source.outputs.source_commit }}
       tag_object: ${{ steps.source.outputs.tag_object }}
 
     steps:
-      - name: Check out tagged source
+      - name: Check out smoke-tagged source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Validate exact release tag and source
+      - name: Validate exact smoke tag and source
         id: source
         shell: bash
         run: |
           set -Eeuo pipefail
 
-          tag="${GITHUB_REF_NAME}"
-          [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-            echo "::error::Trigger tag ${tag} is not a four-part release tag"
-            exit 1
-          }
-          [[ "${GITHUB_REF}" == "refs/tags/${tag}" ]]
+          [[ "${GITHUB_REF}" == "refs/tags/${GHA_TRIGGER_TAG}" ]]
+          [[ "${GITHUB_REF_NAME}" == "${GHA_TRIGGER_TAG}" ]]
           [[ "${UPSTREAM_ID}" == "${EXPECTED_UPSTREAM_ID}" ]] || {
             echo "::error::UPSTREAM_ID must be ${EXPECTED_UPSTREAM_ID}"
             exit 1
@@ -77,63 +76,45 @@ jobs:
             exit 1
           }
 
-          git fetch --force --no-tags origin "+refs/tags/${tag}:refs/tags/${tag}"
-          [[ "$(git cat-file -t "refs/tags/${tag}")" == "tag" ]] || {
-            echo "::error::${tag} must be an annotated, signed tag"
+          git fetch --force --no-tags origin \
+            "+refs/tags/${GHA_TRIGGER_TAG}:refs/tags/${GHA_TRIGGER_TAG}"
+          [[ "$(git cat-file -t "refs/tags/${GHA_TRIGGER_TAG}")" == "tag" ]] || {
+            echo "::error::${GHA_TRIGGER_TAG} must be an annotated, signed tag"
             exit 1
           }
+
+          tag_message="$(git for-each-ref --format='%(contents)' "refs/tags/${GHA_TRIGGER_TAG}")"
+          grep -Fqi 'release to pypi.org' <<<"${tag_message}" || {
+            echo "::error::Smoke tag message must contain 'release to pypi.org'"
+            exit 1
+          }
+          if grep -Fqi 'release to test.pypi.org' <<<"${tag_message}"; then
+            echo "::error::Smoke tag must route only to production PyPI"
+            exit 1
+          fi
 
           git fetch --no-tags origin \
             "+refs/heads/${SOURCE_BRANCH}:refs/remotes/origin/${SOURCE_BRANCH}"
-          tag_object="$(git rev-parse "refs/tags/${tag}")"
-          tagged_commit="$(git rev-parse "refs/tags/${tag}^{commit}")"
-          [[ "${tagged_commit}" == "$(git rev-parse HEAD)" ]] || {
-            echo "::error::Checked-out commit does not match ${tag}"
+          tag_object="$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}")"
+          source_commit="$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}^{commit}")"
+          [[ "${source_commit}" == "$(git rev-parse HEAD)" ]] || {
+            echo "::error::Checked-out commit does not match the smoke tag"
             exit 1
           }
-          [[ "${tagged_commit}" == "$(git rev-parse "refs/remotes/origin/${SOURCE_BRANCH}")" ]] || {
-            echo "::error::${tag} must resolve to the current ${SOURCE_BRANCH} head"
+          [[ "${source_commit}" == "$(git rev-parse "refs/remotes/origin/${SOURCE_BRANCH}")" ]] || {
+            echo "::error::Smoke tag must resolve to the current ${SOURCE_BRANCH} head"
+            exit 1
+          }
+          [[ "$(cd provision && python3 setup.py --version)" == "${RELEASE_TAG}" ]] || {
+            echo "::error::Smoke source must start from acc-provision ${RELEASE_TAG}"
             exit 1
           }
 
           {
-            echo "GHA_TRIGGER_TAG=${tag}"
-            echo "RELEASE_TAG=${tag}"
-            echo "TRAVIS_TAG=${tag}"
-            echo "TRAVIS_COMMIT=${tagged_commit}"
-          } >> "${GITHUB_ENV}"
-          {
-            echo "source_commit=${tagged_commit}"
+            echo "source_commit=${source_commit}"
             echo "tag_object=${tag_object}"
           } >> "${GITHUB_OUTPUT}"
-
-      - name: Select exactly one package registry route
-        id: route
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          tag_message="$(git for-each-ref --format='%(contents)' "refs/tags/${GHA_TRIGGER_TAG}")"
-          production=false
-          test_registry=false
-          grep -Fqi 'release to pypi.org' <<<"${tag_message}" && production=true
-          grep -Fqi 'release to test.pypi.org' <<<"${tag_message}" && test_registry=true
-
-          if [[ "${production}" == true && "${test_registry}" == false ]]; then
-            [[ "${GHA_TRIGGER_TAG}" == '6.1.1.7' ]] || {
-              echo "::error::The hardened production profile is restricted to 6.1.1.7"
-              exit 1
-            }
-            echo "PYPI_TARGET=pypi" >> "${GITHUB_ENV}"
-            echo "ACC_PROVISION_PUBLISH_PROFILE=production" >> "${GITHUB_ENV}"
-            echo "pypi_target=pypi" >> "${GITHUB_OUTPUT}"
-          elif [[ "${production}" == false && "${test_registry}" == true ]]; then
-            echo "PYPI_TARGET=testpypi" >> "${GITHUB_ENV}"
-            echo "ACC_PROVISION_PUBLISH_PROFILE=" >> "${GITHUB_ENV}"
-            echo "pypi_target=testpypi" >> "${GITHUB_OUTPUT}"
-          else
-            echo "::error::Tag message must select exactly one of pypi.org or test.pypi.org"
-            exit 1
-          fi
+          echo "TRAVIS_COMMIT=${source_commit}" >> "${GITHUB_ENV}"
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -146,7 +127,7 @@ jobs:
           go-version: '1.26.3'
           cache: false
 
-      - name: Install pinned package tooling
+      - name: Install pinned build tooling
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -157,8 +138,6 @@ jobs:
             setuptools==80.9.0 \
             wheel==0.45.1 \
             packaging==25.0 \
-            PyYAML==6.0.3 \
-            pytz==2026.3.post1 \
             twine==6.2.0
 
       - name: Fetch immutable CICD scripts
@@ -193,15 +172,13 @@ jobs:
           make -C "${aci_dir}" dist-static/acikubectl
           install -m 0755 "${aci_dir}/dist-static/acikubectl" provision/bin/acikubectl
 
-      - name: Prepare package through shared CICD script
+      - name: Build package through shared CICD script without credentials
         shell: bash
         run: |
           set -Eeuo pipefail
-          mkdir -p "${CI_ARTIFACT_DIR}"
-          "${CICD_DIR}/travis/build-acc-provision.sh" | tee "${CI_ARTIFACT_DIR}/build-acc-provision.log"
+          "${CICD_DIR}/travis/build-acc-provision.sh"
 
-      - name: Build and validate one source distribution without credentials
-        if: env.PYPI_TARGET == 'pypi'
+      - name: Validate and identify the exact source distribution
         id: package
         shell: bash
         run: |
@@ -214,16 +191,16 @@ jobs:
             echo "::error::Shared CICD build must produce exactly one source distribution"
             exit 1
           }
+          [[ -f "${artifacts[0]}" && ! -L "${artifacts[0]}" ]]
           python3 -m twine check --strict "${artifacts[0]}"
           artifact_sha256="$(sha256sum "${artifacts[0]}" | awk '{print $1}')"
           [[ "${artifact_sha256}" =~ ^[0-9a-f]{64}$ ]]
-          artifact_name="acc-provision-pypi-production-6.1.1.7-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          artifact_name="acc-provision-pypi-smoke-${RELEASE_TAG}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
           echo "artifact_sha256=${artifact_sha256}" >> "${GITHUB_OUTPUT}"
           popd
 
-      - name: Upload the exact production package for the protected job
-        if: env.PYPI_TARGET == 'pypi'
+      - name: Upload the exact package for the protected job
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.package.outputs.artifact_name }}
@@ -232,63 +209,26 @@ jobs:
           retention-days: 14
           compression-level: 0
 
-      - name: Record production approval inputs
-        if: env.PYPI_TARGET == 'pypi'
+      - name: Record approval inputs
         shell: bash
         run: |
           {
-            echo "### Awaiting production PyPI approval"
+            echo "### Awaiting disposable production PyPI approval"
             echo
-            echo "- Package: acc-provision==6.1.1.7"
+            echo "- Package: noironetworks-acc-provision-release-smoke==${RELEASE_TAG}"
             echo "- SHA-256: ${{ steps.package.outputs.artifact_sha256 }}"
             echo "- Source: ${{ steps.source.outputs.source_commit }}"
             echo "- CICD scripts: ${CICD_COMMIT}"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-      - name: Publish TestPyPI package through legacy CICD route
-        if: env.PYPI_TARGET == 'testpypi'
-        shell: bash
-        env:
-          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
-          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
-          SKIP_CICD_STATUS: 'true'
-        run: |
-          set -Eeuo pipefail
-          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
-
-      - name: Publish TestPyPI result to CICD status preview
-        if: env.PYPI_TARGET == 'testpypi'
-        shell: bash
-        env:
-          TEST_CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
-        run: |
-          set -Eeuo pipefail
-          "${CICD_DIR}/travis/publish-github-actions-test-acc-provision-status.sh"
-
-      - name: Upload workflow artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: acc-provision-feature-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ci-artifacts/
-          if-no-files-found: warn
-          retention-days: 14
-
-  publish_production:
-    name: Upload once and finalize production release page
-    needs: build_or_testpypi
-    if: needs.build_or_testpypi.outputs.pypi_target == 'pypi'
+  publish:
+    name: Upload once and finalize test release page
+    needs: build
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     environment:
-      name: pypi
-      url: https://pypi.org/project/acc-provision/6.1.1.7/
-    env:
-      ACC_PROVISION_PUBLISH_PROFILE: production
-      GHA_TRIGGER_TAG: 6.1.1.7
-      RELEASE_TAG: 6.1.1.7
-      TRAVIS_TAG: 6.1.1.7
-      TRAVIS_COMMIT: ${{ needs.build_or_testpypi.outputs.source_commit }}
+      name: pypi-smoke
+      url: https://pypi.org/project/noironetworks-acc-provision-release-smoke/6.1.1.7/
 
     steps:
       - name: Check out the approved tagged source
@@ -307,10 +247,11 @@ jobs:
           git fetch --no-tags origin \
             "+refs/heads/${SOURCE_BRANCH}:refs/remotes/origin/${SOURCE_BRANCH}"
           [[ "$(git cat-file -t "refs/tags/${GHA_TRIGGER_TAG}")" == "tag" ]]
-          [[ "$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}")" == \
-             "${{ needs.build_or_testpypi.outputs.tag_object }}" ]]
-          [[ "$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}^{commit}")" == "${TRAVIS_COMMIT}" ]]
-          [[ "$(git rev-parse HEAD)" == "${TRAVIS_COMMIT}" ]]
+          [[ "$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}")" == "${{ needs.build.outputs.tag_object }}" ]]
+          [[ "$(git rev-parse "refs/tags/${GHA_TRIGGER_TAG}^{commit}")" == \
+             "${{ needs.build.outputs.source_commit }}" ]]
+          [[ "$(git rev-parse HEAD)" == "${{ needs.build.outputs.source_commit }}" ]]
+          echo "TRAVIS_COMMIT=${{ needs.build.outputs.source_commit }}" >> "${GITHUB_ENV}"
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -343,7 +284,7 @@ jobs:
       - name: Download the approved source distribution
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          name: ${{ needs.build_or_testpypi.outputs.artifact_name }}
+          name: ${{ needs.build.outputs.artifact_name }}
           path: provision/dist
 
       - name: Verify downloaded artifact before exposing credentials
@@ -356,27 +297,29 @@ jobs:
           [[ ${#artifacts[@]} -eq 1 ]]
           [[ -f "${artifacts[0]}" && ! -L "${artifacts[0]}" ]]
           [[ "$(sha256sum "${artifacts[0]}" | awk '{print $1}')" == \
-             "${{ needs.build_or_testpypi.outputs.artifact_sha256 }}" ]]
+             "${{ needs.build.outputs.artifact_sha256 }}" ]]
           python3 -m twine check --strict "${artifacts[0]}"
 
-      - name: Publish once and finalize production release page
+      - name: Publish once and finalize test release page
         shell: bash
         env:
           PYPI_USER: ${{ secrets.PYPI_USER }}
           PYPI_PASS: ${{ secrets.PYPI_PASS }}
-          PYPI_SIGNING_PUBLIC_KEY: ${{ secrets.PYPI_RELEASE_SIGNING_PUBLIC_KEY }}
-          CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
-          EXPECTED_ARTIFACT_SHA256: ${{ needs.build_or_testpypi.outputs.artifact_sha256 }}
+          PYPI_SIGNING_PUBLIC_KEY: ${{ secrets.PYPI_SMOKE_SIGNING_PUBLIC_KEY }}
+          PYPI_SMOKE_SIGNING_FINGERPRINT: ${{ vars.PYPI_SMOKE_SIGNING_FINGERPRINT }}
+          TEST_CICD_STATUS_TOKEN: ${{ secrets.TEST_CICD_STATUS_TOKEN }}
+          EXPECTED_ARTIFACT_SHA256: ${{ needs.build.outputs.artifact_sha256 }}
         run: |
           set -Eeuo pipefail
           "${CICD_DIR}/travis/push-to-pypi.sh"
 
-      - name: Record final release result
+      - name: Record smoke result
         shell: bash
         run: |
           {
-            echo "### Final CICD release page"
+            echo "### Disposable production PyPI smoke passed"
             echo
-            echo "- Package SHA-256: ${{ needs.build_or_testpypi.outputs.artifact_sha256 }}"
-            echo "- Page: https://noironetworks.github.io/cicd-status/release.html?release=${RELEASE_TAG}"
+            echo "- Package: noironetworks-acc-provision-release-smoke==${RELEASE_TAG}"
+            echo "- SHA-256: ${{ needs.build.outputs.artifact_sha256 }}"
+            echo "- Test release page: https://noironetworks.github.io/test-cicd-status/release.html?release=${RELEASE_TAG}"
           } >> "${GITHUB_STEP_SUMMARY}"
