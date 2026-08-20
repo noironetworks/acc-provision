@@ -1,4 +1,4 @@
-name: ACC Provision feature publish
+name: ACC Provision tag publish
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: acc-provision-feature-tag-${{ github.ref }}
+  group: acc-provision-tag-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -23,8 +23,6 @@ jobs:
       UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
       CICD_BRANCH: ${{ vars.CICD_BRANCH || 'mmr-6.1.1' }}
       CI_ARTIFACT_DIR: ci-artifacts
-      SKIP_CICD_STATUS: ${{ vars.SKIP_CICD_STATUS || 'true' }}
-      PUBLISH_TEST_CICD_STATUS: ${{ vars.PUBLISH_TEST_CICD_STATUS || 'false' }}
 
     steps:
       - name: Check out tagged source
@@ -71,7 +69,7 @@ jobs:
           git fetch --force --no-tags origin \
             "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
           [[ "$(git cat-file -t "refs/tags/${SAFE_TAG}")" == "tag" ]] || {
-            echo "::error::Safe Jenkins tag ${SAFE_TAG} must be annotated"
+            echo "::error::Release tag ${SAFE_TAG} must be annotated"
             exit 1
           }
 
@@ -96,16 +94,20 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          # Final releases carry "release to pypi.org"; .z/dev releases carry "release to test.pypi.org".
           msg="$(git tag -l --format='%(contents)' "${SAFE_TAG}")"
-          if grep -qi "release to pypi.org" <<<"${msg}"; then
+          production=false
+          test_registry=false
+          grep -Fqi "release to pypi.org" <<<"${msg}" && production=true
+          grep -Fqi "release to test.pypi.org" <<<"${msg}" && test_registry=true
+
+          if [[ "${production}" == "true" && "${test_registry}" == "false" ]]; then
             echo "PYPI_TARGET=pypi" >> "${GITHUB_ENV}"
             echo "Final release detected: publishing to pypi.org."
-          elif grep -qi "release to test.pypi.org" <<<"${msg}"; then
+          elif [[ "${production}" == "false" && "${test_registry}" == "true" ]]; then
             echo "PYPI_TARGET=testpypi" >> "${GITHUB_ENV}"
             echo ".z/dev release detected: publishing to test.pypi.org."
           else
-            echo "::error::Tag ${SAFE_TAG} message must contain 'release to pypi.org' (final) or 'release to test.pypi.org' (.z stream)"
+            echo "::error::Tag ${SAFE_TAG} must select exactly one PyPI registry"
             exit 1
           fi
 
@@ -120,26 +122,6 @@ jobs:
           go-version: '1.26.3'
           cache: true
 
-      - name: Validate CICD status settings
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          [[ "${SKIP_CICD_STATUS}" == "true" ]] || {
-            echo "::error::SKIP_CICD_STATUS must remain true in this workflow to disable legacy push-to-cicd-status.sh updates"
-            exit 1
-          }
-          [[ "${PUBLISH_TEST_CICD_STATUS}" == "true" || "${PUBLISH_TEST_CICD_STATUS}" == "false" ]] || {
-            echo "::error::PUBLISH_TEST_CICD_STATUS must be exactly true or false"
-            exit 1
-          }
-
-      - name: Record disabled CICD status preview publication
-        if: env.PUBLISH_TEST_CICD_STATUS != 'true'
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          echo "PUBLISH_TEST_CICD_STATUS=false; CICD status preview publication is disabled and package publication will continue."
-
       - name: Install tooling dependencies
         shell: bash
         run: |
@@ -149,7 +131,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install jq pyyaml pytz twine
 
-      - name: Clone pinned CICD feature scripts
+      - name: Clone CICD release scripts
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -174,114 +156,11 @@ jobs:
           {
             echo "TRAVIS_TAG=${SAFE_TAG}"
             echo "TRAVIS_BUILD_NUMBER=${GITHUB_RUN_NUMBER}"
-            echo "TRAVIS_BUILD_ID=${GITHUB_RUN_ID}"
-            echo "TRAVIS_JOB_ID=${GITHUB_RUN_ID}"
-            echo "TRAVIS_JOB_NUMBER=${GITHUB_RUN_NUMBER}"
             echo "TRAVIS_JOB_WEB_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
             echo "TRAVIS_REPO_SLUG=${GITHUB_REPOSITORY}"
             echo "TRAVIS_COMMIT=${ACC_PROVISION_COMMIT}"
             echo "TRAVIS_BUILD_USER=noiro-tagger"
-            echo "TRAVIS_GO_VERSION=1.26.3"
-            echo "TRAVIS_GO_IMPORT_PATH=github.com/noironetworks/acc-provision"
-            echo "UPSTREAM_ID=${UPSTREAM_ID}"
-            echo "SKIP_CICD_STATUS=${SKIP_CICD_STATUS}"
           } >> "${GITHUB_ENV}"
-
-      - name: Validate and export TestPyPI credentials
-        if: env.PYPI_TARGET == 'testpypi'
-        shell: bash
-        env:
-          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
-          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
-        run: |
-          set -Eeuo pipefail
-
-          [[ -n "${TEST_PYPI_USER}" ]] || { echo "::error::Missing TEST_PYPI_USER"; exit 1; }
-          [[ -n "${TEST_PYPI_PASS}" ]] || { echo "::error::Missing TEST_PYPI_PASS"; exit 1; }
-
-          [[ "${TEST_PYPI_USER}" == "__token__" ]] || {
-            echo "::error::TEST_PYPI_USER must be __token__ for this workflow"
-            exit 1
-          }
-          [[ "${TEST_PYPI_PASS}" == pypi-* ]] || {
-            echo "::error::TEST_PYPI_PASS must be a TestPyPI API token (starts with pypi-)"
-            exit 1
-          }
-
-          {
-            echo "TEST_PYPI_USER=${TEST_PYPI_USER}"
-            echo "TEST_PYPI_PASS=${TEST_PYPI_PASS}"
-          } >> "${GITHUB_ENV}"
-
-      - name: Validate PyPI credentials and verify signed tag
-        if: env.PYPI_TARGET == 'pypi'
-        shell: bash
-        env:
-          PYPI_USER: ${{ secrets.PYPI_USER }}
-          PYPI_PASS: ${{ secrets.PYPI_PASS }}
-        run: |
-          set -Eeuo pipefail
-
-          [[ -n "${PYPI_USER}" ]] || { echo "::error::Missing PYPI_USER"; exit 1; }
-          [[ -n "${PYPI_PASS}" ]] || { echo "::error::Missing PYPI_PASS"; exit 1; }
-          [[ "${PYPI_USER}" == "__token__" ]] || {
-            echo "::error::PYPI_USER must be __token__ for this workflow"
-            exit 1
-          }
-          [[ "${PYPI_PASS}" == pypi-* ]] || {
-            echo "::error::PYPI_PASS must be a PyPI API token (starts with pypi-)"
-            exit 1
-          }
-
-          # Final releases must be signed by the release key B6878A5BBF81C515428FA14E4CA0BB04A10CDFE1.
-          fpr="B6878A5BBF81C515428FA14E4CA0BB04A10CDFE1"
-          gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "${fpr}"
-          gpg --list-keys "${fpr}" >/dev/null 2>&1 || {
-            echo "::error::Release signing key ${fpr} could not be imported"
-            exit 1
-          }
-          git verify-tag "${SAFE_TAG}" 2>&1 | grep -qi "${fpr}" || {
-            echo "::error::Tag ${SAFE_TAG} is not signed by the release key ${fpr}"
-            exit 1
-          }
-
-          {
-            echo "PYPI_USER=${PYPI_USER}"
-            echo "PYPI_PASS=${PYPI_PASS}"
-          } >> "${GITHUB_ENV}"
-
-      - name: Probe TestPyPI authentication
-        if: env.PYPI_TARGET == 'testpypi'
-        shell: bash
-        env:
-          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
-          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
-        run: |
-          set -Eeuo pipefail
-
-          # Send an intentionally incomplete upload request.
-          # 403 means auth failure; 400 means auth accepted but payload rejected.
-          http_code="$(curl -sS -o /tmp/testpypi-auth-probe.out -w "%{http_code}" \
-            -u "${TEST_PYPI_USER}:${TEST_PYPI_PASS}" \
-            -F ":action=file_upload" \
-            -F "protocol_version=1" \
-            https://test.pypi.org/legacy/)"
-
-          case "${http_code}" in
-            400)
-              echo "TestPyPI auth probe succeeded (HTTP 400 expected for malformed test payload)."
-              ;;
-            403)
-              echo "::error::TestPyPI rejected credentials (HTTP 403)."
-              exit 1
-              ;;
-            *)
-              echo "::error::Unexpected TestPyPI probe response: HTTP ${http_code}."
-              echo "Response preview (first 20 lines):"
-              sed -n '1,20p' /tmp/testpypi-auth-probe.out || true
-              exit 1
-              ;;
-          esac
 
       - name: Build acc-provision package inputs
         shell: bash
@@ -303,34 +182,37 @@ jobs:
           cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl
           "${CICD_DIR}/travis/build-acc-provision.sh" | tee "${CI_ARTIFACT_DIR}/build-acc-provision.log"
 
-      - name: Publish package via CICD script
+      - name: Publish production package via CICD script
+        if: env.PYPI_TARGET == 'pypi'
         shell: bash
         env:
+          PYPI_USER: ${{ secrets.PYPI_USER }}
+          PYPI_PASS: ${{ secrets.PYPI_PASS }}
           TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
         run: |
           set -Eeuo pipefail
+          [[ "${PYPI_USER}" == "__token__" && "${PYPI_PASS}" == pypi-* ]]
+          [[ -n "${TRAVIS_TAGGER}" ]]
           "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
 
-      - name: Publish result to CICD status preview
-        if: env.PUBLISH_TEST_CICD_STATUS == 'true'
+      - name: Publish TestPyPI package via CICD script
+        if: env.PYPI_TARGET == 'testpypi'
         shell: bash
         env:
-          TEST_CICD_STATUS_TOKEN: ${{ secrets.GITHUBACTIONS_TAGGER }}
+          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
+          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
+          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
         run: |
           set -Eeuo pipefail
-          bash "${CICD_DIR}/travis/publish-github-actions-test-acc-provision-status.sh"
-          {
-            echo
-            echo "### CICD status preview"
-            echo
-            echo "Published the verified acc-provision result to [6.1.1.7.z](https://noironetworks.github.io/cicd-status/release.html?release=6.1.1.7.z)."
-          } >> "${GITHUB_STEP_SUMMARY}"
+          [[ "${TEST_PYPI_USER}" == "__token__" && "${TEST_PYPI_PASS}" == pypi-* ]]
+          [[ -n "${TRAVIS_TAGGER}" ]]
+          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
 
       - name: Upload workflow artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: acc-provision-feature-${{ github.run_id }}
+          name: acc-provision-tag-${{ github.run_id }}
           path: ci-artifacts/
           if-no-files-found: warn
           retention-days: 14
