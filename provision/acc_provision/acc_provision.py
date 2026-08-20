@@ -3533,16 +3533,20 @@ def has_multi_subnet(config):
 
 
 def is_support_dualstack(flavor):
-    version = flavor.split("-")[1]
-    support_k8s_version = "1.21"
-    support_openshift_version = "4.8"
-    if version >= support_k8s_version:
+    parts = flavor.split("-")
+    family = parts[0]
+
+    try:
+        version_tuple = tuple(int(x) for x in parts[1].split("."))
+    except (IndexError, ValueError):
+        # Non-numeric second segment (e.g. 'openshift-sdn-ovn-baremetal')
+        # These are newer named flavors that support dual-stack
         return True
 
-    if version >= support_openshift_version:
-        return True
-
-    return False
+    if family == "openshift":
+        return version_tuple >= (4, 8)
+    else:
+        return version_tuple >= (1, 21)
 
 
 def process_subnet_value(subnet_value, subnet_info):
