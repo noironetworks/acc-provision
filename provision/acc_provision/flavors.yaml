@@ -21,7 +21,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: false
-    order: 74
+    order: 79
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -31,7 +31,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: false
-    order: 75
+    order: 80
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -41,7 +41,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: false
-    order: 76
+    order: 81
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -51,7 +51,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 77
+    order: 82
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -61,7 +61,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 78
+    order: 83
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -71,7 +71,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 79
+    order: 84
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -81,7 +81,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 80
+    order: 85
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -92,7 +92,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 81
+    order: 86
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -102,7 +102,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 82
+    order: 87
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -112,7 +112,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 83
+    order: 88
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -122,7 +122,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 84
+    order: 89
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -132,7 +132,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 85
+    order: 90
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -142,7 +142,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 86
+    order: 91
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -152,7 +152,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 87
+    order: 92
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -162,7 +162,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 88
+    order: 93
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -173,7 +173,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 89
+    order: 94
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -184,7 +184,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 90
+    order: 95
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -194,7 +194,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 91
+    order: 96
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -204,7 +204,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 92
+    order: 97
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -213,7 +213,7 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 93
+    order: 98
     config:
       kube_config:
         allow_kube_api_default_epg: True
@@ -222,43 +222,43 @@ flavors:
     default_version: 6.1
     status: null
     hidden: true
-    order: 94
+    order: 99
   kubernetes-1.16:
     desc: Kubernetes 1.16
     default_version: 6.1
     status: null
     hidden: true
-    order: 95
+    order: 100
   kubernetes-1.15:
     desc: Kubernetes 1.15
     default_version: 6.1
     status: null
     hidden: true
-    order: 96
+    order: 101
   kubernetes-1.14:
     desc: Kubernetes 1.14
     default_version: 6.1
     status: null
     hidden: true
-    order: 97
+    order: 102
   kubernetes-1.13:
     desc: Kubernetes 1.13
     default_version: 6.1
     status: null
     hidden: true
-    order: 98
+    order: 103
   kubernetes-1.12:
     desc: Kubernetes 1.12
     default_version: 6.1
     status: null
     hidden: true
-    order: 99
+    order: 104
   kubernetes-1.11:
     desc: Kubernetes 1.11
     default_version: 1.9
     status: null
     hidden: true
-    order: 100
+    order: 105
     config:
       kube_config:
         no_priority_class: True
@@ -267,10 +267,143 @@ flavors:
     default_version: 1.9
     status: null
     hidden: true
-    order: 101
+    order: 106
     config:
       kube_config:
         no_priority_class: True
+  openshift-4.22-agent-based-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.22 on Baremetal Agent-based Assisted Installation [Experimental]
+    default_version: 6.1
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_security_context_constraints_agent_based_baremetal: True
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9102, 9102]
+              - [9104, 9104]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system", "default", "nodes"]
+            consumed: ["system", "default"]
+          - name: metal3-provisioning
+            range:
+              - [4343, 4343]
+              - [5050, 5050]
+              - [5051, 5051]
+              - [6180, 6180]
+              - [6183, 6183]
+              - [6385, 6385]
+              - [6388, 6388]
+              - [9443, 9443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system", "default", "nodes"]
+            consumed: ["system", "default", "nodes"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 0
   openshift-4.21-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.21 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -403,7 +536,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 0
+    order: 1
   openshift-4.20-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.20 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -536,7 +669,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 1
+    order: 2
   openshift-4.19-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.19 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -668,8 +801,8 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
-    order: 2
+    hidden: true
+    order: 3
   openshift-4.18-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.18 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -802,7 +935,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 3
+    order: 4
   openshift-4.17-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.17 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -935,7 +1068,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 4
+    order: 5
   openshift-4.16-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.16 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -1068,7 +1201,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 5
+    order: 6
   openshift-4.15-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.15 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -1201,7 +1334,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 6
+    order: 7
   openshift-4.14-agent-based-baremetal:
     desc: Red Hat OpenShift Container Platform 4.14 on Baremetal Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -1334,7 +1467,143 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 7
+    order: 8
+  openshift-4.22-baremetal:
+    desc: Red Hat OpenShift Container Platform 4.22 on Baremetal
+    default_version: 6.1
+    config:
+      net_config:
+        kubeapi_vlan_mode: untagged
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 9
   openshift-4.21-baremetal:
     desc: Red Hat OpenShift Container Platform 4.21 on Baremetal
     default_version: 6.1
@@ -1470,7 +1739,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 8
+    order: 10
   openshift-4.20-baremetal:
     desc: Red Hat OpenShift Container Platform 4.20 on Baremetal
     default_version: 6.1
@@ -1606,7 +1875,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 9
+    order: 11
   openshift-4.19-baremetal:
     desc: Red Hat OpenShift Container Platform 4.19 on Baremetal
     default_version: 6.1
@@ -1741,8 +2010,8 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
-    order: 10
+    hidden: true
+    order: 12
   openshift-4.18-baremetal:
     desc: Red Hat OpenShift Container Platform 4.18 on Baremetal
     default_version: 6.1
@@ -1878,7 +2147,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 11
+    order: 13
   openshift-4.17-baremetal:
     desc: Red Hat OpenShift Container Platform 4.17 on Baremetal
     default_version: 6.1
@@ -2014,7 +2283,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 12
+    order: 14
   openshift-4.16-baremetal:
     desc: Red Hat OpenShift Container Platform 4.16 on Baremetal
     default_version: 6.1
@@ -2150,7 +2419,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 13
+    order: 15
   openshift-4.15-baremetal:
     desc: Red Hat OpenShift Container Platform 4.15 on Baremetal
     default_version: 6.1
@@ -2265,7 +2534,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 14
+    order: 16
   openshift-4.14-baremetal:
     desc: Red Hat OpenShift Container Platform 4.14 on Baremetal
     default_version: 6.1
@@ -2380,7 +2649,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 15
+    order: 17
   openshift-4.13-baremetal:
     desc: Red Hat OpenShift Container Platform 4.13 on Baremetal
     default_version: 6.1
@@ -2495,7 +2764,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 16
+    order: 18
   openshift-4.12-baremetal:
     desc: Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.1
@@ -2610,7 +2879,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 17
+    order: 19
   openshift-4.11-baremetal:
     desc: Red Hat OpenShift Container Platform 4.11 on Baremetal
     default_version: 6.1
@@ -2725,7 +2994,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 18
+    order: 20
   openshift-4.10-baremetal:
     desc: Red Hat OpenShift Container Platform 4.10 on Baremetal
     default_version: 6.1
@@ -2840,7 +3109,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 19
+    order: 21
   openshift-4.9-baremetal:
     desc: Red Hat OpenShift Container Platform 4.9 on Baremetal
     default_version: 6.1
@@ -2955,7 +3224,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 20
+    order: 22
   openshift-4.8-baremetal:
     desc: Red Hat OpenShift Container Platform 4.8 on Baremetal
     default_version: 6.1
@@ -3070,7 +3339,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 21
+    order: 23
   openshift-4.7-baremetal:
     desc: Red Hat OpenShift Container Platform 4.7 on Baremetal
     default_version: 6.1
@@ -3185,7 +3454,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 22
+    order: 24
   openshift-4.6-baremetal:
     desc: Red Hat OpenShift Container Platform 4.6 on Baremetal
     default_version: 6.1
@@ -3300,7 +3569,120 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 23
+    order: 25
+  openshift-4.22-openstack:
+    desc: Red Hat OpenShift Container Platform 4.22 on OpenStack
+    default_version: 6.1
+    config:
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        disable_node_subnet_creation: True
+        kube_default_provide_kube_api: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2380]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9978, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    options: *anchor1
+    status: null
+    hidden: false
+    order: 26
   openshift-4.21-openstack:
     desc: Red Hat OpenShift Container Platform 4.21 on OpenStack
     default_version: 6.1
@@ -3413,7 +3795,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: false
-    order: 24
+    order: 27
   openshift-4.20-openstack:
     desc: Red Hat OpenShift Container Platform 4.20 on OpenStack
     default_version: 6.1
@@ -3526,7 +3908,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: false
-    order: 25
+    order: 28
   openshift-4.19-openstack:
     desc: Red Hat OpenShift Container Platform 4.19 on OpenStack
     default_version: 6.1
@@ -3638,8 +4020,8 @@ flavors:
         disable: True
     options: *anchor1
     status: null
-    hidden: false
-    order: 26
+    hidden: true
+    order: 29
   openshift-4.18-openstack:
     desc: Red Hat OpenShift Container Platform 4.18 on OpenStack
     default_version: 6.1
@@ -3752,7 +4134,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 27
+    order: 30
   openshift-4.17-openstack:
     desc: Red Hat OpenShift Container Platform 4.17 on OpenStack
     default_version: 6.1
@@ -3865,7 +4247,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 28
+    order: 31
   openshift-4.16-openstack:
     desc: Red Hat OpenShift Container Platform 4.16 on OpenStack
     default_version: 6.1
@@ -3978,7 +4360,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 29
+    order: 32
   openshift-4.15-openstack:
     desc: Red Hat OpenShift Container Platform 4.15 on OpenStack
     default_version: 6.1
@@ -4091,7 +4473,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 30
+    order: 33
   openshift-4.14-openstack:
     desc: Red Hat OpenShift Container Platform 4.14 on OpenStack
     default_version: 6.1
@@ -4204,7 +4586,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 31
+    order: 34
   openshift-4.13-openstack:
     desc: Red Hat OpenShift Container Platform 4.13 on OpenStack
     default_version: 6.1
@@ -4317,7 +4699,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 32
+    order: 35
   openshift-4.12-openstack:
     desc: Red Hat OpenShift Container Platform 4.12 on OpenStack
     default_version: 6.1
@@ -4430,7 +4812,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 33
+    order: 36
   openshift-4.11-openstack:
     desc: Red Hat OpenShift Container Platform 4.11 on OpenStack
     default_version: 6.1
@@ -4543,7 +4925,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 34
+    order: 37
   openshift-4.10-openstack:
     desc: Red Hat OpenShift Container Platform 4.10 on OpenStack
     default_version: 6.1
@@ -4656,7 +5038,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 35
+    order: 38
   openshift-4.9-openstack:
     desc: Red Hat OpenShift Container Platform 4.9 on OpenStack
     default_version: 6.1
@@ -4769,7 +5151,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 36
+    order: 39
   openshift-4.8-openstack:
     desc: Red Hat OpenShift Container Platform 4.8 on OpenStack
     default_version: 6.1
@@ -4882,7 +5264,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 37
+    order: 40
   openshift-4.7-openstack:
     desc: Red Hat OpenShift Container Platform 4.7 on OpenStack
     default_version: 6.1
@@ -4995,7 +5377,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 38
+    order: 41
   openshift-4.6-openstack:
     desc: Red Hat OpenShift Container Platform 4.6 on OpenStack
     default_version: 6.1
@@ -5108,7 +5490,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 39
+    order: 42
   openshift-4.5-openstack:
     desc: Red Hat OpenShift Container Platform 4.5 on OpenStack
     default_version: 6.1
@@ -5217,7 +5599,141 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 40
+    order: 43
+  openshift-4.22-agent-based-esx:
+    desc: Red Hat OpenShift Container Platform 4.22 on ESX Agent-based Assisted Installation [Experimental]
+    default_version: 6.1
+    config:
+      net_config:
+        second_kubeapi_portgroup: True
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        no_physdom_for_node_epg: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              - [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              - [1936, 1936]
+              - [2112, 2112]
+              - [3000, 3000]
+              - [8080, 8081]
+              - [8383, 8383]
+              - [8441, 8442]
+              - [8686, 8686]
+              - [9001, 9001]
+              - [9091, 9091]
+              - [9094, 9094]
+              - [9095, 9095]
+              - [9099, 9101]
+              - [9102, 9102]
+              - [9104, 9104]
+              - [9192, 9192]
+              - [9393, 9393]
+              - [9537, 9537]
+              - [10250, 10250]
+              - [10257, 10257]
+              - [10259, 10259]
+              - [17698, 17698]
+              - [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system", "default", "nodes"]
+            consumed: ["system", "default"]
+          - name: metal3-provisioning
+            range:
+              - [4343, 4343]
+              - [5050, 5050]
+              - [5051, 5051]
+              - [6180, 6180]
+              - [6183, 6183]
+              - [6385, 6385]
+              - [6388, 6388]
+              - [9443, 9443]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system", "default", "nodes"]
+            consumed: ["system", "default", "nodes"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+    status: null
+    hidden: false
+    order: 44
   openshift-4.21-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.21 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -5351,7 +5867,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 41
+    order: 45
   openshift-4.20-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.20 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -5485,7 +6001,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 42
+    order: 46
   openshift-4.19-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.19 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -5618,8 +6134,8 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
-    order: 43
+    hidden: true
+    order: 47
   openshift-4.18-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.18 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -5753,7 +6269,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 44
+    order: 48
   openshift-4.17-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.17 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -5887,7 +6403,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 45
+    order: 49
   openshift-4.16-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.16 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -6021,7 +6537,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 46
+    order: 50
   openshift-4.15-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.15 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -6155,7 +6671,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 47
+    order: 51
   openshift-4.14-agent-based-esx:
     desc: Red Hat OpenShift Container Platform 4.14 on ESX Agent-based Assisted Installation [Experimental]
     default_version: 6.1
@@ -6289,7 +6805,146 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 48
+    order: 52
+  openshift-4.22-esx:
+    desc: Red Hat OpenShift Container Platform 4.22 on ESX
+    default_version: 6.1
+    config:
+      net_config:
+        second_kubeapi_portgroup: True
+      kube_config:
+        use_acicni_priority_class: True
+        use_external_service_ip_allocator: False
+        host_agent_openshift_resource: True
+        allow_pods_external_access: True
+        use_privileged_containers: True
+        use_openshift_security_context_constraints: False
+        use_openshift_run_level: True
+        use_cnideploy_initcontainer: True
+        allow_kube_api_default_epg: True
+        kubectl: oc
+        system_namespace: aci-containers-system
+        no_priority_class: True
+        host_agent_cni_bin_path: /var/lib
+        host_agent_cni_conf_path: /etc/kubernetes
+        generate_installer_files: False
+        generate_apic_file: True
+        generate_cnet_file: True
+        use_host_netns_volume: True
+      aci_config:
+        kube_default_provide_kube_api: True
+        no_physdom_for_node_epg: True
+        items:
+          - name: openshift-svc-catalog
+            range:
+              -
+                [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            consumed: ["system"]
+            provided: ["nodes"]
+          - name: openshift-monitoring
+            range:
+              -
+                [1936, 1936]
+              -
+                [2112, 2112]
+              -
+                [3000, 3000]
+              -
+                [8080, 8081]
+              -
+                [8383, 8383]
+              -
+                [8441, 8442]
+              -
+                [8686, 8686]
+              -
+                [9001, 9001]
+              -
+                [9091, 9091]
+              -
+                [9094, 9094]
+              -
+                [9095, 9095]
+              -
+                [9099, 9101]
+              -
+                [9192, 9192]
+              -
+                [9393, 9393]
+              -
+                [9537, 9537]
+              -
+                [10250, 10250]
+              -
+                [10257, 10257]
+              -
+                [10259, 10259]
+              -
+                [17698, 17698]
+              -
+                [60000, 60000]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+            provided: ["system","default","nodes"]
+            consumed: ["system","default"]
+        kube_api_entries:
+          - name: etcd1
+            range: [2379, 2379]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: etcd2
+            range: [9979, 9979]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: http
+            range: [http, http]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: https
+            range: [https, https]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+        dns_entries:
+          - name: dns-multicast-tcp
+            range: [5353, 5353]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-multicast-udp
+            range: [5353, 5353]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+          - name: dns-coreDNS-tcp
+            range: [9153, 9153]
+            etherT: ip
+            prot: tcp
+            stateful: "no"
+          - name: dns-coreDNS-udp
+            range: [9153, 9153]
+            etherT: ip
+            prot: udp
+            stateful: "no"
+        vmm_domain:
+          type: OpenShift
+          nested_inside:
+            duplicate_file_router_default_svc: True
+      istio_config:
+        install_istio: False
+      multus:
+        disable: True
+
+    status: null
+    hidden: false
+    order: 53
   openshift-4.21-esx:
     desc: Red Hat OpenShift Container Platform 4.21 on ESX
     default_version: 6.1
@@ -6427,7 +7082,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 49
+    order: 54
   openshift-4.20-esx:
     desc: Red Hat OpenShift Container Platform 4.20 on ESX
     default_version: 6.1
@@ -6565,7 +7220,7 @@ flavors:
         disable: True
     status: null
     hidden: false
-    order: 50
+    order: 55
   openshift-4.19-esx:
     desc: Red Hat OpenShift Container Platform 4.19 on ESX
     default_version: 6.1
@@ -6702,8 +7357,8 @@ flavors:
       multus:
         disable: True
     status: null
-    hidden: false
-    order: 51
+    hidden: true
+    order: 56
   openshift-4.18-esx:
     desc: Red Hat OpenShift Container Platform 4.18 on ESX
     default_version: 6.1
@@ -6841,7 +7496,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 52
+    order: 57
   openshift-4.17-esx:
     desc: Red Hat OpenShift Container Platform 4.17 on ESX
     default_version: 6.1
@@ -6979,7 +7634,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 53
+    order: 58
   openshift-4.16-esx:
     desc: Red Hat OpenShift Container Platform 4.16 on ESX
     default_version: 6.1
@@ -7117,7 +7772,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 54
+    order: 59
   openshift-4.15-esx:
     desc: Red Hat OpenShift Container Platform 4.15 on ESX
     default_version: 6.1
@@ -7234,7 +7889,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 55
+    order: 60
   openshift-4.14-esx:
     desc: Red Hat OpenShift Container Platform 4.14 on ESX
     default_version: 6.1
@@ -7351,7 +8006,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 56
+    order: 61
   openshift-4.13-esx:
     desc: Red Hat OpenShift Container Platform 4.13 on ESX
     default_version: 6.1
@@ -7468,7 +8123,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 57
+    order: 62
   openshift-4.12-esx:
     desc: Red Hat OpenShift Container Platform 4.12 on ESX
     default_version: 6.1
@@ -7585,7 +8240,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 58
+    order: 63
   openshift-4.11-esx:
     desc: Red Hat OpenShift Container Platform 4.11 on ESX
     default_version: 6.1
@@ -7702,7 +8357,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 59
+    order: 64
   openshift-4.10-esx:
     desc: Red Hat OpenShift Container Platform 4.10 on ESX
     default_version: 6.1
@@ -7819,7 +8474,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 60
+    order: 65
   openshift-4.9-esx:
     desc: Red Hat OpenShift Container Platform 4.9 on ESX
     default_version: 6.1
@@ -7936,7 +8591,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 61
+    order: 66
   openshift-4.8-esx:
     desc: Red Hat OpenShift Container Platform 4.8 on ESX
     default_version: 6.1
@@ -8053,7 +8708,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 62
+    order: 67
   openshift-4.7-esx:
     desc: Red Hat OpenShift Container Platform 4.7 on ESX
     default_version: 6.1
@@ -8170,7 +8825,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 63
+    order: 68
   openshift-4.6-esx:
     desc: Red Hat OpenShift Container Platform 4.6 on ESX
     default_version: 6.1
@@ -8287,7 +8942,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 64
+    order: 69
   openshift-4.5-esx:
     desc: Red Hat OpenShift Container Platform 4.5 on ESX
     default_version: 6.1
@@ -8400,7 +9055,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 65
+    order: 70
   openshift-4.4-openstack:
     desc: Red Hat OpenShift Container Platform 4.4 on OpenStack
     default_version: 6.1
@@ -8509,7 +9164,7 @@ flavors:
     options: *anchor1
     status: null
     hidden: true
-    order: 66
+    order: 71
   openshift-4.4-esx:
     desc: Red Hat OpenShift Container Platform 4.4 on ESX
     default_version: 6.1
@@ -8622,7 +9277,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 67
+    order: 72
   openshift-4.4:
     desc: Red Hat OpenShift Container Platform 4.4
     default_version: 6.1
@@ -8716,7 +9371,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 68
+    order: 73
   openshift-4.3:
     desc: Red Hat OpenShift Container Platform 4.3
     default_version: 6.1
@@ -8810,7 +9465,7 @@ flavors:
         disable: True
     status: null
     hidden: true
-    order: 69
+    order: 74
   openshift-3.11:
     desc: Red Hat OpenShift Container Platform 3.11
     default_version: 6.1
@@ -8852,7 +9507,7 @@ flavors:
         disable: False
     status: null
     hidden: true
-    order: 70
+    order: 75
   openshift-3.10:
     desc: Red Hat OpenShift Container Platform 3.10
     default_version: 6.1
@@ -8893,7 +9548,7 @@ flavors:
         disable: False
     status: null
     hidden: true
-    order: 71
+    order: 76
   openshift-3.9:
     desc: Red Hat OpenShift Container Platform 3.9
     default_version: 6.1
@@ -8934,7 +9589,7 @@ flavors:
         disable: False
     status: null
     hidden: true
-    order: 72
+    order: 77
   # Docker Universal Control Plane (UCP)
   docker-ucp-3.0:
     desc: Docker Universal Control Plane (UCP) 3.0
@@ -8968,7 +9623,7 @@ flavors:
             etherT: ip
             prot: tcp
             stateful: "no"
-    order: 73
+    order: 78
   RKE2-kubernetes-1.35:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.35
     default_version: 6.1
@@ -9022,7 +9677,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 102
+    order: 107
   RKE2-kubernetes-1.34:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.34
     default_version: 6.1
@@ -9076,7 +9731,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 103
+    order: 108
   RKE2-kubernetes-1.33:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.33
     default_version: 6.1
@@ -9130,7 +9785,7 @@ flavors:
         install_istio: False
     status: null
     hidden: false
-    order: 104
+    order: 109
   RKE2-kubernetes-1.32:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.32
     default_version: 6.1
@@ -9184,7 +9839,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 105
+    order: 110
   RKE2-kubernetes-1.31:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.31
     default_version: 6.1
@@ -9238,7 +9893,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 106
+    order: 111
   RKE2-kubernetes-1.30:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.30
     default_version: 6.1
@@ -9292,7 +9947,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 107
+    order: 112
   RKE2-kubernetes-1.29:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.29
     default_version: 6.1
@@ -9346,7 +10001,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 108
+    order: 113
   RKE2-kubernetes-1.28:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.28
     default_version: 6.1
@@ -9400,7 +10055,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 109
+    order: 114
   RKE2-kubernetes-1.27:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.27
     default_version: 6.1
@@ -9454,7 +10109,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 110
+    order: 115
   RKE2-kubernetes-1.26:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.26
     default_version: 6.1
@@ -9508,7 +10163,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 111
+    order: 116
   RKE2-kubernetes-1.25:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.25
     default_version: 6.1
@@ -9562,7 +10217,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 112
+    order: 117
   RKE2-kubernetes-1.24:
     desc: Rancher Kubernetes Engine Government kubernetes version 1.24
     default_version: 6.1
@@ -9616,7 +10271,7 @@ flavors:
         install_istio: False
     status: null
     hidden: true
-    order: 113
+    order: 118
   RKE-1.8.3:
     desc: Rancher Kubernetes Engine min version 1.8.3
     default_version: 6.1
@@ -9672,7 +10327,7 @@ flavors:
         disable: False
     hidden: False
     status: Experimental
-    order: 114
+    order: 119
   RKE-1.7.7:
     desc: Rancher Kubernetes Engine min version 1.7.7
     default_version: 6.1
@@ -9728,7 +10383,7 @@ flavors:
         disable: False
     hidden: False
     status: Experimental
-    order: 115
+    order: 120
   RKE-1.7.2:
     desc: Rancher Kubernetes Engine min version 1.7.2
     default_version: 6.1
@@ -9784,7 +10439,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 116
+    order: 121
   RKE-1.7.1:
     desc: Rancher Kubernetes Engine min version 1.7.1
     default_version: 6.1
@@ -9840,7 +10495,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 117
+    order: 122
   RKE-1.6.10:
     desc: Rancher Kubernetes Engine min version 1.6.10
     default_version: 6.1
@@ -9896,7 +10551,7 @@ flavors:
         disable: False
     hidden: False
     status: Experimental
-    order: 118
+    order: 123
   RKE-1.6.6:
     desc: Rancher Kubernetes Engine min version 1.6.6
     default_version: 6.1
@@ -9952,7 +10607,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 119
+    order: 124
   RKE-1.6.5:
     desc: Rancher Kubernetes Engine min version 1.6.5
     default_version: 6.1
@@ -10008,7 +10663,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 120
+    order: 125
   RKE-1.6.3:
     desc: Rancher Kubernetes Engine min version 1.6.3
     default_version: 6.1
@@ -10064,7 +10719,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 121
+    order: 126
   RKE-1.6.2:
     desc: Rancher Kubernetes Engine min version 1.6.2
     default_version: 6.1
@@ -10120,7 +10775,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 122
+    order: 127
   RKE-1.6.0:
     desc: Rancher Kubernetes Engine min version 1.6.0
     default_version: 6.1
@@ -10176,7 +10831,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 123
+    order: 128
   RKE-1.5.14:
     desc: Rancher Kubernetes Engine min version 1.5.14
     default_version: 6.1
@@ -10232,7 +10887,7 @@ flavors:
         disable: False
     hidden: False
     status: null
-    order: 124
+    order: 129
   RKE-1.5.13:
     desc: Rancher Kubernetes Engine min version 1.5.13
     default_version: 6.1
@@ -10288,7 +10943,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 125
+    order: 130
   RKE-1.5.11:
     desc: Rancher Kubernetes Engine min version 1.5.11
     default_version: 6.1
@@ -10344,7 +10999,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 126
+    order: 131
   RKE-1.5.6:
     desc: Rancher Kubernetes Engine min version 1.5.6
     default_version: 6.1
@@ -10400,7 +11055,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 127
+    order: 132
   RKE-1.5.3:
     desc: Rancher Kubernetes Engine min version 1.5.3
     default_version: 6.1
@@ -10456,7 +11111,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 128
+    order: 133
   RKE-1.4.20:
     desc: Rancher Kubernetes Engine min version 1.4.20
     default_version: 6.1
@@ -10512,7 +11167,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 129
+    order: 134
   RKE-1.4.16:
     desc: Rancher Kubernetes Engine min version 1.4.16
     default_version: 6.1
@@ -10568,7 +11223,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 130
+    order: 135
   RKE-1.4.13:
     desc: Rancher Kubernetes Engine min version 1.4.13
     default_version: 6.1
@@ -10624,7 +11279,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 131
+    order: 136
   RKE-1.4.9:
     desc: Rancher Kubernetes Engine min version 1.4.9
     default_version: 6.1
@@ -10680,7 +11335,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 132
+    order: 137
   RKE-1.4.6:
     desc: Rancher Kubernetes Engine min version 1.4.6
     default_version: 6.1
@@ -10736,7 +11391,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 133
+    order: 138
   RKE-1.3.24:
     desc: Rancher Kubernetes Engine min version 1.3.24
     default_version: 6.1
@@ -10792,7 +11447,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 134
+    order: 139
   RKE-1.3.21:
     desc: Rancher Kubernetes Engine min version 1.3.21
     default_version: 6.1
@@ -10848,7 +11503,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 135
+    order: 140
   RKE-1.3.20:
     desc: Rancher Kubernetes Engine min version 1.3.20
     default_version: 6.1
@@ -10904,7 +11559,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 136
+    order: 141
   RKE-1.3.18:
     desc: Rancher Kubernetes Engine min version 1.3.18
     default_version: 6.1
@@ -10960,7 +11615,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 137
+    order: 142
   RKE-1.3.17:
     desc: Rancher Kubernetes Engine min version 1.3.17
     default_version: 6.1
@@ -11016,7 +11671,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 138
+    order: 143
   RKE-1.3.13:
     desc: Rancher Kubernetes Engine min version 1.3.13
     default_version: 6.1
@@ -11072,7 +11727,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 139
+    order: 144
   RKE-1.2.3:
     desc: Rancher Kubernetes Engine min version 1.2.3
     default_version: 6.1
@@ -11128,7 +11783,7 @@ flavors:
         disable: False
     hidden: True
     status: null
-    order: 140
+    order: 145
   k8s-overlay:
     desc: Kubernetes basic overlay
     default_version: 6.1
@@ -11174,7 +11829,7 @@ flavors:
         enable: true
     status: Experimental
     hidden: true
-    order: 141
+    order: 146
   calico-3.26.3:
     desc: calico-3.26.3
     default_version: 6.1.3.3
@@ -11183,7 +11838,7 @@ flavors:
       template_generator: generate_calico_deployment_files
     hidden: False
     status: null
-    order: 142
+    order: 147
   openshift-sdn-ovn-baremetal:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.12 on Baremetal
     default_version: 6.1
@@ -11212,7 +11867,7 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 143
+    order: 148
   openshift-vmm-lite-baremetal:
     desc: VMM lite for Red Hat OpenShift Container Platform 4.18 on Baremetal
     default_version: 6.1
@@ -11229,7 +11884,7 @@ flavors:
         kube_default_provide_kube_api: True
     status: null
     hidden: false
-    order: 144
+    order: 149
   k8s-aci-cilium:
     desc: Chained CNI for Kubernertes
     default_version: 6.1
@@ -11241,7 +11896,7 @@ flavors:
         disable: False
     hidden: False
     status: Experimental
-    order: 145
+    order: 150
   openshift-4.14-aci-cilium-esx:
     desc: Chained CNI for Red Hat OpenShift Container Platform 4.14 on ESX
     default_version: 6.1
@@ -11358,4 +12013,4 @@ flavors:
         disable: True
     status: Experimental
     hidden: false
-    order: 146
+    order: 151
