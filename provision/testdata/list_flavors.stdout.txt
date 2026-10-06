@@ -1,19 +1,19 @@
 INFO: Available configuration flavors:
+INFO: openshift-4.22-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.22 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.21-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.21 on Baremetal Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.20-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.20 on Baremetal Agent-based Assisted Installation [Experimental]
-INFO: openshift-4.19-agent-based-baremetal:	Red Hat OpenShift Container Platform 4.19 on Baremetal Agent-based Assisted Installation [Experimental]
+INFO: openshift-4.22-baremetal:	Red Hat OpenShift Container Platform 4.22 on Baremetal
 INFO: openshift-4.21-baremetal:	Red Hat OpenShift Container Platform 4.21 on Baremetal
 INFO: openshift-4.20-baremetal:	Red Hat OpenShift Container Platform 4.20 on Baremetal
-INFO: openshift-4.19-baremetal:	Red Hat OpenShift Container Platform 4.19 on Baremetal
+INFO: openshift-4.22-openstack:	Red Hat OpenShift Container Platform 4.22 on OpenStack
 INFO: openshift-4.21-openstack:	Red Hat OpenShift Container Platform 4.21 on OpenStack
 INFO: openshift-4.20-openstack:	Red Hat OpenShift Container Platform 4.20 on OpenStack
-INFO: openshift-4.19-openstack:	Red Hat OpenShift Container Platform 4.19 on OpenStack
+INFO: openshift-4.22-agent-based-esx:	Red Hat OpenShift Container Platform 4.22 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.21-agent-based-esx:	Red Hat OpenShift Container Platform 4.21 on ESX Agent-based Assisted Installation [Experimental]
 INFO: openshift-4.20-agent-based-esx:	Red Hat OpenShift Container Platform 4.20 on ESX Agent-based Assisted Installation [Experimental]
-INFO: openshift-4.19-agent-based-esx:	Red Hat OpenShift Container Platform 4.19 on ESX Agent-based Assisted Installation [Experimental]
+INFO: openshift-4.22-esx:	Red Hat OpenShift Container Platform 4.22 on ESX
 INFO: openshift-4.21-esx:	Red Hat OpenShift Container Platform 4.21 on ESX
 INFO: openshift-4.20-esx:	Red Hat OpenShift Container Platform 4.20 on ESX
-INFO: openshift-4.19-esx:	Red Hat OpenShift Container Platform 4.19 on ESX
 INFO: kubernetes-1.37:	Kubernetes 1.37
 INFO: kubernetes-1.36:	Kubernetes 1.36
 INFO: kubernetes-1.35:	Kubernetes 1.35
