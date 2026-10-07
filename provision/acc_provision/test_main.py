@@ -242,6 +242,36 @@ def test_base_case_simple():
 
 
 @in_testdir
+def test_fabric_ip_overrides():
+    with open("base_case.inp.yaml") as source:
+        config = yaml.safe_load(source)
+    config["net_config"]["opflex_peer_ip"] = "10.10.13.62"
+    config["net_config"]["vxlan_anycast_ip"] = "10.10.13.61"
+
+    with tempfile.TemporaryDirectory() as temp:
+        inpfile = os.path.join(temp, "input.yaml")
+        output = os.path.join(temp, "kube.yaml")
+        operator_cr = os.path.join(temp, "operator.yaml")
+        output_tar = os.path.join(temp, "operator.tar.gz")
+        apicfile = os.path.join(temp, "apic.txt")
+        with open(inpfile, "w") as inp:
+            yaml.safe_dump(config, inp)
+
+        args = get_args(config=inpfile, output=output,
+                        output_tar=output_tar, aci_operator_cr=operator_cr)
+        acc_provision.main(args, apicfile, no_random=True)
+
+        with open(output) as generated:
+            configmaps = [document for document in yaml.safe_load_all(generated)
+                          if document and document.get("kind") == "ConfigMap"
+                          and document["metadata"]["name"] == "aci-containers-config"]
+        assert len(configmaps) == 1
+        host_config = json.loads(configmaps[0]["data"]["host-agent-config"])
+        assert host_config["opflex-peer-ip-override"] == "10.10.13.62"
+        assert host_config["vxlan-anycast-ip-override"] == "10.10.13.61"
+
+
+@in_testdir
 def test_base_case_apic_5_2_3():
     run_provision(
         "base_case_apic_5_2_3.inp.yaml",

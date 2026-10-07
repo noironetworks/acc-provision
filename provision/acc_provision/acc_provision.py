@@ -629,6 +629,8 @@ def config_default():
             "pbr_tracking_non_snat": False,
             "interface_mtu": None,
             "interface_mtu_headroom": None,
+            "opflex_peer_ip": None,
+            "vxlan_anycast_ip": None,
             "second_kubeapi_portgroup": False,
             "disable_wait_for_network": False,
             "duration_wait_for_network": 210,
@@ -1654,6 +1656,18 @@ def is_valid_ip(ip):
     return True
 
 
+def is_valid_optional_ipv4(ip):
+    if ip is None:
+        return True
+    if not isinstance(ip, str):
+        return False
+    try:
+        ipaddress.IPv4Address(ip)
+    except ValueError:
+        return False
+    return True
+
+
 def config_validate(flavor_opts, config):
     def Raise(exception):
         raise exception
@@ -1911,6 +1925,10 @@ def config_validate(flavor_opts, config):
     # Drop log rotation knobs (applies to all flavors when redirecting
     # drop logs to a file).
     checks.update({
+        "net_config/opflex_peer_ip":
+        (get(("net_config", "opflex_peer_ip")), is_valid_optional_ipv4),
+        "net_config/vxlan_anycast_ip":
+        (get(("net_config", "vxlan_anycast_ip")), is_valid_optional_ipv4),
         "drop_log_config/droplog_max_size_mb":
         (get(("drop_log_config", "droplog_max_size_mb")), is_valid_positive_int),
         "drop_log_config/droplog_rotate_count":

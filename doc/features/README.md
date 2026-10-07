@@ -227,6 +227,8 @@ net_config:
   #                             # (Kubernetes only)
   service_vlan: 4003            # The VLAN used by LoadBalancer services
   infra_vlan: 4093              # The VLAN used by ACI infra
+  # opflex_peer_ip: <IPv4 address>   # Optional OpFlex peer address on the fabric
+  # vxlan_anycast_ip: <IPv4 address> # Optional VXLAN anycast address on the fabric
   # interface_mtu: 1600          # min = 1280 for ipv6, max = 8900 for VXLAN
   # interface_mtu_headroom: 100  # MTU Headroom in bytes to be left for Header
   #                             # Must be >= 50
@@ -397,6 +399,12 @@ registry:
   # opflexagent_log_level: debug     # default log level is info
   # operator_log_level: debug        # default log level is info
 ```
+
+Set either or both of `net_config.opflex_peer_ip` and
+`net_config.vxlan_anycast_ip` when the fabric uses addresses other than those
+derived by the host agent. Each supplied address must match the ACI fabric for
+every node in the cluster, because the generated ConfigMap sends the same
+values to all host agents. Omitted values continue to be discovered as before.
 
 > [!Note]
     > Do not modify the Cisco ACI bridge domain configuration that is pushed by the acc-provisioning tool. Setting the bridge domain to flood results in a broken environment.
