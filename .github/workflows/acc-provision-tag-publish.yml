@@ -1,23 +1,87 @@
-name: ACC Provision tag publish
+name: ACC Provision CI
 
 on:
+  pull_request:
   push:
+    branches:
+      - "**"
     tags:
       - "[0-9]+.[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: read
 
-concurrency:
-  group: acc-provision-tag-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  run-unit-tests:
+    name: Lint and unit tests
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.deleted == false && startsWith(github.ref, 'refs/heads/'))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    concurrency:
+      group: acc-provision-tests-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: provision
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install flake8 coverage pytest
+          python -m pip install .
+
+      - name: Run flake8
+        run: python -m flake8 --builtins="unicode" --ignore E501,E731,E741,W504 acc_provision
+
+      - name: Run unit tests with coverage
+        id: tests
+        run: python -m coverage run --source=. -m pytest acc_provision --junitxml=test-results.xml
+
+      - name: Generate coverage reports
+        id: coverage
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        run: |
+          python -m coverage report
+          python -m coverage xml -o coverage.xml
+
+      - name: Upload coverage to Coveralls
+        if: ${{ !cancelled() && steps.coverage.outcome == 'success' }}
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2
+        with:
+          file: provision/coverage.xml
+          format: cobertura
+          base-path: provision
+          fail-on-error: true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: acc-provision-test-reports
+          path: |
+            provision/test-results.xml
+            provision/coverage.xml
+          if-no-files-found: warn
+          retention-days: 14
+
   build-and-publish:
     name: Build and publish acc-provision package
     if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
+    concurrency:
+      group: acc-provision-tag-${{ github.ref }}
+      cancel-in-progress: false
     env:
       SOURCE_BRANCH: ${{ vars.SOURCE_BRANCH || 'mmr-6.1.1' }}
       UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
@@ -119,7 +183,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.26.3'
+          go-version: '1.26.10'
           cache: true
 
       - name: Install tooling dependencies
