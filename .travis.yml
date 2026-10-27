@@ -4,12 +4,13 @@ env:
   global:
     - DEFAULT_BRANCH: master
     - GOPROXY: https://proxy.golang.org,https://goproxy.io,direct
+    - CI_PROVIDER: gha
 language: python
 python: 3.9
 jobs:
   include:
     - stage: run-unit-tests
-      if: tag IS NOT present
+      if: tag IS NOT present AND env(CI_PROVIDER) = travis
       install:
         - pip install flake8 coverage coveralls
         - pip install ./provision
@@ -19,8 +20,7 @@ jobs:
         - coverage run --source=. -m pytest acc_provision
         - coveralls
     - stage: push-package
-      # GitHub Actions is the sole publisher for final release tags.
-      if: tag IS present AND NOT (tag =~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)
+      if: tag IS present AND env(CI_PROVIDER) = travis
       go: 1.22.x
       go_import_path: github.com/noironetworks/aci-containers
       before_script:
