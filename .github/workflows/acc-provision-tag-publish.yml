@@ -87,6 +87,11 @@ jobs:
       UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
       CICD_BRANCH: ${{ vars.CICD_BRANCH || 'mmr-6.1.1' }}
       CI_ARTIFACT_DIR: ci-artifacts
+      TRAVIS_TAG: ${{ github.ref_name }}
+      TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
+      TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      TRAVIS_REPO_SLUG: ${{ github.repository }}
+      TRAVIS_BUILD_USER: noiro-tagger
 
     steps:
       - name: Check out tagged source
@@ -121,15 +126,6 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          [[ "${GITHUB_REF}" == "refs/tags/${SAFE_TAG}" ]] || {
-            echo "::error::Unexpected trigger ref ${GITHUB_REF}"
-            exit 1
-          }
-          [[ "${GITHUB_REF_NAME}" == "${SAFE_TAG}" ]] || {
-            echo "::error::Unexpected trigger tag ${GITHUB_REF_NAME}"
-            exit 1
-          }
-
           git fetch --force --no-tags origin \
             "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
           [[ "$(git cat-file -t "refs/tags/${SAFE_TAG}")" == "tag" ]] || {
@@ -151,7 +147,7 @@ jobs:
             exit 1
           }
 
-          echo "ACC_PROVISION_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
+          echo "TRAVIS_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
 
       - name: Determine PyPI target from tag message
         shell: bash
@@ -192,8 +188,7 @@ jobs:
           set -Eeuo pipefail
           sudo apt-get update
           sudo apt-get install -y jq
-          python -m pip install --upgrade pip
-          python -m pip install jq pyyaml pytz twine
+          python -m pip install pyyaml pytz twine
 
       - name: Clone CICD release scripts
         shell: bash
@@ -203,28 +198,12 @@ jobs:
           cicd_dir="${RUNNER_TEMP}/cicd"
           git clone --depth=1 --single-branch --branch "${CICD_BRANCH}" \
             https://github.com/noironetworks/cicd.git "${cicd_dir}"
-
           cicd_release="$(sed -nE 's/^RELEASE_TAG="([^"]+)"/\1/p' "${cicd_dir}/travis/globals.sh")"
           [[ "${cicd_release}" == "${RELEASE_TAG}" ]] || {
             echo "::error::CICD release ${cicd_release} does not match ${RELEASE_TAG}"
             exit 1
           }
-
           echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
-
-      - name: Export compatibility environment
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          {
-            echo "TRAVIS_TAG=${SAFE_TAG}"
-            echo "TRAVIS_BUILD_NUMBER=${GITHUB_RUN_NUMBER}"
-            echo "TRAVIS_JOB_WEB_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-            echo "TRAVIS_REPO_SLUG=${GITHUB_REPOSITORY}"
-            echo "TRAVIS_COMMIT=${ACC_PROVISION_COMMIT}"
-            echo "TRAVIS_BUILD_USER=noiro-tagger"
-          } >> "${GITHUB_ENV}"
 
       - name: Build acc-provision package inputs
         shell: bash
