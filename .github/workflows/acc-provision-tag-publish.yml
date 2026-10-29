@@ -1,4 +1,4 @@
-name: ACC Provision CI
+name: acc-provision CI
 
 on:
   pull_request:
@@ -14,7 +14,8 @@ permissions:
 jobs:
   run-unit-tests:
     name: Lint and unit tests
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.deleted == false && startsWith(github.ref, 'refs/heads/'))
+    needs: select-ci-provider
+    if: needs.select-ci-provider.outputs.run-gha == 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.deleted == false && startsWith(github.ref, 'refs/heads/')))
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     concurrency:
@@ -74,9 +75,46 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  select-ci-provider:
+    name: Select CI provider
+    runs-on: ubuntu-22.04
+    outputs:
+      run-gha: ${{ steps.selector.outputs.run_gha }}
+    steps:
+      - name: Check out source configuration
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read CI provider from Travis configuration
+        id: selector
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mapfile -t providers < <(
+            awk -F: '$1 ~ /^[[:space:]]*-[[:space:]]*CI_PROVIDER[[:space:]]*$/ {
+              value = $2
+              gsub(/[[:space:]]/, "", value)
+              sub(/#.*/, "", value)
+              print value
+            }' .travis.yml
+          )
+          if ((${#providers[@]} != 1)); then
+            echo "::error:: .travis.yml must define CI_PROVIDER exactly once"
+            exit 1
+          fi
+          provider="${providers[0]}"
+          case "${provider}" in
+            gha) run_gha=true ;;
+            travis) run_gha=false ;;
+            *) echo "::error:: CI_PROVIDER must be 'gha' or 'travis'"; exit 1 ;;
+          esac
+          echo "run_gha=${run_gha}" >> "${GITHUB_OUTPUT}"
+
   build-and-publish:
     name: Build and publish acc-provision package
-    if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
+    needs: select-ci-provider
+    if: needs.select-ci-provider.outputs.run-gha == 'true' && github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     concurrency:
@@ -87,6 +125,11 @@ jobs:
       UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
       CICD_BRANCH: ${{ vars.CICD_BRANCH || 'mmr-6.1.1' }}
       CI_ARTIFACT_DIR: ci-artifacts
+      TRAVIS_TAG: ${{ github.ref_name }}
+      TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
+      TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      TRAVIS_REPO_SLUG: ${{ github.repository }}
+      TRAVIS_BUILD_USER: noiro-tagger
 
     steps:
       - name: Check out tagged source
@@ -121,15 +164,6 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          [[ "${GITHUB_REF}" == "refs/tags/${SAFE_TAG}" ]] || {
-            echo "::error::Unexpected trigger ref ${GITHUB_REF}"
-            exit 1
-          }
-          [[ "${GITHUB_REF_NAME}" == "${SAFE_TAG}" ]] || {
-            echo "::error::Unexpected trigger tag ${GITHUB_REF_NAME}"
-            exit 1
-          }
-
           git fetch --force --no-tags origin \
             "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
           [[ "$(git cat-file -t "refs/tags/${SAFE_TAG}")" == "tag" ]] || {
@@ -151,7 +185,7 @@ jobs:
             exit 1
           }
 
-          echo "ACC_PROVISION_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
+          echo "TRAVIS_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
 
       - name: Determine PyPI target from tag message
         shell: bash
@@ -192,8 +226,7 @@ jobs:
           set -Eeuo pipefail
           sudo apt-get update
           sudo apt-get install -y jq
-          python -m pip install --upgrade pip
-          python -m pip install jq pyyaml pytz twine
+          python -m pip install pyyaml pytz twine
 
       - name: Clone CICD release scripts
         shell: bash
@@ -203,28 +236,12 @@ jobs:
           cicd_dir="${RUNNER_TEMP}/cicd"
           git clone --depth=1 --single-branch --branch "${CICD_BRANCH}" \
             https://github.com/noironetworks/cicd.git "${cicd_dir}"
-
           cicd_release="$(sed -nE 's/^RELEASE_TAG="([^"]+)"/\1/p' "${cicd_dir}/travis/globals.sh")"
           [[ "${cicd_release}" == "${RELEASE_TAG}" ]] || {
             echo "::error::CICD release ${cicd_release} does not match ${RELEASE_TAG}"
             exit 1
           }
-
           echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
-
-      - name: Export compatibility environment
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          {
-            echo "TRAVIS_TAG=${SAFE_TAG}"
-            echo "TRAVIS_BUILD_NUMBER=${GITHUB_RUN_NUMBER}"
-            echo "TRAVIS_JOB_WEB_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-            echo "TRAVIS_REPO_SLUG=${GITHUB_REPOSITORY}"
-            echo "TRAVIS_COMMIT=${ACC_PROVISION_COMMIT}"
-            echo "TRAVIS_BUILD_USER=noiro-tagger"
-          } >> "${GITHUB_ENV}"
 
       - name: Build acc-provision package inputs
         shell: bash
