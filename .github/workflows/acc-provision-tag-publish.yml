@@ -1,0 +1,299 @@
+name: acc-provision CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  run-unit-tests:
+    name: Lint and unit tests
+    needs: select-ci-provider
+    if: needs.select-ci-provider.outputs.run-gha == 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.deleted == false && startsWith(github.ref, 'refs/heads/')))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    concurrency:
+      group: acc-provision-tests-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: provision
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install flake8 coverage pytest
+          python -m pip install .
+
+      - name: Run flake8
+        run: python -m flake8 --builtins="unicode" --ignore E501,E731,E741,W504 acc_provision
+
+      - name: Run unit tests with coverage
+        id: tests
+        run: python -m coverage run --source=. -m pytest acc_provision --junitxml=test-results.xml
+
+      - name: Generate coverage reports
+        id: coverage
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        run: |
+          python -m coverage report
+          python -m coverage xml -o coverage.xml
+
+      - name: Upload coverage to Coveralls
+        if: ${{ !cancelled() && steps.coverage.outcome == 'success' }}
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2
+        with:
+          file: provision/coverage.xml
+          format: cobertura
+          base-path: provision
+          fail-on-error: true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: acc-provision-test-reports
+          path: |
+            provision/test-results.xml
+            provision/coverage.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+  select-ci-provider:
+    name: Select CI provider
+    runs-on: ubuntu-22.04
+    outputs:
+      run-gha: ${{ steps.selector.outputs.run_gha }}
+    steps:
+      - name: Check out source configuration
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read CI provider from Travis configuration
+        id: selector
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mapfile -t providers < <(
+            awk -F: '$1 ~ /^[[:space:]]*-[[:space:]]*CI_PROVIDER[[:space:]]*$/ {
+              value = $2
+              gsub(/[[:space:]]/, "", value)
+              sub(/#.*/, "", value)
+              print value
+            }' .travis.yml
+          )
+          if ((${#providers[@]} != 1)); then
+            echo "::error:: .travis.yml must define CI_PROVIDER exactly once"
+            exit 1
+          fi
+          provider="${providers[0]}"
+          case "${provider}" in
+            gha) run_gha=true ;;
+            travis) run_gha=false ;;
+            *) echo "::error:: CI_PROVIDER must be 'gha' or 'travis'"; exit 1 ;;
+          esac
+          echo "run_gha=${run_gha}" >> "${GITHUB_OUTPUT}"
+
+  build-and-publish:
+    name: Build and publish acc-provision package
+    needs: select-ci-provider
+    if: needs.select-ci-provider.outputs.run-gha == 'true' && github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    concurrency:
+      group: acc-provision-tag-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      SOURCE_BRANCH: ${{ vars.SOURCE_BRANCH || 'master' }}
+      UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
+      CICD_BRANCH: ${{ vars.CICD_BRANCH || 'main' }}
+      CI_ARTIFACT_DIR: ci-artifacts
+      TRAVIS_TAG: ${{ github.ref_name }}
+      TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
+      TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      TRAVIS_REPO_SLUG: ${{ github.repository }}
+      TRAVIS_BUILD_USER: noiro-tagger
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Derive release identifiers from tag
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          # Trigger tag is the plain release tag (e.g. 6.1.2.1); UPSTREAM_ID comes from the repo variable.
+          tag="${GITHUB_REF_NAME}"
+          [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Trigger tag ${tag} is not a release tag of form N.N.N.N (e.g. 6.1.2.1)"
+            exit 1
+          }
+          [[ -n "${UPSTREAM_ID}" ]] || {
+            echo "::error::UPSTREAM_ID is empty; set the UPSTREAM_ID Actions variable on this repository (e.g. 81c2369)"
+            exit 1
+          }
+          {
+            echo "RELEASE_TAG=${tag}"
+            echo "SAFE_TAG=${tag}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Validate safe tag source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          git fetch --force --no-tags origin \
+            "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
+          [[ "$(git cat-file -t "refs/tags/${SAFE_TAG}")" == "tag" ]] || {
+            echo "::error::Release tag ${SAFE_TAG} must be annotated"
+            exit 1
+          }
+
+          git fetch --no-tags origin \
+            "+refs/heads/${SOURCE_BRANCH}:refs/remotes/origin/${SOURCE_BRANCH}"
+          tagged_commit="$(git rev-parse "refs/tags/${SAFE_TAG}^{commit}")"
+          checked_out_commit="$(git rev-parse HEAD)"
+          source_commit="$(git rev-parse "refs/remotes/origin/${SOURCE_BRANCH}")"
+          [[ "${tagged_commit}" == "${checked_out_commit}" ]] || {
+            echo "::error::Tag ${SAFE_TAG} moved after this run was queued; refusing superseded run"
+            exit 1
+          }
+          [[ "${tagged_commit}" == "${source_commit}" ]] || {
+            echo "::error::Tag ${SAFE_TAG} resolves to ${tagged_commit}, not current ${SOURCE_BRANCH} head ${source_commit}"
+            exit 1
+          }
+
+          echo "TRAVIS_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
+
+      - name: Determine PyPI target from tag message
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          msg="$(git tag -l --format='%(contents)' "${SAFE_TAG}")"
+          production=false
+          test_registry=false
+          grep -Fqi "release to pypi.org" <<<"${msg}" && production=true
+          grep -Fqi "release to test.pypi.org" <<<"${msg}" && test_registry=true
+
+          if [[ "${production}" == "true" && "${test_registry}" == "false" ]]; then
+            echo "PYPI_TARGET=pypi" >> "${GITHUB_ENV}"
+            echo "Final release detected: publishing to pypi.org."
+          elif [[ "${production}" == "false" && "${test_registry}" == "true" ]]; then
+            echo "PYPI_TARGET=testpypi" >> "${GITHUB_ENV}"
+            echo ".z/dev release detected: publishing to test.pypi.org."
+          else
+            echo "::error::Tag ${SAFE_TAG} must select exactly one PyPI registry"
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+          cache: true
+
+      - name: Install tooling dependencies
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+          python -m pip install pyyaml pytz twine
+
+      - name: Clone CICD release scripts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          cicd_dir="${RUNNER_TEMP}/cicd"
+          git clone --depth=1 --single-branch --branch "${CICD_BRANCH}" \
+            https://github.com/noironetworks/cicd.git "${cicd_dir}"
+          cicd_release="$(sed -nE 's/^RELEASE_TAG="([^"]+)"/\1/p' "${cicd_dir}/travis/globals.sh")"
+          [[ "${cicd_release}" == "${RELEASE_TAG}" ]] || {
+            echo "::error::CICD release ${cicd_release} does not match ${RELEASE_TAG}"
+            exit 1
+          }
+          echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
+
+      - name: Build acc-provision package inputs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          mkdir -p "${CI_ARTIFACT_DIR}"
+          python -m pip install ./provision
+          "${CICD_DIR}/travis/clone-aci-containers-repo.sh"
+
+          pushd /tmp/noironetworks/aci-containers
+          git fetch --force --no-tags origin \
+            "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
+          git checkout -qf "${SAFE_TAG}"
+          "${CICD_DIR}/travis/show-git-repo-status.sh"
+          make -C . dist-static/acikubectl
+          popd
+
+          cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl
+          "${CICD_DIR}/travis/build-acc-provision.sh" | tee "${CI_ARTIFACT_DIR}/build-acc-provision.log"
+
+      - name: Publish production package via CICD script
+        if: env.PYPI_TARGET == 'pypi'
+        shell: bash
+        env:
+          PYPI_USER: ${{ secrets.PYPI_USER }}
+          PYPI_PASS: ${{ secrets.PYPI_PASS }}
+          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
+        run: |
+          set -Eeuo pipefail
+          [[ "${PYPI_USER}" == "__token__" && "${PYPI_PASS}" == pypi-* ]]
+          [[ -n "${TRAVIS_TAGGER}" ]]
+          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
+
+      - name: Publish TestPyPI package via CICD script
+        if: env.PYPI_TARGET == 'testpypi'
+        shell: bash
+        env:
+          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
+          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
+          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
+        run: |
+          set -Eeuo pipefail
+          [[ "${TEST_PYPI_USER}" == "__token__" && "${TEST_PYPI_PASS}" == pypi-* ]]
+          [[ -n "${TRAVIS_TAGGER}" ]]
+          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
+
+      - name: Upload workflow artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: acc-provision-tag-${{ github.run_id }}
+          path: ci-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
