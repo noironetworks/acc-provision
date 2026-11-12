@@ -141,4 +141,25 @@ class CallerContract(unittest.TestCase):
             self.assertIn('Version: 6.1.1.8.dev55',pkginfo)
             self.assertIn('6.1.1.8.81c2369.z',pins)
 
+    def test_acc_verified_receipt_artifact_handoff_matches_publisher_path(self):
+        if not self.acc:
+            return
+        jobs = self.workflow['jobs']
+        upload = jobs['upload-package']
+        status = jobs['publish-status']
+        receipt_upload = next(step for step in upload['steps'] if step.get('name') == 'Upload publication receipt')
+        receipt_download = next(step for step in status['steps'] if step.get('name') == 'Download verified upload receipt')
+        self.assertEqual(receipt_upload['with']['name'], receipt_download['with']['name'])
+        self.assertEqual(receipt_upload['with']['if-no-files-found'], 'error')
+        self.assertIn('upload-package', status['needs'])
+        received_path = str(Path(receipt_download['with']['path']) / Path(receipt_upload['with']['path']).name)
+        publisher = next(step for step in status['steps'] if step.get('name') == 'Publish prepared package status')
+        self.assertIn('--receipt ' + received_path, publisher['run'])
+        self.assertEqual(set(publisher['env']), {'TRAVIS_TAGGER'})
+        manifest_step = next(step for step in jobs['build-and-publish']['steps'] if 'package-manifest' in step.get('run', ''))
+        self.assertIn('--source-sha "${TRAVIS_COMMIT}"', manifest_step['run'])
+        self.assertIn('--cicd-commit "${CICD_COMMIT}"', manifest_step['run'])
+        uploader_setup = next(step for step in upload['steps'] if step.get('name') == 'Load reviewed uploader')
+        self.assertIn('PyYAML==6.0.2', uploader_setup['run'])
+
 if __name__=='__main__':unittest.main()
