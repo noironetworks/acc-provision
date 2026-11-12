@@ -295,7 +295,8 @@ jobs:
             --mode "${mode}" --version "${PACKAGE_VERSION}" --registry "${registry}" \
             --build-log "${CI_ARTIFACT_DIR}/build-acc-provision.log" \
             --release-tag "${RELEASE_TAG}" --source-repository "${GITHUB_REPOSITORY}" \
-            --source-sha "${TRAVIS_COMMIT}" --run-id "${GITHUB_RUN_NUMBER}" \
+            --source-sha "${TRAVIS_COMMIT}" --run-id "${GITHUB_RUN_ID}" \
+            --run-number "${GITHUB_RUN_NUMBER}" --run-attempt "${GITHUB_RUN_ATTEMPT}" \
             --run-url "${TRAVIS_JOB_WEB_URL}" --trigger-tag "${GITHUB_REF_NAME}" \
             --upstream-id "${UPSTREAM_ID}" "${args[@]}"
 
