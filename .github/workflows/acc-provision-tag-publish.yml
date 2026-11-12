@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 env:
-  CICD_COMMIT: 34fb4932b027fb1776575c0918b1f9ca530b4929
+  CICD_COMMIT: f3b36d2be97c9e6aff36ab7f203172b8349c0858
 
 jobs:
   run-unit-tests:
