@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CICD_COMMIT: REVIEWED_CICD_COMMIT_REQUIRED
+
 jobs:
   run-unit-tests:
     name: Lint and unit tests
@@ -75,7 +78,10 @@ jobs:
           retention-days: 14
 
   build-and-publish:
-    name: Build and publish acc-provision package
+    name: Prepare acc-provision package
+    outputs:
+      package-index: ${{ steps.route.outputs.index }}
+      package-version: ${{ steps.route.outputs.version }}
     if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
@@ -85,13 +91,13 @@ jobs:
     env:
       SOURCE_BRANCH: ${{ vars.SOURCE_BRANCH || 'master' }}
       UPSTREAM_ID: ${{ vars.UPSTREAM_ID }}
-      CICD_BRANCH: ${{ vars.CICD_BRANCH || 'main' }}
       CI_ARTIFACT_DIR: ci-artifacts
       TRAVIS_TAG: ${{ github.ref_name }}
       TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
       TRAVIS_JOB_WEB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       TRAVIS_REPO_SLUG: ${{ github.repository }}
-      TRAVIS_BUILD_USER: noiro-tagger
+      ACC_PUBLICATION_MODE: ${{ vars.ACC_PUBLICATION_MODE }}
+      PUBLICKEYFILE: ci/release-signing-key.asc
 
     steps:
       - name: Check out tagged source
@@ -149,28 +155,6 @@ jobs:
 
           echo "TRAVIS_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
 
-      - name: Determine PyPI target from tag message
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          msg="$(git tag -l --format='%(contents)' "${SAFE_TAG}")"
-          production=false
-          test_registry=false
-          grep -Fqi "release to pypi.org" <<<"${msg}" && production=true
-          grep -Fqi "release to test.pypi.org" <<<"${msg}" && test_registry=true
-
-          if [[ "${production}" == "true" && "${test_registry}" == "false" ]]; then
-            echo "PYPI_TARGET=pypi" >> "${GITHUB_ENV}"
-            echo "Final release detected: publishing to pypi.org."
-          elif [[ "${production}" == "false" && "${test_registry}" == "true" ]]; then
-            echo "PYPI_TARGET=testpypi" >> "${GITHUB_ENV}"
-            echo ".z/dev release detected: publishing to test.pypi.org."
-          else
-            echo "::error::Tag ${SAFE_TAG} must select exactly one PyPI registry"
-            exit 1
-          fi
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -196,14 +180,43 @@ jobs:
           set -Eeuo pipefail
 
           cicd_dir="${RUNNER_TEMP}/cicd"
-          git clone --depth=1 --single-branch --branch "${CICD_BRANCH}" \
-            https://github.com/noironetworks/cicd.git "${cicd_dir}"
+          [[ "${CICD_COMMIT}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::CICD_COMMIT must pin a reviewed full commit SHA"; exit 1;
+          }
+          git init --quiet "${cicd_dir}"
+          git -C "${cicd_dir}" remote add origin https://github.com/noironetworks/cicd.git
+          git -C "${cicd_dir}" fetch --depth=1 origin "${CICD_COMMIT}"
+          git -C "${cicd_dir}" checkout --quiet --detach FETCH_HEAD
+          [[ "$(git -C "${cicd_dir}" rev-parse HEAD)" == "${CICD_COMMIT}" ]] || {
+            echo "::error::CICD checkout does not match reviewed pin"; exit 1;
+          }
           cicd_release="$(sed -nE 's/^RELEASE_TAG="([^"]+)"/\1/p' "${cicd_dir}/travis/globals.sh")"
           [[ "${cicd_release}" == "${RELEASE_TAG}" ]] || {
             echo "::error::CICD release ${cicd_release} does not match ${RELEASE_TAG}"
             exit 1
           }
           echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
+
+      - name: Resolve explicit package publication mode
+        id: route
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "${CI_ARTIFACT_DIR}"
+          python3 "${CICD_DIR}/travis/acc_publication_mode.py" \
+            --mode "${ACC_PUBLICATION_MODE}" --repo . --tag "${SAFE_TAG}" \
+            --actor "${GITHUB_ACTOR}" --triggering-actor "${GITHUB_TRIGGERING_ACTOR}" \
+            --build-number "${GITHUB_RUN_NUMBER}" --output "${CI_ARTIFACT_DIR}/route.json"
+          index="$(jq -r .index "${CI_ARTIFACT_DIR}/route.json")"
+          version="$(jq -r .version "${CI_ARTIFACT_DIR}/route.json")"
+          echo "index=${index}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "PYPI_TARGET=${index}" >> "${GITHUB_ENV}"
+          if [[ "${index}" == pypi ]]; then
+            [[ -f ci/release-inputs.json && -f "${PUBLICKEYFILE}" ]] || {
+              echo "::error::Production requires the reviewed input lock and authorized public key"; exit 1;
+            }
+          fi
 
       - name: Build acc-provision package inputs
         shell: bash
@@ -225,37 +238,176 @@ jobs:
           cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl
           "${CICD_DIR}/travis/build-acc-provision.sh" | tee "${CI_ARTIFACT_DIR}/build-acc-provision.log"
 
-      - name: Publish production package via CICD script
+      - name: Prepare package bytes and manifest without publication credentials
+        id: package
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 .github/scripts/prepare-acc-package.py \
+            --repo . --route "${CI_ARTIFACT_DIR}/route.json" --release-tag "${RELEASE_TAG}" \
+            --upstream-id "${UPSTREAM_ID}" --artifact-dir "${CI_ARTIFACT_DIR}/package" \
+            --output "${CI_ARTIFACT_DIR}/package-build.json"
+          artifact="$(jq -r .artifact "${CI_ARTIFACT_DIR}/package-build.json")"
+          version="$(jq -r .version "${CI_ARTIFACT_DIR}/package-build.json")"
+          python3 -m twine check "${artifact}"
+          python3 "${CICD_DIR}/travis/release_policy.py" package-manifest \
+            --artifact "${artifact}" --name acc_provision --version "${version}" \
+            --index "${PYPI_TARGET}" --output "${CI_ARTIFACT_DIR}/package-manifest.json"
+          echo "PACKAGE_ARTIFACT=${artifact}" >> "${GITHUB_ENV}"
+          echo "PACKAGE_VERSION=${version}" >> "${GITHUB_ENV}"
+
+      - name: Verify production publication prerequisites
         if: env.PYPI_TARGET == 'pypi'
         shell: bash
-        env:
-          PYPI_USER: ${{ secrets.PYPI_USER }}
-          PYPI_PASS: ${{ secrets.PYPI_PASS }}
-          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
         run: |
           set -Eeuo pipefail
-          [[ "${PYPI_USER}" == "__token__" && "${PYPI_PASS}" == pypi-* ]]
-          [[ -n "${TRAVIS_TAGGER}" ]]
-          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
+          python3 "${CICD_DIR}/travis/release_policy.py" collect-checks \
+            --repository "${GITHUB_REPOSITORY}" --source-sha "${TRAVIS_COMMIT}" \
+            --branch "${SOURCE_BRANCH}" --workflow acc-provision-tag-publish.yml \
+            --job 'Lint and unit tests' --output "${CI_ARTIFACT_DIR}/checks.json"
+          python3 "${CICD_DIR}/travis/release_policy.py" inspect-inputs \
+            --lock ci/release-inputs.json --output "${CI_ARTIFACT_DIR}/observations.json"
+          python3 "${CICD_DIR}/travis/release_policy.py" authorize \
+            --repo . --tag "${SAFE_TAG}" --policy "${CICD_DIR}/travis/release-policy.json" \
+            --public-key "${PUBLICKEYFILE}" --lock ci/release-inputs.json \
+            --checks "${CI_ARTIFACT_DIR}/checks.json" --observations "${CI_ARTIFACT_DIR}/observations.json" \
+            --artifact-manifest "${CI_ARTIFACT_DIR}/package-manifest.json" \
+            --output "${CI_ARTIFACT_DIR}/authorization.json"
 
-      - name: Publish TestPyPI package via CICD script
-        if: env.PYPI_TARGET == 'testpypi'
+      - name: Prepare immutable package status without publication credentials
         shell: bash
-        env:
-          TEST_PYPI_USER: ${{ secrets.TEST_PYPI_USER }}
-          TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
-          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
         run: |
           set -Eeuo pipefail
-          [[ "${TEST_PYPI_USER}" == "__token__" && "${TEST_PYPI_PASS}" == pypi-* ]]
-          [[ -n "${TRAVIS_TAGGER}" ]]
-          "${CICD_DIR}/travis/push-to-pypi.sh" | tee "${CI_ARTIFACT_DIR}/push-to-pypi.log"
+          mode=z
+          args=()
+          if [[ "${PYPI_TARGET}" == pypi ]]; then
+            mode=release
+            git -c credential.helper= clone --quiet --branch main \
+              https://github.com/noironetworks/cicd-status.git "${RUNNER_TEMP}/status-inputs"
+            args+=(--status-checkout "${RUNNER_TEMP}/status-inputs")
+          fi
+          registry="https://test.pypi.org/project/acc-provision/${PACKAGE_VERSION}/#files"
+          if [[ "${PYPI_TARGET}" == pypi ]]; then
+            registry="https://pypi.org/project/acc-provision/${PACKAGE_VERSION}/#files"
+          fi
+          python3 "${CICD_DIR}/travis/ci_evidence.py" prepare-package \
+            --artifact "${PACKAGE_ARTIFACT}" --bundle "${CI_ARTIFACT_DIR}/status-bundle" \
+            --mode "${mode}" --version "${PACKAGE_VERSION}" --registry "${registry}" \
+            --build-log "${CI_ARTIFACT_DIR}/build-acc-provision.log" \
+            --release-tag "${RELEASE_TAG}" --source-repository "${GITHUB_REPOSITORY}" \
+            --source-sha "${TRAVIS_COMMIT}" --run-id "${GITHUB_RUN_NUMBER}" \
+            --run-url "${TRAVIS_JOB_WEB_URL}" --trigger-tag "${GITHUB_REF_NAME}" \
+            --upstream-id "${UPSTREAM_ID}" "${args[@]}"
 
       - name: Upload workflow artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: acc-provision-tag-${{ github.run_id }}
+          name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: ci-artifacts/
           if-no-files-found: warn
           retention-days: 14
+
+  upload-package:
+    name: Upload prepared ACC package
+    needs: build-and-publish
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out validated source for production tag recheck
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download prepared package and evidence
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts
+      - name: Load reviewed uploader
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m pip install twine
+          cicd_dir="${RUNNER_TEMP}/cicd"
+          [[ "${CICD_COMMIT}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::CICD_COMMIT must pin a reviewed full commit SHA"; exit 1;
+          }
+          git init --quiet "${cicd_dir}"
+          git -C "${cicd_dir}" remote add origin https://github.com/noironetworks/cicd.git
+          git -C "${cicd_dir}" fetch --depth=1 origin "${CICD_COMMIT}"
+          git -C "${cicd_dir}" checkout --quiet --detach FETCH_HEAD
+          [[ "$(git -C "${cicd_dir}" rev-parse HEAD)" == "${CICD_COMMIT}" ]] || {
+            echo "::error::CICD checkout does not match reviewed pin"; exit 1;
+          }
+          echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
+      - name: Upload prepared preview package
+        if: needs.build-and-publish.outputs.package-index == 'testpypi'
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.TEST_PYPI_USER }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASS }}
+        run: |
+          set -Eeuo pipefail
+          python3 "${CICD_DIR}/travis/release_policy.py" upload \
+            --manifest ci-artifacts/package-manifest.json --receipt ci-artifacts/upload-receipt.json
+      - name: Upload authorized production package
+        if: needs.build-and-publish.outputs.package-index == 'pypi'
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
+        run: |
+          set -Eeuo pipefail
+          python3 "${CICD_DIR}/travis/release_policy.py" upload \
+            --manifest ci-artifacts/package-manifest.json --receipt ci-artifacts/upload-receipt.json \
+            --authorization ci-artifacts/authorization.json --repo .
+      - name: Upload publication receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: acc-provision-upload-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts/upload-receipt.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  publish-status:
+    name: Publish prepared ACC status
+    needs:
+      - build-and-publish
+      - upload-package
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Download prepared status bundle
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts
+      - name: Load reviewed status writer without credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m pip install pyyaml
+          cicd_dir="${RUNNER_TEMP}/cicd"
+          [[ "${CICD_COMMIT}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::CICD_COMMIT must pin a reviewed full commit SHA"; exit 1;
+          }
+          git init --quiet "${cicd_dir}"
+          git -C "${cicd_dir}" remote add origin https://github.com/noironetworks/cicd.git
+          git -C "${cicd_dir}" fetch --depth=1 origin "${CICD_COMMIT}"
+          git -C "${cicd_dir}" checkout --quiet --detach FETCH_HEAD
+          [[ "$(git -C "${cicd_dir}" rev-parse HEAD)" == "${CICD_COMMIT}" ]] || {
+            echo "::error::CICD checkout does not match reviewed pin"; exit 1;
+          }
+          echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
+      - name: Publish prepared package status
+        shell: bash
+        env:
+          TRAVIS_TAGGER: ${{ secrets.GITHUBACTIONS_TAGGER }}
+        run: |
+          set -Eeuo pipefail
+          python3 "${CICD_DIR}/travis/ci_evidence.py" publish \
+            --bundle ci-artifacts/status-bundle \
+            --repository https://github.com/noironetworks/cicd-status.git --branch main
