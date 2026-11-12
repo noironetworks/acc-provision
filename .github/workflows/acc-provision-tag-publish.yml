@@ -252,7 +252,8 @@ jobs:
           python3 -m twine check "${artifact}"
           python3 "${CICD_DIR}/travis/release_policy.py" package-manifest \
             --artifact "${artifact}" --name acc_provision --version "${version}" \
-            --index "${PYPI_TARGET}" --output "${CI_ARTIFACT_DIR}/package-manifest.json"
+            --index "${PYPI_TARGET}" --source-sha "${TRAVIS_COMMIT}" --cicd-commit "${CICD_COMMIT}" \
+            --output "${CI_ARTIFACT_DIR}/package-manifest.json"
           echo "PACKAGE_ARTIFACT=${artifact}" >> "${GITHUB_ENV}"
           echo "PACKAGE_VERSION=${version}" >> "${GITHUB_ENV}"
 
@@ -330,7 +331,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          python3 -m pip install twine
+          python3 -m pip install twine 'PyYAML==6.0.2'
           cicd_dir="${RUNNER_TEMP}/cicd"
           [[ "${CICD_COMMIT}" =~ ^[0-9a-f]{40}$ ]] || {
             echo "::error::CICD_COMMIT must pin a reviewed full commit SHA"; exit 1;
@@ -388,7 +389,7 @@ jobs:
         with:
           name: acc-provision-upload-${{ github.run_id }}-${{ github.run_attempt }}
           path: ci-artifacts/upload-receipt.json
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
 
   publish-status:
@@ -404,6 +405,11 @@ jobs:
         with:
           name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: ci-artifacts
+      - name: Download verified upload receipt
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: acc-provision-upload-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts/receipt
       - name: Load reviewed status writer without credentials
         shell: bash
         run: |
@@ -429,4 +435,5 @@ jobs:
           set -Eeuo pipefail
           python3 "${CICD_DIR}/travis/ci_evidence.py" publish \
             --bundle ci-artifacts/status-bundle \
+            --receipt ci-artifacts/receipt/upload-receipt.json \
             --repository https://github.com/noironetworks/cicd-status.git --branch main
