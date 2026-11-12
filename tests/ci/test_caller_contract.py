@@ -96,17 +96,22 @@ class CallerContract(unittest.TestCase):
         self.assertIn('--lock ci/release-inputs.json',authorize['run'])
         self.assertIn('--public-key "${PUBLICKEYFILE}"',authorize['run'])
         self.assertIn('inspect-inputs',authorize['run'])
+        self.assertIn('collect-cohort-checks',authorize['run'])
         upload=jobs['upload-package']
         self.assertEqual(upload['needs'],'build-and-publish')
         self.assertNotIn('setup.py',str(upload))
         secret_steps=[s for s in upload['steps'] if 'secrets.' in str(s.get('env',{}))]
         self.assertEqual(len(secret_steps),2)
         for step,index in zip(secret_steps,['testpypi','pypi']):
-            self.assertEqual(set(step['env']),{'TWINE_USERNAME','TWINE_PASSWORD'})
+            self.assertEqual(set(step['env']), {'TWINE_USERNAME','TWINE_PASSWORD'} | ({'GITHUB_TOKEN'} if index == 'pypi' else set()))
+            self.assertEqual(step['env']['TWINE_USERNAME'], '__token__')
             self.assertIn(f"== '{index}'",step['if'])
             self.assertIn('release_policy.py" upload',step['run'])
             self.assertIn('--artifact "${PACKAGE_ARTIFACT}"',step['run'])
+        self.assertEqual(upload['permissions'], {'contents':'read','actions':'read'})
+        self.assertEqual(secret_steps[1]['env']['GITHUB_TOKEN'], '${{ github.token }}')
         self.assertIn('--authorization',secret_steps[1]['run'])
+        self.assertIn('--policy \"${CICD_DIR}/travis/release-policy.json\"',secret_steps[1]['run'])
         self.assertEqual(set(jobs['publish-status']['needs']),{'build-and-publish','upload-package'})
 
     def test_pin_placeholder_and_wrong_checkout_fail_before_credentials(self):
@@ -161,5 +166,31 @@ class CallerContract(unittest.TestCase):
         self.assertIn('--cicd-commit "${CICD_COMMIT}"', manifest_step['run'])
         uploader_setup = next(step for step in upload['steps'] if step.get('name') == 'Load reviewed uploader')
         self.assertIn('PyYAML==6.0.2', uploader_setup['run'])
+
+    def test_status_publisher_scope_comes_from_trusted_caller_identity(self):
+        job, publisher = next((job, step) for job in self.workflow['jobs'].values() for step in job['steps']
+                              if 'TRAVIS_TAGGER' in step.get('env', {}))
+        run = publisher['run']
+        for option in ('release-tag', 'kind', 'stream', 'source-repository', 'source-sha', 'cicd-sha', 'run-id', 'run-attempt', 'images'):
+            self.assertIn('--expected-' + option, run)
+        self.assertIn('--expected-source-repository "${GITHUB_REPOSITORY}"', run)
+        self.assertIn('--expected-source-sha "${TRAVIS_COMMIT}"', run)
+        self.assertIn('--expected-cicd-sha "${CICD_COMMIT}"', run)
+        self.assertIn('--expected-run-id "${GITHUB_RUN_ID}"', run)
+        if self.acc:
+            builder = self.workflow['jobs']['build-and-publish']
+            self.assertEqual(builder['outputs']['source-sha'], '${{ steps.source.outputs.source_sha }}')
+            source = next(step for step in builder['steps'] if step.get('id') == 'source')
+            self.assertIn('source_sha=${tagged_commit}', source['run'])
+            self.assertEqual(job['env']['TRAVIS_COMMIT'], '${{ needs.build-and-publish.outputs.source-sha }}')
+            self.assertIn('--expected-kind package', run)
+            self.assertIn("outputs.package-index == 'pypi'", job['env']['EXPECTED_STATUS_STREAM'])
+            self.assertIn("|| ''", job['env']['EXPECTED_STATUS_IMAGES'])
+        else:
+            self.assertIn('--expected-kind images', run)
+            self.assertIn('--expected-stream "${TRAVIS_TAG}.z"', run)
+            images = re.search(r'--expected-images "([^"]+)"', run)[1].split(',')
+            self.assertEqual(len(images), 1 if 'opflex' in self.path.name else 8)
+            self.assertNotIn('$', ','.join(images))
 
 if __name__=='__main__':unittest.main()
