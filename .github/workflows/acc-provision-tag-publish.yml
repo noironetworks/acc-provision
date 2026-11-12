@@ -342,6 +342,22 @@ jobs:
             echo "::error::CICD checkout does not match reviewed pin"; exit 1;
           }
           echo "CICD_DIR=${cicd_dir}" >> "${GITHUB_ENV}"
+      - name: Resolve retained artifact path without credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PYCODE'
+          import json, os, pathlib, re
+          manifest = json.loads(pathlib.Path('ci-artifacts/package-manifest.json').read_text())
+          filename = manifest['filename']
+          if not re.fullmatch(r'acc_provision-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(?:\.dev[0-9]+)?\.tar\.gz', filename):
+              raise SystemExit('Invalid retained package filename')
+          artifact = pathlib.Path('ci-artifacts/package') / filename
+          if artifact.is_symlink() or not artifact.is_file():
+              raise SystemExit('Retained package bytes are missing')
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write('PACKAGE_ARTIFACT=' + str(artifact) + '\n')
+          PYCODE
       - name: Upload prepared preview package
         if: needs.build-and-publish.outputs.package-index == 'testpypi'
         shell: bash
@@ -351,7 +367,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 "${CICD_DIR}/travis/release_policy.py" upload \
-            --manifest ci-artifacts/package-manifest.json --receipt ci-artifacts/upload-receipt.json
+            --manifest ci-artifacts/package-manifest.json --artifact "${PACKAGE_ARTIFACT}" \
+            --receipt ci-artifacts/upload-receipt.json
       - name: Upload authorized production package
         if: needs.build-and-publish.outputs.package-index == 'pypi'
         shell: bash
@@ -361,7 +378,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 "${CICD_DIR}/travis/release_policy.py" upload \
-            --manifest ci-artifacts/package-manifest.json --receipt ci-artifacts/upload-receipt.json \
+            --manifest ci-artifacts/package-manifest.json --artifact "${PACKAGE_ARTIFACT}" \
+            --receipt ci-artifacts/upload-receipt.json \
             --authorization ci-artifacts/authorization.json --repo .
       - name: Upload publication receipt
         if: always()

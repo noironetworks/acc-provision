@@ -99,6 +99,7 @@ class CallerContract(unittest.TestCase):
             self.assertEqual(set(step['env']),{'TWINE_USERNAME','TWINE_PASSWORD'})
             self.assertIn(f"== '{index}'",step['if'])
             self.assertIn('release_policy.py" upload',step['run'])
+            self.assertIn('--artifact "${PACKAGE_ARTIFACT}"',step['run'])
         self.assertIn('--authorization',secret_steps[1]['run'])
         self.assertEqual(set(jobs['publish-status']['needs']),{'build-and-publish','upload-package'})
 
