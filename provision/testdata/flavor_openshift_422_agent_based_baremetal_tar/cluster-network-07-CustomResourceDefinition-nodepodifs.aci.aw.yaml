@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nodepodifs.aci.aw
+spec:
+  group: aci.aw
+  names:
+    kind: NodePodIF
+    listKind: NodePodIFList
+    plural: nodepodifs
+    singular: nodepodif
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              podifs:
+                items:
+                  properties:
+                    containerID:
+                      type: string
+                    epg:
+                      type: string
+                    ifname:
+                      type: string
+                    ipaddr:
+                      type: string
+                    macaddr:
+                      type: string
+                    podname:
+                      type: string
+                    podns:
+                      type: string
+                    vtep:
+                      type: string
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
