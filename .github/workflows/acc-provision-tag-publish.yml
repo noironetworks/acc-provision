@@ -82,9 +82,13 @@ jobs:
     outputs:
       package-index: ${{ steps.route.outputs.index }}
       package-version: ${{ steps.route.outputs.version }}
+      source-sha: ${{ steps.source.outputs.source_sha }}
     if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
+    permissions:
+      contents: read
+      actions: read
     concurrency:
       group: acc-provision-tag-${{ github.ref }}
       cancel-in-progress: false
@@ -128,6 +132,7 @@ jobs:
           } >> "${GITHUB_ENV}"
 
       - name: Validate safe tag source
+        id: source
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -154,6 +159,7 @@ jobs:
           }
 
           echo "TRAVIS_COMMIT=${tagged_commit}" >> "${GITHUB_ENV}"
+          echo "source_sha=${tagged_commit}" >> "${GITHUB_OUTPUT}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -260,12 +266,13 @@ jobs:
       - name: Verify production publication prerequisites
         if: env.PYPI_TARGET == 'pypi'
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
-          python3 "${CICD_DIR}/travis/release_policy.py" collect-checks \
-            --repository "${GITHUB_REPOSITORY}" --source-sha "${TRAVIS_COMMIT}" \
-            --branch "${SOURCE_BRANCH}" --workflow acc-provision-tag-publish.yml \
-            --job 'Lint and unit tests' --output "${CI_ARTIFACT_DIR}/checks.json"
+          python3 "${CICD_DIR}/travis/release_policy.py" collect-cohort-checks \
+            --policy "${CICD_DIR}/travis/release-policy.json" --lock ci/release-inputs.json \
+            --source-sha "${TRAVIS_COMMIT}" --output "${CI_ARTIFACT_DIR}/checks.json"
           python3 "${CICD_DIR}/travis/release_policy.py" inspect-inputs \
             --lock ci/release-inputs.json --output "${CI_ARTIFACT_DIR}/observations.json"
           python3 "${CICD_DIR}/travis/release_policy.py" authorize \
@@ -315,6 +322,9 @@ jobs:
     needs: build-and-publish
     runs-on: ubuntu-22.04
     timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Check out validated source for production tag recheck
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -360,11 +370,15 @@ jobs:
           with open(os.environ['GITHUB_ENV'], 'a') as stream:
               stream.write('PACKAGE_ARTIFACT=' + str(artifact) + '\n')
           PYCODE
+      - name: Verify production inspection tooling
+        if: needs.build-and-publish.outputs.package-index == 'pypi'
+        shell: bash
+        run: docker buildx version
       - name: Upload prepared preview package
         if: needs.build-and-publish.outputs.package-index == 'testpypi'
         shell: bash
         env:
-          TWINE_USERNAME: ${{ secrets.TEST_PYPI_USER }}
+          TWINE_USERNAME: '__token__'
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASS }}
         run: |
           set -Eeuo pipefail
@@ -375,14 +389,16 @@ jobs:
         if: needs.build-and-publish.outputs.package-index == 'pypi'
         shell: bash
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+          TWINE_USERNAME: '__token__'
           TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
           python3 "${CICD_DIR}/travis/release_policy.py" upload \
             --manifest ci-artifacts/package-manifest.json --artifact "${PACKAGE_ARTIFACT}" \
             --receipt ci-artifacts/upload-receipt.json \
-            --authorization ci-artifacts/authorization.json --repo .
+            --authorization ci-artifacts/authorization.json --repo . \
+            --policy "${CICD_DIR}/travis/release-policy.json"
       - name: Upload publication receipt
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -399,6 +415,10 @@ jobs:
       - upload-package
     runs-on: ubuntu-22.04
     timeout-minutes: 30
+    env:
+      TRAVIS_COMMIT: ${{ needs.build-and-publish.outputs.source-sha }}
+      EXPECTED_STATUS_STREAM: ${{ needs.build-and-publish.outputs.package-index == 'pypi' && github.ref_name || format('{0}.z', github.ref_name) }}
+      EXPECTED_STATUS_IMAGES: ${{ needs.build-and-publish.outputs.package-index == 'pypi' && 'aci-containers-host,aci-containers-host-ovscni,aci-containers-controller,aci-containers-operator,aci-containers-webhook,aci-containers-certmanager,cnideploy,openvswitch,opflex' || '' }}
     steps:
       - name: Download prepared status bundle
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -436,4 +456,9 @@ jobs:
           python3 "${CICD_DIR}/travis/ci_evidence.py" publish \
             --bundle ci-artifacts/status-bundle \
             --receipt ci-artifacts/receipt/upload-receipt.json \
+            --expected-release-tag "${GITHUB_REF_NAME}" --expected-kind package \
+            --expected-stream "${EXPECTED_STATUS_STREAM}" \
+            --expected-source-repository "${GITHUB_REPOSITORY}" --expected-source-sha "${TRAVIS_COMMIT}" \
+            --expected-cicd-sha "${CICD_COMMIT}" --expected-run-id "${GITHUB_RUN_ID}" \
+            --expected-run-attempt "${GITHUB_RUN_ATTEMPT}" --expected-images "${EXPECTED_STATUS_IMAGES}" \
             --repository https://github.com/noironetworks/cicd-status.git --branch main
