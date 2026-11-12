@@ -83,6 +83,8 @@ jobs:
       package-index: ${{ steps.route.outputs.index }}
       package-version: ${{ steps.route.outputs.version }}
       source-sha: ${{ steps.source.outputs.source_sha }}
+      package-artifact: ${{ format('acc-provision-prepared-{0}-{1}', github.run_id, github.run_attempt) }}
+      evidence-run-attempt: ${{ github.run_attempt }}
     if: github.event_name == 'push' && github.event.deleted == false && github.repository == 'noironetworks/acc-provision' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
     timeout-minutes: 120
@@ -231,17 +233,48 @@ jobs:
 
           mkdir -p "${CI_ARTIFACT_DIR}"
           python -m pip install ./provision
-          "${CICD_DIR}/travis/clone-aci-containers-repo.sh"
-
-          pushd /tmp/noironetworks/aci-containers
-          git fetch --force --no-tags origin \
-            "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
-          git checkout -qf "${SAFE_TAG}"
+          if [[ "${PYPI_TARGET}" == pypi ]]; then
+            locked_aci="$(jq -er '.sources["noironetworks/aci-containers"]' ci/release-inputs.json)"
+            [[ "${locked_aci}" =~ ^[0-9a-f]{40}$ ]] || {
+              echo "::error::Production requires a full locked ACI source SHA"; exit 1;
+            }
+            aci_dir="${RUNNER_TEMP}/acc-aci-containers"
+            git init --quiet "${aci_dir}"
+            git -C "${aci_dir}" remote add origin https://github.com/noironetworks/aci-containers.git
+            git -C "${aci_dir}" fetch --depth=1 --no-tags origin "${locked_aci}"
+            git -C "${aci_dir}" checkout --quiet --detach FETCH_HEAD
+            actual_aci="$(git -C "${aci_dir}" rev-parse HEAD)"
+            [[ "${actual_aci}" == "${locked_aci}" ]] || {
+              echo "::error::ACI binary source differs from the approved input lock"; exit 1;
+            }
+            source_selection=locked-production-sha
+          elif [[ "${PYPI_TARGET}" == testpypi ]]; then
+            "${CICD_DIR}/travis/clone-aci-containers-repo.sh"
+            aci_dir=/tmp/noironetworks/aci-containers
+            git -C "${aci_dir}" fetch --force --no-tags origin \
+              "+refs/tags/${SAFE_TAG}:refs/tags/${SAFE_TAG}"
+            git -C "${aci_dir}" checkout -qf "${SAFE_TAG}"
+            actual_aci="$(git -C "${aci_dir}" rev-parse HEAD)"
+            source_selection=legacy-preview-tag
+          else
+            echo "::error::Unknown package index for ACI binary build"; exit 1;
+          fi
+          [[ "${actual_aci}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::ACI binary source identity is unavailable"; exit 1;
+          }
+          echo "ACTUAL_ACI_SOURCE_SHA=${actual_aci}" >> "${GITHUB_ENV}"
+          python3 - "${CI_ARTIFACT_DIR}/acikubectl-source.json" "${actual_aci}" "${source_selection}" "${SAFE_TAG}" <<'PYCODE'
+          import json, pathlib, sys
+          path, sha, selection, trigger = sys.argv[1:]
+          pathlib.Path(path).write_text(json.dumps({'schema_version': 1, 'repository': 'noironetworks/aci-containers',
+              'source_sha': sha, 'selection': selection, 'trigger_tag': trigger}, indent=2) + '\n')
+          PYCODE
+          pushd "${aci_dir}"
           "${CICD_DIR}/travis/show-git-repo-status.sh"
           make -C . dist-static/acikubectl
           popd
 
-          cp /tmp/noironetworks/aci-containers/dist-static/acikubectl provision/bin/acikubectl
+          cp "${aci_dir}/dist-static/acikubectl" provision/bin/acikubectl
           "${CICD_DIR}/travis/build-acc-provision.sh" | tee "${CI_ARTIFACT_DIR}/build-acc-provision.log"
 
       - name: Prepare package bytes and manifest without publication credentials
@@ -258,7 +291,8 @@ jobs:
           python3 -m twine check "${artifact}"
           python3 "${CICD_DIR}/travis/release_policy.py" package-manifest \
             --artifact "${artifact}" --name acc_provision --version "${version}" \
-            --index "${PYPI_TARGET}" --source-sha "${TRAVIS_COMMIT}" --cicd-commit "${CICD_COMMIT}" \
+            --index "${PYPI_TARGET}" --source-sha "${TRAVIS_COMMIT}" \
+            --aci-source-sha "${ACTUAL_ACI_SOURCE_SHA}" --cicd-commit "${CICD_COMMIT}" \
             --output "${CI_ARTIFACT_DIR}/package-manifest.json"
           echo "PACKAGE_ARTIFACT=${artifact}" >> "${GITHUB_ENV}"
           echo "PACKAGE_VERSION=${version}" >> "${GITHUB_ENV}"
@@ -319,6 +353,8 @@ jobs:
 
   upload-package:
     name: Upload prepared ACC package
+    outputs:
+      receipt-artifact: ${{ format('acc-provision-upload-{0}-{1}', github.run_id, github.run_attempt) }}
     needs: build-and-publish
     runs-on: ubuntu-22.04
     timeout-minutes: 30
@@ -335,7 +371,7 @@ jobs:
       - name: Download prepared package and evidence
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ needs.build-and-publish.outputs.package-artifact }}
           path: ci-artifacts
       - name: Load reviewed uploader
         shell: bash
@@ -417,18 +453,19 @@ jobs:
     timeout-minutes: 30
     env:
       TRAVIS_COMMIT: ${{ needs.build-and-publish.outputs.source-sha }}
+      EVIDENCE_RUN_ATTEMPT: ${{ needs.build-and-publish.outputs.evidence-run-attempt }}
       EXPECTED_STATUS_STREAM: ${{ needs.build-and-publish.outputs.package-index == 'pypi' && github.ref_name || format('{0}.z', github.ref_name) }}
       EXPECTED_STATUS_IMAGES: ${{ needs.build-and-publish.outputs.package-index == 'pypi' && 'aci-containers-host,aci-containers-host-ovscni,aci-containers-controller,aci-containers-operator,aci-containers-webhook,aci-containers-certmanager,cnideploy,openvswitch,opflex' || '' }}
     steps:
       - name: Download prepared status bundle
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: acc-provision-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ needs.build-and-publish.outputs.package-artifact }}
           path: ci-artifacts
       - name: Download verified upload receipt
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: acc-provision-upload-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ needs.upload-package.outputs.receipt-artifact }}
           path: ci-artifacts/receipt
       - name: Load reviewed status writer without credentials
         shell: bash
@@ -460,5 +497,5 @@ jobs:
             --expected-stream "${EXPECTED_STATUS_STREAM}" \
             --expected-source-repository "${GITHUB_REPOSITORY}" --expected-source-sha "${TRAVIS_COMMIT}" \
             --expected-cicd-sha "${CICD_COMMIT}" --expected-run-id "${GITHUB_RUN_ID}" \
-            --expected-run-attempt "${GITHUB_RUN_ATTEMPT}" --expected-images "${EXPECTED_STATUS_IMAGES}" \
+            --expected-run-attempt "${EVIDENCE_RUN_ATTEMPT}" --expected-images "${EXPECTED_STATUS_IMAGES}" \
             --repository https://github.com/noironetworks/cicd-status.git --branch main
